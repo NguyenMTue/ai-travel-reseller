@@ -35,3 +35,49 @@ export const createClient = (request: NextRequest) => {
 
   return supabaseResponse
 };
+
+// Các route yêu cầu đăng nhập (Merchant / Reseller / Admin Portal)
+const PROTECTED_PREFIXES = ["/merchant", "/reseller", "/admin"];
+
+/**
+ * Refresh Supabase Auth session cho mỗi request (dùng trong proxy.ts – Next.js 16)
+ * và chuyển hướng về /login nếu truy cập route được bảo vệ khi chưa đăng nhập.
+ */
+export const updateSession = async (request: NextRequest) => {
+  let supabaseResponse = NextResponse.next({ request });
+
+  const supabase = createServerClient(supabaseUrl!, supabaseKey!, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        supabaseResponse = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
+
+  // KHÔNG chèn logic nào giữa createServerClient và getUser() – dễ gây mất session ngẫu nhiên.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { pathname } = request.nextUrl;
+  const isProtected = PROTECTED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+
+  if (!user && isProtected) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("next", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // Phải trả về supabaseResponse để cookie session mới được gửi về trình duyệt.
+  return supabaseResponse;
+};
