@@ -13,7 +13,7 @@ Last Updated: 07/10/2026
 | BE1-01 | BE1 | BE | Khởi tạo Supabase & ERD sơ bộ | DONE | 06/10 | 06/10 |
 | BE1-02 | BE1 | BE | Thiết lập Migration Quyền (GRANT) & RLS | DONE | 07/10 | 07/10 |
 | BE1-03 | BE1 | BE | Cấu hình Supabase Auth Middleware (proxy.ts) | DONE | 07/10 | 07/10 |
-| BE1-04 | BE1 | BE | Tạo dữ liệu mẫu (seed.sql) | IN_PROGRESS | 07/10 | 08/10 |
+| BE1-04 | BE1 | BE | Tạo dữ liệu mẫu (seed.sql) | DONE | 07/10 | 08/10 |
 | BE2-01 | BE2 | BE | Phối hợp thiết kế trường vector | IN_PROGRESS | 06/10 | 06/10 |
 | UX-01 | UI/UX | UI | Khởi tạo Design System | IN_PROGRESS | 06/10 | 07/10 |
 
@@ -26,6 +26,7 @@ Last Updated: 07/10/2026
 | BE1-01 | BE1 | Khởi tạo Supabase & 8 bảng schema gốc | 06/10/2026 | BE2, BE3 |
 | BE1-02 | BE1 | Migration RLS Policies & GRANT | 07/10/2026 | Toàn team |
 | BE1-03 | BE1 | Cấu hình proxy.ts và Auth session refresh | 07/10/2026 | FE |
+| BE1-04 | BE1 | Dữ liệu mẫu seed.sql | 07/10/2026 | Toàn team |
 
 ---
 
@@ -33,7 +34,7 @@ Last Updated: 07/10/2026
 
 | Task ID | Member | Task | Progress | Blocker | Next Step |
 |---|---|---|---|---|---|
-| BE1-04 | BE1 | Tạo script dữ liệu mẫu (seed.sql) | 10% | None | Viết câu lệnh INSERT giả lập cho các bảng |
+| | | | | | |
 
 ---
 
@@ -118,17 +119,20 @@ Last Updated: 07/10/2026
 - Tạo Migration cấu hình Quyền (GRANT) và RLS Policies cho 8 bảng.
 - Tạo file `proxy.ts` và thiết lập hàm `updateSession()` trong middleware Supabase để bảo vệ routes `/merchant`, `/reseller`, `/admin`.
 - Gỡ file chứa biến môi trường nhạy cảm `env.text` ra khỏi git tracking.
+- Viết file dữ liệu mẫu `seed.sql` với user giả lập (1 Merchant, 1 Reseller) cùng các dữ liệu liên quan (Product, Campaign, Content).
+- Cố định lỗi duplicate key trong `seed.sql` (bổ sung `ON CONFLICT DO UPDATE`) để trigger Auth chạy mượt mà cùng seed data.
+- Sửa lỗi encoding file `.gitignore`.
+- Chạy thành công lệnh `npx supabase db reset` local, xác nhận database đã nạp đầy đủ cấu trúc và dữ liệu.
 
 **In Progress**
-- Khởi tạo script dữ liệu mẫu (`seed.sql`).
+- Khởi tạo pgvector (BE2 đang chờ).
 
 **Blocked**
-- None.
+- None (Đã test thành công `db reset` trên Docker local).
 
 **Next**
-- Hoàn thiện `seed.sql` với dữ liệu giả lập cho Merchants, Products, Campaigns.
-- Chạy thử `npx supabase db reset` local để kiểm tra dữ liệu và quyền.
-- Chốt lại việc map `auth.uid()` vào bảng bằng Trigger/Function (nếu cần).
+- Tạo file migration kích hoạt extension pgvector và tạo bảng `product_embeddings` cho team AI (BE2).
+- Viết Edge Function / API Route cấp Tracking Link.
 
 ### 06/10/2026
 
