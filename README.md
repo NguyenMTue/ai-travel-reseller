@@ -16,9 +16,10 @@
 7. [Làm việc với Database (Supabase)](#7-làm-việc-với-database-supabase)
 8. [Quy tắc code bắt buộc](#8-quy-tắc-code-bắt-buộc)
 9. [Bản đồ tài liệu (.md)](#9-bản-đồ-tài-liệu-md)
-10. [Lộ trình 4 tuần & phân công](#10-lộ-trình-4-tuần--phân-công)
-11. [Trạng thái hiện tại & lưu ý quan trọng](#11-trạng-thái-hiện-tại--lưu-ý-quan-trọng)
-12. [Xử lý sự cố thường gặp](#12-xử-lý-sự-cố-thường-gặp)
+10. [🤖 Bộ skill cho AI coding agent](#10--bộ-skill-cho-ai-coding-agent)
+11. [Lộ trình 4 tuần & phân công](#11-lộ-trình-4-tuần--phân-công)
+12. [Trạng thái hiện tại & lưu ý quan trọng](#12-trạng-thái-hiện-tại--lưu-ý-quan-trọng)
+13. [Xử lý sự cố thường gặp](#13-xử-lý-sự-cố-thường-gặp)
 
 ---
 
@@ -138,8 +139,12 @@ ai-travel-reseller/
 ├── .ai/                        # 📚 Tài liệu dự án dành cho team & AI agent
 │   ├── process/                # Roadmap, template đánh giá tiến độ
 │   ├── role/                   # Rulebook, schema, kiến trúc, API contract, prompts
-│   └── skills/                 # Bộ skill cho AI coding agent (Next.js, React, shadcn...)
-├── .agents/skills/             # Skill Supabase cho AI agent (quản lý bởi skills-lock.json)
+│   └── skills/                 # Skill Frontend: Next.js, React, shadcn, Tailwind, a11y, SEO...
+├── .agents/skills/             # Skill chính (Supabase, n8n, LangChain/LangGraph) – Antigravity, Codex, Cursor...
+├── .claude/skills/             # Bản sao skill n8n cho Claude Code
+├── .kiro/skills/               # Bản sao skill n8n cho Kiro
+├── skills/                     # Bản sao skill n8n (định dạng plugin chung)
+├── skills-lock.json            # Khóa nguồn + hash của các skill cài bằng `npx skills`
 ├── AGENTS.md / CLAUDE.md       # Chỉ dẫn cho AI coding agent
 └── package.json
 ```
@@ -349,11 +354,55 @@ Tóm tắt từ [RULE_BOOK.md](.ai/role/RULE_BOOK.md) – **áp dụng cho cả 
 | [.ai/role/ai_prompts.md](.ai/role/ai_prompts.md) | System prompt Content Factory & Sales Agent (anti-hallucination) | BE2, BE3, Tester 2 |
 | [.ai/process/ai_progress_evaluation_template.md](.ai/process/ai_progress_evaluation_template.md) | Template nhờ AI đánh giá tiến độ team hằng tuần | PM |
 | [AGENTS.md](AGENTS.md) / [CLAUDE.md](CLAUDE.md) | Chỉ dẫn cho AI coding agent (Next.js 16 breaking changes) | Người dùng AI agent |
-| `.ai/skills/*`, `.agents/skills/*` | Bộ skill cho AI agent (Next.js, React, shadcn, Tailwind, a11y, SEO, Supabase, Postgres) | Người dùng AI agent |
+| `.ai/skills/*`, `.agents/skills/*`, `.claude/skills/*`, `.kiro/skills/*`, `skills/*` | Bộ skill cho AI agent – xem mục 10 | Người dùng AI agent |
 
 ---
 
-## 10. Lộ trình 4 tuần & phân công
+## 10. 🤖 Bộ skill cho AI coding agent
+
+Repo đi kèm sẵn các **Agent Skills** (thư mục chứa `SKILL.md` + tài liệu tham khảo) để AI coding agent (Antigravity, Claude Code, Cursor, Codex, Kiro...) code đúng chuẩn của dự án và đúng phiên bản thư viện mới nhất. Sau khi `git pull` là có ngay, **không cần cài thêm**.
+
+### 10.1 Skill theo vai trò
+
+| Vai trò | Nhóm skill | Skill tiêu biểu | Nguồn |
+| :--- | :--- | :--- | :--- |
+| **FE / UI-UX / Tester 1** | Frontend | `nextjs-app-router-patterns`, `nextjs-best-practices`, `react-best-practices`, `shadcn`, `tailwind-patterns`, `frontend-design`, `ui-a11y`, `form-cro`, `seo-audit` | `.ai/skills/` |
+| **BE1** (DB/Auth) | Supabase & Postgres | `supabase`, `supabase-postgres-best-practices` (schema, migration, RLS, index, pgvector) | `supabase/agent-skills` |
+| **BE2** (AI Agent/RAG) | LangChain / LangGraph / Deep Agents | `ecosystem-primer` *(đọc đầu tiên)*, `langchain-rag`, `langchain-fundamentals`, `langchain-middleware`, `langgraph-fundamentals`, `langgraph-persistence`, `langgraph-human-in-the-loop`, `deep-agents-*`, `*-typescript-quickstart` | `langchain-ai/langchain-skills` |
+| **BE3** (n8n/Automation) | n8n | `using-n8n-skills-official` *(router – đọc đầu tiên)*, `n8n-node-configuration-official`, `n8n-agents-official`, `n8n-expressions-official`, `n8n-error-handling-official`, `n8n-credentials-and-security-official`, `n8n-workflow-lifecycle-official`, `n8n-subworkflows-official`, `n8n-loops-official`, `n8n-code-nodes-official`, `n8n-data-tables-official`, `n8n-debugging-official`, `n8n-extending-mcp-official`, `n8n-binary-and-data-official` | `n8n-io/skills` |
+| **Tester 2 / BE2** | Đánh giá AI | `eval-engineering` (thiết kế bộ test/benchmark cho agent), `swarm` (chạy song song nhiều việc) | `langchain-ai/langchain-skills` |
+
+### 10.2 Mỗi công cụ đọc skill ở đâu?
+
+| Thư mục | Công cụ đọc | Nội dung |
+| :--- | :--- | :--- |
+| `.agents/skills/` | Antigravity, Codex, Cursor, Gemini CLI… (chuẩn chung) | **Đầy đủ nhất**: Supabase + n8n + LangChain/LangGraph |
+| `.claude/skills/` | Claude Code | n8n |
+| `.kiro/skills/` | Kiro | n8n |
+| `skills/` | Plugin/agent đọc thư mục `skills/` ở root | n8n |
+| `.ai/skills/` | Tham khảo thủ công / trỏ agent tới khi cần | Frontend (Next.js, React, shadcn…) |
+
+> [!NOTE]
+> Các thư mục trên là **bản sao** (không phải symlink), được tạo bởi CLI [`skills`](https://github.com/vercel-labs/skills). Nguồn và hash được khóa trong [skills-lock.json](skills-lock.json). **Không sửa tay** file trong các thư mục này – thay đổi sẽ bị ghi đè khi cập nhật.
+
+### 10.3 Cài thêm / cập nhật skill
+
+```bash
+npx skills add supabase/agent-skills           # Supabase
+npx skills add n8n-io/skills                   # n8n
+npx skills add langchain-ai/langchain-skills   # LangChain / LangGraph / Deep Agents
+```
+
+CLI sẽ hỏi chọn skill và chọn agent đích (Claude Code, Kiro, Cursor…). Sau khi cài/cập nhật, **commit cả thư mục skill lẫn `skills-lock.json`** để cả team dùng chung một phiên bản.
+
+> [!TIP]
+> - Khi nhờ AI làm task, hãy nêu rõ skill cần dùng, ví dụ: *"Dùng skill `supabase-postgres-best-practices` để viết migration thêm bảng `product_embeddings`"*.
+> - Skill n8n hoạt động tốt nhất khi agent được kết nối **n8n MCP server** của instance n8n team (bật trong n8n **Settings → MCP**). Không có MCP, agent vẫn dùng skill để hướng dẫn nhưng không tự tạo/validate workflow được.
+> - Các skill LangChain có cả bản Python và TypeScript – dự án này dùng **TypeScript** (Next.js Route Handlers), nên ưu tiên các skill `*-typescript-*`.
+
+---
+
+## 11. Lộ trình 4 tuần & phân công
 
 **Đội ngũ (9 người):** UI/UX · FE · **BE1** (Supabase/Core DB) · **BE2** (AI Agent/RAG) · **BE3** (n8n/Tracking) · **Tester 1** (hỗ trợ FE 2 tuần đầu) · **Tester 2** (AI Safety) · **Tester 3** (System/Commission).
 
@@ -368,12 +417,13 @@ Tóm tắt từ [RULE_BOOK.md](.ai/role/RULE_BOOK.md) – **áp dụng cho cả 
 
 ---
 
-## 11. Trạng thái hiện tại & lưu ý quan trọng
+## 12. Trạng thái hiện tại & lưu ý quan trọng
 
 **Đã có:**
 - ✅ Khung Next.js 16 + Tailwind v4 + TypeScript.
 - ✅ Supabase client (browser / server / middleware helper) + `database.types.ts` đã sinh cho 8 bảng.
 - ✅ Migration schema ban đầu `20261006162951_remote_schema.sql` (8 bảng, đã bật RLS).
+- ✅ Bộ tài liệu dự án trong `.ai/` + bộ Agent Skills cho FE / Supabase / n8n / LangChain (mục 10).
 
 **Chưa có / cần xử lý:**
 - ⏳ Chưa có page nghiệp vụ (`app/page.tsx` vẫn là template), chưa cài shadcn/ui, `ai-services.ts` đang trống.
@@ -381,16 +431,16 @@ Tóm tắt từ [RULE_BOOK.md](.ai/role/RULE_BOOK.md) – **áp dụng cho cả 
 - ⚠️ Chưa có file `proxy.ts` ở root để refresh session Auth (Next.js 16 dùng `proxy.ts` thay cho `middleware.ts`). Helper [middleware.ts](src/lib/supabase/middleware.ts) mới tạo client nhưng chưa gọi `supabase.auth.getUser()`.
 - ⚠️ Chưa có `supabase/seed.sql` (config đang trỏ tới) – `db reset` local sẽ không có dữ liệu mẫu.
 - ⚠️ `.gitignore` có một dòng `.env.local` bị ghi sai encoding (UTF-16) ở cuối file – nên xóa dòng đó (đã có `.env*` bảo vệ).
-- ⚠️ Không commit file ghi chú/secret cá nhân (vd: `env.text`) lên repo.
+- ⚠️ File `env.text` **đã bị commit lên repo** (chứa Supabase URL + tên biến cũ `NEXT_PUBLIC_SUPABASE_ANON_KEY`). Nên xóa khỏi git (`git rm --cached env.text`) vì hướng dẫn trong đó đã được thay bằng mục 5 của README này.
 
 ---
 
-## 12. Xử lý sự cố thường gặp
+## 13. Xử lý sự cố thường gặp
 
 | Lỗi | Nguyên nhân & cách sửa |
 | :--- | :--- |
 | `Error: supabaseUrl is required` / `supabaseKey is required` | Thiếu `.env.local` hoặc sai tên biến (phải là `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`). Sửa xong restart `npm run dev`. |
-| `permission denied for table ...` / query trả `[]` | Chưa có GRANT/RLS policy cho bảng – xem mục 11, liên hệ BE1. |
+| `permission denied for table ...` / query trả `[]` | Chưa có GRANT/RLS policy cho bảng – xem mục 12, liên hệ BE1. |
 | `npx supabase link` hỏi password rồi lỗi | Sai database password hoặc chưa được mời vào project Supabase. |
 | `supabase start` lỗi Docker | Docker Desktop chưa chạy, hoặc trùng port 54321–54324. |
 | Lỗi type sau khi đổi schema | Chạy lại lệnh `gen types` ở mục 7. |
