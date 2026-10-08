@@ -77,3 +77,19 @@ Suite trên mặc định yêu cầu môi trường không cấu hình Supabase 
 
 ## Ảnh giao diện
 Ảnh tại `screenshots/`: landing/login/register/chat/dashboard desktop và mobile. Chúng là bằng chứng giao diện của bản build local, không phải số liệu kinh doanh thật.
+
+### Trạng thái bàn giao Git
+- Đã commit source trên `Feature_FE_W1_UI_Foundation` (commit implementation `70d3abb`).
+- Push đã thử nhưng thất bại: phiên làm việc chưa có xác thực GitHub HTTPS. Chưa có remote branch, PR hoặc merge được tạo bởi lần làm việc này.
+- `FE_W1.bundle` kèm source ZIP là cách chuyển nguyên nhánh sang máy có quyền GitHub. Bundle chỉ chứa commit mới sau base dev, cần fetch repo gốc trước.
+
+Trong repo trên máy bạn (đặt bundle vào thư mục Downloads, chỉnh đường dẫn đúng):
+```bash
+git fetch origin dev
+git fetch /path/to/FE_W1.bundle Feature_FE_W1_UI_Foundation:Feature_FE_W1_UI_Foundation
+git switch Feature_FE_W1_UI_Foundation
+npm ci
+npm run dev
+git push -u origin Feature_FE_W1_UI_Foundation
+```
+Sau đó mở GitHub tạo PR `Feature_FE_W1_UI_Foundation` → `dev`, dùng nội dung `docs/fe-w1/PR_DESCRIPTION.md`. Không ghi đè nhánh đang có thay đổi chưa commit trên máy bạn.

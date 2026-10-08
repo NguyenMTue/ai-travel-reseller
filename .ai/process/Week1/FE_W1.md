@@ -176,7 +176,8 @@ CRUD sản phẩm thật, analytics thật, Reseller feed, Admin Dashboard, ví/
 
 ## 13. END-OF-WEEK CHECKLIST
 - [ ] All assigned tasks completed (Auth E2E còn thiếu)
-- [ ] Code committed/pushed — xem kết quả Git trong docs/fe-w1/README.md
+- [x] Code committed local trên nhánh Feature
+- [ ] Code pushed — đã thử, thiếu xác thực GitHub; xem docs/fe-w1/README.md
 - [ ] PR created
 - [ ] PR merged vào dev
 - [x] Documentation updated

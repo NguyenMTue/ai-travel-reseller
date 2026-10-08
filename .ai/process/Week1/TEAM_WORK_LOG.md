@@ -50,7 +50,7 @@ Không đánh dấu cả milestone DONE: còn Auth/AI E2E, review/merge.
 ## 7. SHARED RESOURCES
 | Resource | Owner | Location | Status |
 |---|---|---|---|
-| FE source | FE | app/, src/components/ | Feature branch local |
+| FE source | FE | app/, src/components/ | Feature branch committed local; push blocked do thiếu xác thực |
 | DB/Auth | BE1 | supabase/, src/lib/supabase/, app/actions/auth.ts | Code trên base dev; remote chưa kiểm chứng |
 | AI Chat | BE2 | app/api/chat/, src/lib/ai/ | Code trên base dev d435a55 |
 | Env | BE1/BE2 | .env.local, gitignored | env.text chỉ placeholder |
@@ -91,3 +91,6 @@ Không đánh dấu cả milestone DONE: còn Auth/AI E2E, review/merge.
 3. Task có owner; blocker có người bàn giao; interface có contract.
 4. Requirement chưa rõ ghi NEEDS DECISION; không im lặng xử lý conflict.
 5. Cập nhật phần bị ảnh hưởng, giữ lịch sử và không tạo log trùng.
+
+### Git handoff status
+Implementation commit: `70d3abb`. Push HTTPS đã thử nhưng thiếu xác thực GitHub. Chưa tạo PR hoặc merge; bundle/source ZIP được chuẩn bị để thành viên có quyền tiếp tục.
