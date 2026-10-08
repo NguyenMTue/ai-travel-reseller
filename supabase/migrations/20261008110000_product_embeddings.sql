@@ -1,6 +1,6 @@
 -- =====================================================================
 -- BE1-05: Product Embeddings (pgvector) cho AI Sales Agent (RAG - BE2)
--- Model: OpenAI text-embedding-3-small  ->  1536 dimensions
+-- Model: Google Gemini gemini-embedding-2  ->  1536 dimensions
 -- Pipeline: products INSERT/UPDATE -> Webhook -> /api/embeddings/sync
 --           -> chunk + embed -> UPSERT vào product_embeddings
 -- =====================================================================
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.product_embeddings (
   content_hash  text,                                            -- hash nội dung để bỏ qua re-embed khi không đổi
   metadata      jsonb                     NOT NULL DEFAULT '{}'::jsonb,
   embedding     extensions.vector(1536)   NOT NULL,
-  model         text                      NOT NULL DEFAULT 'text-embedding-3-small',
+  model         text                      NOT NULL DEFAULT 'gemini-embedding-2',
   created_at    timestamptz               NOT NULL DEFAULT now(),
   updated_at    timestamptz               NOT NULL DEFAULT now(),
   CONSTRAINT product_embeddings_pkey PRIMARY KEY (id),
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS public.product_embeddings (
 );
 
 COMMENT ON TABLE public.product_embeddings IS
-  'Vector embeddings (text-embedding-3-small, 1536d) của các chunk mô tả sản phẩm, phục vụ RAG cho AI Sales Agent.';
+  'Vector embeddings (gemini-embedding-2, 1536d) của các chunk mô tả sản phẩm, phục vụ RAG cho AI Sales Agent.';
 
 -- 3. Indexes
 -- Unique constraint (product_id, chunk_index) đã bao phủ truy vấn theo product_id.
