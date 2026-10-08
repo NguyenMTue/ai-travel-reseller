@@ -1,8 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+import { supabaseUrl, supabasePublicKey as supabaseKey, hasSupabaseConfig } from "./config";
 
 export const createClient = (request: NextRequest) => {
   // Create an unmodified response
@@ -45,6 +44,17 @@ const PROTECTED_PREFIXES = ["/merchant", "/reseller", "/admin"];
  */
 export const updateSession = async (request: NextRequest) => {
   let supabaseResponse = NextResponse.next({ request });
+  // Public UI remains reviewable without credentials; protected portals stay closed.
+  if (!hasSupabaseConfig) {
+    const pathname = request.nextUrl.pathname;
+    if (PROTECTED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
 
   const supabase = createServerClient(supabaseUrl!, supabaseKey!, {
     cookies: {
