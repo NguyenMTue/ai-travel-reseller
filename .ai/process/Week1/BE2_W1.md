@@ -17,8 +17,8 @@ Ghi chú: Chỉ đánh dấu DONE cho deliverable đã có code và kết quả 
 | BE2-01 | BE2 | AI/RAG | Phối hợp BE1 chốt cấu trúc lưu vector và tham chiếu dữ liệu sản phẩm | DONE | 06/10 | Trước tích hợp DB |
 | BE2-02 | BE2 | AI/RAG | Cấu hình pgvector trên Supabase và Vector Store | DONE (Local) | 08/10 | 09/10/2026 12:00 |
 | BE2-03 | BE2 | AI/RAG | Triển khai embedding pipeline cho Product seed | DONE (Local) | 08/10 | 09/10/2026 12:00 |
-| BE2-04 | BE2 | AI/RAG | API/Function semantic search trả về dữ liệu liên quan | IN_PROGRESS | 08/10 | 09/10/2026 12:00 |
-| BE2-05 | BE2 | AI/RAG | Viết Prompt Template và thử nghiệm RAG với LLM API | READY — chờ retrieval được kiểm thử | Chưa bắt đầu | 09/10/2026 12:00 |
+| BE2-04 | BE2 | AI/RAG | API/Function semantic search trả về dữ liệu liên quan | DONE (Local) | 08/10 | 09/10/2026 12:00 |
+| BE2-05 | BE2 | AI/RAG | Viết Prompt Template và thử nghiệm RAG với LLM API | DONE (Local) | 08/10 | 09/10/2026 12:00 |
 
 Lịch chung: 07/10 cấu hình RAG vector cơ bản; 08/10 hoàn thiện RPC/Edge Functions và test tích hợp; 09/10 trước 12:00 hoàn thành, merge PR và cập nhật tài liệu. Đây là lịch phối hợp, không phải xác nhận tiến độ.
 
@@ -31,6 +31,8 @@ Lịch chung: 07/10 cấu hình RAG vector cơ bản; 08/10 hoàn thiện RPC/Ed
 | BE2-01 | BE2 | Chốt contract `product_embeddings`, `vector(1536)`, HNSW cosine và RPC với BE1 | 08/10/2026 | BE1 |
 | BE2-02 | BE2 | Gemini helper 1536 chiều, service-role client và Vector Store local | 08/10/2026 | BE1, BE3 |
 | BE2-03 | BE2 | `POST /api/embeddings/sync`: product-to-text, chunking, SHA-256 hash, upsert và xóa chunk thừa | 08/10/2026 | BE1, BE3, QA |
+| BE2-04 | BE2 | Query embedding + RPC `match_product_embeddings`, lọc theo product và format context có nguồn | 08/10/2026 | BE3, QA |
+| BE2-05 | BE2 | `POST /api/chat`, LangChain prompt grounded, structured output và checkout URL do server kiểm soát | 08/10/2026 | FE, BE3, QA |
 
 ---
 
@@ -38,8 +40,7 @@ Lịch chung: 07/10 cấu hình RAG vector cơ bản; 08/10 hoàn thiện RPC/Ed
 
 | Task ID | Member | Task | Progress | Blocker | Next Step |
 |---|---|---|---|---|---|
-| BE2-04 | BE2 | Semantic retrieval bằng query embedding + `match_product_embeddings` | Query formatter và RPC đã có; chưa có test gọi RPC bằng Gemini query vector | Không có blocker kỹ thuật đã biết | Tạo query embedding cùng model, gọi RPC và kiểm tra Top-K |
-| BE2-05 | BE2 | Prompt Template và RAG với LLM | Chưa triển khai | Phụ thuộc BE2-04 được kiểm thử | Viết prompt grounded sau khi retrieval pass |
+| — | BE2 | Không còn task BE2-04/05 đang thực hiện | — | — | Chờ review/cross-test trước khi merge |
 
 ---
 
@@ -47,9 +48,9 @@ Lịch chung: 07/10 cấu hình RAG vector cơ bản; 08/10 hoàn thiện RPC/Ed
 
 | Task ID | Owner | Blocked By | Required From | Impact |
 |---|---|---|---|---|
-| BE2-05 — end-to-end | BE2 | Semantic retrieval chưa được kiểm thử | BE2 | Chưa thể chứng minh RAG end-to-end hoặc grounded response |
+| — | BE2 | Không có blocker kỹ thuật hiện tại | — | Chờ review/cross-test |
 
-Dependency hiện tại: ~~BE1 schema + contract~~ → ~~BE2 vector store + document embeddings~~ → semantic search → RAG test → BE3/QA tích hợp.
+Dependency hiện tại: ~~BE1 schema + contract~~ → ~~BE2 vector store + document embeddings~~ → ~~semantic search~~ → ~~RAG test~~ → BE3/QA tích hợp.
 
 ---
 
@@ -62,6 +63,7 @@ Dependency hiện tại: ~~BE1 schema + contract~~ → ~~BE2 vector store + docu
 | BE2 | BE3 | Sync endpoint: `POST`, body `{ product_id }`, Bearer secret, response thống kê chunk | READY_FOR_HANDOFF | 08/10/2026 |
 | BE2 | Tester 2 & Tester 3 | Smoke test product Bà Nà Hills: sinh 1 chunk, 1536 chiều, lần hai skip do hash không đổi | READY_FOR_HANDOFF | 08/10/2026 |
 | BE2 | Toàn team | Code document embedding + local verification | DONE; retrieval/prompt còn tiếp tục | 08/10/2026 |
+| BE2 | FE, BE3, QA | `POST /api/chat`: request theo `api_contracts.md`, response `{ reply, suggested_checkout_url }` | READY_FOR_HANDOFF | 08/10/2026 |
 
 ---
 
@@ -71,10 +73,10 @@ Dependency hiện tại: ~~BE1 schema + contract~~ → ~~BE2 vector store + docu
 |---|---|---|---|---|
 | DB Schema ↔ Vector Store | BE1: schema; BE2: application pipeline | BE2 | `product_embeddings`, `vector(1536)`, UNIQUE `(product_id, chunk_index)`, HNSW cosine, service-role write | DONE (Local) |
 | Test Data ↔ Embedding Pipeline | BE1: seed; BE2: pipeline | BE2 | Product seed `33333333-3333-3333-3333-333333333333` (Bà Nà Hills) | DONE (Local) |
-| Embedding ↔ Semantic Search | BE2 | BE2/BE3 | `gemini-embedding-2`, 1536 chiều cho cả document/query; RPC trả Top-K cosine | PARTIAL — document pass, query/RPC chưa test |
+| Embedding ↔ Semantic Search | BE2 | BE2/BE3 | `gemini-embedding-2`, 1536 chiều cho cả document/query; RPC trả Top-K cosine | DONE (Local) |
 | Embedding Sync ↔ n8n/webhook | BE2: route; BE3: workflow | BE3 | `POST /api/embeddings/sync`, Bearer secret, body `{ product_id }`; generated/skipped/removed | ROUTE DONE; webhook chưa cấu hình |
-| RAG ↔ LLM | BE2 | RAG thử nghiệm | Prompt + context từ dữ liệu được duyệt; thiếu dữ liệu phải nói rõ, không bịa thông tin | NEEDS IMPLEMENTATION |
-| RAG ↔ QA | BE2; Tester 2 & Tester 3 | QA | Cách chạy và đối chiếu câu trả lời với sample; kiểm tra thiếu context/bịa giá | NEEDS HANDOFF |
+| RAG ↔ LLM | BE2 | RAG thử nghiệm | Prompt + context từ dữ liệu được duyệt; thiếu dữ liệu phải nói rõ, không bịa thông tin | DONE (Local) |
+| RAG ↔ QA | BE2; Tester 2 & Tester 3 | QA | `/api/chat`; kiểm tra giá từ context, prompt injection, mã giảm giá và checkout URL | READY_FOR_HANDOFF |
 
 Không tự chọn endpoint, tên bảng, field hoặc provider thành contract chính thức khi team chưa chốt.
 
@@ -88,7 +90,7 @@ Không tự chọn endpoint, tên bảng, field hoặc provider thành contract 
 | GitHub repository | Team | `origin/dev`; BE2 commit `aab945f` | MERGED |
 | Product sample / Test data | BE1 | `supabase/seed.sql` | AVAILABLE |
 | Gemini / Supabase server credentials | Người quản lý môi trường | `.env.local`, gitignored; không ghi secret trong log | AVAILABLE LOCAL |
-| Semantic Search / RAG documentation | BE2 | File này và source BE2 | IN_PROGRESS |
+| Semantic Search / RAG documentation | BE2 | File này và source BE2 | READY_FOR_REVIEW |
 | n8n instance / workflow contract | BE3 | Chưa được cung cấp | NEEDS HANDOFF |
 | API Test Suite (Postman/Bruno) | Tester 2 & Tester 3 | Chưa được cung cấp | PLANNED theo Weekly Plan |
 
@@ -121,6 +123,7 @@ Không tự chọn endpoint, tên bảng, field hoặc provider thành contract 
 | 08/10 | Dùng Google Gemini `gemini-embedding-2`, output 1536 chiều | Team BE1/BE2 thống nhất provider và giữ contract DB 1536 | BE1, BE2 | Document/query phải dùng cùng model; không trộn embedding space |
 | 08/10 | Route ứng dụng đặt tại root `app/api/embeddings/sync` | Repo đang dùng root `app/`; Next.js bỏ qua `src/app` khi root `app` tồn tại | BE2 | BE3/webhook gọi endpoint này |
 | 08/10 | Ghi embeddings chỉ bằng service-role client phía server | Không lộ secret và tuân thủ RLS/write permission | BE1, BE2 | Browser không được gọi Supabase write trực tiếp |
+| 08/10 | Dùng LangChain direct RAG chain và `gemini-3.8-flash` cho câu trả lời | Luồng tuyến tính retrieve → generate, không cần state graph; structured output tách reply/purchase intent | BE2 | API chỉ trả context-grounded reply; URL do server tạo |
 
 Ràng buộc từ nguồn: BE1 phụ trách schema gốc theo Roadmap; AI chỉ dùng dữ liệu merchant được duyệt theo PRD. Không bịa giá, tồn kho, khuyến mãi, giờ mở cửa, chính sách hoàn tiền hoặc trạng thái booking; không tự nhận là merchant.
 
@@ -132,6 +135,7 @@ Ràng buộc từ nguồn: BE1 phụ trách schema gốc theo Roadmap; AI chỉ 
 |---|---|---|
 | 06/10/2026 | Khởi tạo BE2_W1 theo cấu trúc mẫu BE1; bổ sung task BE2, dependency, handoff và conflict từ tài liệu | AI Planner |
 | 08/10/2026 | Cập nhật tiến độ thực tế từ commit `aab945f`, PR merge `af5764e` và smoke test Supabase local | BE2 |
+| 08/10/2026 | Hoàn thành BE2-04/05 trên nhánh `feature/be2-query-rag`; smoke-test retrieval, grounded reply, prompt injection và attribution | BE2 |
 
 ---
 
@@ -150,20 +154,24 @@ Ràng buộc từ nguồn: BE1 phụ trách schema gốc theo Roadmap; AI chỉ 
 - `npx supabase db reset`, `npx tsc --noEmit` và ESLint đều pass.
 - Smoke test local sản phẩm Bà Nà Hills: HTTP 200, 1 row, hash 64 ký tự, model đúng, `vector_dims(embedding) = 1536`; gọi lần hai `generated = 0`, `skipped = 1`.
 - Commit `aab945f` đã merge vào `origin/dev` qua merge commit `af5764e`.
+- Thêm query pipeline: Gemini query embedding 1536 chiều → RPC `match_product_embeddings` → context có source metadata.
+- Thêm LangChain Sales Agent và `POST /api/chat` theo contract; prompt cấm bịa giá/mã giảm giá/URL và chống chỉ dẫn độc hại trong context/user input.
+- Smoke test local `/api/chat`: trả đúng giá Bà Nà Hills 900.000/850.000 VNĐ; không bịa `GIAM50`; không tự sinh checkout URL; attribution sai trả HTTP 404.
+- `npx tsc --noEmit` và ESLint pass; endpoint đặt timeout LLM 30 giây, retry 1 lần và Gemini thinking level LOW.
 
 **In Progress**
-- Query embedding bằng cùng model và gọi `match_product_embeddings` để kiểm thử Top-K semantic retrieval.
+- Chờ team review và QA cross-test nhánh `feature/be2-query-rag`.
 
 **Blocked**
-- RAG end-to-end chưa thể đánh dấu DONE cho đến khi retrieval được kiểm thử.
+- Không có blocker kỹ thuật hiện tại.
 
 **Next**
-- Tạo query embedding, gọi RPC và kiểm tra similarity/order.
-- Viết Prompt Template grounded từ retrieved context.
+- FE/BE3/QA review và cross-test `POST /api/chat`.
 - Phối hợp BE3 cấu hình Database Webhook gọi `/api/embeddings/sync` và bổ sung backfill cho sản phẩm hiện có.
+- Sau khi được xác nhận: commit/push nhánh và mở merge request theo quy trình team.
 
 **Handoff**
-- BE1/BE3/QA có thể dùng commit `aab945f`; sync endpoint và kết quả smoke test đã sẵn sàng để cross-test.
+- BE1/BE3/QA có thể dùng embedding sync từ commit `aab945f`; `/api/chat` trên nhánh `feature/be2-query-rag` đã sẵn sàng để review/cross-test.
 
 ### 06/10/2026
 
