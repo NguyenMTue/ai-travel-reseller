@@ -88,6 +88,8 @@ def publish_tour_post(
     affiliate_link: str = "",
     custom_price: str = "",
     custom_note: str = "",
+    campaign_id: str = None,
+    product_id: str = None,
     save_to_supabase: bool = True
 ) -> dict:
     """
@@ -176,13 +178,16 @@ Quy tắc quan trọng:
                 caption_text += f"\n\n👉 Đặt tour giữ chỗ tại đây: {affiliate_link}"
 
             rec = {
-                "campaign_id": None,
                 "persona": target_audience,
                 "hook": (data.get("hooks") or [""])[0],
                 "script": data.get("body", ""),
                 "caption": caption_text,
                 "status": "published"
             }
+            if campaign_id:
+                rec["campaign_id"] = campaign_id
+            if product_id:
+                rec["product_id"] = product_id
 
             filtered_rec = {k: v for k, v in rec.items() if k in existing_cols}
             insert_res = supabase.table("contents").insert([filtered_rec]).execute()

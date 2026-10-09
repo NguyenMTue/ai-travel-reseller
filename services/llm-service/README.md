@@ -1,10 +1,12 @@
-# AI Travel Reseller
+# AI Travel Reseller - LLM & Content Factory Service
 
-## Web thử nghiệm TikTok trên Vercel
+Dịch vụ Python phục vụ tự động hóa nội dung du lịch cho Reseller:
+1. **RAG Knowledge Base & Engine (`rag_engine.py`)**: Kho tri thức cẩm nang du lịch Đà Nẵng / Hội An (Bà Nà Hills, Cù Lao Chàm, Rừng dừa Bảy Mẫu).
+2. **Groq AI Content Generator (`content_generator.py`)**: Sinh kịch bản, hooks, captions, hashtags bán tour với tốc độ cao qua Groq API.
+3. **n8n Client & Google Sheets Review Queue (`n8n_client.py`)**: Kết nối workflow n8n để sinh bản nháp review lưu vào Google Sheets chờ duyệt.
+4. **FastAPI RAG Service (`rag_api.py`)**: Cung cấp API tra cứu tri thức RAG cho n8n hoặc các service khác.
+5. **TikTok Publishing & Scheduler (Thử nghiệm)**: Hỗ trợ tích hợp Content Posting API của TikTok và lập lịch đăng video tự động.
 
-Web đăng bài nằm riêng trong `web/`, dùng OAuth phía server và giao diện xem trước/chỉnh nội dung trước khi gửi video. Dự án hiện chưa dùng n8n; lịch Python cũ và web Vercel là hai luồng riêng.
-
-Xem [web/README.md](web/README.md) để đặt Root Directory là `web`, cấu hình các biến môi trường trong Vercel và đăng ký callback URL HTTPS với TikTok Developer.
 
 ## TikTok: thư viện video và lịch đăng hằng ngày
 
