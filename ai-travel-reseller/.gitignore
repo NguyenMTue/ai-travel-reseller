@@ -1,0 +1,23 @@
+# Environment variables
+.env
+data/tiktok_daily_schedule.json
+data/tiktok_oauth_state.json
+media/tiktok/*
+!media/tiktok/README.md
+web/.vercel/
+web/.env.local
+web/node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+env/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
