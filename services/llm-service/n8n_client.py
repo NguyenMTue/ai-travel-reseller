@@ -42,21 +42,33 @@ def generate_review_via_n8n(product: dict) -> dict:
     if config.N8N_WEBHOOK_TOKEN:
         headers["X-Webhook-Token"] = config.N8N_WEBHOOK_TOKEN
 
+    payload_data = {
+        **product,
+        "product_id": product_id,
+        "product": product,
+        "gemini_api_key": config.GEMINI_API_KEY,
+    }
     try:
         response = httpx.post(
             webhook_url,
-            # Send normalized product facts so n8n does not need to look up
-            # the catalog in Google Sheets. Keep product_id at top level for
-            # compatibility with the current workflow and review sheet.
-            # Include flat fields for existing n8n expressions such as
-            # $json.body.product_name, and the nested object for the newer
-            # $json.body.product.product_name form.
-            json={**product, "product_id": product_id, "product": product},
+            json=payload_data,
             headers=headers,
             timeout=240,
         )
+        if response.status_code == 404 and "localhost" in webhook_url:
+            fallback_url = webhook_url.replace("localhost", "127.0.0.1")
+            alt_res = httpx.post(fallback_url, json=payload_data, headers=headers, timeout=240)
+            if not alt_res.is_error:
+                response = alt_res
     except httpx.HTTPError as exc:
-        raise RuntimeError(f"Không gọi được Webhook n8n: {exc}") from exc
+        if "localhost" in webhook_url:
+            try:
+                fallback_url = webhook_url.replace("localhost", "127.0.0.1")
+                response = httpx.post(fallback_url, json=payload_data, headers=headers, timeout=240)
+            except httpx.HTTPError:
+                raise RuntimeError(f"Không gọi được Webhook n8n: {exc}") from exc
+        else:
+            raise RuntimeError(f"Không gọi được Webhook n8n: {exc}") from exc
 
     if response.is_error:
         detail = response.text[:1000]

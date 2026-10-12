@@ -120,7 +120,15 @@ class APIDebugApp:
             state=tk.DISABLED,
         )
         self.btn_open_sheet.pack(side=tk.LEFT)
-        ttk.Label(p_row2, text="Tạo nháp chỉ ghi vào hàng chờ; không đăng mạng xã hội.", style="SubHeader.TLabel").pack(side=tk.LEFT, padx=10)
+        self.btn_save_supabase = ttk.Button(
+            p_row2,
+            text="3. LƯU VÀO SUPABASE (LOCAL)",
+            style="Action.TButton",
+            command=self.save_review_to_supabase,
+            state=tk.DISABLED,
+        )
+        self.btn_save_supabase.pack(side=tk.LEFT, padx=(8, 0))
+        ttk.Label(p_row2, text="Bản nháp lưu vào Supabase Local hoặc Google Sheets.", style="SubHeader.TLabel").pack(side=tk.LEFT, padx=10)
 
         # 3. Notebook: 2 Tab (Tab 1: Bản xem trước bài đăng, Tab 2: Quản trị & Debug)
         self.notebook = ttk.Notebook(main_container)
@@ -286,6 +294,9 @@ class APIDebugApp:
         if hasattr(self, "btn_open_sheet"):
             can_approve = bool(self.last_review_data and self.last_review_data.get("review_draft"))
             self.btn_open_sheet.config(state=(tk.DISABLED if is_busy or not can_approve else tk.NORMAL))
+        if hasattr(self, "btn_save_supabase"):
+            can_save = bool(self.last_review_data and self.last_review_data.get("review_draft"))
+            self.btn_save_supabase.config(state=(tk.DISABLED if is_busy or not can_save else tk.NORMAL))
         self.btn_check_env.config(state=state)
         self.btn_test_sb.config(state=state)
         self.btn_test_groq.config(state=state)
@@ -404,7 +415,44 @@ class APIDebugApp:
         self.preview_text.insert(tk.END, result["review_draft"])
         self.notebook.select(0)
         self.btn_open_sheet.config(state=tk.NORMAL)
+        if hasattr(self, "btn_save_supabase"):
+            self.btn_save_supabase.config(state=tk.NORMAL)
         self.log_success(f"Đã nhận bản nháp cho {result.get('product_id', '')}; chưa đăng lên mạng xã hội.")
+
+    def save_review_to_supabase(self):
+        if not self.last_review_data:
+            messagebox.showwarning("Chưa có bản nháp", "Hãy tạo bản nháp qua n8n trước.")
+            return
+
+        review_draft = self.preview_text.get("1.0", "end-1c").strip()
+        product_id = self.last_review_data.get("product_id")
+        product_name = self.last_review_data.get("product_name", "")
+        official_url = self.last_review_data.get("official_booking_url", "")
+
+        try:
+            from db import get_supabase
+            from save_content import get_available_columns
+            sb = get_supabase()
+            avail = get_available_columns(sb, "contents")
+            rec = {
+                "product_id": product_id,
+                "persona": "general",
+                "hook": f"Review: {product_name}",
+                "caption": review_draft,
+                "cta": f"Đặt chỗ tại: {official_url}" if official_url else None,
+                "status": "pending_approval"
+            }
+            filtered = {k: v for k, v in rec.items() if k in avail} if avail else rec
+            res = sb.table("contents").insert([filtered]).execute()
+            saved_id = res.data[0].get("id") if res.data else "OK"
+            self.log_success(f"Đã lưu bản nháp vào bảng contents trên Supabase Local! (ID: {saved_id})")
+            messagebox.showinfo(
+                "Đã lưu Supabase thành công",
+                f"Đã lưu bản nháp vào bảng 'contents' trên Supabase Local!\n\nMã bản ghi: {saved_id}\nTrạng thái: pending_approval",
+            )
+        except Exception as exc:
+            self.log_error(f"Lỗi khi lưu Supabase Local: {exc}")
+            messagebox.showerror("Lỗi lưu Supabase", str(exc))
 
     def open_review_sheet(self):
         if not self.last_review_data:
