@@ -246,7 +246,25 @@ npx supabase stop           # tắt khi xong
 
 Sau đó sửa `.env.local` trỏ về local: `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321` và key lấy từ `supabase status`. Supabase Studio local: http://127.0.0.1:54323.
 
-### 5.7 Checklist nhanh
+### 5.7 Chạy & Test Dịch vụ AI & n8n Automation (BE3 - AI Content Factory)
+
+Dịch vụ Python phục vụ tự động hóa nội dung du lịch và hàng chờ kiểm duyệt Google Sheets (Week 1 Milestone của BE3):
+
+1. **Khởi động n8n container:**
+   ```bash
+   docker run -d --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n n8nio/n8n:latest
+   ```
+2. **Import Workflow (1 Click):** Mở `http://127.0.0.1:5678` ➔ chọn menu `...` góc phải ➔ **Import from file** ➔ chọn `services/llm-service/workflow_ai_travel_review.json` ➔ mở node `Append to Google Sheets`, chọn Credential Google Sheets của bạn ➔ Bật **Active: ON**.
+3. **Chạy test nhanh:**
+   ```bash
+   cd services/llm-service
+   python -m main --demo-n8n
+   # hoặc khởi động giao diện Desktop trực quan:
+   python gui.py
+   ```
+Xem hướng dẫn chi tiết từng bước tại: [services/llm-service/README.md](services/llm-service/README.md).
+
+### 5.8 Checklist nhanh
 
 - [ ] `node -v` ≥ 20.9
 - [ ] `npm install` chạy không lỗi

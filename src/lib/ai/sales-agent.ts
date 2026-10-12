@@ -6,7 +6,8 @@ import {
 } from "@langchain/core/prompts";
 import { z } from "zod";
 
-export const SALES_AGENT_MODEL = "gemini-3.8-flash";
+export const SALES_AGENT_MODEL =
+  process.env.GEMINI_SALES_MODEL?.trim() || "gemini-3.5-flash-lite";
 const SALES_AGENT_TIMEOUT_MS = 30_000;
 
 export type SalesConversationMessage = {
@@ -63,7 +64,7 @@ Quy tắc bắt buộc:
   ["human", "{question}"],
 ]);
 
-function createSalesModel() {
+function createSalesModel(modelName = SALES_AGENT_MODEL) {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
 
   if (!apiKey) {
@@ -71,14 +72,11 @@ function createSalesModel() {
   }
 
   return new ChatGoogleGenerativeAI({
-    model: SALES_AGENT_MODEL,
+    model: modelName,
     apiKey,
     temperature: 0,
     maxOutputTokens: 512,
-    maxRetries: 1,
-    thinkingConfig: {
-      thinkingLevel: "LOW",
-    },
+    maxRetries: 2,
   });
 }
 
@@ -101,23 +99,42 @@ export async function generateSalesReply({
       ? new HumanMessage(message.content)
       : new AIMessage(message.content),
   );
-  const model = createSalesModel().withStructuredOutput(
-    salesAgentResponseSchema,
-    { name: "sales_agent_response" },
-  );
-  const chain = salesAgentPrompt.pipe(model);
-  const result = await chain.invoke(
-    {
-      question,
-      history: historyMessages,
-      context,
-      checkoutAvailability: checkoutAvailable ? "AVAILABLE" : "UNAVAILABLE",
-    },
-    { signal: AbortSignal.timeout(SALES_AGENT_TIMEOUT_MS) },
-  );
 
-  return {
-    reply: result.reply,
-    purchaseIntent: result.purchase_intent,
-  };
+  async function invokeModel(modelName: string) {
+    const model = createSalesModel(modelName).withStructuredOutput(
+      salesAgentResponseSchema,
+      { name: "sales_agent_response" },
+    );
+    const chain = salesAgentPrompt.pipe(model);
+    return chain.invoke(
+      {
+        question,
+        history: historyMessages,
+        context,
+        checkoutAvailability: checkoutAvailable ? "AVAILABLE" : "UNAVAILABLE",
+      },
+      { signal: AbortSignal.timeout(SALES_AGENT_TIMEOUT_MS) },
+    );
+  }
+
+  try {
+    const result = await invokeModel(SALES_AGENT_MODEL);
+    return {
+      reply: result.reply,
+      purchaseIntent: result.purchase_intent,
+    };
+  } catch (err: unknown) {
+    // Tự động fallback sang gemini-3.5-flash-lite nếu model chính bị 503 Service Unavailable
+    if (SALES_AGENT_MODEL !== "gemini-3.5-flash-lite") {
+      console.warn(
+        `Model ${SALES_AGENT_MODEL} gặp sự cố (có thể do 503 high demand), tự động chuyển sang gemini-3.5-flash-lite...`,
+      );
+      const fallbackResult = await invokeModel("gemini-3.5-flash-lite");
+      return {
+        reply: fallbackResult.reply,
+        purchaseIntent: fallbackResult.purchase_intent,
+      };
+    }
+    throw err;
+  }
 }

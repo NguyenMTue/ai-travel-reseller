@@ -1,0 +1,292 @@
+{
+  "id": "TfD9XgK2Lq3mZ1aB",
+  "name": "AI Travel Review Draft Automation",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ai-travel-review",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "id": "11111111-1111-4111-a111-111111111111",
+      "name": "Webhook Trigger",
+      "webhookId": "ec204614-e131-46ad-892d-47aeef662b42"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key={{ $json.body.gemini_api_key || $env.GEMINI_API_KEY || 'YOUR_GEMINI_API_KEY' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  contents: [\n    {\n      parts: [\n        {\n          text: 'Bạn là chuyên gia sáng tạo nội dung du lịch cho AI Travel Reseller Platform. Hãy viết bản nháp review du lịch tiếng Việt dựa trên dữ liệu đã xác thực sau:\\n\\n- Merchant: ' + ($json.body.merchant_name || 'Đại lý') + '\\n- Sản phẩm: ' + ($json.body.product_name || '') + '\\n- Địa điểm: ' + ($json.body.location || '') + '\\n- Thông tin xác thực: ' + ($json.body.verified_facts || '') + '\\n- Giá xác nhận: ' + ($json.body.confirmed_price_offer || '') + '\\n- Đối tượng: ' + ($json.body.target_audience || 'Gia đình & giới trẻ') + '\\n- Link đặt chỗ chính thức: ' + ($json.body.official_booking_url || '') + '\\n\\nQUY TẮC BẮT BUỘC:\\n1. Chỉ dùng thông tin đã xác thực ở trên, tuyệt đối không bịa thêm giá hoặc ưu đãi ảo.\\n2. Bố cục bài viết gồm: Tiêu đề thu hút, Nội dung review trải nghiệm chân thực, Lời kêu gọi đặt vé (CTA), Kèm link đặt chỗ chính thức.\\n3. Ghi rõ ở cuối: [BẢN NHÁP KIỂM DUYỆT - CHƯA ĐĂNG MẠNG XÃ HỘI]'\n        }\n      ]\n    }\n  ]\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        300
+      ],
+      "id": "22222222-2222-4222-a222-222222222222",
+      "name": "Gemini AI Generate Draft",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "product_id",
+              "value": "={{ $('Webhook Trigger').item.json.body.product_id }}",
+              "type": "string"
+            },
+            {
+              "id": "f2",
+              "name": "product_name",
+              "value": "={{ $('Webhook Trigger').item.json.body.product_name }}",
+              "type": "string"
+            },
+            {
+              "id": "f3",
+              "name": "merchant_name",
+              "value": "={{ $('Webhook Trigger').item.json.body.merchant_name }}",
+              "type": "string"
+            },
+            {
+              "id": "f4",
+              "name": "location",
+              "value": "={{ $('Webhook Trigger').item.json.body.location }}",
+              "type": "string"
+            },
+            {
+              "id": "f5",
+              "name": "official_booking_url",
+              "value": "={{ $('Webhook Trigger').item.json.body.official_booking_url }}",
+              "type": "string"
+            },
+            {
+              "id": "f6",
+              "name": "review_draft",
+              "value": "={{ $json.candidates[0].content.parts[0].text }}",
+              "type": "string"
+            },
+            {
+              "id": "f7",
+              "name": "status",
+              "value": "NEEDS_REVIEW",
+              "type": "string"
+            },
+            {
+              "id": "f8",
+              "name": "created_at",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        700,
+        300
+      ],
+      "id": "33333333-3333-4333-a333-333333333333",
+      "name": "Edit Fields Output"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1bKKdivQuJT7a1yTmot83Zb8ttDLhP5s_1-2UrhUiT94/edit?gid=0#gid=0"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "review_queue",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bKKdivQuJT7a1yTmot83Zb8ttDLhP5s_1-2UrhUiT94/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "merchant_name",
+              "displayName": "merchant_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "product_name",
+              "displayName": "product_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "location",
+              "displayName": "location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "review_draft",
+              "displayName": "review_draft",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "model",
+              "displayName": "model",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "interaction_id",
+              "displayName": "interaction_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "official_booking_url",
+              "displayName": "official_booking_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        940,
+        300
+      ],
+      "id": "44444444-4444-4444-a444-444444444444",
+      "name": "Append to Google Sheets",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  product_id: $('Edit Fields Output').item.json.product_id,\n  product_name: $('Edit Fields Output').item.json.product_name,\n  review_draft: $('Edit Fields Output').item.json.review_draft,\n  status: $('Edit Fields Output').item.json.status,\n  official_booking_url: $('Edit Fields Output').item.json.official_booking_url\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1180,
+        300
+      ],
+      "id": "55555555-5555-4555-a555-555555555555",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gemini AI Generate Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini AI Generate Draft": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields Output": {
+      "main": [
+        [
+          {
+            "node": "Append to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

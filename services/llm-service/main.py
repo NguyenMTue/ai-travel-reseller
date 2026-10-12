@@ -81,6 +81,7 @@ def main():
     parser.add_argument("--tours", action="store_true", help="Liệt kê danh sách tất cả các tour trong kho RAG")
     parser.add_argument("--rag-test", type=str, help="Tra cứu các đoạn tri thức RAG theo từ khóa")
     parser.add_argument("--test-all", action="store_true", help="Chạy thử nghiệm tạo nội dung với RAG và lưu Supabase")
+    parser.add_argument("--demo-n8n", action="store_true", help="Demo tự động n8n Webhook với Supabase Local: Đọc product, gọi n8n Gemini, lưu bản nháp vào Supabase")
     parser.add_argument("--tiktok-schedule-daily", type=str, metavar="HH:MM", help="Thiết lập giờ đăng TikTok mỗi ngày (giờ Việt Nam)")
     parser.add_argument("--tiktok-tour", type=str, help="Tên tour dùng để tạo caption mỗi ngày")
     parser.add_argument("--tiktok-worker", action="store_true", help="Chạy bộ hẹn giờ TikTok; cần để cửa sổ này hoạt động")
@@ -222,6 +223,67 @@ def main():
             print("Kết quả lưu thành công:", len(saved or []), "bản ghi.")
         except Exception as e:
             print(f"Lỗi khi chạy thử: {e}")
+        return
+
+    if args.demo_n8n:
+        print("=" * 65)
+        print("🚀 DEMO BE3: N8N AUTOMATION VỚI SUPABASE LOCAL")
+        print("=" * 65)
+        from db import list_products, get_supabase
+        from n8n_client import generate_review_via_n8n
+        from save_content import get_available_columns
+
+        print("\n[Bước 1/3] Đang tải danh sách sản phẩm từ Supabase Local (127.0.0.1:54321)...")
+        try:
+            prods = list_products()
+        except Exception as exc:
+            print(f"  ❌ Không kết nối được Supabase Local: {exc}")
+            return
+
+        if not prods:
+            print("  ❌ Bảng 'products' trong Supabase Local chưa có dữ liệu sản phẩm.")
+            return
+
+        prod = prods[0]
+        print(f"  ✓ Đã chọn sản phẩm: {prod.get('product_name')} (ID: {prod.get('product_id')})")
+        print(f"  ✓ Merchant: {prod.get('merchant_name') or 'N/A'} | Giá: {prod.get('confirmed_price_offer') or 'N/A'}")
+
+        print("\n[Bước 2/3] Gửi thông tin sang n8n Webhook tạo bản nháp review...")
+        try:
+            review_res = generate_review_via_n8n(prod)
+            print("  ✅ n8n đã trả về bản nháp review thành công!")
+            print(f"  ✓ Trạng thái n8n: {review_res.get('status')}")
+            print("\n" + "-" * 50)
+            print("📝 NỘI DUNG BẢN NHÁP (DO N8N & GEMINI SINH):")
+            print("-" * 50)
+            print(review_res.get("review_draft"))
+            print("-" * 50 + "\n")
+        except Exception as exc:
+            print(f"  ❌ Lỗi n8n: {exc}")
+            return
+
+        print("[Bước 3/3] Lưu bản nháp vào bảng 'contents' trên Supabase Local...")
+        try:
+            sb = get_supabase()
+            avail = get_available_columns(sb, "contents")
+            rec = {
+                "product_id": prod.get("product_id"),
+                "persona": "general",
+                "hook": f"Review: {prod.get('product_name')}",
+                "caption": review_res.get("review_draft"),
+                "cta": f"Đặt chỗ tại: {prod.get('official_booking_url')}" if prod.get("official_booking_url") else None,
+                "status": "pending_approval"
+            }
+            filtered = {k: v for k, v in rec.items() if k in avail} if avail else rec
+            insert_res = sb.table("contents").insert([filtered]).execute()
+            saved_id = insert_res.data[0].get("id") if insert_res.data else "OK"
+            print(f"  ✅ Đã lưu thành công vào Supabase Local! (ID bản ghi: {saved_id})")
+        except Exception as exc:
+            print(f"  ⚠️ Lỗi khi lưu Supabase: {exc}")
+
+        print("\n" + "=" * 65)
+        print("🎉 HOÀN TẤT DEMO THÔNG LUỒNG BE3 N8N VỚI SUPABASE LOCAL!")
+        print("=" * 65 + "\n")
         return
 
     run_cli_diagnostics()

@@ -6,12 +6,13 @@ ENV_PATH = Path(__file__).resolve().parent / ".env"
 
 def reload_config():
     """Tải lại các biến môi trường từ file .env"""
-    global SUPABASE_URL, SUPABASE_KEY, GROQ_API_KEY
+    global SUPABASE_URL, SUPABASE_KEY, GROQ_API_KEY, GEMINI_API_KEY
     global TIKTOK_CLIENT_KEY, TIKTOK_CLIENT_SECRET, TIKTOK_ACCESS_TOKEN, TIKTOK_REFRESH_TOKEN, TIKTOK_REDIRECT_URI
     global N8N_REVIEW_WEBHOOK_URL, N8N_WEBHOOK_TOKEN, REVIEW_SHEET_URL
     load_dotenv(dotenv_path=ENV_PATH, override=True)
     SUPABASE_URL = os.getenv("SUPABASE_URL", "").strip()
     SUPABASE_KEY = os.getenv("SUPABASE_KEY", "").strip()
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
     
     # Ưu tiên GROQ_API_KEY, fallback sang OPENAI_API_KEY nếu người dùng điền key Groq vào đó
     groq_key = os.getenv("GROQ_API_KEY", "").strip()
@@ -32,6 +33,7 @@ def reload_config():
 reload_config()
 
 def update_env_file(supabase_url: str = None, supabase_key: str = None, groq_api_key: str = None,
+                    gemini_api_key: str = None,
                     tiktok_client_key: str = None, tiktok_client_secret: str = None,
                     tiktok_access_token: str = None, tiktok_refresh_token: str = None,
                     tiktok_redirect_uri: str = None) -> bool:
@@ -53,6 +55,8 @@ def update_env_file(supabase_url: str = None, supabase_key: str = None, groq_api
             new_values["SUPABASE_KEY"] = supabase_key.strip()
         if groq_api_key is not None:
             new_values["GROQ_API_KEY"] = groq_api_key.strip()
+        if gemini_api_key is not None:
+            new_values["GEMINI_API_KEY"] = gemini_api_key.strip()
         if tiktok_client_key is not None:
             new_values["TIKTOK_CLIENT_KEY"] = tiktok_client_key.strip()
         if tiktok_client_secret is not None:
@@ -114,8 +118,8 @@ def validate_config() -> dict:
         missing.append("SUPABASE_URL: Chưa được thiết lập.")
     elif "xxxxx.supabase.co" in SUPABASE_URL:
         missing.append("SUPABASE_URL: Vẫn đang là giá trị placeholder mẫu ('xxxxx.supabase.co'). Cần thay bằng URL dự án Supabase của bạn.")
-    elif not SUPABASE_URL.startswith("https://"):
-        warnings.append("SUPABASE_URL: Thường bắt đầu bằng 'https://'. Vui lòng kiểm tra lại URL.")
+    elif not (SUPABASE_URL.startswith("https://") or SUPABASE_URL.startswith("http://127.0.0.1") or SUPABASE_URL.startswith("http://localhost")):
+        warnings.append("SUPABASE_URL: Thường bắt đầu bằng 'https://' (hoặc 'http://127.0.0.1' cho Supabase local). Vui lòng kiểm tra lại URL.")
 
     # 3. Kiểm tra SUPABASE_KEY
     if not SUPABASE_KEY:
