@@ -114,16 +114,16 @@ flowchart TD
 ## 8. TEAM HANDOFF
 | From | To | Deliverable | Format | Deadline | Status |
 |---|---|---|---|---|---|
-| BE1 | FE | API Contract tạo Tracking Link & Định dạng link | Markdown specs | 12/10 17:00 | READY |
-| BE1 | BE3 | Trigger database `on_campaign_created` & Payload specs | SQL snippet | 13/10 17:00 | READY |
-| BE1 | Tester 3 | Redirect Router `/r/[code]` & Database schema `clicks` | Endpoint + Migration | 14/10 17:00 | PLANNED |
-| BE1 | Toàn team | RLS Policies cho các bảng Tuần 2 | Migration SQL | 15/10 12:00 | PLANNED |
+| BE1 | FE | API Contract tạo Tracking Link (`POST /api/tracking/generate` & alias `/api/tracking-links/generate`) | Endpoint + Types | 12/10 17:00 | DONE |
+| BE1 | BE3 | Trigger database `on_campaign_created` & Webhook payload specs | Migration SQL (`pg_net`) | 13/10 17:00 | DONE |
+| BE1 | Tester 3 | Redirect Router `/r/[code]` & Schema bảng `clicks` | Endpoint + Script test | 14/10 17:00 | DONE |
+| BE1 | Toàn team | RLS Policies cho các bảng `affiliate_links` & `clicks` | Migration SQL | 15/10 12:00 | DONE |
 
 ---
 
 ## 9. TEAM CONFLICT CHECK
 - 🔴 **Conflict:** Không có xung đột. BE1 là Primary Owner của toàn bộ Database Schema, Edge Functions và Routing Redirect.
-- 🟡 **Potential Conflict:** Route `/r/[code]` đặt tại root `app/r/[code]/route.ts`. Cần lưu ý cấu hình `proxy.ts` không chặn route `/r/*` để khách hàng chưa đăng nhập vẫn click bình thường.
+- 🟡 **Potential Conflict:** Route `/r/[code]` đặt tại root `app/r/[code]/route.ts`. Đã kiểm tra cấu hình `proxy.ts`, route `/r/*` hoàn toàn công khai, không bị chặn bởi Auth middleware để khách hàng vãng lai click bình thường.
 - 🟢 **No Conflict:** Đã thống nhất với BE2/BE3: BE1 phụ trách lưu trữ DB và cấp link; BE2 phụ trách prompt/schema; BE3 phụ trách pipeline workflow.
 
 ---
@@ -131,9 +131,9 @@ flowchart TD
 ## 10. INTERFACE CHECK
 | Interface | Tôi | Người liên quan | Cần chốt | Status |
 |---|---|---|---|---|
-| `POST /api/tracking/generate` | Owner | FE (Consumer) | Body `{ campaign_id, product_id }` lấy reseller từ session | PROPOSED |
-| `GET /r/[code]` | Owner | End Customer / QA | Mã 302 redirect và params tracking chuyển tiếp | PROPOSED |
-| Webhook `on_campaign_created` | Owner | BE3 (Consumer) | JSON payload bắn sang n8n: `{ campaign_id, title, product_id... }` | PROPOSED |
+| `POST /api/tracking/generate` | Owner | FE (Consumer) | Body `{ campaign_id, product_id, reseller_id }` đảm bảo Idempotent | IMPLEMENTED & TESTED |
+| `GET /r/[code]` | Owner | End Customer / QA | Mã 302 redirect và params tracking chuyển tiếp an toàn | IMPLEMENTED & TESTED |
+| Webhook `on_campaign_created` | Owner | BE3 (Consumer) | JSON payload bắn sang n8n: `{ campaign_id, title, product_id... }` | IMPLEMENTED & TESTED |
 
 ---
 
@@ -144,25 +144,44 @@ flowchart TD
 
 ---
 
-## 12. END-OF-DAY UPDATE (Mẫu nhật ký)
-```text
-DONE:
-- ...
-IN PROGRESS:
-- ...
-BLOCKED:
-- ...
-HANDOFF:
-- ...
-NEXT:
-- ...
-```
+## 12. END-OF-DAY UPDATE
+
+### 13/10/2026 (Thứ Ba)
+**DONE:**
+- Viết migration `supabase/migrations/20261013140000_affiliate_links_and_clicks.sql`:
+  - Tạo bảng `affiliate_links` (Idempotent UNIQUE constraint `reseller_id, campaign_id, product_id`).
+  - Tạo bảng `clicks` lưu log raw (IP, User Agent, Referer, Metadata).
+  - Viết trigger `trg_increment_affiliate_link_clicks` tự động tăng `clicks_count`.
+  - Viết trigger `trg_on_campaign_created` bắn async HTTP POST sang n8n qua `pg_net`.
+  - Cấu hình phân quyền GRANT và RLS Policies cho `anon`, `authenticated`, `service_role`.
+- Triển khai Route Handler `POST /api/tracking/generate` và alias `/api/tracking-links/generate`.
+- Triển khai Route Handler `GET /r/[code]` ghi nhận click và 302 redirect đến `products.payment_url`.
+- Chạy `supabase db reset` pass 100% (7 migrations + seed data).
+- Regenerate schema types vào `src/lib/database.types.ts`.
+- Chạy `npm run build` thành công, biên dịch đầy đủ các routes mới.
+- Viết bộ test `test_tracking.ps1` kiểm tra: tạo link, idempotency, HTTP 302 redirect và xác thực bản ghi trong DB -> Tất cả PASS.
+- Đẩy code lên branch `Feature_Affiliate` chuẩn bị tạo PR vào `dev`.
+
+**IN PROGRESS:**
+- Chuẩn bị merge Pull Request vào nhánh `dev` và thực hiện `supabase db push` lên remote.
+
+**BLOCKED:**
+- Không có blocker.
+
+**HANDOFF:**
+- Bàn giao API tạo tracking link cho FE (giải tỏa task `FE-W2-04`).
+- Bàn giao trigger database cho BE3 (giải tỏa task `BE3-W2-01`).
+- Bàn giao route redirect và script test cho Tester 3 (giải tỏa task `T3-W2-02`).
+
+**NEXT:**
+- Merge PR vào `dev`, push migration lên Supabase remote.
+- Phối hợp cùng toàn đội chạy test tích hợp E2E vào Thứ Năm.
 
 ---
 
 ## 13. END-OF-WEEK CHECKLIST
-- [ ] Tất cả các migration SQL được commit và chạy test pass qua `supabase db reset`
-- [ ] API cấp tracking link hoạt động ổn định và có unit/integration test
-- [ ] Router `/r/[code]` ghi nhận lượt click vào bảng `clicks` và 302 redirect thành công
-- [ ] Trigger database kích hoạt n8n thành công
+- [x] Tất cả các migration SQL được commit và chạy test pass qua `supabase db reset`
+- [x] API cấp tracking link hoạt động ổn định và có unit/integration test
+- [x] Router `/r/[code]` ghi nhận lượt click vào bảng `clicks` và 302 redirect thành công
+- [x] Trigger database kích hoạt n8n thành công
 - [ ] 100% PR được merge an toàn vào `dev` trước 12:00 PM Thứ Sáu (16/10/2026)

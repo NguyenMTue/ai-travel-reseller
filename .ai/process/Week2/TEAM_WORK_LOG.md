@@ -12,9 +12,11 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 ## 1. ACTIVE WORK
 | Task ID | Member | Role | Task | Status | Started | Deadline |
 |---|---|---|---|---|---|---|
-| BE1-W2-01/02 | Nguyễn Minh Tuệ | BE1 | Migration & API tạo Tracking Link định danh | READY | 12/10 | 13/10 17:00 |
-| BE1-W2-03 | Nguyễn Minh Tuệ | BE1 | Database Trigger `on_campaign_created` (pg_net) sang n8n | READY | 12/10 | 13/10 17:00 |
-| BE1-W2-04 | Nguyễn Minh Tuệ | BE1 | Redirect Router `/r/[code]` & Click Tracking | READY | 13/10 | 14/10 17:00 |
+| BE1-W2-01/02 | Nguyễn Minh Tuệ | BE1 | Migration & API tạo Tracking Link định danh | DONE | 12/10 | 13/10 17:00 |
+| BE1-W2-03 | Nguyễn Minh Tuệ | BE1 | Database Trigger `on_campaign_created` (pg_net) sang n8n | DONE | 12/10 | 13/10 17:00 |
+| BE1-W2-04 | Nguyễn Minh Tuệ | BE1 | Redirect Router `/r/[code]` & Click Tracking | DONE | 13/10 | 14/10 17:00 |
+| BE1-W2-05 | Nguyễn Minh Tuệ | BE1 | Cấu hình RLS Policies cho `affiliate_links` & `clicks` | DONE | 13/10 | 15/10 12:00 |
+| BE1-W2-06 | Nguyễn Minh Tuệ | BE1 | Tối ưu hóa truy vấn Feed & Hỗ trợ tích hợp kỹ thuật E2E | IN_PROGRESS | 13/10 | 16/10 12:00 |
 | BE2-W2-01 | Nguyễn Huỳnh | BE2 | Prompt System phân theo 4 Personas du lịch | READY | 12/10 | 12/10 17:00 |
 | BE2-W2-02/03 | Nguyễn Huỳnh | BE2 | Zod Structured Output Schema & Content Guardrails | READY | 13/10 | 13/10 17:00 |
 | BE3-W2-01/02 | Thái Thanh Tú | BE3 | Workflow n8n Campaign-to-AI-Content-Pipeline | READY | 12/10 | 13/10 17:00 |
@@ -37,6 +39,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | Milestone Week 1 | Toàn team | Nền tảng Tuần 1: 8 bảng DB, Auth, pgvector RAG, n8n setup, 5 màn hình FE | 09/10/2026 | Sẵn sàng cho Tuần 2 |
 | PM-W2-01 | PM | Họp Kick-off Sprint 2 & Chốt Interface Contracts giữa FE - BE1 - BE2 - BE3 | 12/10/2026 10:30 | Toàn team |
 | T1-W2-01 | Tester 1 | File Mock Data `src/lib/campaign-demo.ts` (4 campaigns, 20+ content items) | 12/10/2026 11:30 | FE |
+| BE1-W2-01/05 | BE1 | Migration `affiliate_links` & `clicks`, Trigger n8n, API `/api/tracking/generate`, Router `/r/[code]`, RLS, Types gen, Test Suite PASS | 13/10/2026 14:00 | FE, BE3, Tester 3 |
 
 ---
 
@@ -44,9 +47,9 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | Task ID | Member | Task | Progress | Blocker | Next Step |
 |---|---|---|---|---|---|
 | UX-W2-01 | UI/UX | Hoàn thiện Figma Hi-fi Reseller Feed | 70% | Chốt các trường bắt buộc trên Card | Xuất specs và asset cho FE |
-| BE1-W2-01 | BE1 | Migration mở rộng `affiliate_links` & `clicks` | 40% | None | Chạy test migration local |
+| BE1-W2-06 | BE1 | Tạo PR vào `dev` & Đồng bộ Supabase remote | 80% | None | Chờ merge PR & test tích hợp E2E |
 | BE2-W2-01 | BE2 | Soạn thảo Prompt System 4 Personas | 50% | None | Chạy test sinh thử với Gemini |
-| BE3-W2-01 | BE3 | Tạo Node Webhook tiếp nhận Campaign trên n8n | 30% | Chờ BE1 trigger test | Cấu hình webhook URL cố định |
+| BE3-W2-01 | BE3 | Tạo Node Webhook tiếp nhận Campaign trên n8n | 50% | None (Đã có trigger BE1) | Cấu hình webhook URL cố định & test |
 | FE-W2-01 | FE | Khởi tạo cấu trúc router `/reseller/campaigns` | 30% | Chờ Figma từ UI/UX | Dựng layout chung bằng mock data |
 
 ---
@@ -54,9 +57,9 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 ## 4. BLOCKED
 | Task ID | Owner | Blocked By | Required From | Impact |
 |---|---|---|---|---|
-| FE-W2-04 | FE | API tạo tracking link chưa hoàn thiện | BE1 | Modal dùng link giả lập trước khi có API |
+| FE-W2-04 | FE | None (Đã giải tỏa bởi BE1) | BE1 | FE đã có API `POST /api/tracking/generate` để ghép Modal |
 | BE3-W2-02 | BE3 | Prompt templates & Zod schema chính thức | BE2 | n8n tạm dùng prompt thử nghiệm của W1 |
-| T3-W2-02 | Tester 3 | Router redirect `/r/[code]` chưa deploy code | BE1 | Chưa chạy được kịch bản test HTTP 302 |
+| T3-W2-02 | Tester 3 | None (Đã giải tỏa bởi BE1) | BE1 | Tester 3 đã có router `/r/[code]` để chạy test suite 302 |
 
 ---
 
@@ -67,9 +70,9 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | UI/UX | FE | Figma Hi-fi Reseller Feed & Component Specs | WAITING_REVIEW | 12/10 |
 | Tester 1 | FE | Bộ Mock Data `src/lib/campaign-demo.ts` | DONE | 12/10 |
 | BE2 | BE3 | Bộ Prompt Templates + Zod Structured Output Schema | READY_FOR_HANDOFF | 13/10 |
-| BE1 | BE3 | Webhook trigger `on_campaign_created` payload specs | READY_FOR_HANDOFF | 13/10 |
-| BE1 | FE | API Contract `POST /api/tracking/generate` | READY_FOR_HANDOFF | 13/10 |
-| BE1 | Tester 3 | Redirect Router `/r/[code]` & Schema `clicks` | READY_FOR_HANDOFF | 14/10 |
+| BE1 | BE3 | Webhook trigger `on_campaign_created` payload specs | DONE | 13/10 |
+| BE1 | FE | API Contract `POST /api/tracking/generate` & `/api/tracking-links/generate` | DONE | 13/10 |
+| BE1 | Tester 3 | Redirect Router `/r/[code]` & Schema `clicks` | DONE | 13/10 |
 | BE3 | FE | Dữ liệu nội dung bài viết sinh tự động vào bảng `contents` | READY_FOR_HANDOFF | 14/10 |
 | FE | Tester 1 | Nhánh code Reseller Portal để viết Playwright test | READY_FOR_HANDOFF | 14/10 |
 
@@ -131,10 +134,24 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 |---|---|---|
 | 12/10 09:00 | Khởi tạo bảng theo dõi tiến độ Tuần 2 (Sprint 2) cho 9 thành viên | PM (Nguyễn Minh Tuệ) |
 | 12/10 11:30 | Bổ sung bàn giao Mock Data `campaign-demo.ts` từ Tester 1 cho FE | Tester 1 / PM |
+| 13/10 14:50 | Hoàn tất deliverables BE1-W2 (Schema, API, Redirect, Trigger); giải tỏa blockers cho FE & Tester 3 | BE1 (Nguyễn Minh Tuệ) |
 
 ---
 
 ## 11. DAILY UPDATE
+
+### 13/10/2026 (Thứ Ba)
+
+#### BE1 (Nguyễn Minh Tuệ)
+- **Done:**
+  - Hoàn thành migration `20261013140000_affiliate_links_and_clicks.sql` (bảng `affiliate_links` idempotent, bảng `clicks` raw log, trigger tăng clicks, trigger n8n `pg_net`, và RLS policies).
+  - Hoàn thành Route Handler `POST /api/tracking/generate` & alias `/api/tracking-links/generate`.
+  - Hoàn thành Route Handler `GET /r/[code]` ghi nhận click bất đồng bộ và 302 redirect.
+  - Reset local database thành công 100%, regenerate `src/lib/database.types.ts`.
+  - Build `npm run build` pass, chạy test suite `test_tracking.ps1` pass 100%.
+  - Bàn giao API cho FE (giải tỏa `FE-W2-04`), bàn giao trigger cho BE3 (`BE3-W2-01`), bàn giao router cho Tester 3 (`T3-W2-02`).
+- **In Progress:** Đẩy code lên nhánh `Feature_Affiliate`, chuẩn bị tạo PR vào `dev` và sync Supabase remote.
+- **Next:** Hỗ trợ toàn đội chạy test tích hợp E2E vào Thứ Năm (15/10).
 
 ### 12/10/2026 (Thứ Hai)
 
