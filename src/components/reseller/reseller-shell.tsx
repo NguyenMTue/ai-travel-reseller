@@ -68,7 +68,7 @@ export function ResellerShell({
             onOpenMobileMenu={() => setMobileOpen(true)}
           />
 
-          <main className="reseller-main">{children}</main>
+          <main className="reseller-main page-enter">{children}</main>
         </div>
 
         <DesignNotesModal

@@ -5,6 +5,7 @@ import { createClient } from "@/src/lib/supabase/server";
 import { hasSupabaseConfig } from "@/src/lib/supabase/config";
 import { ResellerShell } from "@/src/components/reseller/reseller-shell";
 import { getInitials } from "@/src/lib/reseller-data";
+import { homePathForRole, resolveUserRole } from "@/src/lib/role-auth";
 
 export const metadata = {
   title: "Không gian cộng tác viên — TravelLink AI",
@@ -30,13 +31,12 @@ export default async function ResellerLayout({
       redirect("/login?next=/reseller");
     }
 
-    const role =
-      (user.user_metadata?.role as string | undefined) ||
-      (user.app_metadata?.role as string | undefined);
-
-    // Nếu là merchant cố truy cập reseller thì chuyển về merchant
-    if (role === "merchant") {
-      redirect("/merchant");
+    const role = await resolveUserRole(supabase, user.id);
+    if (!role) {
+      redirect("/login?error=no_role");
+    }
+    if (role !== "reseller") {
+      redirect(homePathForRole(role));
     }
 
     const rawName =

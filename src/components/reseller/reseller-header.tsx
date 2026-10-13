@@ -1,7 +1,7 @@
 "use client";
 
-import { LogOut, Clock, Menu } from "lucide-react";
-import { logout } from "@/app/actions/auth";
+import { Clock, Menu } from "lucide-react";
+import { LogoutButton } from "@/src/components/auth/logout-button";
 
 export function ResellerHeader({
   name = "Minh Anh — Demo",
@@ -48,16 +48,7 @@ export function ResellerHeader({
           <span>Dữ liệu mô phỏng</span>
         </div>
 
-        <form
-          action={async () => {
-            await logout();
-          }}
-        >
-          <button type="submit" className="reseller-logout-btn">
-            <LogOut size={16} />
-            <span>Đăng xuất</span>
-          </button>
-        </form>
+        <LogoutButton className="reseller-logout-btn" />
       </div>
     </header>
   );

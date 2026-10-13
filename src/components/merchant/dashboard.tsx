@@ -10,15 +10,13 @@ import {
   Compass,
   SlidersHorizontal,
   X,
-  LogOut,
-  Menu,
   ShieldCheck,
 } from "lucide-react";
 import { Brand } from "@/src/components/brand";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { demoProducts, demoMetrics } from "@/src/lib/merchant-demo";
-import { logout } from "@/app/actions/auth";
+import { MerchantHeader } from "@/src/components/merchant/merchant-header";
 export function Dashboard({ preview = false }: { preview?: boolean }) {
   const [tab, setTab] = useState("overview");
   const [query, setQuery] = useState("");
@@ -100,43 +98,17 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
             <Link className="sidebar-login" href="/login">
               Đăng nhập tài khoản <ArrowUpRight size={16} />
             </Link>
-          ) : (
-            <form
-              action={async () => {
-                await logout();
-              }}
-            >
-              <Button variant="ghost" type="submit">
-                <LogOut />
-                Đăng xuất
-              </Button>
-            </form>
-          )}
+          ) : null}
         </div>
       </aside>
       <div className="dashboard-body">
-        <header className="dashboard-header">
-          <div className="flex items-center gap-3">
-            <button
-              className="mobile-menu"
-              aria-expanded={menu}
-              aria-label="Mở điều hướng"
-              onClick={() => setMenu(!menu)}
-            >
-              <Menu />
-            </button>
-            <span>
-              Không gian doanh nghiệp{" "}
-              <span className="breadcrumb">
-                / {tab === "overview" ? "Tổng quan" : "Sản phẩm"}
-              </span>
-            </span>
-          </div>
-          <Link href="/" className="profile-badge" aria-label="Về trang chủ">
-            TL
-          </Link>
-        </header>
-        <main id="main-content" className="dashboard-main">
+        <MerchantHeader
+          preview={preview}
+          menuOpen={menu}
+          onToggleMenu={() => setMenu(!menu)}
+          breadcrumb={tab === "overview" ? "Tổng quan" : "Sản phẩm"}
+        />
+        <main id="main-content" className="dashboard-main page-enter">
           <div className="preview-banner">
             <span>
               <span className="dot" />{" "}
@@ -288,7 +260,12 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
                       </thead>
                       <tbody>
                         {products.map((p) => (
-                          <tr key={p.id}>
+                          <tr
+                            key={p.id}
+                            className={
+                              selected === p.id ? "table-row-selected" : undefined
+                            }
+                          >
                             <td>
                               <div className="product-name">
                                 <span className={`product-thumbnail ${p.tone}`}>

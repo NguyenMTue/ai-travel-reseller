@@ -32,6 +32,11 @@ test("protected portal redirects; auth validation and password visibility", asyn
 }) => {
   await page.goto("/merchant");
   await expect(page).toHaveURL(/\/login\?next=/);
+  await page.goto("/login");
+  await expect(page).toHaveURL(/\/login$/);
+  await expect(
+    page.getByRole("heading", { name: "Đăng nhập", exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Đăng nhập", exact: true }),
   ).toBeDisabled();

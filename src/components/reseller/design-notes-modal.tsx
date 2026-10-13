@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { X, Sparkles, Shield, Palette, Layers, Link as LinkIcon } from "lucide-react";
 
 export function DesignNotesModal({
@@ -9,17 +10,26 @@ export function DesignNotesModal({
   open: boolean;
   onClose: () => void;
 }) {
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (
     <div
-      className="reseller-modal-backdrop"
+      className="reseller-modal-backdrop modal-backdrop-enter"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
     >
       <div
-        className="reseller-modal-panel"
+        className="reseller-modal-panel modal-panel-enter"
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>

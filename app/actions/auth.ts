@@ -10,6 +10,10 @@ import {
   signupSchema,
   safeNextPath,
 } from "@/src/lib/auth-validation";
+import { resolveUserRole } from "@/src/lib/role-auth";
+
+const NO_ROLE_MESSAGE =
+  "Tài khoản chưa được gán vai trò Merchant hoặc Cộng tác viên. Vui lòng liên hệ quản trị viên.";
 
 export async function login(formData: FormData) {
   if (!hasSupabaseConfig)
@@ -18,23 +22,35 @@ export async function login(formData: FormData) {
 
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const next = safeNextPath(formData.get("next"));
+  const rawNext = formData.get("next") as string | null;
   if (!loginSchema.safeParse({ email, password }).success)
     return { error: "Vui lòng nhập email và mật khẩu hợp lệ." };
 
-  const { error } = await supabase.auth
+  const { data, error } = await supabase.auth
     .signInWithPassword({ email, password })
-    .catch(() => ({ error: { message: "network" } }));
+    .catch(() => ({ data: { user: null }, error: { message: "network" } }));
 
-  if (error) {
+  if (error || !data?.user) {
     return {
       error:
         "Không thể đăng nhập. Kiểm tra email, mật khẩu hoặc kết nối và thử lại.",
     };
   }
 
+  const role = await resolveUserRole(supabase, data.user.id);
+  if (!role) {
+    await supabase.auth.signOut();
+    return { error: NO_ROLE_MESSAGE };
+  }
+
+  const destination = safeNextPath(rawNext, role);
+  if (!destination) {
+    await supabase.auth.signOut();
+    return { error: NO_ROLE_MESSAGE };
+  }
+
   revalidatePath("/", "layout");
-  redirect(next);
+  redirect(destination);
 }
 
 export async function signup(formData: FormData) {
@@ -84,7 +100,10 @@ export async function logout() {
   if (!hasSupabaseConfig)
     return { error: "Chưa cấu hình dịch vụ xác thực. Vui lòng thử lại sau." };
   const supabase = createClient(await cookies());
-  await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
+  if (error) {
+    return { error: "Không thể đăng xuất. Vui lòng thử lại." };
+  }
 
   revalidatePath("/", "layout");
   redirect("/login");

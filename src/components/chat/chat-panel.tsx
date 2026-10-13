@@ -154,7 +154,7 @@ export function ChatPanel({
         </div>
       </aside>
       <section className="chat-window" aria-label="Trò chuyện với trợ lý AI">
-        <header className="chat-header">
+        <header className="chat-header chat-header-bar">
           <span className="chat-avatar">
             <Sparkles />
           </span>

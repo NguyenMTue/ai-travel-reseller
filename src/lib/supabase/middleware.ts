@@ -1,6 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
+import {
+  homePathForRole,
+  resolveUserRole,
+} from "@/src/lib/role-auth";
 import { supabaseUrl, supabasePublicKey as supabaseKey, hasSupabaseConfig } from "./config";
 
 export const createClient = (request: NextRequest) => {
@@ -77,15 +81,47 @@ export const updateSession = async (request: NextRequest) => {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isProtected = PROTECTED_PREFIXES.some(
-    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
-  );
+  const isMerchantRoute = pathname === "/merchant" || pathname.startsWith("/merchant/");
+  const isResellerRoute = pathname === "/reseller" || pathname.startsWith("/reseller/");
+  const isProtected = isMerchantRoute || isResellerRoute || pathname === "/admin" || pathname.startsWith("/admin/");
+
+  const createRedirect = (url: URL) => {
+    const res = NextResponse.redirect(url);
+    supabaseResponse.cookies.getAll().forEach((c) => {
+      res.cookies.set(c.name, c.value);
+    });
+    return res;
+  };
 
   if (!user && isProtected) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
+    return createRedirect(url);
+  }
+
+  if (user && isProtected) {
+    const role = await resolveUserRole(supabase, user.id);
+
+    if (!role) {
+      await supabase.auth.signOut();
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("error", "no_role");
+      return createRedirect(url);
+    }
+
+    if (isMerchantRoute && role !== "merchant") {
+      const url = request.nextUrl.clone();
+      url.pathname = homePathForRole(role);
+      return createRedirect(url);
+    }
+
+    if (isResellerRoute && role !== "reseller") {
+      const url = request.nextUrl.clone();
+      url.pathname = homePathForRole(role);
+      return createRedirect(url);
+    }
   }
 
   // Phải trả về supabaseResponse để cookie session mới được gửi về trình duyệt.
