@@ -13,6 +13,7 @@ test("pages render without overflow or runtime errors", async ({
   ]) {
     const response = await page.goto(route);
     expect(response?.status()).toBe(200);
+    await expect(page.locator("h1")).toHaveCount(1);
     await expect(page.locator("h1")).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     expect(
@@ -27,6 +28,54 @@ test("pages render without overflow or runtime errors", async ({
   }
   expect(errors).toEqual([]);
 });
+
+test("unknown routes show the branded not-found page", async ({ page }) => {
+  const response = await page.goto("/route-khong-ton-tai");
+  expect(response?.status()).toBe(404);
+  await expect(
+    page.getByRole("heading", { name: "Không tìm thấy trang" }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+});
+
+test("mobile navigation opens and closes accessibly", async ({ page }) => {
+  const viewport = page.viewportSize();
+  test.skip(!viewport || viewport.width > 760, "Mobile navigation only appears on small screens");
+
+  await page.goto("/");
+  const siteToggle = page.getByRole("button", { name: "Mở menu" });
+  await expect(siteToggle).toBeVisible();
+  await siteToggle.click();
+  await expect(
+    page.getByRole("navigation", { name: "Điều hướng chính trên thiết bị di động" }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Mở menu" })).toHaveAttribute(
+    "aria-expanded",
+    "false",
+  );
+
+  await page.goto("/preview/merchant");
+  await page.getByRole("button", { name: "Mở điều hướng" }).click();
+  const merchantNav = page.getByRole("navigation", { name: "Điều hướng Merchant" });
+  await expect(merchantNav).toBeVisible();
+  await page.mouse.click(viewport!.width - 16, viewport!.height / 2);
+  await expect(merchantNav).toBeHidden();
+
+  await page.goto("/preview/reseller");
+  await page.getByRole("button", { name: "Mở menu" }).click();
+  const resellerNav = page.getByRole("navigation", { name: "Điều hướng cộng tác viên" });
+  await expect(resellerNav).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Mở menu" })).toHaveAttribute(
+    "aria-expanded",
+    "false",
+  );
+});
 test("protected portal redirects; auth validation and password visibility", async ({
   page,
 }) => {
@@ -37,9 +86,15 @@ test("protected portal redirects; auth validation and password visibility", asyn
   await expect(
     page.getByRole("heading", { name: "Đăng nhập", exact: true }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Đăng nhập", exact: true }),
-  ).toBeDisabled();
+  const loginButton = page.getByRole("button", {
+    name: "Đăng nhập",
+    exact: true,
+  });
+  if (await page.getByText(/Giao diện đang ở bản xem trước/).isVisible()) {
+    await expect(loginButton).toBeDisabled();
+  } else {
+    await expect(loginButton).toBeEnabled();
+  }
   await page.goto("/register?role=reseller");
   await expect(
     page.getByRole("radio", { name: "Cộng tác viên" }),

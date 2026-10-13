@@ -26,7 +26,8 @@ export function MerchantHeader({
         <button
           className="mobile-menu"
           aria-expanded={menuOpen}
-          aria-label="Mở điều hướng"
+          aria-label={menuOpen ? "Đóng điều hướng" : "Mở điều hướng"}
+          aria-controls="merchant-navigation"
           type="button"
           onClick={onToggleMenu}
         >

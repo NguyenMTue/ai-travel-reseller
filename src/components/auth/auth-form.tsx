@@ -207,7 +207,7 @@ export function AuthForm({
           </p>
         )}
 
-        <Button type="submit" disabled={pending} className="w-full">
+        <Button type="submit" disabled={pending || !configured} className="w-full">
           {pending ? (
             <>
               <LoaderCircle className="spin" />

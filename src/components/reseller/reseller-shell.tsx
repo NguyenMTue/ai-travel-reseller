@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, createContext, useContext, ReactNode } from "react";
+import { useEffect, useState, createContext, useContext, ReactNode } from "react";
 import { ResellerSidebar } from "./reseller-sidebar";
 import { ResellerHeader } from "./reseller-header";
 import { DesignNotesModal } from "./design-notes-modal";
@@ -45,6 +45,21 @@ export function ResellerShell({
     }, 2400);
   };
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setMobileOpen(false);
+    }
+
+    document.addEventListener("keydown", closeOnEscape);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", closeOnEscape);
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
   return (
     <ResellerContext.Provider
       value={{
@@ -61,14 +76,24 @@ export function ResellerShell({
           onOpenNotes={() => setNotesOpen(true)}
         />
 
+        {mobileOpen ? (
+          <button
+            type="button"
+            className="reseller-menu-backdrop"
+            aria-label="Đóng menu điều hướng"
+            onClick={() => setMobileOpen(false)}
+          />
+        ) : null}
+
         <div className="reseller-body">
           <ResellerHeader
             name={userName}
             initials={initials}
+            menuOpen={mobileOpen}
             onOpenMobileMenu={() => setMobileOpen(true)}
           />
 
-          <main className="reseller-main page-enter">{children}</main>
+          <main id="main-content" className="reseller-main page-enter">{children}</main>
         </div>
 
         <DesignNotesModal
@@ -77,7 +102,7 @@ export function ResellerShell({
         />
 
         {toastMsg && (
-          <div className="reseller-toast" role="status">
+          <div className="reseller-toast" role="status" aria-live="polite">
             {toastMsg}
           </div>
         )}

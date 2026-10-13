@@ -91,6 +91,8 @@ export function ResellerCampaignDetail({
         <button
           type="button"
           role="tab"
+          id="campaign-content-tab"
+          aria-controls="campaign-content-panel"
           aria-selected={activeTab === "content"}
           className={activeTab === "content" ? "active" : ""}
           onClick={() => setActiveTab("content")}
@@ -100,6 +102,8 @@ export function ResellerCampaignDetail({
         <button
           type="button"
           role="tab"
+          id="campaign-info-tab"
+          aria-controls="campaign-info-panel"
           aria-selected={activeTab === "info"}
           className={activeTab === "info" ? "active" : ""}
           onClick={() => setActiveTab("info")}
@@ -109,57 +113,70 @@ export function ResellerCampaignDetail({
       </div>
 
       {activeTab === "content" ? (
-        contents.length ? (
-          <div className="campaign-content-sections">
-            {sections.map(({ title, key, icon: Icon }) => {
-              const entries = contents
-                .map((content) => ({ id: content.id, persona: content.persona, text: content[key] }))
-                .filter((entry): entry is { id: string; persona: string | null; text: string } => Boolean(entry.text?.trim()));
+        <div
+          id="campaign-content-panel"
+          role="tabpanel"
+          aria-labelledby="campaign-content-tab"
+          tabIndex={0}
+        >
+          {contents.length ? (
+            <div className="campaign-content-sections">
+              {sections.map(({ title, key, icon: Icon }) => {
+                const entries = contents
+                  .map((content) => ({ id: content.id, persona: content.persona, text: content[key] }))
+                  .filter((entry): entry is { id: string; persona: string | null; text: string } => Boolean(entry.text?.trim()));
 
-              return (
-                <section className="reseller-card campaign-content-group" key={key}>
-                  <div className="campaign-content-group-heading">
-                    <div className="campaign-detail-icon small" aria-hidden><Icon size={18} /></div>
-                    <div>
-                      <h2 className="reseller-card-title">{title}</h2>
-                      <p className="reseller-card-subtitle">{entries.length} nội dung đã duyệt</p>
+                return (
+                  <section className="reseller-card campaign-content-group" key={key}>
+                    <div className="campaign-content-group-heading">
+                      <div className="campaign-detail-icon small" aria-hidden><Icon size={18} /></div>
+                      <div>
+                        <h2 className="reseller-card-title">{title}</h2>
+                        <p className="reseller-card-subtitle">{entries.length} nội dung đã duyệt</p>
+                      </div>
                     </div>
-                  </div>
-                  {entries.length ? (
-                    <ul className="campaign-copy-list">
-                      {entries.map((entry, index) => (
-                        <li className="campaign-copy-item" key={`${entry.id}-${key}`}>
-                          <div>
-                            <span className="campaign-copy-index">{title.slice(0, -1)} {index + 1}</span>
-                            {entry.persona ? <span className="reseller-badge-gray">{entry.persona}</span> : null}
-                            <p>{entry.text}</p>
-                          </div>
-                          <button
-                            type="button"
-                            className="reseller-action-btn campaign-copy-button"
-                            onClick={() => copyContent(entry.text, title.toLowerCase())}
-                          >
-                            <Copy size={14} aria-hidden /> Copy
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="campaign-content-empty">Chưa có {title.toLowerCase()} cho chiến dịch này.</p>
-                  )}
-                </section>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="reseller-card campaign-state" role="status">
-            <Sparkles size={23} aria-hidden />
-            <h2>Chưa có nội dung được duyệt</h2>
-            <p>Nội dung Hooks, Captions và CTAs sẽ xuất hiện ở đây sau khi được tạo và phê duyệt.</p>
-          </div>
-        )
+                    {entries.length ? (
+                      <ul className="campaign-copy-list">
+                        {entries.map((entry, index) => (
+                          <li className="campaign-copy-item" key={`${entry.id}-${key}`}>
+                            <div>
+                              <span className="campaign-copy-index">{title.slice(0, -1)} {index + 1}</span>
+                              {entry.persona ? <span className="reseller-badge-gray">{entry.persona}</span> : null}
+                              <p>{entry.text}</p>
+                            </div>
+                            <button
+                              type="button"
+                              className="reseller-action-btn campaign-copy-button"
+                              onClick={() => copyContent(entry.text, title.toLowerCase())}
+                            >
+                              <Copy size={14} aria-hidden /> Copy
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="campaign-content-empty">Chưa có {title.toLowerCase()} cho chiến dịch này.</p>
+                    )}
+                  </section>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="reseller-card campaign-state" role="status">
+              <Sparkles size={23} aria-hidden />
+              <h2>Chưa có nội dung được duyệt</h2>
+              <p>Nội dung Hooks, Captions và CTAs sẽ xuất hiện ở đây sau khi được tạo và phê duyệt.</p>
+            </div>
+          )}
+        </div>
       ) : (
-        <section className="reseller-card campaign-info-card" role="tabpanel">
+        <section
+          id="campaign-info-panel"
+          className="reseller-card campaign-info-card"
+          role="tabpanel"
+          aria-labelledby="campaign-info-tab"
+          tabIndex={0}
+        >
           <div className="campaign-info-intro">
             <div className="campaign-detail-icon small" aria-hidden><Ticket size={18} /></div>
             <div>

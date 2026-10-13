@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Info, Eye, Copy, X } from "lucide-react";
 import { useReseller } from "./reseller-shell";
 import { sampleContents, ContentItem } from "@/src/lib/reseller-data";
@@ -8,6 +8,15 @@ import { sampleContents, ContentItem } from "@/src/lib/reseller-data";
 export function ResellerContentView() {
   const { showToast } = useReseller();
   const [modalItem, setModalItem] = useState<ContentItem | null>(null);
+
+  useEffect(() => {
+    if (!modalItem) return;
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setModalItem(null);
+    }
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [modalItem]);
 
   const handleCopy = async (text: string, label: string) => {
     try {
@@ -109,6 +118,7 @@ export function ResellerContentView() {
           className="reseller-modal-backdrop"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="reseller-content-modal-title"
           onClick={() => setModalItem(null)}
         >
           <div
@@ -129,7 +139,7 @@ export function ResellerContentView() {
               </button>
             </div>
 
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1F2937", marginBottom: 16 }}>
+            <h3 id="reseller-content-modal-title" style={{ fontSize: 18, fontWeight: 700, color: "#1F2937", marginBottom: 16 }}>
               {modalItem.hook}
             </h3>
 

@@ -94,9 +94,6 @@ export function ResellerCampaignsView({
             Khám phá sản phẩm du lịch và chọn chiến dịch phù hợp với cộng đồng của bạn.
           </p>
         </div>
-        <Link href="/reseller/campaigns/create" className="reseller-action-btn">
-          Quyền tạo chiến dịch <ArrowRight size={15} aria-hidden />
-        </Link>
       </div>
 
       {source === "demo" ? (

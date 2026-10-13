@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Info,
@@ -8,10 +8,7 @@ import {
   Eye,
   Copy,
   Clock,
-  Check,
   X,
-  FileText,
-  Sparkles,
 } from "lucide-react";
 import { useReseller } from "./reseller-shell";
 import { sampleCampaigns, sampleContents, formatVND, ContentItem } from "@/src/lib/reseller-data";
@@ -19,6 +16,15 @@ import { sampleCampaigns, sampleContents, formatVND, ContentItem } from "@/src/l
 export function ResellerOverview() {
   const { showToast, user } = useReseller();
   const [contentModal, setContentModal] = useState<ContentItem | null>(null);
+
+  useEffect(() => {
+    if (!contentModal) return;
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setContentModal(null);
+    }
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [contentModal]);
 
   const featuredCampaign = sampleCampaigns[0];
   const featuredContent = sampleContents[0];
@@ -180,6 +186,7 @@ export function ResellerOverview() {
           className="reseller-modal-backdrop"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="reseller-overview-modal-title"
           onClick={() => setContentModal(null)}
         >
           <div
@@ -200,7 +207,7 @@ export function ResellerOverview() {
               </button>
             </div>
 
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: "#1F2937", marginBottom: 16 }}>
+            <h3 id="reseller-overview-modal-title" style={{ fontSize: 18, fontWeight: 700, color: "#1F2937", marginBottom: 16 }}>
               {contentModal.hook}
             </h3>
 

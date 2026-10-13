@@ -23,7 +23,7 @@ export function ResellerSidebar({
   const isContent = pathname.startsWith("/reseller/content");
 
   return (
-    <aside className={`reseller-sidebar ${isOpen ? "open" : ""}`}>
+    <aside id="reseller-navigation" className={`reseller-sidebar ${isOpen ? "open" : ""}`}>
       <div className="reseller-sidebar-brand" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Brand />
         {onClose && (

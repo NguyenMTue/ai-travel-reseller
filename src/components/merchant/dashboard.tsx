@@ -1,9 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Package,
+  Megaphone,
   MessageSquare,
   ArrowUpRight,
   Search,
@@ -17,8 +19,13 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { demoProducts, demoMetrics } from "@/src/lib/merchant-demo";
 import { MerchantHeader } from "@/src/components/merchant/merchant-header";
-export function Dashboard({ preview = false }: { preview?: boolean }) {
-  const [tab, setTab] = useState("overview");
+import { CampaignCreateForm } from "@/src/components/merchant/campaign-create-form";
+export function Dashboard({ preview = false, initialTab = "overview" }: { preview?: boolean; initialTab?: string }) {
+  const pathname = usePathname();
+  const [tab, setTab] = useState(initialTab);
+  const activeTab = pathname === "/merchant/campaigns/create"
+    ? "create-campaign"
+    : tab === "create-campaign" ? "overview" : tab;
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [menu, setMenu] = useState(false);
@@ -35,9 +42,31 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
             (status === "all" || p.status === status),
         );
   const product = demoProducts.find((p) => p.id === selected);
+
+  useEffect(() => {
+    if (!menu) return;
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenu(false);
+    }
+    document.addEventListener("keydown", closeOnEscape);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", closeOnEscape);
+      document.body.style.overflow = "";
+    };
+  }, [menu]);
+
   return (
     <div className="dashboard-shell">
-      <aside className={`sidebar ${menu ? "sidebar-open" : ""}`}>
+      {menu ? (
+        <button
+          type="button"
+          className="merchant-menu-backdrop"
+          aria-label="Đóng menu điều hướng"
+          onClick={() => setMenu(false)}
+        />
+      ) : null}
+      <aside id="merchant-navigation" className={`sidebar ${menu ? "sidebar-open" : ""}`}>
         <div className="sidebar-brand">
           <Brand />
           <button
@@ -77,6 +106,13 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
             <Package size={19} />
             Sản phẩm<span className="nav-count">{demoProducts.length}</span>
           </button>
+          <Link
+            href="/merchant/campaigns/create"
+            aria-current={pathname === "/merchant/campaigns/create" ? "page" : undefined}
+          >
+            <Megaphone size={19} />
+            Tạo chiến dịch
+          </Link>
           <Link href="/chat">
             <MessageSquare size={19} />
             Trợ lý AI
@@ -106,41 +142,43 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
           preview={preview}
           menuOpen={menu}
           onToggleMenu={() => setMenu(!menu)}
-          breadcrumb={tab === "overview" ? "Tổng quan" : "Sản phẩm"}
+          breadcrumb={activeTab === "overview" ? "Tổng quan" : activeTab === "products" ? "Sản phẩm" : "Tạo chiến dịch"}
         />
         <main id="main-content" className="dashboard-main page-enter">
           <div className="preview-banner">
             <span>
               <span className="dot" />{" "}
-              {preview ? "BẢN XEM TRƯỚC" : "GIAO DIỆN MẪU"} · Toàn bộ số liệu
-              bên dưới là dữ liệu minh họa.
+              {preview ? "BẢN XEM TRƯỚC" : "DỮ LIỆU MINH HỌA"} · Các chỉ số và
+              sản phẩm hiện chưa được kết nối dữ liệu thật.
             </span>
-            <label>
-              Trạng thái{" "}
-              <select
-                aria-label="Trạng thái giao diện"
-                value={view}
-                onChange={(e) => setView(e.target.value)}
-              >
-                <option value="sample">Có dữ liệu</option>
-                <option value="empty">Trống</option>
-                <option value="loading">Đang tải</option>
-                <option value="error">Lỗi</option>
-              </select>
-            </label>
+            {preview ? (
+              <label>
+                Trạng thái{" "}
+                <select
+                  aria-label="Trạng thái giao diện"
+                  value={view}
+                  onChange={(e) => setView(e.target.value)}
+                >
+                  <option value="sample">Có dữ liệu</option>
+                  <option value="empty">Trống</option>
+                  <option value="loading">Đang tải</option>
+                  <option value="error">Lỗi</option>
+                </select>
+              </label>
+            ) : null}
           </div>
           <div className="dashboard-title">
             <div>
               <p className="eyebrow">MERCHANT PORTAL</p>
               <h1>
-                {tab === "overview"
+                {activeTab === "overview"
                   ? "Tổng quan hoạt động"
-                  : "Sản phẩm của bạn"}
+                  : activeTab === "products" ? "Sản phẩm của bạn" : "Tạo chiến dịch"}
               </h1>
               <p>
-                {tab === "overview"
+                {activeTab === "overview"
                   ? "Một góc nhìn trọn vẹn về những kết nối của bạn."
-                  : "Thông tin sản phẩm là điểm bắt đầu cho mọi kết nối."}
+                  : activeTab === "products" ? "Thông tin sản phẩm là điểm bắt đầu cho mọi kết nối." : "Tạo chiến dịch để giới thiệu sản phẩm đến mạng lưới cộng tác viên."}
               </p>
             </div>
             <Button asChild variant="outline">
@@ -150,7 +188,9 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
               </Link>
             </Button>
           </div>
-          {view === "loading" ? (
+          {activeTab === "create-campaign" ? (
+            <CampaignCreateForm />
+          ) : view === "loading" ? (
             <div
               role="status"
               aria-label="Đang tải Dashboard"
@@ -240,8 +280,8 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
                     onChange={(e) => setStatus(e.target.value)}
                   >
                     <option value="all">Tất cả trạng thái</option>
-                    <option>Đang hoạt động</option>
-                    <option>Bản nháp</option>
+                    <option value="Đang hoạt động">Đang hoạt động</option>
+                    <option value="Bản nháp">Bản nháp</option>
                   </select>
                 </div>
                 {products.length ? (

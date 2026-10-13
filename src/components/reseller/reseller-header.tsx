@@ -1,15 +1,17 @@
 "use client";
 
-import { Clock, Menu } from "lucide-react";
+import { Clock, Menu, X } from "lucide-react";
 import { LogoutButton } from "@/src/components/auth/logout-button";
 
 export function ResellerHeader({
   name = "Minh Anh — Demo",
   initials = "MA",
+  menuOpen = false,
   onOpenMobileMenu,
 }: {
   name?: string;
   initials?: string;
+  menuOpen?: boolean;
   onOpenMobileMenu?: () => void;
 }) {
   return (
@@ -19,17 +21,12 @@ export function ResellerHeader({
           <button
             type="button"
             onClick={onOpenMobileMenu}
-            aria-label="Mở menu"
+            aria-label={menuOpen ? "Đóng menu" : "Mở menu"}
+            aria-expanded={menuOpen}
+            aria-controls="reseller-navigation"
             className="mobile-menu-btn"
-            style={{
-              display: "none",
-              background: "transparent",
-              border: "none",
-              padding: 6,
-              cursor: "pointer",
-            }}
           >
-            <Menu size={22} />
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         )}
 

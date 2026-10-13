@@ -125,11 +125,11 @@ export function ChatPanel({
     <div className="chat-layout">
       <aside className="chat-aside">
         <p className="eyebrow">TRỢ LÝ DU LỊCH</p>
-        <h1>
+        <h2>
           Một câu hỏi.
           <br />
           <em>Mở ra hành trình.</em>
-        </h1>
+        </h2>
         <p>
           Tìm hiểu trải nghiệm, chính sách và cách đặt dịch vụ từ thông tin
           doanh nghiệp cung cấp.

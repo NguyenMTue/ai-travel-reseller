@@ -26,6 +26,7 @@ export function DesignNotesModal({
       className="reseller-modal-backdrop modal-backdrop-enter"
       role="dialog"
       aria-modal="true"
+      aria-labelledby="design-notes-title"
       onClick={onClose}
     >
       <div
@@ -35,7 +36,7 @@ export function DesignNotesModal({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ color: "#1C4438" }}><Sparkles size={20} /></span>
-            <h3 style={{ fontSize: 18, fontWeight: 700, margin: 0, color: "#1C4438" }}>
+            <h3 id="design-notes-title" style={{ fontSize: 18, fontWeight: 700, margin: 0, color: "#1C4438" }}>
               Design & Architecture Notes
             </h3>
           </div>
@@ -57,7 +58,7 @@ export function DesignNotesModal({
         <div style={{ display: "flex", flexDirection: "column", gap: 16, fontSize: 13, lineHeight: 1.6, color: "#374151" }}>
           <div style={{ background: "#F3F5F2", padding: 14, borderRadius: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 600, color: "#1C4438", marginBottom: 6 }}>
-              <Palette size={16} /> Phong cách "Coastal Editorial"
+              <Palette size={16} /> Phong cách “Coastal Editorial”
             </div>
             <p style={{ margin: 0 }}>
               Không gian cộng tác viên được thiết kế riêng biệt với tông màu <strong>Xanh thông trầm (#1C4438)</strong>, nền giấy ấm kem <strong>(#FAF9F5)</strong>, badge xanh ngọc dịu <strong>(#DDF2ED)</strong> và typography serif sang trọng kết hợp sans-serif hiện đại.
