@@ -37,12 +37,12 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
 ## 4. THIS WEEK — MY TASKS
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|---|---|---|---|---|---|
-| BE1-W2-01 | Migration chuẩn hóa bảng `affiliate_links` và `clicks` | P0 | READY | Tuần 1 schema | BE1 | File migration SQL | 12/10 17:00 |
-| BE1-W2-02 | Supabase Edge Function / API tạo Tracking Link cá nhân hóa | P1 | READY | BE1-W2-01 | BE1 | Route `/api/tracking/generate` | 13/10 17:00 |
-| BE1-W2-03 | Database Trigger `on_campaign_created` kích hoạt Webhook n8n | P0 | READY | Schema campaigns | BE1 | Trigger SQL (`pg_net`) | 13/10 17:00 |
-| BE1-W2-04 | Triển khai Redirect Router `/r/[tracking_id]` & Ghi nhận Click | P0 | READY | BE1-W2-01, 02 | BE1 | Next.js route `/r/[code]` | 14/10 17:00 |
-| BE1-W2-05 | Cấu hình RLS Policies cho `campaigns`, `affiliate_links`, `clicks` | P1 | READY | BE1-W2-01 | BE1 | Migration RLS SQL | 15/10 12:00 |
-| BE1-W2-06 | Tối ưu hóa truy vấn Feed & Hỗ trợ tích hợp kỹ thuật E2E | P2 | READY | BE1-W2-04 | BE1 | Query indexes + E2E pass | 16/10 12:00 |
+| BE1-W2-01 | Migration chuẩn hóa bảng `affiliate_links` và `clicks` | P0 | DONE | Tuần 1 schema | BE1 | File migration SQL (`20261013140000_affiliate_links_and_clicks.sql`) | 12/10 17:00 |
+| BE1-W2-02 | Supabase Edge Function / API tạo Tracking Link cá nhân hóa | P1 | DONE | BE1-W2-01 | BE1 | Route `/api/tracking/generate` & `/api/tracking-links/generate` | 13/10 17:00 |
+| BE1-W2-03 | Database Trigger `on_campaign_created` kích hoạt Webhook n8n | P0 | DONE | Schema campaigns | BE1 | Trigger SQL (`pg_net` async HTTP POST) | 13/10 17:00 |
+| BE1-W2-04 | Triển khai Redirect Router `/r/[tracking_id]` & Ghi nhận Click | P0 | DONE | BE1-W2-01, 02 | BE1 | Next.js route `app/r/[code]/route.ts` | 14/10 17:00 |
+| BE1-W2-05 | Cấu hình RLS Policies cho `campaigns`, `affiliate_links`, `clicks` | P1 | DONE | BE1-W2-01 | BE1 | Migration RLS SQL (bảo vệ link, cho phép public redirect) | 15/10 12:00 |
+| BE1-W2-06 | Tối ưu hóa truy vấn Feed & Hỗ trợ tích hợp kỹ thuật E2E | P2 | IN_PROGRESS | BE1-W2-04 | BE1 | Query indexes + test suite `test_tracking.ps1` | 16/10 12:00 |
 
 ---
 
