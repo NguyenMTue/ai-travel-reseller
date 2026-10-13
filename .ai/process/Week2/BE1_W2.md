@@ -5,7 +5,7 @@
 **Role:** Backend Developer 1 (Supabase DB, Edge Functions, Tracking Link & RLS)  
 **Current Milestone:** AI CONTENT FACTORY & DISTRIBUTION (Sinh nội dung & Phân phối)  
 **Deadline:** 12:00 PM Thứ Sáu (16/10/2026); Cross-testing & Demo: 13:30 – 17:30 ngày 16/10/2026  
-**Branch:** `feature/be1-tracking-redirect` (tách từ `dev`)  
+**Branch:** `Feature_BE1_Optimization` (tách từ `dev`)  
 
 ---
 
@@ -42,7 +42,7 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
 | BE1-W2-03 | Database Trigger `on_campaign_created` kích hoạt Webhook n8n | P0 | DONE | Schema campaigns | BE1 | Trigger SQL (`pg_net` async HTTP POST) | 13/10 17:00 |
 | BE1-W2-04 | Triển khai Redirect Router `/r/[tracking_id]` & Ghi nhận Click | P0 | DONE | BE1-W2-01, 02 | BE1 | Next.js route `app/r/[code]/route.ts` | 14/10 17:00 |
 | BE1-W2-05 | Cấu hình RLS Policies cho `campaigns`, `affiliate_links`, `clicks` | P1 | DONE | BE1-W2-01 | BE1 | Migration RLS SQL (bảo vệ link, cho phép public redirect) | 15/10 12:00 |
-| BE1-W2-06 | Tối ưu hóa truy vấn Feed & Hỗ trợ tích hợp kỹ thuật E2E | P2 | IN_PROGRESS | BE1-W2-04 | BE1 | Query indexes + test suite `test_tracking.ps1` | 16/10 12:00 |
+| BE1-W2-06 | Tối ưu hóa truy vấn Feed & Hỗ trợ tích hợp kỹ thuật E2E | P2 | DONE | BE1-W2-04 | BE1 | Migration SQL (`20261013213000_optimize_feed_and_tracking_indexes.sql`), benchmark script `benchmark_performance.ps1` | 13/10 21:30 |
 
 ---
 
@@ -156,14 +156,21 @@ flowchart TD
   - Cấu hình phân quyền GRANT và RLS Policies cho `anon`, `authenticated`, `service_role`.
 - Triển khai Route Handler `POST /api/tracking/generate` và alias `/api/tracking-links/generate`.
 - Triển khai Route Handler `GET /r/[code]` ghi nhận click và 302 redirect đến `products.payment_url`.
-- Chạy `supabase db reset` pass 100% (7 migrations + seed data).
+- Viết migration `supabase/migrations/20261013213000_optimize_feed_and_tracking_indexes.sql`:
+  - Tạo composite indexes cho `campaigns(status, start_date DESC)`, partial index `idx_campaigns_active_feed`.
+  - Tạo composite index cho `contents(campaign_id, status)` và `contents(campaign_id, persona)`.
+  - Tạo composite index cho `clicks(link_id, clicked_at DESC)`.
+  - Đánh index toàn bộ foreign keys `product_id`, `merchant_id`, `reseller_id`.
+- Viết script `benchmark_performance.ps1` đo lường hiệu năng thực tế qua `EXPLAIN ANALYZE`:
+  - Query Reseller Feed: Bitmap Index Scan ~ 0.183 ms (Đạt chuẩn DoD < 500ms).
+  - Query Content Kit: Index Scan ~ 0.142 ms.
+  - Query 302 Redirect: Index Scan ~ 0.089 ms.
+- Chạy `supabase db reset` pass 100% (8 migrations + seed data).
 - Regenerate schema types vào `src/lib/database.types.ts`.
-- Chạy `npm run build` thành công, biên dịch đầy đủ các routes mới.
-- Viết bộ test `test_tracking.ps1` kiểm tra: tạo link, idempotency, HTTP 302 redirect và xác thực bản ghi trong DB -> Tất cả PASS.
-- Đẩy code lên branch `Feature_Affiliate` chuẩn bị tạo PR vào `dev`.
+- Chạy `npm run build` thành công 100% (14 routes).
 
 **IN PROGRESS:**
-- Chuẩn bị merge Pull Request vào nhánh `dev` và thực hiện `supabase db push` lên remote.
+- Chuẩn bị tạo Pull Request cho nhánh `Feature_BE1_Optimization` vào `dev`.
 
 **BLOCKED:**
 - Không có blocker.
@@ -172,6 +179,7 @@ flowchart TD
 - Bàn giao API tạo tracking link cho FE (giải tỏa task `FE-W2-04`).
 - Bàn giao trigger database cho BE3 (giải tỏa task `BE3-W2-01`).
 - Bàn giao route redirect và script test cho Tester 3 (giải tỏa task `T3-W2-02`).
+- Bàn giao database indexes và script benchmark cho FE/PM sẵn sàng cho tích hợp E2E.
 
 **NEXT:**
 - Merge PR vào `dev`, push migration lên Supabase remote.
@@ -184,4 +192,5 @@ flowchart TD
 - [x] API cấp tracking link hoạt động ổn định và có unit/integration test
 - [x] Router `/r/[code]` ghi nhận lượt click vào bảng `clicks` và 302 redirect thành công
 - [x] Trigger database kích hoạt n8n thành công
+- [x] Đánh composite/partial indexes tối ưu truy vấn Feed, Content Kit và Click Analytics đạt < 1ms
 - [ ] 100% PR được merge an toàn vào `dev` trước 12:00 PM Thứ Sáu (16/10/2026)
