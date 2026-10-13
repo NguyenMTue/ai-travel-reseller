@@ -4,384 +4,181 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Link2,
+  CalendarDays,
   Copy,
-  Check,
-  ExternalLink,
-  Sparkles,
+  MapPin,
   ShieldCheck,
-  Eye,
-  BarChart2,
-  Share2,
+  Sparkles,
+  Ticket,
 } from "lucide-react";
 import { useReseller } from "./reseller-shell";
 import {
-  sampleCampaigns,
-  sampleContents,
   formatVND,
-  CampaignItem,
+  type CampaignItem,
+  type ResellerCampaignContent,
 } from "@/src/lib/reseller-data";
 
-export function ResellerCampaignDetail({ id }: { id: string }) {
-  const { showToast, user } = useReseller();
-  const [activeTab, setActiveTab] = useState<"content" | "info" | "stats">("content");
+type ResellerCampaignDetailProps = {
+  campaign: CampaignItem | null;
+  contents: ResellerCampaignContent[];
+  source: "database" | "demo";
+  error?: string | null;
+};
 
-  // Tìm chiến dịch theo id, fallback sang chiến dịch đầu tiên nếu id không khớp
-  const campaign =
-    sampleCampaigns.find((c) => c.id === id) || sampleCampaigns[0];
+export function ResellerCampaignDetail({
+  campaign,
+  contents,
+  source,
+  error = null,
+}: ResellerCampaignDetailProps) {
+  const { showToast } = useReseller();
+  const [activeTab, setActiveTab] = useState<"content" | "info">("content");
 
-  // Tìm nội dung mẫu của chiến dịch này
-  const contents = sampleContents.filter((c) => c.campaign_id === campaign.id);
-  const relevantContents =
-    contents.length > 0 ? contents : [sampleContents[0]];
-
-  // Tracking link chuẩn hoá
-  const trackingLink = `http://localhost:3000/chat?reseller_id=22222222-2222-2222-2222-111111111111&campaign_id=${campaign.id}&product_id=${campaign.product_id}`;
-
-  const handleCopy = async (text: string, label: string) => {
+  async function copyContent(text: string, label: string) {
     try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
       await navigator.clipboard.writeText(text);
       showToast(`Đã sao chép ${label}`);
     } catch {
-      showToast(`Sao chép thất bại: ${text.slice(0, 30)}`);
+      showToast("Không thể sao chép. Hãy kiểm tra quyền clipboard và thử lại.");
     }
-  };
+  }
+
+  if (!campaign) {
+    return (
+      <div className="reseller-card campaign-state" role="alert">
+        <h1>Chưa tải được chiến dịch</h1>
+        <p>{error ?? "Vui lòng thử lại sau."}</p>
+        <Link href="/reseller/campaigns" className="reseller-primary-btn">Quay lại danh sách</Link>
+      </div>
+    );
+  }
+
+  const sections = [
+    { title: "Hooks", key: "hook" as const, icon: Sparkles },
+    { title: "Captions", key: "caption" as const, icon: Copy },
+    { title: "CTAs", key: "cta" as const, icon: ArrowLeft },
+  ];
 
   return (
-    <>
-      <div style={{ marginBottom: 20 }}>
-        <Link
-          href="/reseller/campaigns"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            fontSize: 13,
-            color: "#6B7280",
-            textDecoration: "none",
-          }}
-        >
-          <ArrowLeft size={16} />
-          <span>Quay lại danh sách chiến dịch</span>
-        </Link>
-      </div>
+    <div className="campaign-detail-page">
+      <Link href="/reseller/campaigns" className="campaign-back-link">
+        <ArrowLeft size={16} aria-hidden /> Quay lại danh sách chiến dịch
+      </Link>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: 24 }}>
-        <div>
-          <div className="reseller-heading-title" style={{ fontSize: 28 }}>
-            {campaign.name}
-          </div>
-          <div className="reseller-heading-subtitle" style={{ marginBottom: 0 }}>
-            {campaign.merchant_name} · <span>Khu vực: {campaign.target_location}</span>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", gap: 8 }}>
-          <span className="reseller-badge-mint">
-            Hoa hồng: {campaign.commission_rate}%
-          </span>
-          <span className="reseller-badge-gray">Đang diễn ra</span>
-        </div>
-      </div>
-
-      {/* Box Tracking Link */}
-      <div className="reseller-card" style={{ background: "#FAFDFB", borderColor: "#D5E7DB", padding: 20 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 600, color: "#1C4438", marginBottom: 8 }}>
-          <Link2 size={18} />
-          <span>Đường dẫn theo dõi (Tracking Link của bạn)</span>
-        </div>
-        <p style={{ fontSize: 13, color: "#4B5563", margin: "0 0 12px" }}>
-          Khách hàng bấm vào link này sẽ được kết nối với Trợ lý AI tư vấn và tự động ghi nhận hoa hồng khi đặt mua:
-        </p>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-          <input
-            type="text"
-            readOnly
-            value={trackingLink}
-            style={{
-              flex: 1,
-              minWidth: 260,
-              background: "#FFFFFF",
-              border: "1px solid #D1D5DB",
-              borderRadius: 8,
-              padding: "9px 12px",
-              fontSize: 12,
-              fontFamily: "monospace",
-              color: "#374151",
-            }}
-          />
-          <button
-            type="button"
-            className="reseller-primary-btn"
-            onClick={() => handleCopy(trackingLink, "Tracking link")}
-          >
-            <Copy size={14} />
-            <span>Sao chép Link</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Tab Navigation */}
-      <div style={{ display: "flex", gap: 12, borderBottom: "1px solid #E5E7EB", marginBottom: 24 }}>
-        <button
-          type="button"
-          onClick={() => setActiveTab("content")}
-          style={{
-            padding: "10px 16px",
-            border: "none",
-            background: "transparent",
-            fontSize: 14,
-            fontWeight: 600,
-            cursor: "pointer",
-            borderBottom: activeTab === "content" ? "2px solid #1C4438" : "2px solid transparent",
-            color: activeTab === "content" ? "#1C4438" : "#6B7280",
-          }}
-        >
-          Nội dung quảng bá AI ({relevantContents.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("info")}
-          style={{
-            padding: "10px 16px",
-            border: "none",
-            background: "transparent",
-            fontSize: 14,
-            fontWeight: 600,
-            cursor: "pointer",
-            borderBottom: activeTab === "info" ? "2px solid #1C4438" : "2px solid transparent",
-            color: activeTab === "info" ? "#1C4438" : "#6B7280",
-          }}
-        >
-          Thông tin sản phẩm & Điều kiện
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab("stats")}
-          style={{
-            padding: "10px 16px",
-            border: "none",
-            background: "transparent",
-            fontSize: 14,
-            fontWeight: 600,
-            cursor: "pointer",
-            borderBottom: activeTab === "stats" ? "2px solid #1C4438" : "2px solid transparent",
-            color: activeTab === "stats" ? "#1C4438" : "#6B7280",
-          }}
-        >
-          Hiệu quả hoạt động
-        </button>
-      </div>
-
-      {/* Tab 1: Nội dung quảng bá */}
-      {activeTab === "content" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <div className="reseller-alert-banner">
-            <Sparkles size={18} className="reseller-alert-icon" />
-            <div>
-              Hooks, kịch bản video và caption được tạo sẵn từ thông tin đã duyệt của nhà cung cấp. Bạn có thể sao chép nhanh và tùy biến theo giọng văn riêng.
-            </div>
-          </div>
-
-          {relevantContents.map((content) => (
-            <div key={content.id} className="reseller-card" style={{ marginBottom: 0 }}>
-              <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-                <span className="reseller-badge-mint">{content.persona}</span>
-                <span className="reseller-badge-gray">Đã duyệt (mô phỏng)</span>
-              </div>
-
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>
-                  Hook gợi ý:
-                </div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>
-                  {content.hook}
-                </div>
-              </div>
-
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>
-                  Kịch bản video ngắn (Script):
-                </div>
-                <div style={{ background: "#F9FAF8", border: "1px solid #E5E7EB", borderRadius: 8, padding: 12, fontSize: 13, color: "#374151", lineHeight: 1.6 }}>
-                  {content.script}
-                </div>
-              </div>
-
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", marginBottom: 4 }}>
-                  Caption bài đăng:
-                </div>
-                <div style={{ background: "#F9FAF8", border: "1px solid #E5E7EB", borderRadius: 8, padding: 12, fontSize: 13, color: "#374151", lineHeight: 1.6 }}>
-                  {content.caption}
-                </div>
-              </div>
-
-              <div className="reseller-cta-box">
-                <strong>CTA:</strong> {content.cta}
-              </div>
-
-              <div className="reseller-action-row">
-                <button
-                  type="button"
-                  className="reseller-action-btn"
-                  onClick={() => handleCopy(content.hook, "Hook")}
-                >
-                  <Copy size={13} />
-                  <span>Sao chép Hook</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="reseller-action-btn"
-                  onClick={() => handleCopy(content.script, "Kịch bản (Script)")}
-                >
-                  <Copy size={13} />
-                  <span>Sao chép Script</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="reseller-action-btn"
-                  onClick={() => handleCopy(content.caption, "Caption")}
-                >
-                  <Copy size={13} />
-                  <span>Sao chép Caption</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="reseller-action-btn"
-                  onClick={() => handleCopy(content.cta, "CTA")}
-                >
-                  <Copy size={13} />
-                  <span>Sao chép CTA</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="reseller-primary-btn"
-                  style={{ marginLeft: "auto" }}
-                  onClick={() => handleCopy(`${content.caption}\n\n${content.cta}\n${trackingLink}`, "trọn bộ nội dung và link")}
-                >
-                  <Share2 size={14} />
-                  <span>Sao chép trọn bộ</span>
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Tab 2: Thông tin sản phẩm */}
-      {activeTab === "info" && (
-        <div className="reseller-card">
-          <div className="reseller-card-title">Thông tin chi tiết sản phẩm</div>
-          <p style={{ fontSize: 13, color: "#4B5563", marginBottom: 20 }}>
-            Cung cấp bởi: <strong>{campaign.merchant_name}</strong>
+      <header className="campaign-detail-heading">
+        <div className="campaign-detail-icon" aria-hidden><Ticket size={25} /></div>
+        <div className="campaign-detail-title">
+          <p className="eyebrow">CHIẾN DỊCH RESELLER</p>
+          <h1 className="reseller-heading-title">{campaign.name}</h1>
+          <p className="reseller-heading-subtitle">
+            {campaign.merchant_name} · {campaign.product_name}
           </p>
+        </div>
+        <span className="reseller-badge-mint">Hoa hồng {campaign.commission_rate}%</span>
+      </header>
 
+      {source === "demo" ? (
+        <div className="reseller-alert-banner" role="note">
+          <ShieldCheck size={17} className="reseller-alert-icon" aria-hidden />
+          <span>Dữ liệu chiến dịch và nội dung dưới đây chỉ để minh họa; không phải nội dung AI trực tiếp đã được xác nhận.</span>
+        </div>
+      ) : null}
+
+      {error ? <div className="reseller-alert-banner campaign-error" role="alert">{error}</div> : null}
+
+      <div className="campaign-detail-tabs" role="tablist" aria-label="Thông tin chiến dịch">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "content"}
+          className={activeTab === "content" ? "active" : ""}
+          onClick={() => setActiveTab("content")}
+        >
+          Nội dung quảng bá ({contents.length})
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "info"}
+          className={activeTab === "info" ? "active" : ""}
+          onClick={() => setActiveTab("info")}
+        >
+          Chi tiết chiến dịch
+        </button>
+      </div>
+
+      {activeTab === "content" ? (
+        contents.length ? (
+          <div className="campaign-content-sections">
+            {sections.map(({ title, key, icon: Icon }) => {
+              const entries = contents
+                .map((content) => ({ id: content.id, persona: content.persona, text: content[key] }))
+                .filter((entry): entry is { id: string; persona: string | null; text: string } => Boolean(entry.text?.trim()));
+
+              return (
+                <section className="reseller-card campaign-content-group" key={key}>
+                  <div className="campaign-content-group-heading">
+                    <div className="campaign-detail-icon small" aria-hidden><Icon size={18} /></div>
+                    <div>
+                      <h2 className="reseller-card-title">{title}</h2>
+                      <p className="reseller-card-subtitle">{entries.length} nội dung đã duyệt</p>
+                    </div>
+                  </div>
+                  {entries.length ? (
+                    <ul className="campaign-copy-list">
+                      {entries.map((entry, index) => (
+                        <li className="campaign-copy-item" key={`${entry.id}-${key}`}>
+                          <div>
+                            <span className="campaign-copy-index">{title.slice(0, -1)} {index + 1}</span>
+                            {entry.persona ? <span className="reseller-badge-gray">{entry.persona}</span> : null}
+                            <p>{entry.text}</p>
+                          </div>
+                          <button
+                            type="button"
+                            className="reseller-action-btn campaign-copy-button"
+                            onClick={() => copyContent(entry.text, title.toLowerCase())}
+                          >
+                            <Copy size={14} aria-hidden /> Copy
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="campaign-content-empty">Chưa có {title.toLowerCase()} cho chiến dịch này.</p>
+                  )}
+                </section>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="reseller-card campaign-state" role="status">
+            <Sparkles size={23} aria-hidden />
+            <h2>Chưa có nội dung được duyệt</h2>
+            <p>Nội dung Hooks, Captions và CTAs sẽ xuất hiện ở đây sau khi được tạo và phê duyệt.</p>
+          </div>
+        )
+      ) : (
+        <section className="reseller-card campaign-info-card" role="tabpanel">
+          <div className="campaign-info-intro">
+            <div className="campaign-detail-icon small" aria-hidden><Ticket size={18} /></div>
+            <div>
+              <h2 className="reseller-card-title">{campaign.product_name}</h2>
+              <p className="reseller-card-subtitle">{campaign.merchant_name}</p>
+            </div>
+          </div>
+          {campaign.description ? <p className="campaign-product-description">{campaign.description}</p> : null}
           <div className="reseller-info-grid">
-            <div className="reseller-info-item">
-              <span className="reseller-info-label">Tên sản phẩm</span>
-              <span className="reseller-info-val">{campaign.product_name}</span>
-            </div>
-
-            <div className="reseller-info-item">
-              <span className="reseller-info-label">Danh mục</span>
-              <span className="reseller-info-val">{campaign.category}</span>
-            </div>
-
-            <div className="reseller-info-item">
-              <span className="reseller-info-label">Giá niêm yết</span>
-              <span className="reseller-info-val" style={{ textDecoration: "line-through", color: "#6B7280" }}>
-                {formatVND(campaign.original_price)}
-              </span>
-            </div>
-
-            <div className="reseller-info-item">
-              <span className="reseller-info-label">Giá ưu đãi cho khách</span>
-              <span className="reseller-info-val" style={{ color: "#1C4438", fontSize: 16 }}>
-                {formatVND(campaign.sale_price)}
-              </span>
-            </div>
-
-            <div className="reseller-info-item">
-              <span className="reseller-info-label">Tỷ lệ hoa hồng</span>
-              <span className="reseller-info-val">{campaign.commission_rate}%</span>
-            </div>
-
-            <div className="reseller-info-item">
-              <span className="reseller-info-label">Hoa hồng ước tính mỗi đơn</span>
-              <span className="reseller-info-val">
-                {formatVND((campaign.sale_price * campaign.commission_rate) / 100)}
-              </span>
-            </div>
-
-            <div className="reseller-info-item">
-              <span className="reseller-info-label">Thời hạn áp dụng</span>
-              <span className="reseller-info-val">
-                {campaign.start_date} – {campaign.end_date}
-              </span>
-            </div>
-
-            <div className="reseller-info-item">
-              <span className="reseller-info-label">Khu vực phục vụ</span>
-              <span className="reseller-info-val">{campaign.target_location}</span>
-            </div>
+            <div className="reseller-info-item"><span className="reseller-info-label">Danh mục</span><span className="reseller-info-val">{campaign.category}</span></div>
+            <div className="reseller-info-item"><span className="reseller-info-label">Giá bán</span><span className="reseller-info-val">{campaign.sale_price ? formatVND(campaign.sale_price) : "Chưa cập nhật"}</span></div>
+            <div className="reseller-info-item"><span className="reseller-info-label">Hoa hồng</span><span className="reseller-info-val">{campaign.commission_rate}%</span></div>
+            <div className="reseller-info-item"><span className="reseller-info-label">Đối tượng</span><span className="reseller-info-val">{campaign.target_audience}</span></div>
+            <div className="reseller-info-item"><span className="reseller-info-label">Địa điểm</span><span className="reseller-info-val"><MapPin size={14} aria-hidden /> {campaign.target_location}</span></div>
+            <div className="reseller-info-item"><span className="reseller-info-label">Thời gian</span><span className="reseller-info-val"><CalendarDays size={14} aria-hidden /> {campaign.start_date} – {campaign.end_date}</span></div>
           </div>
-
-          <div style={{ borderTop: "1px solid #E5E7EB", paddingTop: 16, marginTop: 16 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#4B5563" }}>
-              <ShieldCheck size={16} style={{ color: "#1C4438" }} />
-              <span>
-                Thanh toán chính thức: Khách hàng thanh toán trực tiếp qua checkout của đối tác{" "}
-                <a
-                  href={campaign.booking_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ color: "#1C4438", fontWeight: 600, textDecoration: "underline" }}
-                >
-                  {campaign.booking_url} ↗
-                </a>
-              </span>
-            </div>
-          </div>
-        </div>
+          <div className="campaign-trust-note"><ShieldCheck size={17} aria-hidden /> Khách hàng thanh toán trực tiếp với Merchant qua kênh chính thức.</div>
+        </section>
       )}
-
-      {/* Tab 3: Hiệu quả hoạt động */}
-      {activeTab === "stats" && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <div className="reseller-stats-grid">
-            <div className="reseller-stat-card">
-              <div className="reseller-stat-label">Tổng lượt click</div>
-              <div className="reseller-stat-value">12 lượt</div>
-            </div>
-            <div className="reseller-stat-card">
-              <div className="reseller-stat-label">Khách hỏi mua (Leads)</div>
-              <div className="reseller-stat-value">3 lượt</div>
-            </div>
-            <div className="reseller-stat-card">
-              <div className="reseller-stat-label">Đơn hoàn thành</div>
-              <div className="reseller-stat-value">1 đơn</div>
-            </div>
-            <div className="reseller-stat-card">
-              <div className="reseller-stat-label">Hoa hồng ghi nhận</div>
-              <div className="reseller-stat-value" style={{ color: "#1C4438" }}>
-                {formatVND((campaign.sale_price * campaign.commission_rate) / 100)}
-              </div>
-            </div>
-          </div>
-
-          <div className="reseller-card">
-            <div className="reseller-card-title">Nhật ký chuyển đổi gần đây</div>
-            <div style={{ fontSize: 13, color: "#6B7280", marginTop: 12 }}>
-              Dữ liệu được cập nhật tự động từ hệ thống tracking affiliate và đối soát đơn hàng.
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 }

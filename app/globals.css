@@ -2931,3 +2931,501 @@ tr:last-child td {
   opacity: 0.92;
 }
 
+/* Reseller campaign feed, approved content, and role-aware creation screen. */
+.campaign-page-heading,
+.campaign-detail-heading,
+.campaign-create-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.campaign-page-heading {
+  align-items: flex-end;
+}
+.campaign-page-heading > div:first-child {
+  min-width: 0;
+}
+.campaign-page-heading .reseller-heading-title,
+.campaign-detail-heading .reseller-heading-title,
+.campaign-create-heading .reseller-heading-title {
+  margin-bottom: 5px;
+}
+.campaign-page-heading .reseller-heading-subtitle,
+.campaign-detail-heading .reseller-heading-subtitle,
+.campaign-create-heading .reseller-heading-subtitle {
+  display: block;
+  margin: 0;
+}
+.campaign-page-heading > .reseller-action-btn {
+  flex-shrink: 0;
+}
+.campaign-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0 24px;
+}
+.campaign-search-field {
+  position: relative;
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+.campaign-search-field > svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #6b7280;
+  pointer-events: none;
+}
+.campaign-search-field .reseller-filter-search {
+  padding-left: 38px;
+}
+.campaign-filters .reseller-filter-select {
+  min-height: 42px;
+  font-size: 12px;
+}
+.campaign-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.campaign-card {
+  padding: 0;
+  overflow: hidden;
+  margin: 0;
+}
+.campaign-card-cover {
+  min-height: 108px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #1c4438;
+  background: linear-gradient(120deg, #eaf2ed, #f5e8da);
+}
+.campaign-card-cover > span {
+  max-width: 75%;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4e5f57;
+}
+.campaign-card-content {
+  padding: 20px 22px;
+}
+.campaign-card-topline,
+.campaign-card-meta,
+.campaign-card-footer,
+.campaign-content-group-heading,
+.campaign-info-intro,
+.campaign-disabled-form-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.campaign-card .reseller-card-title {
+  margin-top: 14px;
+  line-height: 1.4;
+}
+.campaign-description,
+.campaign-product-description {
+  color: #5f6b66;
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 10px 0 16px;
+}
+.campaign-card-meta {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  color: #56645e;
+  font-size: 12px;
+  padding-bottom: 16px;
+}
+.campaign-card-meta > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.campaign-card-meta > span:last-child {
+  margin-left: auto;
+  color: #1c4438;
+  font-weight: 700;
+}
+.campaign-card-footer {
+  border-top: 1px solid #edf0eb;
+  padding-top: 15px;
+  color: #6b7280;
+  font-size: 11px;
+}
+.campaign-card-footer .reseller-primary-btn {
+  padding: 9px 12px;
+  font-size: 11px;
+}
+.campaign-state {
+  text-align: center;
+  padding: 40px 24px;
+}
+.campaign-state > svg {
+  color: #1c4438;
+  margin-bottom: 10px;
+}
+.campaign-state h1,
+.campaign-state h2 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+.campaign-state p {
+  color: #6b7280;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.campaign-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.campaign-loading-toolbar {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 10px;
+}
+.campaign-loading-toolbar .skeleton {
+  height: 42px;
+  border-radius: 8px;
+}
+.campaign-loading-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.campaign-loading-cover {
+  height: 94px;
+  border-radius: 8px;
+}
+.campaign-loading-line {
+  height: 14px;
+  border-radius: 6px;
+}
+.campaign-loading-line.short {
+  width: 55%;
+}
+.campaign-loading-title {
+  width: min(460px, 75%);
+  height: 36px;
+  border-radius: 8px;
+}
+.campaign-detail-page,
+.campaign-create-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.campaign-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 8px;
+  color: #5f6b66;
+  font-size: 12px;
+}
+.campaign-back-link:hover {
+  background: #eaf2ed;
+  color: #1c4438;
+  transform: translateX(-2px);
+}
+.campaign-detail-heading {
+  align-items: center;
+  padding: 20px 22px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: white;
+}
+.campaign-detail-title {
+  min-width: 0;
+  flex: 1;
+}
+.campaign-detail-title .eyebrow,
+.campaign-create-heading .eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #9b6a4f;
+  margin-bottom: 5px;
+}
+.campaign-detail-icon {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  color: white;
+  background: #1c4438;
+}
+.campaign-detail-icon.small {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: #1c4438;
+  background: #eaf2ed;
+}
+.campaign-detail-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #e5e7eb;
+  overflow-x: auto;
+}
+.campaign-detail-tabs button {
+  white-space: nowrap;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #6b7280;
+  padding: 11px 14px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.campaign-detail-tabs button.active {
+  color: #1c4438;
+  border-bottom-color: #1c4438;
+}
+.campaign-content-sections {
+  display: grid;
+  gap: 16px;
+}
+.campaign-content-group {
+  margin: 0;
+}
+.campaign-content-group-heading {
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+.campaign-content-group-heading .reseller-card-title,
+.campaign-content-group-heading .reseller-card-subtitle {
+  margin: 0;
+}
+.campaign-content-group-heading .reseller-card-subtitle {
+  margin-top: 3px;
+}
+.campaign-copy-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.campaign-copy-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px;
+  border: 1px solid #e8ece7;
+  border-radius: 10px;
+  background: #fbfcfa;
+}
+.campaign-copy-index {
+  color: #6b7280;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-right: 8px;
+}
+.campaign-copy-item .reseller-badge-gray {
+  margin-bottom: 8px;
+}
+.campaign-copy-item p {
+  color: #2f3f39;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin-top: 8px;
+}
+.campaign-copy-button {
+  flex: 0 0 auto;
+}
+.campaign-content-empty {
+  color: #78817c;
+  font-size: 12px;
+  padding: 10px 0 2px;
+}
+.campaign-info-card {
+  margin: 0;
+}
+.campaign-info-intro {
+  justify-content: flex-start;
+}
+.campaign-info-intro .reseller-card-title,
+.campaign-info-intro .reseller-card-subtitle {
+  margin: 0;
+}
+.campaign-product-description {
+  margin: 16px 0 20px;
+}
+.campaign-info-card .reseller-info-val {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.campaign-trust-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #e8ece7;
+  margin-top: 20px;
+  padding-top: 15px;
+  color: #526159;
+  font-size: 12px;
+}
+.campaign-trust-note svg {
+  flex: 0 0 auto;
+  color: #1c4438;
+}
+.campaign-error {
+  margin: 0;
+}
+.campaign-permission-card {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 16px;
+  margin: 0;
+  background: #f8fbf8;
+  border-color: #d9e8df;
+}
+.campaign-permission-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #1c4438;
+  background: #e3efe8;
+}
+.campaign-permission-card h2 {
+  font-family: var(--font-display);
+  font-size: 19px;
+  margin-bottom: 8px;
+}
+.campaign-permission-card p {
+  color: #59665f;
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+.campaign-permission-card .campaign-permission-source {
+  font-size: 11px;
+  margin-bottom: 16px;
+}
+.campaign-disabled-form {
+  margin: 0;
+}
+.campaign-disabled-form-heading {
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+.campaign-disabled-form-heading .reseller-card-title,
+.campaign-disabled-form-heading .reseller-card-subtitle {
+  margin: 0;
+}
+.campaign-disabled-form-heading .reseller-card-subtitle {
+  margin-top: 5px;
+}
+.campaign-disabled-form fieldset {
+  display: grid;
+  gap: 15px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.campaign-disabled-form label {
+  display: grid;
+  gap: 6px;
+  color: #4b5563;
+  font-size: 11px;
+  font-weight: 600;
+}
+.campaign-disabled-form input,
+.campaign-disabled-form textarea,
+.campaign-disabled-form select {
+  width: 100%;
+  border: 1px solid #dce3dc;
+  border-radius: 8px;
+  background: #f7f8f6;
+  padding: 10px 12px;
+  color: #68746e;
+  font-size: 12px;
+}
+.campaign-disabled-form input::placeholder,
+.campaign-disabled-form textarea::placeholder {
+  color: #939b96;
+}
+.campaign-disabled-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.campaign-disabled-form button:disabled {
+  width: fit-content;
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 900px) {
+  .campaign-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 640px) {
+  .campaign-page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .campaign-page-heading > .reseller-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .campaign-filters,
+  .campaign-filters > label,
+  .campaign-search-field {
+    width: 100%;
+    min-width: 0;
+  }
+  .campaign-filters .reseller-filter-select {
+    width: 100%;
+  }
+  .campaign-reset {
+    justify-content: center;
+  }
+  .campaign-detail-heading {
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+  .campaign-detail-title {
+    flex: 1 1 calc(100% - 64px);
+  }
+  .campaign-detail-heading > .reseller-badge-mint {
+    margin-left: 64px;
+  }
+  .campaign-copy-item {
+    flex-direction: column;
+  }
+  .campaign-disabled-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .campaign-permission-card {
+    grid-template-columns: 1fr;
+  }
+  .campaign-loading-toolbar {
+    grid-template-columns: 1fr;
+  }
+}
+

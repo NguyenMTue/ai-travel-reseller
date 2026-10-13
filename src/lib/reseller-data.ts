@@ -22,6 +22,7 @@ export interface CampaignItem {
   merchant_name: string;
   product_id: string;
   product_name: string;
+  description?: string;
   category: string;
   original_price: number;
   sale_price: number;
@@ -51,6 +52,17 @@ export interface ContentItem {
   badges: string[];
   tracking_url: string | null;
   video_url: string | null;
+}
+
+export interface ResellerCampaignContent {
+  id: string;
+  campaign_id: string | null;
+  persona: string | null;
+  hook: string | null;
+  script: string | null;
+  caption: string | null;
+  cta: string | null;
+  status: string | null;
 }
 
 export function formatVND(amount: number): string {
