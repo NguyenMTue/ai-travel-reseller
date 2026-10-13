@@ -17,8 +17,8 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | BE1-W2-04 | Nguyễn Minh Tuệ | BE1 | Redirect Router `/r/[code]` & Click Tracking | DONE | 13/10 | 14/10 17:00 |
 | BE1-W2-05 | Nguyễn Minh Tuệ | BE1 | Cấu hình RLS Policies cho `affiliate_links` & `clicks` | DONE | 13/10 | 15/10 12:00 |
 | BE1-W2-06 | Nguyễn Minh Tuệ | BE1 | Tối ưu hóa truy vấn Feed & Hỗ trợ tích hợp kỹ thuật E2E | IN_PROGRESS | 13/10 | 16/10 12:00 |
-| BE2-W2-01 | Nguyễn Huỳnh | BE2 | Prompt System phân theo 4 Personas du lịch | READY | 12/10 | 12/10 17:00 |
-| BE2-W2-02/03 | Nguyễn Huỳnh | BE2 | Zod Structured Output Schema & Content Guardrails | READY | 13/10 | 13/10 17:00 |
+| BE2-W2-01 | Nguyễn Huỳnh | BE2 | Prompt System phân theo 4 Personas du lịch | DONE | 12/10 | 12/10 17:00 |
+| BE2-W2-02/03 | Nguyễn Huỳnh | BE2 | Zod Structured Output Schema & Content Guardrails | DONE | 13/10 | 13/10 17:00 |
 | BE3-W2-01/02 | Thái Thanh Tú | BE3 | Workflow n8n Campaign-to-AI-Content-Pipeline | READY | 12/10 | 13/10 17:00 |
 | BE3-W2-03/04 | Thái Thanh Tú | BE3 | Node kiểm duyệt & Lưu nội dung vào bảng `contents` | READY | 13/10 | 14/10 17:00 |
 | FE-W2-01/02 | Thành viên FE | FE | Layout Reseller Portal & Màn hình Bảng tin (`/reseller/campaigns`) | READY | 12/10 | 13/10 17:00 |
@@ -40,6 +40,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | PM-W2-01 | PM | Họp Kick-off Sprint 2 & Chốt Interface Contracts giữa FE - BE1 - BE2 - BE3 | 12/10/2026 10:30 | Toàn team |
 | T1-W2-01 | Tester 1 | File Mock Data `src/lib/campaign-demo.ts` (4 campaigns, 20+ content items) | 12/10/2026 11:30 | FE |
 | BE1-W2-01/05 | BE1 | Migration `affiliate_links` & `clicks`, Trigger n8n, API `/api/tracking/generate`, Router `/r/[code]`, RLS, Types gen, Test Suite PASS | 13/10/2026 14:00 | FE, BE3, Tester 3 |
+| BE2-W2-01/03 | BE2 | Prompt 4 personas, Zod/JSON Schema, guardrails, 10/10 live parse và 5/5 violation tests | 13/10/2026 | BE3, Tester 2 |
 
 ---
 
@@ -48,7 +49,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 |---|---|---|---|---|---|
 | UX-W2-01 | UI/UX | Hoàn thiện Figma Hi-fi Reseller Feed | 70% | Chốt các trường bắt buộc trên Card | Xuất specs và asset cho FE |
 | BE1-W2-06 | BE1 | Tạo PR vào `dev` & Đồng bộ Supabase remote | 80% | None | Chờ merge PR & test tích hợp E2E |
-| BE2-W2-01 | BE2 | Soạn thảo Prompt System 4 Personas | 50% | None | Chạy test sinh thử với Gemini |
+| BE2-W2-04 | BE2 | Handoff Prompt, Schema & Guardrails cho BE3 | 90% | Chờ quyết định mapping mảng output → rows `contents` | BE3 review artifact và chốt mapping với FE |
 | BE3-W2-01 | BE3 | Tạo Node Webhook tiếp nhận Campaign trên n8n | 50% | None (Đã có trigger BE1) | Cấu hình webhook URL cố định & test |
 | FE-W2-01 | FE | Khởi tạo cấu trúc router `/reseller/campaigns` | 30% | Chờ Figma từ UI/UX | Dựng layout chung bằng mock data |
 
@@ -60,6 +61,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | FE-W2-04 | FE | None (Đã giải tỏa bởi BE1) | BE1 | FE đã có API `POST /api/tracking/generate` để ghép Modal |
 | BE3-W2-02 | BE3 | Prompt templates & Zod schema chính thức | BE2 | n8n tạm dùng prompt thử nghiệm của W1 |
 | T3-W2-02 | Tester 3 | None (Đã giải tỏa bởi BE1) | BE1 | Tester 3 đã có router `/r/[code]` để chạy test suite 302 |
+| BE2-W2-04 | BE2 | Mapping 10 hooks + 5 scripts/captions/CTAs sang rows `contents` | BE3 + FE + PM | Không thể khóa batch-insert contract nếu chưa chốt cách ghép |
 
 ---
 
@@ -69,7 +71,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | PM | Toàn team | Phân công nhiệm vụ chi tiết Tuần 2 (Week2.md + 9 work plans) | DONE | 12/10 |
 | UI/UX | FE | Figma Hi-fi Reseller Feed & Component Specs | WAITING_REVIEW | 12/10 |
 | Tester 1 | FE | Bộ Mock Data `src/lib/campaign-demo.ts` | DONE | 12/10 |
-| BE2 | BE3 | Bộ Prompt Templates + Zod Structured Output Schema | READY_FOR_HANDOFF | 13/10 |
+| BE2 | BE3 | Prompt Templates + Zod/JSON Schema + Guardrails + Test Report | WAITING_REVIEW | 13/10 |
 | BE1 | BE3 | Webhook trigger `on_campaign_created` payload specs | DONE | 13/10 |
 | BE1 | FE | API Contract `POST /api/tracking/generate` & `/api/tracking-links/generate` | DONE | 13/10 |
 | BE1 | Tester 3 | Redirect Router `/r/[code]` & Schema `clicks` | DONE | 13/10 |
@@ -84,7 +86,8 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | Tracking API | BE1 | FE | `POST /api/tracking/generate` nhận `{ campaign_id, product_id }` trả `{ short_url, tracking_id }` | CONTRACT AGREED |
 | Redirect Router | BE1 | End Customer / QA | `GET /r/[code]` ghi nhận bảng `clicks` và 302 redirect tới official URL | CONTRACT AGREED |
 | Webhook Campaign | BE1 | BE3 | `POST n8n-webhook` payload: `{ campaign_id, product_id, title, commission_rate }` | CONTRACT AGREED |
-| LLM Output Schema | BE2 | BE3 | JSON schema gồm: `persona`, `hooks[]`, `scripts[]`, `captions[]`, `ctas[]` | CONTRACT AGREED |
+| LLM Output Schema | BE2 | BE3 | JSON schema gồm: `persona`, `hooks[]`, `scripts[]`, `captions[]`, `ctas[]` | IMPLEMENTED & TESTED |
+| LLM Output → `contents` rows | BE3 | BE2 / FE | Cách ghép 10 hooks với 5 scripts/captions/CTAs | NEEDS DECISION |
 | Reseller Card Specs | UI/UX | FE | Hiển thị ảnh, tên tour, địa điểm, badge hoa hồng cam đất, nút hành động | CONTRACT AGREED |
 | Bảng `contents` Schema | BE1 / BE3 | FE | Các cột: `product_id`, `persona`, `hook`, `script`, `caption`, `cta`, `status` | CONTRACT LIVE |
 
@@ -166,9 +169,9 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 - **Next:** Viết route handler `/api/tracking/generate` và database trigger `on_campaign_created`.
 
 #### BE2 (Nguyễn Huỳnh)
-- **Done:** Soạn thảo khung System Prompt cho 4 Personas du lịch.
-- **In Progress:** Định nghĩa Zod Structured Output Schema.
-- **Next:** Hoàn thiện module Guardrails và bàn giao cho BE3.
+- **Done:** Hoàn thiện Prompt 4 Personas, Zod/JSON Schema, parser, Guardrails; 11/11 unit tests, 10/10 live Gemini generations và 5/5 violation cases PASS.
+- **In Progress:** Handoff cho BE3 và chốt mapping output arrays sang bảng `contents`.
+- **Next:** Phối hợp BE3 chạy workflow cho Bà Nà Hills/VinWonders, sau đó bàn giao sample cho Tester 2.
 
 #### BE3 (Thái Thanh Tú)
 - **Done:** Chuẩn bị môi trường n8n cho Tuần 2, tạo Webhook Trigger node nhận Campaign.

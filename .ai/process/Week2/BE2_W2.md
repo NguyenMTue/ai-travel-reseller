@@ -37,10 +37,10 @@ Trong Tuần 2, BE2 đóng vai trò "Kiến trúc sư nội dung AI":
 ## 4. THIS WEEK — MY TASKS
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|---|---|---|---|---|---|
-| BE2-W2-01 | Chuẩn hóa Prompt System phân theo 4 Personas du lịch | P0 | READY | Dữ liệu tour Tuần 1 | BE2 | `src/lib/ai/prompts/content-factory.ts` | 12/10 17:00 |
-| BE2-W2-02 | Xây dựng Zod Schema cho Structured Output | P0 | READY | BE2-W2-01 | BE2 | `src/lib/ai/schemas/content-schema.ts` | 13/10 12:00 |
-| BE2-W2-03 | Xây dựng Module kiểm duyệt tự động (Content Guardrails) | P1 | READY | BE2-W2-02 | BE2 | `src/lib/ai/guardrails/content-validator.ts` | 13/10 17:00 |
-| BE2-W2-04 | Handoff Prompt & Schema cho BE3 nhúng vào n8n workflow | P0 | READY | BE2-W2-02, 03 | BE2 | Tài liệu tích hợp + JSON node | 13/10 18:00 |
+| BE2-W2-01 | Chuẩn hóa Prompt System phân theo 4 Personas du lịch | P0 | DONE | Dữ liệu tour Tuần 1 | BE2 | `src/lib/ai/prompts/content-factory.ts` | 12/10 17:00 |
+| BE2-W2-02 | Xây dựng Zod Schema cho Structured Output | P0 | DONE | BE2-W2-01 | BE2 | `src/lib/ai/schemas/content-schema.ts` | 13/10 12:00 |
+| BE2-W2-03 | Xây dựng Module kiểm duyệt tự động (Content Guardrails) | P1 | DONE | BE2-W2-02 | BE2 | `src/lib/ai/guardrails/content-validator.ts` | 13/10 17:00 |
+| BE2-W2-04 | Handoff Prompt & Schema cho BE3 nhúng vào n8n workflow | P0 | WAITING_REVIEW | BE2-W2-02, 03 | BE2 | `docs/be2/content-factory-handoff.md` + JSON Schema | 13/10 18:00 |
 | BE2-W2-05 | Phối hợp BE3 test luồng sinh bài mẫu cho Bà Nà Hills & VinWonders | P1 | READY | BE3-W2-01 | BE2 + BE3 | Báo cáo sinh nội dung mẫu | 14/10 17:00 |
 | BE2-W2-06 | Phối hợp Tester 2 rà soát Hallucination & Tối ưu Prompt | P1 | READY | BE2-W2-05 | BE2 + Tester 2 | Bộ prompt tối ưu | 15/10 17:00 |
 
@@ -57,9 +57,9 @@ Trong Tuần 2, BE2 đóng vai trò "Kiến trúc sư nội dung AI":
 3. **Foodie & Check-in (Tín đồ sống ảo):** Giọng văn thời thượng, bắt trend, làm nổi bật góc chụp triệu view, ẩm thực đặc sản, âm nhạc, lễ hội.
 4. **Budget Traveler (Săn deal thông thái):** Giọng văn thực tế, phân tích giá trị nhận được, so sánh giá niêm yết và giá ưu đãi, kêu gọi hành động nhanh.  
 **Steps:**
-- [ ] Soạn thảo System Prompt cốt lõi kèm quy tắc an toàn (Zero-hallucination).
-- [ ] Thêm hướng dẫn sinh cấu trúc: 10 Hooks (mở đầu ấn tượng < 3 giây), 5 Scripts (kịch bản video 30-45s), 5 Captions (bài viết mạng xã hội), 5 CTAs (lời kêu gọi hành động kèm link tiếp thị).
-- [ ] Tích hợp kiểm tra tính tương thích với Google Gemini `gemini-3.5-flash-lite` và Groq `llama-3.3-70b-versatile`.  
+- [x] Soạn thảo System Prompt cốt lõi kèm quy tắc an toàn (Zero-hallucination).
+- [x] Thêm hướng dẫn sinh cấu trúc: 10 Hooks (mở đầu ấn tượng < 3 giây), 5 Scripts (kịch bản video 30-45s), 5 Captions (bài viết mạng xã hội), 5 CTAs (lời kêu gọi hành động kèm link tiếp thị).
+- [x] Xác minh live với Google Gemini `gemini-3.5-flash-lite`; Groq là fallback thuộc workflow BE3 và chưa chạy trong repo TypeScript.
 **Definition of Done:** Chạy test sinh thử ra ít nhất 4 kịch bản rõ nét về tone of voice cho 4 personas; không vi phạm sự thật của tour.  
 **Handoff To:** BE3 (đưa vào n8n), Tester 2 (đánh giá phong văn).
 
@@ -69,13 +69,13 @@ Trong Tuần 2, BE2 đóng vai trò "Kiến trúc sư nội dung AI":
 **Goal:** Bắt buộc LLM trả về cấu trúc JSON đúng chuẩn để n8n và backend có thể parse trực tiếp lưu vào database mà không bị lỗi cú pháp.  
 **Prerequisites:** Bảng `contents` đã có các trường `persona`, `hook`, `script`, `caption`, `cta`.  
 **Steps:**
-- [ ] Định nghĩa `campaignContentOutputSchema` bằng Zod.
-- [ ] Quy định các mảng dữ liệu có ràng buộc độ dài tối thiểu/tối đa:
+- [x] Định nghĩa `campaignContentOutputSchema` bằng Zod.
+- [x] Quy định các mảng dữ liệu có ràng buộc độ dài tối thiểu/tối đa:
   * `hooks`: Array 10 items (string, 20-100 ký tự).
   * `scripts`: Array 5 items (object gồm `title`, `duration`, `scenes`).
   * `captions`: Array 5 items (string, bao gồm hashtags phù hợp).
   * `ctas`: Array 5 items (string, có chỗ điền `[LINK_MUA_VE]`).
-- [ ] Viết hàm parse và format JSON tự động sửa các lỗi cú pháp markdown (như loại bỏ ` ```json ` bao quanh).  
+- [x] Viết hàm parse và format JSON tự động sửa các lỗi cú pháp markdown (như loại bỏ ` ```json ` bao quanh).
 **Definition of Done:** Kiểm tra với 10 lần sinh ngẫu nhiên, 10/10 lần đều parse JSON thành công qua Zod Schema.  
 **Handoff To:** BE3 (cấu hình trong HTTP Request/Code node n8n).
 
@@ -85,11 +85,11 @@ Trong Tuần 2, BE2 đóng vai trò "Kiến trúc sư nội dung AI":
 **Goal:** Kiểm tra dữ liệu đầu ra của LLM trước khi lưu vào database, loại bỏ nội dung vi phạm sự thật hoặc bịa đặt khuyến mãi.  
 **Prerequisites:** Dữ liệu `confirmed_price_offer` và `verified_facts` từ Merchant.  
 **Steps:**
-- [ ] Viết hàm `validateContentGuardrails(generatedText, verifiedProduct)`:
+- [x] Viết hàm `validateContentGuardrails(generatedText, verifiedProduct)`:
   * Kiểm tra số tiền xuất hiện trong bài viết: Nếu có số tiền nhưng khác với giá cam kết của tour -> Đánh dấu vi phạm giá.
   * Kiểm tra mã giảm giá ảo: Quét regex các cụm như `GIAM[0-9]+`, `SALE[0-9]+`, `FREE` -> Đánh dấu vi phạm mã ảo.
   * Kiểm tra cam kết sai: Quét các từ cấm bịa đặt như "miễn phí khách sạn", "bao ăn trọn đời".
-- [ ] Trả về kết quả đánh giá: `isValid: boolean`, `flags: string[]`, `recommended_status: 'APPROVED' | 'NEEDS_REVIEW'`.  
+- [x] Trả về kết quả đánh giá: `isValid: boolean`, `flags: string[]`, `recommended_status: 'APPROVED' | 'NEEDS_REVIEW'`.
 **Definition of Done:** Chạy bài test với 5 mẫu nội dung vi phạm giả lập, module bắt chính xác 5/5 trường hợp vi phạm.  
 **Handoff To:** BE3 (nhúng vào bước hậu xử lý n8n), Tester 2 (kiểm thử an toàn).
 
@@ -149,22 +149,26 @@ flowchart TD
 ## 12. END-OF-DAY UPDATE (Mẫu nhật ký)
 ```text
 DONE:
-- ...
+- BE2-W2-01: Prompt System cho 4 Personas; live smoke test 4/4 PASS.
+- BE2-W2-02: Zod + portable JSON Schema; 10/10 live generation parse PASS.
+- BE2-W2-03: Guardrails; 5/5 mẫu vi phạm bị phát hiện.
 IN PROGRESS:
-- ...
+- BE2-W2-04: Handoff artifact đã sẵn sàng, chờ BE3 review.
 BLOCKED:
-- ...
+- Cần BE2 + BE3 + FE chốt mapping 10 hooks với 5 scripts/captions/CTAs sang từng row `contents`.
 HANDOFF:
-- ...
+- `docs/be2/content-factory-handoff.md`
+- `docs/be2/content-factory.schema.json`
+- `docs/be2/content-factory-test-report.md`
 NEXT:
-- ...
+- Review contract với BE3, sau đó test Bà Nà Hills và VinWonders qua workflow n8n.
 ```
 
 ---
 
 ## 13. END-OF-WEEK CHECKLIST
-- [ ] 4 bộ Prompt phân Personas hoàn thành và đạt tiêu chuẩn văn phong
-- [ ] Zod Schema parse 100% hợp lệ các phản hồi từ mô hình LLM
-- [ ] Module Guardrails phát hiện và chặn các lỗi bịa giá / ưu đãi ảo
+- [x] 4 bộ Prompt phân Personas hoàn thành và đạt tiêu chuẩn văn phong
+- [x] Zod Schema parse 100% hợp lệ 10/10 phản hồi live từ mô hình LLM
+- [x] Module Guardrails phát hiện và chặn các lỗi bịa giá / ưu đãi ảo
 - [ ] Bàn giao thành công cho BE3 và hoàn thành bài test sinh nội dung tự động
 - [ ] 100% code được review và merge vào nhánh `dev` trước 12:00 PM Thứ Sáu (16/10/2026)
