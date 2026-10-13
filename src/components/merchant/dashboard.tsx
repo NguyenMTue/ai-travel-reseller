@@ -25,7 +25,9 @@ export function Dashboard({ preview = false, initialTab = "overview" }: { previe
   const [tab, setTab] = useState(initialTab);
   const activeTab = pathname === "/merchant/campaigns/create"
     ? "create-campaign"
-    : tab === "create-campaign" ? "overview" : tab;
+    : pathname === "/merchant/products"
+      ? "products"
+      : tab === "create-campaign" ? "overview" : tab;
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [menu, setMenu] = useState(false);
@@ -86,34 +88,57 @@ export function Dashboard({ preview = false, initialTab = "overview" }: { previe
         </div>
         <p className="nav-label">KHÔNG GIAN LÀM VIỆC</p>
         <nav aria-label="Điều hướng Merchant">
-          <button
-            aria-current={tab === "overview" ? "page" : undefined}
-            onClick={() => {
-              setTab("overview");
-              setMenu(false);
-            }}
-          >
-            <LayoutDashboard size={19} />
-            Tổng quan
-          </button>
-          <button
-            aria-current={tab === "products" ? "page" : undefined}
-            onClick={() => {
-              setTab("products");
-              setMenu(false);
-            }}
-          >
-            <Package size={19} />
-            Sản phẩm<span className="nav-count">{demoProducts.length}</span>
-          </button>
+          {preview ? (
+            <button
+              aria-current={activeTab === "overview" ? "page" : undefined}
+              onClick={() => {
+                setTab("overview");
+                setMenu(false);
+              }}
+            >
+              <LayoutDashboard size={19} />
+              Tổng quan
+            </button>
+          ) : (
+            <Link
+              href="/merchant"
+              onClick={() => setMenu(false)}
+              aria-current={pathname === "/merchant" ? "page" : undefined}
+            >
+              <LayoutDashboard size={19} />
+              Tổng quan
+            </Link>
+          )}
+          {preview ? (
+            <button
+              aria-current={activeTab === "products" ? "page" : undefined}
+              onClick={() => {
+                setTab("products");
+                setMenu(false);
+              }}
+            >
+              <Package size={19} />
+              Sản phẩm<span className="nav-count">{demoProducts.length}</span>
+            </button>
+          ) : (
+            <Link
+              href="/merchant/products"
+              onClick={() => setMenu(false)}
+              aria-current={pathname === "/merchant/products" ? "page" : undefined}
+            >
+              <Package size={19} />
+              Sản phẩm<span className="nav-count">{demoProducts.length}</span>
+            </Link>
+          )}
           <Link
             href="/merchant/campaigns/create"
+            onClick={() => setMenu(false)}
             aria-current={pathname === "/merchant/campaigns/create" ? "page" : undefined}
           >
             <Megaphone size={19} />
             Tạo chiến dịch
           </Link>
-          <Link href="/chat">
+          <Link href="/chat" onClick={() => setMenu(false)}>
             <MessageSquare size={19} />
             Trợ lý AI
             <ArrowUpRight size={15} />
@@ -209,7 +234,7 @@ export function Dashboard({ preview = false, initialTab = "overview" }: { previe
             </div>
           ) : (
             <>
-              {tab === "overview" && (
+              {activeTab === "overview" && (
                 <>
                   <div className="metrics">
                     {demoMetrics.map((m, i) => (
@@ -253,7 +278,7 @@ export function Dashboard({ preview = false, initialTab = "overview" }: { previe
                 <div className="panel-heading">
                   <div>
                     <h2>
-                      {tab === "overview"
+                      {activeTab === "overview"
                         ? "Sản phẩm nổi bật"
                         : "Danh sách sản phẩm"}
                     </h2>
