@@ -16,7 +16,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | BE1-W2-03 | Nguyễn Minh Tuệ | BE1 | Database Trigger `on_campaign_created` (pg_net) sang n8n | DONE | 12/10 | 13/10 17:00 |
 | BE1-W2-04 | Nguyễn Minh Tuệ | BE1 | Redirect Router `/r/[code]` & Click Tracking | DONE | 13/10 | 14/10 17:00 |
 | BE1-W2-05 | Nguyễn Minh Tuệ | BE1 | Cấu hình RLS Policies cho `affiliate_links` & `clicks` | DONE | 13/10 | 15/10 12:00 |
-| BE1-W2-06 | Nguyễn Minh Tuệ | BE1 | Tối ưu hóa truy vấn Feed & Hỗ trợ tích hợp kỹ thuật E2E | IN_PROGRESS | 13/10 | 16/10 12:00 |
+| BE1-W2-06 | Nguyễn Minh Tuệ | BE1 | Tối ưu hóa truy vấn Feed & Hỗ trợ tích hợp kỹ thuật E2E | DONE | 13/10 | 16/10 12:00 |
 | BE2-W2-01 | Nguyễn Huỳnh | BE2 | Prompt System phân theo 4 Personas du lịch | DONE | 12/10 | 12/10 17:00 |
 | BE2-W2-02/03 | Nguyễn Huỳnh | BE2 | Zod Structured Output Schema & Content Guardrails | DONE | 13/10 | 13/10 17:00 |
 | BE3-W2-01/02 | Thái Thanh Tú | BE3 | Workflow n8n Campaign-to-AI-Content-Pipeline | READY | 12/10 | 13/10 17:00 |
@@ -41,6 +41,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | T1-W2-01 | Tester 1 | File Mock Data `src/lib/campaign-demo.ts` (4 campaigns, 20+ content items) | 12/10/2026 11:30 | FE |
 | BE1-W2-01/05 | BE1 | Migration `affiliate_links` & `clicks`, Trigger n8n, API `/api/tracking/generate`, Router `/r/[code]`, RLS, Types gen, Test Suite PASS | 13/10/2026 14:00 | FE, BE3, Tester 3 |
 | BE2-W2-01/03 | BE2 | Prompt 4 personas, Zod/JSON Schema, guardrails, 10/10 live parse và 5/5 violation tests | 13/10/2026 | BE3, Tester 2 |
+| BE1-W2-06 | BE1 | Migration `optimize_feed_and_tracking_indexes.sql`, Benchmark script, EXPLAIN ANALYZE < 1ms PASS, Build PASS | 13/10/2026 21:30 | Toàn team (E2E) |
 
 ---
 
@@ -48,7 +49,6 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | Task ID | Member | Task | Progress | Blocker | Next Step |
 |---|---|---|---|---|---|
 | UX-W2-01 | UI/UX | Hoàn thiện Figma Hi-fi Reseller Feed | 70% | Chốt các trường bắt buộc trên Card | Xuất specs và asset cho FE |
-| BE1-W2-06 | BE1 | Tạo PR vào `dev` & Đồng bộ Supabase remote | 80% | None | Chờ merge PR & test tích hợp E2E |
 | BE2-W2-04 | BE2 | Handoff Prompt, Schema & Guardrails cho BE3 | 90% | Chờ quyết định mapping mảng output → rows `contents` | BE3 review artifact và chốt mapping với FE |
 | BE3-W2-01 | BE3 | Tạo Node Webhook tiếp nhận Campaign trên n8n | 50% | None (Đã có trigger BE1) | Cấu hình webhook URL cố định & test |
 | FE-W2-01 | FE | Khởi tạo cấu trúc router `/reseller/campaigns` | 30% | Chờ Figma từ UI/UX | Dựng layout chung bằng mock data |
