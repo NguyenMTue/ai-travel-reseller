@@ -41,6 +41,7 @@ export interface CampaignItem {
 export interface ContentItem {
   id: string;
   campaign_id: string;
+  product_id?: string;
   campaign_name: string;
   product_name: string;
   persona: string;

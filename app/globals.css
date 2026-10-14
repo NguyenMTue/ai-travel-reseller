@@ -3754,3 +3754,26 @@ tr:last-child td {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+.reseller-tracking-link-control {
+  margin: 12px 0 18px;
+}
+.reseller-tracking-link-result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cfe2d8;
+  border-radius: 10px;
+  background: #f4faf6;
+  color: #176044;
+}
+.reseller-tracking-link-result a {
+  max-width: min(520px, 100%);
+  overflow-wrap: anywhere;
+  color: #176044;
+  font-size: 13px;
+}

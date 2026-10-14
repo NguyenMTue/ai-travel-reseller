@@ -12,6 +12,7 @@ import {
   Ticket,
 } from "lucide-react";
 import { useReseller } from "./reseller-shell";
+import { ResellerTrackingLinkButton } from "./reseller-tracking-link-button";
 import {
   formatVND,
   type CampaignItem,
@@ -77,6 +78,10 @@ export function ResellerCampaignDetail({
         </div>
         <span className="reseller-badge-mint">Hoa hồng {campaign.commission_rate}%</span>
       </header>
+
+      {campaign.product_id ? (
+        <ResellerTrackingLinkButton campaignId={campaign.id} productId={campaign.product_id} />
+      ) : null}
 
       {source === "demo" ? (
         <div className="reseller-alert-banner" role="note">

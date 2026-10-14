@@ -11,9 +11,9 @@ import {
   X,
 } from "lucide-react";
 import { useReseller } from "./reseller-shell";
-import { sampleCampaigns, sampleContents, formatVND, ContentItem } from "@/src/lib/reseller-data";
+import { formatVND, type CampaignItem, type ContentItem } from "@/src/lib/reseller-data";
 
-export function ResellerOverview() {
+export function ResellerOverview({ campaigns, contents, trackingMetrics, error }: { campaigns: CampaignItem[]; contents: ContentItem[]; trackingMetrics: { linkCount: number; clickCount: number }; error: string | null }) {
   const { showToast, user } = useReseller();
   const [contentModal, setContentModal] = useState<ContentItem | null>(null);
 
@@ -26,8 +26,8 @@ export function ResellerOverview() {
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, [contentModal]);
 
-  const featuredCampaign = sampleCampaigns[0];
-  const featuredContent = sampleContents[0];
+  const featuredCampaign = campaigns[0];
+  const featuredContent = contents[0];
 
   const handleCopy = async (text: string, label: string) => {
     try {
@@ -45,7 +45,7 @@ export function ResellerOverview() {
         <span>Xin chào, {user.name}</span>
         <span className="reseller-pill-badge" style={{ padding: "3px 10px", fontSize: 11 }}>
           <Clock size={12} />
-          Dữ liệu mô phỏng
+          Dữ liệu từ Supabase
         </span>
       </div>
 
@@ -69,19 +69,21 @@ export function ResellerOverview() {
             <Link2 size={14} />
             <span>Tracking link</span>
           </div>
-          <div className="reseller-stat-value">Chưa được cấp</div>
+          <div className="reseller-stat-value">{trackingMetrics.linkCount} link · {trackingMetrics.clickCount} click</div>
         </div>
       </div>
 
-      {/* Chiến dịch mẫu */}
+      {error ? <div className="reseller-alert-banner campaign-error" role="alert">{error}</div> : null}
+
+      {/* Chiến dịch gần đây */}
       <div className="reseller-section-header">
-        <div className="reseller-section-title">Chiến dịch mẫu</div>
+        <div className="reseller-section-title">Chiến dịch đang hoạt động</div>
         <Link href="/reseller/campaigns" className="reseller-section-link">
           Xem tất cả
         </Link>
       </div>
 
-      <div className="reseller-card">
+      {featuredCampaign ? <div className="reseller-card">
         <div className="reseller-card-title">{featuredCampaign.name}</div>
         <div className="reseller-card-subtitle">{featuredCampaign.merchant_name}</div>
 
@@ -125,17 +127,17 @@ export function ResellerOverview() {
         >
           Tham gia chiến dịch
         </Link>
-      </div>
+      </div> : <div className="reseller-card campaign-state" role="status">Chưa có chiến dịch hoạt động từ Supabase.</div>}
 
       {/* Nội dung đã duyệt để tham khảo */}
       <div className="reseller-section-header">
         <div className="reseller-section-title">Nội dung đã duyệt để tham khảo</div>
       </div>
 
-      <div className="reseller-card">
+      {featuredContent ? <div className="reseller-card">
         <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
           <span className="reseller-badge-mint">Local Guide</span>
-          <span className="reseller-badge-gray">Đã duyệt (mô phỏng)</span>
+          <span className="reseller-badge-gray">Đã duyệt</span>
         </div>
 
         <div className="reseller-card-title" style={{ fontSize: 17, marginBottom: 8 }}>
@@ -178,7 +180,7 @@ export function ResellerOverview() {
             <span>Sao chép CTA</span>
           </button>
         </div>
-      </div>
+      </div> : <div className="reseller-card campaign-state" role="status">Chưa có nội dung quảng bá đã duyệt.</div>}
 
       {/* Modal xem chi tiết nội dung */}
       {contentModal && (

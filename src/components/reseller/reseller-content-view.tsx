@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { Info, Eye, Copy, X } from "lucide-react";
 import { useReseller } from "./reseller-shell";
-import { sampleContents, ContentItem } from "@/src/lib/reseller-data";
+import type { ContentItem } from "@/src/lib/reseller-data";
+import { ResellerTrackingLinkButton } from "./reseller-tracking-link-button";
 
-export function ResellerContentView() {
+export function ResellerContentView({ contents, error }: { contents: ContentItem[]; error: string | null }) {
   const { showToast } = useReseller();
   const [modalItem, setModalItem] = useState<ContentItem | null>(null);
 
@@ -42,14 +43,16 @@ export function ResellerContentView() {
         </div>
       </div>
 
+      {error ? <div className="reseller-alert-banner campaign-error" role="alert">{error}</div> : null}
+
       {/* Danh sách nội dung */}
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        {sampleContents.map((item) => (
+        {contents.map((item) => (
           <div key={item.id} className="reseller-card" style={{ marginBottom: 0 }}>
             <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
               <span className="reseller-badge-mint">{item.badges[0] || item.persona}</span>
               <span className="reseller-badge-gray">
-                {item.badges[1] || "Đã duyệt (mô phỏng)"}
+                {item.badges[1] || "Đã duyệt"}
               </span>
             </div>
 
@@ -81,6 +84,9 @@ export function ResellerContentView() {
             </div>
 
             <div className="reseller-action-row">
+              {item.campaign_id && item.product_id ? (
+                <ResellerTrackingLinkButton campaignId={item.campaign_id} productId={item.product_id} />
+              ) : null}
               <button
                 type="button"
                 className="reseller-action-btn"
@@ -110,6 +116,12 @@ export function ResellerContentView() {
             </div>
           </div>
         ))}
+        {!contents.length && !error ? (
+          <div className="reseller-card campaign-state" role="status">
+            <h2>Chưa có nội dung được duyệt</h2>
+            <p>Nội dung đã duyệt từ Supabase sẽ xuất hiện tại đây.</p>
+          </div>
+        ) : null}
       </div>
 
       {/* Modal xem toàn bộ script */}

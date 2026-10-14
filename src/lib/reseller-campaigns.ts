@@ -2,8 +2,6 @@ import { cookies } from "next/headers";
 import { createClient } from "@/src/lib/supabase/server";
 import { hasSupabaseConfig } from "@/src/lib/supabase/config";
 import {
-  sampleCampaigns,
-  sampleContents,
   type CampaignItem,
   type ResellerCampaignContent,
 } from "@/src/lib/reseller-data";
@@ -77,7 +75,7 @@ export async function getResellerCampaignFeed(): Promise<
   DataResult<CampaignItem[]>
 > {
   if (!hasSupabaseConfig) {
-    return { data: sampleCampaigns, source: "demo", error: null };
+    return { data: [], source: "database", error: "Ứng dụng chưa được cấu hình kết nối Supabase." };
   }
 
   const supabase = createClient(await cookies());
@@ -138,20 +136,11 @@ export async function getResellerCampaignDetail(
   DataResult<{ campaign: CampaignItem | null; contents: ResellerCampaignContent[] }>
 > {
   if (!hasSupabaseConfig) {
-    const campaign = sampleCampaigns.find((item) => item.id === id) ?? null;
-    const contents = sampleContents
-      .filter((item) => item.campaign_id === id && item.status === "approved")
-      .map((item) => ({
-        id: item.id,
-        campaign_id: item.campaign_id,
-        persona: item.persona,
-        hook: item.hook,
-        script: item.script,
-        caption: item.caption,
-        cta: item.cta,
-        status: item.status,
-      }));
-    return { data: { campaign, contents }, source: "demo", error: null };
+    return {
+      data: { campaign: null, contents: [] },
+      source: "database",
+      error: "Ứng dụng chưa được cấu hình kết nối Supabase.",
+    };
   }
 
   const supabase = createClient(await cookies());
@@ -201,6 +190,100 @@ export async function getResellerCampaignDetail(
       contents: (contentsResult.data ?? []) as ResellerCampaignContent[],
     },
     source: "database",
+    error: null,
+  };
+}
+
+export async function getResellerContentFeed(): Promise<
+  DataResult<import("@/src/lib/reseller-data").ContentItem[]>
+> {
+  if (!hasSupabaseConfig) {
+    return { data: [], source: "database", error: "Ứng dụng chưa được cấu hình kết nối Supabase." };
+  }
+
+  const supabase = createClient(await cookies());
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { data: [], source: "database", error: "Vui lòng đăng nhập lại để tải nội dung." };
+  }
+
+  const { data: contents, error: contentsError } = await supabase
+    .from("contents")
+    .select("id,campaign_id,product_id,persona,hook,script,caption,cta,status,tracking_url,video_url,created_at")
+    .eq("status", "approved")
+    .order("created_at", { ascending: false });
+
+  if (contentsError) {
+    return { data: [], source: "database", error: "Không tải được nội dung đã duyệt từ Supabase." };
+  }
+
+  const campaignIds = [...new Set((contents ?? []).map((item) => item.campaign_id).filter(Boolean))] as string[];
+  const campaignsResult = campaignIds.length
+    ? await supabase.from("campaigns").select("id,name,product_id").in("id", campaignIds)
+    : { data: [], error: null };
+  if (campaignsResult.error) {
+    return { data: [], source: "database", error: "Không tải được thông tin chiến dịch của nội dung." };
+  }
+  const productIds = [...new Set([
+    ...(contents ?? []).map((item) => item.product_id),
+    ...(campaignsResult.data ?? []).map((item) => item.product_id),
+  ].filter(Boolean))] as string[];
+  const productsResult = productIds.length
+    ? await supabase.from("products").select("id,name").in("id", productIds)
+    : { data: [], error: null };
+
+  if (productsResult.error) {
+    return { data: [], source: "database", error: "Không tải được thông tin chiến dịch của nội dung." };
+  }
+
+  const campaigns = new Map((campaignsResult.data ?? []).map((item) => [item.id, item]));
+  const products = new Map((productsResult.data ?? []).map((item) => [item.id, item]));
+  return {
+    data: (contents ?? []).map((item) => {
+      const campaign = item.campaign_id ? campaigns.get(item.campaign_id) : undefined;
+      const productId = item.product_id ?? campaign?.product_id ?? "";
+      const product = products.get(productId);
+      return {
+        id: item.id,
+        campaign_id: item.campaign_id ?? "",
+        campaign_name: campaign?.name ?? "Chiến dịch",
+        product_name: product?.name ?? "Sản phẩm",
+        persona: item.persona ?? "Nội dung quảng bá",
+        hook: item.hook ?? "",
+        script: item.script ?? "",
+        caption: item.caption ?? "",
+        cta: item.cta ?? "",
+        status: "approved" as const,
+        badges: [item.persona ?? "Nội dung quảng bá", "Đã duyệt"],
+        tracking_url: item.tracking_url,
+        video_url: item.video_url,
+        product_id: productId,
+      };
+    }),
+    source: "database",
+    error: null,
+  };
+}
+
+export async function getResellerTrackingMetrics(): Promise<{ linkCount: number; clickCount: number; error: string | null }> {
+  if (!hasSupabaseConfig) {
+    return { linkCount: 0, clickCount: 0, error: "Ứng dụng chưa được cấu hình kết nối Supabase." };
+  }
+  const supabase = createClient(await cookies());
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
+    return { linkCount: 0, clickCount: 0, error: "Vui lòng đăng nhập lại để tải thống kê tracking." };
+  }
+  const { data, error } = await supabase
+    .from("affiliate_links")
+    .select("clicks_count")
+    .eq("reseller_id", user.id);
+  if (error) {
+    return { linkCount: 0, clickCount: 0, error: "Không tải được thống kê tracking từ Supabase." };
+  }
+  return {
+    linkCount: data.length,
+    clickCount: data.reduce((sum, link) => sum + Number(link.clicks_count ?? 0), 0),
     error: null,
   };
 }

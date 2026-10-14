@@ -9,7 +9,7 @@ export const metadata = {
 export default function ResellerPreviewPage() {
   return (
     <ResellerShell userName="Minh Anh — Demo" initials="MA" userEmail="minhanh.demo@example.com">
-      <ResellerOverview />
+      <ResellerOverview campaigns={[]} contents={[]} trackingMetrics={{ linkCount: 0, clickCount: 0 }} error={null} />
     </ResellerShell>
   );
 }

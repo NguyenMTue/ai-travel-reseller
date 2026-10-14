@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { LogoutButton } from "@/src/components/auth/logout-button";
 
 export function ResellerHeader({
@@ -40,11 +40,6 @@ export function ResellerHeader({
       </div>
 
       <div className="reseller-header-actions">
-        <div className="reseller-pill-badge">
-          <Clock size={13} />
-          <span>Dữ liệu mô phỏng</span>
-        </div>
-
         <LogoutButton className="reseller-logout-btn" />
       </div>
     </header>

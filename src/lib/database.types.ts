@@ -1,629 +1,413 @@
-﻿export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[];
+﻿
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never;
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json;
-          operationName?: string;
-          query?: string;
-          variables?: Json;
-        };
-        Returns: Json;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
-  public: {
-    Tables: {
-      campaigns: {
-        Row: {
-          commission_rate: number | null;
-          end_date: string | null;
-          id: string;
-          merchant_id: string | null;
-          name: string;
-          product_id: string | null;
-          start_date: string | null;
-          status: string | null;
-          target_audience: string | null;
-          target_location: string | null;
-        };
-        Insert: {
-          commission_rate?: number | null;
-          end_date?: string | null;
-          id?: string;
-          merchant_id?: string | null;
-          name: string;
-          product_id?: string | null;
-          start_date?: string | null;
-          status?: string | null;
-          target_audience?: string | null;
-          target_location?: string | null;
-        };
-        Update: {
-          commission_rate?: number | null;
-          end_date?: string | null;
-          id?: string;
-          merchant_id?: string | null;
-          name?: string;
-          product_id?: string | null;
-          start_date?: string | null;
-          status?: string | null;
-          target_audience?: string | null;
-          target_location?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "campaigns_merchant_id_fkey";
-            columns: ["merchant_id"];
-            isOneToOne: false;
-            referencedRelation: "merchants";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "campaigns_product_id_fkey";
-            columns: ["product_id"];
-            isOneToOne: false;
-            referencedRelation: "products";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      contents: {
-        Row: {
-          campaign_id: string | null;
-          caption: string | null;
-          created_at: string | null;
-          hook: string | null;
-          id: string;
-          persona: string | null;
-          reseller_id: string | null;
-          script: string | null;
-          status: string | null;
-          tracking_url: string | null;
-          video_url: string | null;
-        };
-        Insert: {
-          campaign_id?: string | null;
-          caption?: string | null;
-          created_at?: string | null;
-          hook?: string | null;
-          id?: string;
-          persona?: string | null;
-          reseller_id?: string | null;
-          script?: string | null;
-          status?: string | null;
-          tracking_url?: string | null;
-          video_url?: string | null;
-        };
-        Update: {
-          campaign_id?: string | null;
-          caption?: string | null;
-          created_at?: string | null;
-          hook?: string | null;
-          id?: string;
-          persona?: string | null;
-          reseller_id?: string | null;
-          script?: string | null;
-          status?: string | null;
-          tracking_url?: string | null;
-          video_url?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "contents_campaign_id_fkey";
-            columns: ["campaign_id"];
-            isOneToOne: false;
-            referencedRelation: "campaigns";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "contents_reseller_id_fkey";
-            columns: ["reseller_id"];
-            isOneToOne: false;
-            referencedRelation: "resellers";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      merchants: {
-        Row: {
-          address: string | null;
-          created_at: string | null;
-          description: string | null;
-          id: string;
-          logo: string | null;
-          name: string;
-          phone: string | null;
-          status: string | null;
-          website: string | null;
-        };
-        Insert: {
-          address?: string | null;
-          created_at?: string | null;
-          description?: string | null;
-          id?: string;
-          logo?: string | null;
-          name: string;
-          phone?: string | null;
-          status?: string | null;
-          website?: string | null;
-        };
-        Update: {
-          address?: string | null;
-          created_at?: string | null;
-          description?: string | null;
-          id?: string;
-          logo?: string | null;
-          name?: string;
-          phone?: string | null;
-          status?: string | null;
-          website?: string | null;
-        };
-        Relationships: [];
-      };
-      orders: {
-        Row: {
-          amount: number | null;
-          booking_reference: string | null;
-          commission_amount: number | null;
-          created_at: string | null;
-          id: string;
-          merchant_id: string | null;
-          product_id: string | null;
-          reseller_id: string | null;
-          status: string | null;
-        };
-        Insert: {
-          amount?: number | null;
-          booking_reference?: string | null;
-          commission_amount?: number | null;
-          created_at?: string | null;
-          id?: string;
-          merchant_id?: string | null;
-          product_id?: string | null;
-          reseller_id?: string | null;
-          status?: string | null;
-        };
-        Update: {
-          amount?: number | null;
-          booking_reference?: string | null;
-          commission_amount?: number | null;
-          created_at?: string | null;
-          id?: string;
-          merchant_id?: string | null;
-          product_id?: string | null;
-          reseller_id?: string | null;
-          status?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "orders_merchant_id_fkey";
-            columns: ["merchant_id"];
-            isOneToOne: false;
-            referencedRelation: "merchants";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "orders_product_id_fkey";
-            columns: ["product_id"];
-            isOneToOne: false;
-            referencedRelation: "products";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "orders_reseller_id_fkey";
-            columns: ["reseller_id"];
-            isOneToOne: false;
-            referencedRelation: "resellers";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      product_embeddings: {
-        Row: {
-          chunk_index: number;
-          content: string;
-          content_hash: string | null;
-          created_at: string;
-          embedding: string;
-          id: string;
-          metadata: NonNullable<Json>;
-          model: string;
-          product_id: string;
-          updated_at: string;
-        };
-        Insert: {
-          chunk_index?: number;
-          content: string;
-          content_hash?: string | null;
-          created_at?: string;
-          embedding: string;
-          id?: string;
-          metadata?: NonNullable<Json>;
-          model?: string;
-          product_id: string;
-          updated_at?: string;
-        };
-        Update: {
-          chunk_index?: number;
-          content?: string;
-          content_hash?: string | null;
-          created_at?: string;
-          embedding?: string;
-          id?: string;
-          metadata?: NonNullable<Json>;
-          model?: string;
-          product_id?: string;
-          updated_at?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "product_embeddings_product_id_fkey";
-            columns: ["product_id"];
-            isOneToOne: false;
-            referencedRelation: "products";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      products: {
-        Row: {
-          booking_url: string | null;
-          category: string | null;
-          commission_rate: number | null;
-          created_at: string | null;
-          description: string | null;
-          id: string;
-          merchant_id: string | null;
-          name: string;
-          original_price: number | null;
-          payment_url: string | null;
-          sale_price: number | null;
-          status: string | null;
-          valid_from: string | null;
-          valid_to: string | null;
-        };
-        Insert: {
-          booking_url?: string | null;
-          category?: string | null;
-          commission_rate?: number | null;
-          created_at?: string | null;
-          description?: string | null;
-          id?: string;
-          merchant_id?: string | null;
-          name: string;
-          original_price?: number | null;
-          payment_url?: string | null;
-          sale_price?: number | null;
-          status?: string | null;
-          valid_from?: string | null;
-          valid_to?: string | null;
-        };
-        Update: {
-          booking_url?: string | null;
-          category?: string | null;
-          commission_rate?: number | null;
-          created_at?: string | null;
-          description?: string | null;
-          id?: string;
-          merchant_id?: string | null;
-          name?: string;
-          original_price?: number | null;
-          payment_url?: string | null;
-          sale_price?: number | null;
-          status?: string | null;
-          valid_from?: string | null;
-          valid_to?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "products_merchant_id_fkey";
-            columns: ["merchant_id"];
-            isOneToOne: false;
-            referencedRelation: "merchants";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      resellers: {
-        Row: {
-          commission_rate: number | null;
-          created_at: string | null;
-          email: string | null;
-          id: string;
-          name: string;
-          phone: string | null;
-          status: string | null;
-        };
-        Insert: {
-          commission_rate?: number | null;
-          created_at?: string | null;
-          email?: string | null;
-          id?: string;
-          name: string;
-          phone?: string | null;
-          status?: string | null;
-        };
-        Update: {
-          commission_rate?: number | null;
-          created_at?: string | null;
-          email?: string | null;
-          id?: string;
-          name?: string;
-          phone?: string | null;
-          status?: string | null;
-        };
-        Relationships: [];
-      };
-      social_accounts: {
-        Row: {
-          average_views: number | null;
-          created_at: string | null;
-          followers: number | null;
-          id: string;
-          platform: string | null;
-          reseller_id: string | null;
-          status: string | null;
-          url: string | null;
-          username: string | null;
-        };
-        Insert: {
-          average_views?: number | null;
-          created_at?: string | null;
-          followers?: number | null;
-          id?: string;
-          platform?: string | null;
-          reseller_id?: string | null;
-          status?: string | null;
-          url?: string | null;
-          username?: string | null;
-        };
-        Update: {
-          average_views?: number | null;
-          created_at?: string | null;
-          followers?: number | null;
-          id?: string;
-          platform?: string | null;
-          reseller_id?: string | null;
-          status?: string | null;
-          url?: string | null;
-          username?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "social_accounts_reseller_id_fkey";
-            columns: ["reseller_id"];
-            isOneToOne: false;
-            referencedRelation: "resellers";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-      tracking_events: {
-        Row: {
-          campaign_id: string | null;
-          event_type: string | null;
-          id: string;
-          metadata: Json | null;
-          product_id: string | null;
-          reseller_id: string | null;
-          timestamp: string | null;
-        };
-        Insert: {
-          campaign_id?: string | null;
-          event_type?: string | null;
-          id?: string;
-          metadata?: Json | null;
-          product_id?: string | null;
-          reseller_id?: string | null;
-          timestamp?: string | null;
-        };
-        Update: {
-          campaign_id?: string | null;
-          event_type?: string | null;
-          id?: string;
-          metadata?: Json | null;
-          product_id?: string | null;
-          reseller_id?: string | null;
-          timestamp?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "tracking_events_campaign_id_fkey";
-            columns: ["campaign_id"];
-            isOneToOne: false;
-            referencedRelation: "campaigns";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "tracking_events_product_id_fkey";
-            columns: ["product_id"];
-            isOneToOne: false;
-            referencedRelation: "products";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "tracking_events_reseller_id_fkey";
-            columns: ["reseller_id"];
-            isOneToOne: false;
-            referencedRelation: "resellers";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      match_product_embeddings: {
-        Args: {
-          filter_product_id?: string;
-          match_count?: number;
-          match_threshold?: number;
-          query_embedding: string;
-        };
-        Returns: {
-          chunk_index: number;
-          content: string;
-          id: string;
-          metadata: Json;
-          product_id: string;
-          similarity: number;
-        }[];
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
-};
+  
+  "graphql_public": {
+          Tables: {
+            [_ in never]: never
+          }
+          Views: {
+            [_ in never]: never
+          }
+          Functions: {
+            "graphql":
+{ Args: { "extensions"?: Json,"operationName"?: string,"query"?: string,"variables"?: Json }; Returns: Json
+                           }
+          }
+          Enums: {
+            [_ in never]: never
+          }
+          CompositeTypes: {
+            [_ in never]: never
+          }
+        },"public": {
+          Tables: {
+            "affiliate_links": {
+                  Row: {
+                    "campaign_id": string,"clicks_count": number,"created_at": string,"destination_url": string,"id": string,"is_active": boolean,"product_id": string,"reseller_id": string,"short_url": string | null,"unique_code": string,"updated_at": string
+                  }
+                  Insert: {
+                    "campaign_id": string,"clicks_count"?: number,"created_at"?: string,"destination_url": string,"id"?: string,"is_active"?: boolean,"product_id": string,"reseller_id": string,"short_url"?: string | null,"unique_code": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "campaign_id"?: string,"clicks_count"?: number,"created_at"?: string,"destination_url"?: string,"id"?: string,"is_active"?: boolean,"product_id"?: string,"reseller_id"?: string,"short_url"?: string | null,"unique_code"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "affiliate_links_campaign_id_fkey"
+      columns: ["campaign_id"]
+isOneToOne: false
+      referencedRelation: "campaigns"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "affiliate_links_product_id_fkey"
+      columns: ["product_id"]
+isOneToOne: false
+      referencedRelation: "products"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "affiliate_links_reseller_id_fkey"
+      columns: ["reseller_id"]
+isOneToOne: false
+      referencedRelation: "resellers"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"campaigns": {
+                  Row: {
+                    "commission_rate": number | null,"end_date": string | null,"id": string,"merchant_id": string | null,"name": string,"product_id": string | null,"start_date": string | null,"status": string | null,"target_audience": string | null,"target_location": string | null
+                  }
+                  Insert: {
+                    "commission_rate"?: number | null,"end_date"?: string | null,"id"?: string,"merchant_id"?: string | null,"name": string,"product_id"?: string | null,"start_date"?: string | null,"status"?: string | null,"target_audience"?: string | null,"target_location"?: string | null
+                  }
+                  Update: {
+                    "commission_rate"?: number | null,"end_date"?: string | null,"id"?: string,"merchant_id"?: string | null,"name"?: string,"product_id"?: string | null,"start_date"?: string | null,"status"?: string | null,"target_audience"?: string | null,"target_location"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "campaigns_merchant_id_fkey"
+      columns: ["merchant_id"]
+isOneToOne: false
+      referencedRelation: "merchants"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "campaigns_product_id_fkey"
+      columns: ["product_id"]
+isOneToOne: false
+      referencedRelation: "products"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"clicks": {
+                  Row: {
+                    "clicked_at": string,"id": string,"ip_address": string | null,"link_id": string,"metadata": NonNullable<Json>,"referer": string | null,"user_agent": string | null
+                  }
+                  Insert: {
+                    "clicked_at"?: string,"id"?: string,"ip_address"?: string | null,"link_id": string,"metadata"?: NonNullable<Json>,"referer"?: string | null,"user_agent"?: string | null
+                  }
+                  Update: {
+                    "clicked_at"?: string,"id"?: string,"ip_address"?: string | null,"link_id"?: string,"metadata"?: NonNullable<Json>,"referer"?: string | null,"user_agent"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "clicks_link_id_fkey"
+      columns: ["link_id"]
+isOneToOne: false
+      referencedRelation: "affiliate_links"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"contents": {
+                  Row: {
+                    "campaign_id": string | null,"caption": string | null,"created_at": string | null,"cta": string | null,"hook": string | null,"id": string,"persona": string | null,"product_id": string | null,"reseller_id": string | null,"script": string | null,"status": string | null,"tracking_url": string | null,"video_url": string | null
+                  }
+                  Insert: {
+                    "campaign_id"?: string | null,"caption"?: string | null,"created_at"?: string | null,"cta"?: string | null,"hook"?: string | null,"id"?: string,"persona"?: string | null,"product_id"?: string | null,"reseller_id"?: string | null,"script"?: string | null,"status"?: string | null,"tracking_url"?: string | null,"video_url"?: string | null
+                  }
+                  Update: {
+                    "campaign_id"?: string | null,"caption"?: string | null,"created_at"?: string | null,"cta"?: string | null,"hook"?: string | null,"id"?: string,"persona"?: string | null,"product_id"?: string | null,"reseller_id"?: string | null,"script"?: string | null,"status"?: string | null,"tracking_url"?: string | null,"video_url"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "contents_campaign_id_fkey"
+      columns: ["campaign_id"]
+isOneToOne: false
+      referencedRelation: "campaigns"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "contents_product_id_fkey"
+      columns: ["product_id"]
+isOneToOne: false
+      referencedRelation: "products"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "contents_reseller_id_fkey"
+      columns: ["reseller_id"]
+isOneToOne: false
+      referencedRelation: "resellers"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"merchants": {
+                  Row: {
+                    "address": string | null,"created_at": string | null,"description": string | null,"id": string,"logo": string | null,"name": string,"phone": string | null,"status": string | null,"website": string | null
+                  }
+                  Insert: {
+                    "address"?: string | null,"created_at"?: string | null,"description"?: string | null,"id"?: string,"logo"?: string | null,"name": string,"phone"?: string | null,"status"?: string | null,"website"?: string | null
+                  }
+                  Update: {
+                    "address"?: string | null,"created_at"?: string | null,"description"?: string | null,"id"?: string,"logo"?: string | null,"name"?: string,"phone"?: string | null,"status"?: string | null,"website"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"orders": {
+                  Row: {
+                    "amount": number | null,"booking_reference": string | null,"commission_amount": number | null,"created_at": string | null,"id": string,"merchant_id": string | null,"product_id": string | null,"reseller_id": string | null,"status": string | null
+                  }
+                  Insert: {
+                    "amount"?: number | null,"booking_reference"?: string | null,"commission_amount"?: number | null,"created_at"?: string | null,"id"?: string,"merchant_id"?: string | null,"product_id"?: string | null,"reseller_id"?: string | null,"status"?: string | null
+                  }
+                  Update: {
+                    "amount"?: number | null,"booking_reference"?: string | null,"commission_amount"?: number | null,"created_at"?: string | null,"id"?: string,"merchant_id"?: string | null,"product_id"?: string | null,"reseller_id"?: string | null,"status"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "orders_merchant_id_fkey"
+      columns: ["merchant_id"]
+isOneToOne: false
+      referencedRelation: "merchants"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "orders_product_id_fkey"
+      columns: ["product_id"]
+isOneToOne: false
+      referencedRelation: "products"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "orders_reseller_id_fkey"
+      columns: ["reseller_id"]
+isOneToOne: false
+      referencedRelation: "resellers"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"product_embeddings": {
+                  Row: {
+                    "chunk_index": number,"content": string,"content_hash": string | null,"created_at": string,"embedding": string,"id": string,"metadata": NonNullable<Json>,"model": string,"product_id": string,"updated_at": string
+                  }
+                  Insert: {
+                    "chunk_index"?: number,"content": string,"content_hash"?: string | null,"created_at"?: string,"embedding": string,"id"?: string,"metadata"?: NonNullable<Json>,"model"?: string,"product_id": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "chunk_index"?: number,"content"?: string,"content_hash"?: string | null,"created_at"?: string,"embedding"?: string,"id"?: string,"metadata"?: NonNullable<Json>,"model"?: string,"product_id"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "product_embeddings_product_id_fkey"
+      columns: ["product_id"]
+isOneToOne: false
+      referencedRelation: "products"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"products": {
+                  Row: {
+                    "booking_url": string | null,"category": string | null,"commission_rate": number | null,"created_at": string | null,"description": string | null,"id": string,"merchant_id": string | null,"name": string,"original_price": number | null,"payment_url": string | null,"sale_price": number | null,"status": string | null,"valid_from": string | null,"valid_to": string | null
+                  }
+                  Insert: {
+                    "booking_url"?: string | null,"category"?: string | null,"commission_rate"?: number | null,"created_at"?: string | null,"description"?: string | null,"id"?: string,"merchant_id"?: string | null,"name": string,"original_price"?: number | null,"payment_url"?: string | null,"sale_price"?: number | null,"status"?: string | null,"valid_from"?: string | null,"valid_to"?: string | null
+                  }
+                  Update: {
+                    "booking_url"?: string | null,"category"?: string | null,"commission_rate"?: number | null,"created_at"?: string | null,"description"?: string | null,"id"?: string,"merchant_id"?: string | null,"name"?: string,"original_price"?: number | null,"payment_url"?: string | null,"sale_price"?: number | null,"status"?: string | null,"valid_from"?: string | null,"valid_to"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "products_merchant_id_fkey"
+      columns: ["merchant_id"]
+isOneToOne: false
+      referencedRelation: "merchants"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"resellers": {
+                  Row: {
+                    "commission_rate": number | null,"created_at": string | null,"email": string | null,"id": string,"name": string,"phone": string | null,"status": string | null
+                  }
+                  Insert: {
+                    "commission_rate"?: number | null,"created_at"?: string | null,"email"?: string | null,"id"?: string,"name": string,"phone"?: string | null,"status"?: string | null
+                  }
+                  Update: {
+                    "commission_rate"?: number | null,"created_at"?: string | null,"email"?: string | null,"id"?: string,"name"?: string,"phone"?: string | null,"status"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"social_accounts": {
+                  Row: {
+                    "average_views": number | null,"created_at": string | null,"followers": number | null,"id": string,"platform": string | null,"reseller_id": string | null,"status": string | null,"url": string | null,"username": string | null
+                  }
+                  Insert: {
+                    "average_views"?: number | null,"created_at"?: string | null,"followers"?: number | null,"id"?: string,"platform"?: string | null,"reseller_id"?: string | null,"status"?: string | null,"url"?: string | null,"username"?: string | null
+                  }
+                  Update: {
+                    "average_views"?: number | null,"created_at"?: string | null,"followers"?: number | null,"id"?: string,"platform"?: string | null,"reseller_id"?: string | null,"status"?: string | null,"url"?: string | null,"username"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "social_accounts_reseller_id_fkey"
+      columns: ["reseller_id"]
+isOneToOne: false
+      referencedRelation: "resellers"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"tracking_events": {
+                  Row: {
+                    "campaign_id": string | null,"event_type": string | null,"id": string,"metadata": Json | null,"product_id": string | null,"reseller_id": string | null,"timestamp": string | null
+                  }
+                  Insert: {
+                    "campaign_id"?: string | null,"event_type"?: string | null,"id"?: string,"metadata"?: Json | null,"product_id"?: string | null,"reseller_id"?: string | null,"timestamp"?: string | null
+                  }
+                  Update: {
+                    "campaign_id"?: string | null,"event_type"?: string | null,"id"?: string,"metadata"?: Json | null,"product_id"?: string | null,"reseller_id"?: string | null,"timestamp"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "tracking_events_campaign_id_fkey"
+      columns: ["campaign_id"]
+isOneToOne: false
+      referencedRelation: "campaigns"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tracking_events_product_id_fkey"
+      columns: ["product_id"]
+isOneToOne: false
+      referencedRelation: "products"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tracking_events_reseller_id_fkey"
+      columns: ["reseller_id"]
+isOneToOne: false
+      referencedRelation: "resellers"
+      referencedColumns: ["id"]
+    }
+                  ]
+                }
+          }
+          Views: {
+            [_ in never]: never
+          }
+          Functions: {
+            "match_product_embeddings":
+{ Args: { "filter_product_id"?: string,"match_count"?: number,"match_threshold"?: number,"query_embedding": string }; Returns: {
+              "chunk_index": number,"content": string,"id": string,"metadata": Json,"product_id": string,"similarity": number
+            }[]
+                           }
+          }
+          Enums: {
+            [_ in never]: never
+          }
+          CompositeTypes: {
+            [_ in never]: never
+          }
+        }
+}
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
+type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<
-  keyof Database,
-  "public"
->];
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+    : never = never
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R;
+      Row: infer R
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R;
-      }
-      ? R
-      : never
-    : never;
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+    : never = never
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I;
+      Insert: infer I
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I;
-      }
-      ? I
-      : never
-    : never;
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+    : never = never
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U;
+      Update: infer U
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U;
-      }
-      ? U
-      : never
-    : never;
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never) = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+    : never = never
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never;
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals;
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never) = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals;
-}
+    : never = never
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never;
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
-  public: {
-    Enums: {},
-  },
-} as const;
+  "graphql_public": {
+          Enums: {
+            
+          }
+        },"public": {
+          Enums: {
+            
+          }
+        }
+} as const
