@@ -17,8 +17,8 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | BE1-W2-04 | Nguyễn Minh Tuệ | BE1 | Redirect Router `/r/[code]` & Click Tracking | DONE | 13/10 | 14/10 17:00 |
 | BE1-W2-05 | Nguyễn Minh Tuệ | BE1 | Cấu hình RLS Policies cho `affiliate_links` & `clicks` | DONE | 13/10 | 15/10 12:00 |
 | BE1-W2-06 | Nguyễn Minh Tuệ | BE1 | Tối ưu hóa truy vấn Feed & Hỗ trợ tích hợp kỹ thuật E2E | DONE | 13/10 | 13/10 21:30 |
-| BE1-W2-07 | Nguyễn Minh Tuệ | BE1 | Migration Clicks Anti-Fraud & Cập nhật Trigger thống kê click hợp lệ | READY | 14/10 | 14/10 17:00 |
-| BE1-W2-08 | Nguyễn Minh Tuệ | BE1 | Module Lọc Bot & Parser Thiết bị trong Router `/r/[code]` | READY | 14/10 | 15/10 12:00 |
+| BE1-W2-07 | Nguyễn Minh Tuệ | BE1 | Migration Clicks Anti-Fraud & Cập nhật Trigger thống kê click hợp lệ | DONE | 14/10 | 14/10 11:15 |
+| BE1-W2-08 | Nguyễn Minh Tuệ | BE1 | Module Lọc Bot & Parser Thiết bị trong Router `/r/[code]` | IN_PROGRESS | 14/10 | 15/10 12:00 |
 | BE1-W2-09 | Nguyễn Minh Tuệ | BE1 | Bộ Postgres RPC Hàm Thống Kê Nhanh (Analytics RPCs) | READY | 14/10 | 15/10 17:00 |
 | BE1-W2-10 | Nguyễn Minh Tuệ | BE1 | API Quản Lý & Báo Cáo cho Reseller Dashboard (`/api/reseller/*`) | READY | 15/10 | 16/10 10:00 |
 | BE2-W2-01 | Nguyễn Huỳnh | BE2 | Prompt System phân theo 4 Personas du lịch | READY | 12/10 | 12/10 17:00 |
@@ -45,6 +45,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | T1-W2-01 | Tester 1 | File Mock Data `src/lib/campaign-demo.ts` (4 campaigns, 20+ content items) | 12/10/2026 11:30 | FE |
 | BE1-W2-01/05 | BE1 | Migration `affiliate_links` & `clicks`, Trigger n8n, API `/api/tracking/generate`, Router `/r/[code]`, RLS, Types gen, Test Suite PASS | 13/10/2026 14:00 | FE, BE3, Tester 3 |
 | BE1-W2-06 | BE1 | Migration `optimize_feed_and_tracking_indexes.sql`, Benchmark script, EXPLAIN ANALYZE < 1ms PASS, Build PASS | 13/10/2026 21:30 | Toàn team (E2E) |
+| BE1-W2-07 | BE1 | Migration `clicks_anti_fraud_and_device_analytics.sql`, Trigger assertion test PASS 100%, types generated, Build PASS | 14/10/2026 11:15 | Tester 3, BE1 (Task 08) |
 
 ---
 
@@ -52,7 +53,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | Task ID | Member | Task | Progress | Blocker | Next Step |
 |---|---|---|---|---|---|
 | UX-W2-01 | UI/UX | Hoàn thiện Figma Hi-fi Reseller Feed | 70% | Chốt các trường bắt buộc trên Card | Xuất specs và asset cho FE |
-| BE1-W2-07/08 | BE1 | Migration Clicks Anti-Fraud & Module Lọc Bot Router `/r/[code]` | 20% | None | Viết migration SQL và module ua-parser |
+| BE1-W2-08 | BE1 | Module Lọc Bot & Parser Thiết bị trong Router `/r/[code]` | 10% | None | Viết module ua-parser và rate-limiter |
 | BE2-W2-01 | BE2 | Soạn thảo Prompt System 4 Personas | 50% | None | Chạy test sinh thử với Gemini |
 | BE3-W2-01 | BE3 | Tạo Node Webhook tiếp nhận Campaign trên n8n | 50% | None (Đã có trigger BE1) | Cấu hình webhook URL cố định & test |
 | FE-W2-01 | FE | Khởi tạo cấu trúc router `/reseller/campaigns` | 30% | Chờ Figma từ UI/UX | Dựng layout chung bằng mock data |
