@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "persona": {
+      "type": "string",
+      "enum": [
+        "local_guide",
+        "family",
+        "foodie",
+        "budget_traveler"
+      ]
+    },
+    "hooks": {
+      "minItems": 10,
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 20,
+        "maxLength": 100
+      }
+    },
+    "scripts": {
+      "minItems": 5,
+      "maxItems": 5,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 120
+          },
+          "duration": {
+            "type": "integer",
+            "minimum": 30,
+            "maximum": 45
+          },
+          "scenes": {
+            "minItems": 3,
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 10,
+              "maxLength": 500
+            }
+          }
+        },
+        "required": ["title", "duration", "scenes"],
+        "additionalProperties": false
+      }
+    },
+    "captions": {
+      "minItems": 5,
+      "maxItems": 5,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 40,
+        "maxLength": 2200,
+        "pattern": "#[\\p{L}\\p{N}_]+"
+      }
+    },
+    "ctas": {
+      "minItems": 5,
+      "maxItems": 5,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 15,
+        "maxLength": 300,
+        "pattern": "\\[LINK_MUA_VE\\]"
+      }
+    }
+  },
+  "required": ["persona", "hooks", "scripts", "captions", "ctas"],
+  "additionalProperties": false
+}
