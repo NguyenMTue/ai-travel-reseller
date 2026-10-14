@@ -8,7 +8,11 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Bỏ qua static files, ảnh và các file tĩnh phổ biến
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/merchant",
+    "/merchant/:path*",
+    "/reseller",
+    "/reseller/:path*",
+    "/admin",
+    "/admin/:path*",
   ],
 };

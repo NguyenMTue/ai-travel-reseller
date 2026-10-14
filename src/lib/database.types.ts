@@ -8,7 +8,10 @@ export type Database = {
             [_ in never]: never
           }
           Views: {
-            [_ in never]: never
+            "merchant_public_profiles": {
+              Row: { "id": string, "name": string }
+              Relationships: []
+            }
           }
           Functions: {
             "graphql":

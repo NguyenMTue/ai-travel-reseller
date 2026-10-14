@@ -3,7 +3,7 @@ import { AssistantPageHeader } from "@/src/components/chat/assistant-page-header
 import { ChatPanel, type Attribution } from "@/src/components/chat/chat-panel";
 import { createClient } from "@/src/lib/supabase/server";
 import { hasSupabaseConfig } from "@/src/lib/supabase/config";
-import { homePathForRole, resolveUserRole } from "@/src/lib/role-auth";
+import { homePathForRole, resolveUserRoleFromClaims } from "@/src/lib/role-auth";
 
 export const metadata = { title: "Trợ lý AI" };
 
@@ -12,13 +12,13 @@ async function resolveAssistantHome(): Promise<string> {
     return "/";
   }
   const supabase = createClient(await cookies());
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const { data, error } = await supabase.auth.getClaims();
+  const claims = data?.claims;
+  const userId = typeof claims?.sub === "string" ? claims.sub : null;
+  if (error || !userId) {
     return "/";
   }
-  const role = await resolveUserRole(supabase, user.id);
+  const role = await resolveUserRoleFromClaims(supabase, claims as Record<string, unknown>);
   if (!role) {
     return "/";
   }

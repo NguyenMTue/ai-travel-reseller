@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { supabasePublicKey, supabaseUrl } from "@/src/lib/supabase/config";
+import { createAdminClient } from "@/src/lib/supabase/admin";
 
 type RouteContext = {
   params: Promise<{
@@ -17,18 +16,13 @@ export async function GET(request: Request, context: RouteContext) {
       return NextResponse.redirect(new URL("/?error=invalid_tracking_code", request.url), 302);
     }
 
-    if (!supabaseUrl || !supabasePublicKey) {
-      return NextResponse.redirect(new URL("/?error=tracking_unavailable", request.url), 302);
-    }
-    // This public redirect flow is intentionally limited by RLS to active links and click inserts.
-    const database = createClient(supabaseUrl, supabasePublicKey, {
-      auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
-    });
+    // The customer-facing route is public; database access remains server-only.
+    const database = createAdminClient();
 
     // 1. Tìm thông tin link tiếp thị từ unique_code
     const { data: link, error } = await database
       .from("affiliate_links")
-      .select("id, destination_url, is_active, reseller_id, campaign_id, product_id")
+      .select("id, unique_code, destination_url, is_active")
       .eq("unique_code", cleanCode)
       .maybeSingle();
 
@@ -57,9 +51,6 @@ export async function GET(request: Request, context: RouteContext) {
         referer: referer,
         metadata: {
           code: cleanCode,
-          reseller_id: link.reseller_id,
-          campaign_id: link.campaign_id,
-          product_id: link.product_id,
           timestamp: new Date().toISOString(),
         },
       });

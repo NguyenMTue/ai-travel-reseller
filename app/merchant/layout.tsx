@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/src/lib/supabase/server";
 import { hasSupabaseConfig } from "@/src/lib/supabase/config";
-import { homePathForRole, resolveUserRole } from "@/src/lib/role-auth";
+import { homePathForRole, resolveUserRoleFromClaims } from "@/src/lib/role-auth";
 import {
   MerchantUserProvider,
   type MerchantUser,
@@ -22,15 +22,15 @@ export default async function MerchantLayout({
   }
 
   const supabase = createClient(await cookies());
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getClaims();
+  const claims = data?.claims;
+  const userId = typeof claims?.sub === "string" ? claims.sub : null;
 
-  if (!user) {
+  if (error || !userId) {
     redirect("/login?next=/merchant");
   }
 
-  const role = await resolveUserRole(supabase, user.id);
+  const role = await resolveUserRoleFromClaims(supabase, claims as Record<string, unknown>);
   if (!role) {
     redirect(`/login?error=no_role`);
   }
@@ -38,13 +38,15 @@ export default async function MerchantLayout({
     redirect(homePathForRole(role));
   }
 
+  const userMetadata = claims?.user_metadata as Record<string, unknown> | undefined;
+  const email = typeof claims?.email === "string" ? claims.email : "";
   const displayName =
-    (user.user_metadata?.full_name as string | undefined) ||
-    user.email?.split("@")[0] ||
+    (typeof userMetadata?.full_name === "string" ? userMetadata.full_name : undefined) ||
+    email.split("@")[0] ||
     "Merchant";
 
   const merchantUser: MerchantUser = {
-    email: user.email ?? "",
+    email,
     displayName,
     initials: getInitials(displayName),
   };

@@ -35,14 +35,32 @@ export async function resolveUserRole(
   return null;
 }
 
+/**
+ * Resolve a role from a verified JWT claim first. The database lookup remains
+ * as a rollout fallback for sessions issued before the Auth Hook was enabled.
+ */
+export async function resolveUserRoleFromClaims(
+  supabase: SupabaseClient,
+  claims: Record<string, unknown> | null | undefined,
+): Promise<UserRole | null> {
+  const userId = typeof claims?.sub === "string" ? claims.sub : null;
+  if (!userId) return null;
+
+  if (Object.prototype.hasOwnProperty.call(claims, "user_role")) {
+    const role = claims?.user_role;
+    return role === "merchant" || role === "reseller" ? role : null;
+  }
+
+  return resolveUserRole(supabase, userId);
+}
+
 export function getUserRoleFromMetadata(user: {
   user_metadata?: Record<string, unknown> | null;
   app_metadata?: Record<string, unknown> | null;
 } | null | undefined): UserRole | null {
   if (!user) return null;
-  const role =
-    (user.user_metadata?.role as string | undefined) ||
-    (user.app_metadata?.role as string | undefined);
+  // user_metadata is user-editable and must never authorize access.
+  const role = user.app_metadata?.role as string | undefined;
 
   if (role === "merchant" || role === "reseller") {
     return role;

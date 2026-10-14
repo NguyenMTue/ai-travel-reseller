@@ -99,7 +99,7 @@ export async function getResellerCampaignFeed(): Promise<
       ? supabase.from("products").select("*").in("id", productIds)
       : Promise.resolve({ data: [], error: null }),
     merchantIds.length
-      ? supabase.from("merchants").select("id,name").in("id", merchantIds)
+      ? supabase.from("merchant_public_profiles").select("id,name").in("id", merchantIds)
       : Promise.resolve({ data: [], error: null }),
   ]);
 
@@ -166,7 +166,7 @@ export async function getResellerCampaignDetail(
       ? supabase.from("products").select("*").eq("id", campaign.product_id).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     campaign.merchant_id
-      ? supabase.from("merchants").select("id,name").eq("id", campaign.merchant_id).maybeSingle()
+      ? supabase.from("merchant_public_profiles").select("id,name").eq("id", campaign.merchant_id).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     supabase
       .from("contents")

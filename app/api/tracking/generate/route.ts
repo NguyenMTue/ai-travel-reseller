@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { createClient } from "@/src/lib/supabase/server";
-import { resolveUserRole } from "@/src/lib/role-auth";
+import { resolveUserRoleFromClaims } from "@/src/lib/role-auth";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
@@ -72,25 +72,22 @@ export async function POST(request: Request) {
     // Danh tính người nhận link phải lấy từ session đã xác thực, không tin ID do client gửi.
     const cookieStore = await cookies();
     const supabaseAuth = createClient(cookieStore);
-    const {
-      data: { user },
-      error: authError,
-    } = await supabaseAuth.auth.getUser();
-    if (authError || !user) {
+    const { data, error: authError } = await supabaseAuth.auth.getClaims();
+    const claims = data?.claims;
+    const resellerId = typeof claims?.sub === "string" ? claims.sub : null;
+    if (authError || !resellerId) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
-    const role = await resolveUserRole(supabaseAuth, user.id);
+    const role = await resolveUserRoleFromClaims(supabaseAuth, claims as Record<string, unknown>);
     if (role !== "reseller") {
       return NextResponse.json({ error: "Only resellers can generate tracking links" }, { status: 403 });
     }
-    if (body.reseller_id && body.reseller_id !== user.id) {
+    if (body.reseller_id && body.reseller_id !== resellerId) {
       return NextResponse.json(
         { error: "reseller_id does not match the signed-in user" },
         { status: 403 },
       );
     }
-    const resellerId = user.id;
-
     // Use the authenticated client so Supabase RLS enforces the reseller's ownership.
     const database = supabaseAuth;
 
