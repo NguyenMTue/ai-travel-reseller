@@ -20,7 +20,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | BE1-W2-07 | Nguyễn Minh Tuệ | BE1 | Migration Clicks Anti-Fraud & Cập nhật Trigger thống kê click hợp lệ | DONE | 14/10 | 14/10 11:15 |
 | BE1-W2-08 | Nguyễn Minh Tuệ | BE1 | Module Lọc Bot & Parser Thiết bị trong Router `/r/[code]` | DONE | 14/10 | 14/10 11:30 |
 | BE1-W2-09 | Nguyễn Minh Tuệ | BE1 | Bộ Postgres RPC Hàm Thống Kê Nhanh (Analytics RPCs) | DONE | 14/10 | 14/10 11:45 |
-| BE1-W2-10 | Nguyễn Minh Tuệ | BE1 | API Quản Lý & Báo Cáo cho Reseller Dashboard (`/api/reseller/*`) | IN_PROGRESS | 14/10 | 16/10 10:00 |
+| BE1-W2-10 | Nguyễn Minh Tuệ | BE1 | API Quản Lý & Báo Cáo cho Reseller Dashboard (`/api/reseller/*`) | DONE | 14/10 | 14/10 12:00 |
 | BE2-W2-01 | Nguyễn Huỳnh | BE2 | Prompt System phân theo 4 Personas du lịch | READY | 12/10 | 12/10 17:00 |
 | BE2-W2-02/03 | Nguyễn Huỳnh | BE2 | Zod Structured Output Schema & Content Guardrails | READY | 13/10 | 13/10 17:00 |
 | BE3-W2-01/02 | Thái Thanh Tú | BE3 | Workflow n8n Campaign-to-AI-Content-Pipeline | READY | 12/10 | 13/10 17:00 |
@@ -48,6 +48,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | BE1-W2-07 | BE1 | Migration `clicks_anti_fraud_and_device_analytics.sql`, Trigger assertion test PASS 100%, types generated, Build PASS | 14/10/2026 11:15 | Tester 3, BE1 (Task 08) |
 | BE1-W2-08 | BE1 | Module UA Parser, Rate Limiter & Router `/r/[code]` anti-bot integration, Unit tests PASS 100%, Build PASS | 14/10/2026 11:30 | Tester 3, FE |
 | BE1-W2-09 | BE1 | Migration `reseller_analytics_rpc.sql`, 4 RPC functions (Overview, Timeseries, Top campaigns, Devices) test PASS 100%, types generated | 14/10/2026 11:45 | FE, BE1 (Task 10) |
+| BE1-W2-10 | BE1 | 2 API Route Handlers (`GET /api/reseller/links`, `GET /api/reseller/analytics`), Test E2E `test_antibot_and_analytics.ps1` PASS 100%, Build PASS 16/16 routes | 14/10/2026 12:00 | FE, Tester 3 |
 
 ---
 
@@ -55,7 +56,6 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | Task ID | Member | Task | Progress | Blocker | Next Step |
 |---|---|---|---|---|---|
 | UX-W2-01 | UI/UX | Hoàn thiện Figma Hi-fi Reseller Feed | 70% | Chốt các trường bắt buộc trên Card | Xuất specs và asset cho FE |
-| BE1-W2-10 | BE1 | API Quản Lý & Báo Cáo cho Reseller Dashboard (`/api/reseller/*`) | 10% | None | Xây dựng 2 Route Handlers /links và /analytics |
 | BE2-W2-01 | BE2 | Soạn thảo Prompt System 4 Personas | 50% | None | Chạy test sinh thử với Gemini |
 | BE3-W2-01 | BE3 | Tạo Node Webhook tiếp nhận Campaign trên n8n | 50% | None (Đã có trigger BE1) | Cấu hình webhook URL cố định & test |
 | FE-W2-01 | FE | Khởi tạo cấu trúc router `/reseller/campaigns` | 30% | Chờ Figma từ UI/UX | Dựng layout chung bằng mock data |
@@ -81,8 +81,8 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | BE1 | BE3 | Webhook trigger `on_campaign_created` payload specs | DONE | 13/10 |
 | BE1 | FE | API Contract `POST /api/tracking/generate` & `/api/tracking-links/generate` | DONE | 13/10 |
 | BE1 | Tester 3 | Redirect Router `/r/[code]` & Schema `clicks` | DONE | 13/10 |
-| BE1 | FE | API Báo cáo & Link Reseller (`GET /api/reseller/links`, `GET /api/reseller/analytics`) | READY | 15/10 |
-| BE1 | Tester 3 | RPC Functions & Test script lọc Bot, Rate limit, Analytics | READY | 15/10 |
+| BE1 | FE | API Báo cáo & Link Reseller (`GET /api/reseller/links`, `GET /api/reseller/analytics`) | DONE | 14/10 |
+| BE1 | Tester 3 | RPC Functions & Test script lọc Bot, Rate limit, Analytics | DONE | 14/10 |
 | BE3 | FE | Dữ liệu nội dung bài viết sinh tự động vào bảng `contents` | READY_FOR_HANDOFF | 14/10 |
 | FE | Tester 1 | Nhánh code Reseller Portal để viết Playwright test | READY_FOR_HANDOFF | 14/10 |
 
@@ -148,6 +148,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | 12/10 11:30 | Bổ sung bàn giao Mock Data `campaign-demo.ts` từ Tester 1 cho FE | Tester 1 / PM |
 | 13/10 14:50 | Hoàn tất deliverables BE1-W2 (Schema, API, Redirect, Trigger); giải tỏa blockers cho FE & Tester 3 | BE1 (Nguyễn Minh Tuệ) |
 | 14/10 10:45 | Phân rã 4 modules nâng cấp BE1-W2-07 đến 10 (Anti-fraud bot, Device parser, RPC analytics, Reseller API) | BE1 / PM |
+| 14/10 12:00 | Hoàn tất toàn bộ 4 modules BE1-W2-07 đến 10 (Anti-bot, Device parser, RPCs, Reseller APIs, E2E test PASS 100%) | BE1 (Nguyễn Minh Tuệ) |
 
 ---
 
@@ -159,11 +160,16 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 - **Done:**
   - Merge thành công PR #12 (`Feature_Affiliate`) và PR #13 (`Feature_BE1_Optimization`) vào nhánh `dev`.
   - Tiếp nhận và phân rã 4 module nâng cấp từ `SP_BE1_W2` thành 4 task chính thức (`BE1-W2-07` đến `BE1-W2-10`).
-  - Thiết kế cấu trúc mở rộng bảng `clicks` (bot detection, devices parser) và bộ 4 hàm Postgres RPC Analytics.
+  - Hoàn thành trọn vẹn cả 4 nhiệm vụ trên nhánh `Feature_BE1_AntiBot`:
+    - `BE1-W2-07`: Mở rộng schema `clicks`, trigger đếm click hợp lệ (`clicks_anti_fraud_and_device_analytics.sql`).
+    - `BE1-W2-08`: Module nhận diện Bot, Device Parser, Rate Limiter gắn vào `/r/[code]`.
+    - `BE1-W2-09`: Bộ 4 Postgres RPC functions tính toán hiệu năng cao (`reseller_analytics_rpc.sql`).
+    - `BE1-W2-10`: 2 API Route Handlers `/api/reseller/links` & `/api/reseller/analytics`.
+  - Kiểm thử E2E kịch bản anti-bot, rate limit, crawler, analytics với `test_antibot_and_analytics.ps1` đạt PASS 100%. Next.js build pass 16/16 routes.
 - **In Progress:**
-  - Viết file migration `20261014110000_clicks_anti_fraud_and_device_analytics.sql` và xây dựng module parser User-Agent / Rate Limiter.
+  - Đẩy 4 commits lên branch `Feature_BE1_AntiBot`, chuẩn bị tạo PR merge vào `dev`.
 - **Next:**
-  - Cập nhật Route Handler `/r/[code]`, triển khai các hàm Postgres RPC và 2 Route Handlers cho Reseller Dashboard.
+  - Hỗ trợ FE ghép UI Báo cáo Reseller với API mới và hỗ trợ Tester 3 chạy kiểm thử diện rộng.
 
 ### 13/10/2026 (Thứ Ba)
 
