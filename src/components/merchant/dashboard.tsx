@@ -20,6 +20,7 @@ import { Input } from "@/src/components/ui/input";
 import { demoProducts, demoMetrics } from "@/src/lib/merchant-demo";
 import { MerchantHeader } from "@/src/components/merchant/merchant-header";
 import { CampaignCreateForm } from "@/src/components/merchant/campaign-create-form";
+import { MerchantProductsPanel } from "@/src/components/merchant/merchant-products-panel";
 export function Dashboard({ preview = false, initialTab = "overview" }: { preview?: boolean; initialTab?: string }) {
   const pathname = usePathname();
   const [tab, setTab] = useState(initialTab);
@@ -173,8 +174,7 @@ export function Dashboard({ preview = false, initialTab = "overview" }: { previe
           <div className="preview-banner">
             <span>
               <span className="dot" />{" "}
-              {preview ? "BẢN XEM TRƯỚC" : "DỮ LIỆU MINH HỌA"} · Các chỉ số và
-              sản phẩm hiện chưa được kết nối dữ liệu thật.
+              {preview ? "BẢN XEM TRƯỚC · DỮ LIỆU MINH HỌA" : "KHU VỰC DOANH NGHIỆP · SẢN PHẨM ĐƯỢC TẢI TỪ SUPABASE"}
             </span>
             {preview ? (
               <label>
@@ -215,6 +215,8 @@ export function Dashboard({ preview = false, initialTab = "overview" }: { previe
           </div>
           {activeTab === "create-campaign" ? (
             <CampaignCreateForm />
+          ) : activeTab === "products" ? (
+            <MerchantProductsPanel preview={preview} />
           ) : view === "loading" ? (
             <div
               role="status"
@@ -426,3 +428,4 @@ export function Dashboard({ preview = false, initialTab = "overview" }: { previe
     </div>
   );
 }
+

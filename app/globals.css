@@ -3689,3 +3689,68 @@ tr:last-child td {
   }
 }
 
+
+.merchant-products-panel > .panel-heading {
+  align-items: center;
+}
+.product-create-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 18px 0 22px;
+  padding: 18px;
+  border: 1px solid #dce3dc;
+  border-radius: 12px;
+  background: #fbfcfa;
+}
+.product-create-form label {
+  display: grid;
+  gap: 7px;
+  color: #354b46;
+  font-size: 13px;
+  font-weight: 600;
+}
+.product-create-form input,
+.product-create-form textarea {
+  width: 100%;
+  border: 1px solid #dce3dc;
+  border-radius: 8px;
+  background: #fff;
+  padding: 10px 12px;
+  color: #243c37;
+  font: inherit;
+}
+.product-create-wide {
+  grid-column: 1 / -1;
+}
+.product-panel-message,
+.product-panel-error {
+  margin: 14px 0;
+  font-size: 13px;
+}
+.product-panel-message {
+  color: #176044;
+}
+.product-panel-error {
+  color: #b42318;
+}
+@media (max-width: 640px) {
+  .product-create-form {
+    grid-template-columns: 1fr;
+  }
+  .product-create-wide {
+    grid-column: auto;
+  }
+  .merchant-products-panel > .panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+.merchant-campaign-add-product {
+  width: fit-content;
+  color: #1d5b52;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
