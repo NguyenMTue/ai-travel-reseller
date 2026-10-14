@@ -280,7 +280,23 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "match_product_embeddings":
+            "get_reseller_click_timeseries":
+{ Args: { "p_days"?: number,"p_reseller_id": string }; Returns: {
+              "bot_clicks": number,"date": string,"total_clicks": number,"valid_clicks": number
+            }[]
+                           },
+"get_reseller_device_stats":
+{ Args: { "p_reseller_id": string }; Returns: Json
+                           },
+"get_reseller_overview_stats":
+{ Args: { "p_reseller_id": string }; Returns: Json
+                           },
+"get_reseller_top_campaigns":
+{ Args: { "p_limit"?: number,"p_reseller_id": string }; Returns: {
+              "campaign_id": string,"campaign_name": string,"commission_rate": number,"product_name": string,"short_url": string,"total_clicks": number,"unique_code": string,"valid_clicks": number
+            }[]
+                           },
+"match_product_embeddings":
 { Args: { "filter_product_id"?: string,"match_count"?: number,"match_threshold"?: number,"query_embedding": string }; Returns: {
               "chunk_index": number,"content": string,"id": string,"metadata": Json,"product_id": string,"similarity": number
             }[]

@@ -47,8 +47,8 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
 | BE1-W2-06 | Tối ưu hóa truy vấn Feed & Hỗ trợ tích hợp kỹ thuật E2E | P2 | DONE | BE1-W2-04 | BE1 | Migration SQL (`20261013213000_optimize_feed_and_tracking_indexes.sql`), benchmark script `benchmark_performance.ps1` | 13/10 21:30 |
 | BE1-W2-07 | Migration mở rộng bảng `clicks` & Cập nhật Trigger đếm click hợp lệ | P1 | DONE | BE1-W2-01 | BE1 | File migration SQL (`20261014110000_clicks_anti_fraud_and_device_analytics.sql`) | 14/10 11:15 |
 | BE1-W2-08 | Module Chống click tặc, Lọc Bot & Parser Thiết bị trong Router `/r/[code]` | P1 | DONE | BE1-W2-04, 07 | BE1 | Code `app/r/[code]/route.ts` + `ua-parser.ts`, `rate-limiter.ts` | 14/10 11:30 |
-| BE1-W2-09 | Bộ Postgres RPC Hàm Thống Kê Nhanh (High-Performance Analytics RPCs) | P1 | IN_PROGRESS | BE1-W2-07 | BE1 | File migration SQL (`20261014140000_reseller_analytics_rpc.sql`) | 15/10 17:00 |
-| BE1-W2-10 | API Quản Lý & Báo Cáo cho Reseller Dashboard (`/api/reseller/*`) | P1 | READY | BE1-W2-09 | BE1 | Routes `app/api/reseller/links/route.ts` & `app/api/reseller/analytics/route.ts` | 16/10 10:00 |
+| BE1-W2-09 | Bộ Postgres RPC Hàm Thống Kê Nhanh (High-Performance Analytics RPCs) | P1 | DONE | BE1-W2-07 | BE1 | File migration SQL (`20261014140000_reseller_analytics_rpc.sql`) | 14/10 11:45 |
+| BE1-W2-10 | API Quản Lý & Báo Cáo cho Reseller Dashboard (`/api/reseller/*`) | P1 | IN_PROGRESS | BE1-W2-09 | BE1 | Routes `app/api/reseller/links/route.ts` & `app/api/reseller/analytics/route.ts` | 16/10 10:00 |
 
 ---
 
