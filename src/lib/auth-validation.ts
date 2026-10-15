@@ -10,8 +10,10 @@ export const signupSchema = loginSchema.extend({
 });
 export function safeNextPath(value: unknown) {
   // Only explicit app destinations; rejects external URLs, backslashes and encoded redirects.
-  if (typeof value !== "string") return "/merchant";
-  return /^\/(merchant|reseller)(\/[a-zA-Z0-9_-]+)*$/.test(value)
-    ? value
-    : "/merchant";
+  return parseSafeNextPath(value) ?? "/merchant";
+}
+// Unlike the legacy string fallback, this preserves the absence of a requested
+// destination so login can resolve a default from verified memberships.
+export function parseSafeNextPath(value: unknown): string | null {
+  return typeof value === "string" && /^\/(merchant|reseller)(\/[a-zA-Z0-9_-]+)*$/.test(value) ? value : null;
 }

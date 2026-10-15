@@ -501,9 +501,42 @@ textarea::placeholder {
   padding-bottom: 44px;
 }
 .footer p,
-.footer > a:not(.brand) {
+.footer-chat {
   font-size: 10px;
   color: var(--muted-foreground);
+}
+.footer-navigation,
+.legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+}
+.footer-navigation {
+  justify-content: flex-end;
+}
+.legal-links {
+  font-size: 12px;
+  color: var(--primary);
+}
+.legal-links a,
+.footer-chat {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.legal-links a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.auth-bottom .legal-links {
+  justify-content: center;
+  margin-bottom: 8px;
+}
+@media (max-width: 760px) {
+  .footer-navigation {
+    justify-content: flex-start;
+  }
 }
 .skip-link {
   position: fixed;
