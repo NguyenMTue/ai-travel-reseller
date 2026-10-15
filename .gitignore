@@ -48,3 +48,6 @@ next-env.d.ts
 # UI test artifacts
 /test-results/
 /playwright-report/
+# idea
+.idea/
+**/.idea/
