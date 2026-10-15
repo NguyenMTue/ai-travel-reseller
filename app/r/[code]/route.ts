@@ -83,7 +83,12 @@ export async function GET(request: Request, context: RouteContext) {
 
     // 4. HTTP 302 Redirect an toàn đến trang thanh toán chính thức của Merchant
     // Lưu ý: Luôn luôn chuyển hướng 302 kể cả với Bot hoặc spam để bảo đảm OpenGraph Preview trên MXH không bị lỗi
-    return NextResponse.redirect(link.destination_url, 302);
+    try {
+      const redirectUrl = new URL(link.destination_url, request.url);
+      return NextResponse.redirect(redirectUrl.toString(), 302);
+    } catch {
+      return NextResponse.redirect(new URL("/?error=invalid_destination_url", request.url), 302);
+    }
   } catch (error) {
     console.error("[Tracking] Lỗi router chuyển hướng:", error);
     return NextResponse.redirect(new URL("/?error=redirect_failed", request.url), 302);
