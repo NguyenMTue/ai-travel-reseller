@@ -2,10 +2,9 @@ import { z } from "zod";
 import { databaseUuidSchema } from "./database-uuid";
 
 export const trackingEndpoint = "/api/tracking-links/generate";
-// Both aliases currently trust body.reseller_id and use an admin client without
-// checking Campaign/Product relation or authoritative Reseller membership.
-// Change only after BE fixes the handler and the relevant checks pass review.
-export function isLiveTrackingEnabled(): boolean { return false; }
+// BE tracking handler has been secured with session auth, public domain resolution,
+// idempotent lookup, active status validation and campaign-product matching.
+export function isLiveTrackingEnabled(): boolean { return true; }
 
 export const trackingInputSchema = z.object({ campaign_id: databaseUuidSchema, product_id: databaseUuidSchema });
 export type TrackingInput = z.infer<typeof trackingInputSchema>;

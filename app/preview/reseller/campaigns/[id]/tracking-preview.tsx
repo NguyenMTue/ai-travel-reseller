@@ -12,7 +12,7 @@ export function TrackingPreview({ input, scenario, onSettled }: { input: Trackin
   const [attempts, setAttempts] = useState(0);
   const [payload, setPayload] = useState("");
   return <>
-    <TrackingLinkModal input={scenario === "missing-product" ? null : input} preview={scenario !== "blocked"}
+    <TrackingLinkModal input={scenario === "missing-product" ? null : input} preview={scenario !== "blocked"} blocked={scenario === "blocked"}
       request={async value => {
         const result = await requestTrackingFixture(value, scenario, body => { setAttempts(n => n + 1); setPayload(body); });
         onSettled?.();

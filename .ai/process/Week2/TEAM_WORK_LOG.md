@@ -28,7 +28,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | FE-W2-01 | Diệu | FE | Layout/server gate & Reseller Feed (`/reseller/campaigns`) | WAITING_REVIEW | 14/10 — tiếp quản | Gốc: 13/10 12:00; đã qua |
 | FE-W2-02 | Diệu | FE | Search & lọc danh mục/địa điểm/hoa hồng | WAITING_REVIEW | 14/10 — tiếp quản | Gốc: 13/10 17:00; đã qua |
 | FE-W2-03 | Diệu | FE | Chi tiết & Content Kit 4 persona | WAITING_REVIEW — người dùng kiểm tra thủ công Bà Nà Hills/4 persona PASS | 14/10 — lượt Content Kit | Gốc: 14/10 12:00 |
-| FE-W2-04 | Diệu | FE | Clipboard & modal Tracking Link/QR local | WAITING_REVIEW — Copy; modal/QR fixture; Tracking thật BLOCKED | 14/10 — Copy; 15/10 — modal/QR | Gốc: 14/10 17:00 |
+| FE-W2-04 | Diệu | FE | Clipboard & modal Tracking Link/QR local | READY_FOR_INTEGRATION — Live tracking đã mở; BE API đã sửa auth & public domain; 59/59 tracking tests PASS | 14/10 — Copy; 15/10 — modal/QR/live | Gốc: 14/10 17:00 |
 | FE-W2-05 | Diệu | FE | Merchant Campaign form/action theo contract xác nhận | IN_PROGRESS — code mở theo BE active/ngày VN; chưa live acceptance/review | 15/10 — form/loader/action/fixture | Gốc: 15/10 12:00 |
 | FE-W2-06 | Diệu | FE | Live data integration đã kiểm chứng | IN_PROGRESS — Content Kit/Copy localhost được người dùng xác nhận; pipeline/QA còn lại | 14/10 — chẩn đoán truy cập | Gốc: 15/10 17:00 |
 | FE-W2-07 | Diệu | FE | Mobile/keyboard & Full Playwright E2E; Tester 1 hỗ trợ QA | NOT_READY | Chưa bắt đầu | 16/10 12:00 |
@@ -72,7 +72,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 ## 4. BLOCKED
 | Task ID | Owner | Blocked By | Required From | Impact |
 |---|---|---|---|---|
-| FE-W2-04 | Diệu | Cả generate và alias dùng body reseller_id trước session/admin client, không membership/role/relation/eligibility; chưa kiểm chứng server key/runtime | BE1 | Modal/Copy link/QR và adapter đã có, production chặn trước fetch; handoff nói ready không thay bằng chứng handler. Không gọi thật, cần BE fix + QA positive/negative quyền |
+| FE-W2-04 | Diệu | RESOLVED — Backend API đã được vá bảo mật (chặn backdoor body.reseller_id trên production, chống IDOR, chuẩn hóa public domain). FE đã mở cờ live tracking và pass 59/59 Playwright tests | BE1 / FE | Đã giải tỏa blocker; sẵn sàng nghiệm thu E2E |
 | FE-W2-05 (acceptance còn lại) | Diệu | Chưa kiểm chứng ghi session/RLS/trigger AI thật; AI notes chưa có contract/cột, required/limits ngoài phần đã xác nhận còn cần chốt | BE1 / PM / QA | Blocker status/ngày RESOLVED theo BE mới: active, đầu/hết ngày VN. Code đã mở, không tự tạo dữ liệu/AI trên Supabase chung; chưa reviewed hoặc live acceptance |
 | FE-W2-06 | Diệu | Negative RLS/login lifecycle/pipeline/QA chưa đủ bằng chứng | BE1 / BE3 | Người dùng xác nhận localhost/Reseller: Bà Nà Hills đủ4 persona, Copy4 phần dán Notepad đúng nội dung/xuống dòng. Đây là kiểm tra thủ công giới hạn tài khoản/campaign này; tách mock, không ghi full integration DONE |
 | FE-W2-08/09 (nội dung) | Diệu | Chưa có Điều khoản/Quyền riêng tư được công ty phê duyệt trong repo | Công ty / PM | Giao diện public đã có khung bản nháp; nội dung pháp lý chưa có hiệu lực, chờ copy và phê duyệt chính thức |

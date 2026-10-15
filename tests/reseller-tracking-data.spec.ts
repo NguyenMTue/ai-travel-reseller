@@ -49,15 +49,21 @@ test("local URLs are labeled explicitly; a nonlocal URL alone does not prove pub
   expect(trackingUrlAudience(trackingFixtureUrl)).toBe("unverified-public");
 });
 
-test("live creation is blocked before fetch regardless of a caller-supplied identity", async () => {
-  expect(isLiveTrackingEnabled()).toBe(false);
-  const original = globalThis.fetch;
+test("live creation dispatches request with session credentials when enabled", async () => {
+  expect(isLiveTrackingEnabled()).toBe(true);
+  const originalFetch = globalThis.fetch;
+  const originalWindow = (globalThis as unknown as { window?: unknown }).window;
   let requests = 0;
+  (globalThis as unknown as { window: { location: { origin: string } } }).window = { location: { origin } };
   globalThis.fetch = async () => { requests++; return reply(trackingFixtureResponse()); };
   try {
-    expect((await requestLiveTrackingLink(input)).status).toBe("blocked");
-    expect(requests).toBe(0);
-  } finally { globalThis.fetch = original; }
+    const res = await requestLiveTrackingLink(input);
+    expect(res.status).toBe("success");
+    expect(requests).toBe(1);
+  } finally {
+    globalThis.fetch = originalFetch;
+    (globalThis as unknown as { window?: unknown }).window = originalWindow;
+  }
 });
 
 test("POST serializes only matching campaign and product, with session credentials and no retry", async () => {

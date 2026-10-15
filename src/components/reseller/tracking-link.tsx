@@ -10,13 +10,13 @@ import { useTrackingScope } from "./tracking-scope";
 import { trackingUrlAudience } from "@/src/lib/reseller/tracking-cta";
 
 type ModalProps = {
-  input: TrackingInput | null; request?: TrackingRequest; preview?: boolean;
+  input: TrackingInput | null; request?: TrackingRequest; preview?: boolean; blocked?: boolean;
 };
 export function TrackingLinkModal(props: ModalProps) {
   const { invalidated } = useTrackingScope();
   return <TrackingLinkDialog key={invalidated ? "invalidated" : "current"} {...props} input={invalidated ? null : props.input} />;
 }
-function TrackingLinkDialog({ input, request = requestLiveTrackingLink, preview = false }: ModalProps) {
+function TrackingLinkDialog({ input, request = requestLiveTrackingLink, preview = false, blocked = false }: ModalProps) {
   const { acceptLink } = useTrackingScope();
   const dialog = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLButtonElement>(null);
@@ -27,7 +27,7 @@ function TrackingLinkDialog({ input, request = requestLiveTrackingLink, preview 
   const [copy, setCopy] = useState<"idle" | "pending" | "success" | "error">("idle");
   const inFlight = useRef(false);
   const copying = useRef(false);
-  const allowed = preview || isLiveTrackingEnabled();
+  const allowed = !blocked && (preview || isLiveTrackingEnabled());
   const locked = result?.status === "success" || result?.status === "uncertain" || result?.status === "session";
 
   async function create() {
