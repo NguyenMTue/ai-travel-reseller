@@ -16,6 +16,10 @@ import {
   CONTENT_GUARDRAIL_FLAGS,
   validateContentGuardrails,
 } from "../src/lib/ai/guardrails/content-validator.ts";
+import {
+  mapCampaignContentToRows,
+  toPersistenceStatus,
+} from "../src/lib/ai/content-persistence.ts";
 
 const validOutput = {
   persona: "local_guide" as const,
@@ -64,6 +68,22 @@ const promptProduct = {
   confirmed_offers: [],
 };
 
+const vinWondersPromptProduct = {
+  name: "Vé VinWonders Nam Hội An",
+  description: "Vé vào cửa khu vui chơi VinWonders Nam Hội An.",
+  category: "Vé vui chơi",
+  original_price: 600_000,
+  sale_price: 550_000,
+  campaign_name: "Khám phá Nam Hội An 2026",
+  target_audience: "Gia đình có trẻ nhỏ và nhóm bạn",
+  target_location: "Quảng Nam, Đà Nẵng",
+  verified_facts: [
+    "Bao gồm vé vào cửa VinWonders Nam Hội An",
+    "Không bao gồm chi phí ăn uống",
+  ],
+  confirmed_offers: ["Giá bán chính thức 550.000 VND"],
+};
+
 test("all four persona prompts preserve the shared safety boundary", () => {
   const prompts = Object.keys(CONTENT_PERSONAS).map((persona) =>
     buildContentFactoryPrompt(
@@ -77,6 +97,15 @@ test("all four persona prompts preserve the shared safety boundary", () => {
   for (const prompt of prompts) {
     assert.match(prompt.system, /Không bịa giá/);
     assert.match(prompt.system, /\[LINK_MUA_VE\]/);
+    assert.match(prompt.user, /<VERIFIED_PRODUCT_DATA>/);
+  }
+});
+
+test("Bà Nà Hills and VinWonders prompts keep product data outside the system instruction", () => {
+  for (const product of [promptProduct, vinWondersPromptProduct]) {
+    const prompt = buildContentFactoryPrompt("family", product);
+    assert.equal(prompt.system.includes(product.name), false);
+    assert.equal(prompt.user.includes(product.name), true);
     assert.match(prompt.user, /<VERIFIED_PRODUCT_DATA>/);
   }
 });
@@ -124,6 +153,53 @@ test("guardrails approve confirmed prices", () => {
     flags: [],
     recommended_status: "APPROVED",
   });
+});
+
+test("persistence mapping creates five complete rows and five hook-only rows", () => {
+  const rows = mapCampaignContentToRows(
+    validOutput,
+    { isValid: true, flags: [], recommended_status: "APPROVED" },
+    {
+      campaign_id: "44444444-4444-4444-4444-444444444444",
+      product_id: "33333333-3333-3333-3333-333333333333",
+      reseller_id: null,
+    },
+  );
+
+  assert.equal(rows.length, 10);
+  assert.ok(
+    rows.slice(0, 5).every((row) =>
+      row.script !== null && row.caption !== null && row.cta !== null
+    ),
+  );
+  assert.ok(
+    rows.slice(5).every((row) =>
+      row.script === null && row.caption === null && row.cta === null
+    ),
+  );
+  assert.equal(new Set(rows.map((row) => row.hook)).size, 10);
+  assert.equal(rows[0].status, "approved");
+  assert.equal(rows[0].reseller_id, null);
+  assert.match(rows[0].script ?? "", /Thời lượng: 30 giây/);
+});
+
+test("persistence status is lowercase and rejects inconsistent guardrail results", () => {
+  assert.equal(
+    toPersistenceStatus({
+      isValid: false,
+      flags: [CONTENT_GUARDRAIL_FLAGS.PRICE_MISMATCH],
+      recommended_status: "NEEDS_REVIEW",
+    }),
+    "needs_review",
+  );
+  assert.throws(
+    () => toPersistenceStatus({
+      isValid: true,
+      flags: [],
+      recommended_status: "NEEDS_REVIEW",
+    }),
+    /Inconsistent content guardrail result/,
+  );
 });
 
 const invalidCases = [

@@ -26,26 +26,46 @@ const runCount = Number.isInteger(requestedRuns)
 const personas = Object.keys(CONTENT_PERSONAS) as ContentPersona[];
 const client = new GoogleGenAI({ apiKey });
 
-const product = {
-  name: "Vé Cáp Treo Bà Nà Hills + Buffet Trưa Quốc Tế",
-  description:
-    "Vé trọn gói vào cổng, cáp treo khứ hồi Bà Nà Hills, tham quan Cầu Vàng, Làng Pháp và buffet trưa hơn 100 món tại nhà hàng Arapang hoặc Beer Plaza.",
-  category: "Vé tham quan & Ẩm thực",
-  original_price: 1_250_000,
-  sale_price: 1_150_000,
-  campaign_name: "Chiến dịch Hè 2026 - Kích cầu du lịch Bà Nà Hills",
-  target_audience: "Gia đình có trẻ nhỏ, nhóm bạn trẻ",
-  target_location: "Đà Nẵng, Hà Nội, TP.HCM",
-  verified_facts: [
-    "Bao gồm vé vào cổng và cáp treo khứ hồi",
-    "Bao gồm tham quan Cầu Vàng và Làng Pháp",
-    "Bao gồm buffet trưa hơn 100 món tại Arapang hoặc Beer Plaza",
-  ],
-  confirmed_offers: ["Giá bán chính thức 1.150.000 VND"],
-};
+const products = [
+  {
+    testId: "ba-na-hills",
+    name: "Vé Cáp Treo Bà Nà Hills + Buffet Trưa Quốc Tế",
+    description:
+      "Vé trọn gói vào cổng, cáp treo khứ hồi Bà Nà Hills, tham quan Cầu Vàng, Làng Pháp và buffet trưa hơn 100 món tại nhà hàng Arapang hoặc Beer Plaza.",
+    category: "Vé tham quan & Ẩm thực",
+    original_price: 1_250_000,
+    sale_price: 1_150_000,
+    campaign_name: "Chiến dịch Hè 2026 - Kích cầu du lịch Bà Nà Hills",
+    target_audience: "Gia đình có trẻ nhỏ, nhóm bạn trẻ",
+    target_location: "Đà Nẵng, Hà Nội, TP.HCM",
+    verified_facts: [
+      "Bao gồm vé vào cổng và cáp treo khứ hồi",
+      "Bao gồm tham quan Cầu Vàng và Làng Pháp",
+      "Bao gồm buffet trưa hơn 100 món tại Arapang hoặc Beer Plaza",
+    ],
+    confirmed_offers: ["Giá bán chính thức 1.150.000 VND"],
+  },
+  {
+    testId: "vinwonders-nam-hoi-an",
+    name: "Vé VinWonders Nam Hội An",
+    description: "Vé vào cửa khu vui chơi VinWonders Nam Hội An.",
+    category: "Vé vui chơi",
+    original_price: 600_000,
+    sale_price: 550_000,
+    campaign_name: "Khám phá Nam Hội An 2026",
+    target_audience: "Gia đình có trẻ nhỏ và nhóm bạn",
+    target_location: "Quảng Nam, Đà Nẵng",
+    verified_facts: [
+      "Bao gồm vé vào cửa VinWonders Nam Hội An",
+      "Không bao gồm chi phí ăn uống",
+    ],
+    confirmed_offers: ["Giá bán chính thức 550.000 VND"],
+  },
+];
 
 for (let index = 0; index < runCount; index += 1) {
   const persona = personas[index % personas.length];
+  const product = products[index % products.length];
   const prompt = buildContentFactoryPrompt(persona, product);
   const interaction = await client.interactions.create({
     model,
@@ -81,5 +101,7 @@ for (let index = 0; index < runCount; index += 1) {
     `Run ${index + 1} failed guardrails: ${guardrailResult.flags.join(", ")}`,
   );
 
-  process.stdout.write(`run=${index + 1} persona=${persona} status=PASS\n`);
+  process.stdout.write(
+    `run=${index + 1} product=${product.testId} persona=${persona} status=PASS\n`,
+  );
 }

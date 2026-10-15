@@ -40,9 +40,9 @@ Trong Tuần 2, BE2 đóng vai trò "Kiến trúc sư nội dung AI":
 | BE2-W2-01 | Chuẩn hóa Prompt System phân theo 4 Personas du lịch | P0 | DONE | Dữ liệu tour Tuần 1 | BE2 | `src/lib/ai/prompts/content-factory.ts` | 12/10 17:00 |
 | BE2-W2-02 | Xây dựng Zod Schema cho Structured Output | P0 | DONE | BE2-W2-01 | BE2 | `src/lib/ai/schemas/content-schema.ts` | 13/10 12:00 |
 | BE2-W2-03 | Xây dựng Module kiểm duyệt tự động (Content Guardrails) | P1 | DONE | BE2-W2-02 | BE2 | `src/lib/ai/guardrails/content-validator.ts` | 13/10 17:00 |
-| BE2-W2-04 | Handoff Prompt & Schema cho BE3 nhúng vào n8n workflow | P0 | WAITING_REVIEW | BE2-W2-02, 03 | BE2 | `docs/be2/content-factory-handoff.md` + JSON Schema | 13/10 18:00 |
-| BE2-W2-05 | Phối hợp BE3 test luồng sinh bài mẫu cho Bà Nà Hills & VinWonders | P1 | READY | BE3-W2-01 | BE2 + BE3 | Báo cáo sinh nội dung mẫu | 14/10 17:00 |
-| BE2-W2-06 | Phối hợp Tester 2 rà soát Hallucination & Tối ưu Prompt | P1 | READY | BE2-W2-05 | BE2 + Tester 2 | Bộ prompt tối ưu | 15/10 17:00 |
+| BE2-W2-04 | Handoff Prompt & Schema cho BE3 nhúng vào n8n workflow | P0 | READY_FOR_REVIEW | BE2-W2-02, 03 | BE2 | `docs/be2/content-factory-handoff.md` + JSON Schema + persistence mapper | 13/10 18:00 |
+| BE2-W2-05 | Phối hợp BE3 test luồng sinh bài mẫu cho Bà Nà Hills & VinWonders | P1 | PARTIAL — BE2 fixtures/tests ready; waiting BE3 E2E | BE3-W2-01/03 | BE2 + BE3 | Báo cáo sinh nội dung mẫu | 14/10 17:00 |
+| BE2-W2-06 | Phối hợp Tester 2 rà soát Hallucination & Tối ưu Prompt | P1 | IN_PROGRESS — deterministic suite ready | BE2-W2-05 | BE2 + Tester 2 | Bộ prompt tối ưu | 15/10 17:00 |
 
 ---
 

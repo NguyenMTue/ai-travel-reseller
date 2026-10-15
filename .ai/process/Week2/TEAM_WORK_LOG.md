@@ -63,7 +63,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | Task ID | Member | Task | Progress | Blocker | Next Step |
 |---|---|---|---|---|---|
 | UX-W2-01 | UI/UX | Hoàn thiện Figma Hi-fi Reseller Feed | 70% | Chốt các trường bắt buộc trên Card | Xuất specs và asset cho FE |
-| BE2-W2-04 | BE2 | Handoff Prompt, Schema & Guardrails cho BE3 | 90% | Chờ quyết định mapping mảng output → rows `contents` | BE3 review artifact và chốt mapping với FE |
+| BE2-W2-04 | BE2 | Handoff Prompt, Schema, Guardrails & persistence mapper cho BE3 | READY_FOR_REVIEW | Chờ BE3/FE xác nhận contract trong live workflow | BE3 mirror mapper, batch insert và cross-test với FE |
 | BE3-W2-01 | BE3 | Tạo Node Webhook tiếp nhận Campaign trên n8n | 50% | None (Đã có trigger BE1) | Cấu hình webhook URL cố định & test |
 | FE-W2-01/02 | Diệu | Protected layout, server adapter/Feed, search/filter/states | Code + scoped lint/typegen/tsc/isolated build + 28/28 data/UI tests fixture pass; WAITING_REVIEW | Live RLS/types/status cần BE1/BE3; Figma/QA review chưa có | Tester 1/UIUX review JSON và ảnh sau sửa 320/390/1440px; không live DONE |
 
@@ -78,7 +78,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | FE-W2-08/09 (nội dung) | Diệu | Chưa có Điều khoản/Quyền riêng tư được công ty phê duyệt trong repo | Công ty / PM | Giao diện public đã có khung bản nháp; nội dung pháp lý chưa có hiệu lực, chờ copy và phê duyệt chính thức |
 | BE3-W2-02 | BE3 | Prompt templates & Zod schema chính thức | BE2 | n8n tạm dùng prompt thử nghiệm của W1 |
 | T3-W2-02 | Tester 3 | None (Đã giải tỏa bởi BE1) | BE1 | Tester 3 đã có router `/r/[code]` để chạy test suite 302 |
-| BE2-W2-04 | BE2 | Mapping 10 hooks + 5 scripts/captions/CTAs sang rows `contents` | BE3 + FE + PM | Không thể khóa batch-insert contract nếu chưa chốt cách ghép |
+| BE2-W2-04 acceptance | BE2 | Reference mapping đã có: 5 full rows + 5 hook-only rows; status DB lowercase | BE3 + FE | Chưa thể DONE đến khi live workflow xác nhận batch insert và FE đọc được `approved` |
 
 ---
 
@@ -88,7 +88,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | PM | Toàn team | Phân công nhiệm vụ chi tiết Tuần 2 (Week2.md + 9 work plans) | DONE | 12/10 |
 | UI/UX | FE | Figma Hi-fi Reseller Feed & Component Specs | WAITING_REVIEW | 12/10 |
 | Tester 1 | FE | Bộ Mock Data `src/lib/campaign-demo.ts` | DONE | 12/10 |
-| BE2 | BE3 | Prompt Templates + Zod/JSON Schema + Guardrails + Test Report | WAITING_REVIEW | 13/10 |
+| BE2 | BE3 | Prompt Templates + Zod/JSON Schema + Guardrails + persistence mapper + Test Report | READY_FOR_REVIEW | 15/10 |
 | BE1 | BE3 | Webhook trigger `on_campaign_created` payload specs | DONE | 13/10 |
 | BE1 | FE | API Contract `POST /api/tracking/generate` & `/api/tracking-links/generate` | DONE | 13/10 |
 | BE1 | Tester 3 | Redirect Router `/r/[code]` & Schema `clicks` | DONE | 13/10 |
@@ -107,7 +107,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | Redirect Router | BE1 | End Customer / QA | `GET /r/[code]` ghi nhận bảng `clicks` và 302 redirect tới official URL | CONTRACT AGREED |
 | Webhook Campaign | BE1 | BE3 | `POST n8n-webhook` payload: `{ campaign_id, product_id, title, commission_rate }` | CONTRACT AGREED |
 | LLM Output Schema | BE2 | BE3 | JSON schema gồm: `persona`, `hooks[]`, `scripts[]`, `captions[]`, `ctas[]` | IMPLEMENTED & TESTED |
-| LLM Output → `contents` rows | BE3 | BE2 / FE | Cách ghép 10 hooks với 5 scripts/captions/CTAs | NEEDS DECISION |
+| LLM Output → `contents` rows | BE2 reference; BE3 producer | BE3 / FE | 10 rows/persona: 5 full + 5 hook-only; shared `reseller_id = null`; `approved`/`needs_review` lowercase | IMPLEMENTED & TESTED BY BE2; WAITING LIVE ACCEPTANCE |
 | Reseller Card Specs | UI/UX | FE | Hiển thị ảnh, tên tour, địa điểm, badge hoa hồng cam đất, nút hành động | CONTRACT AGREED |
 | Bảng `contents` Schema | BE1 / BE3 | FE | Các cột: `product_id`, `persona`, `hook`, `script`, `caption`, `cta`, `status` | CONTRACT LIVE |
 | Reseller Links API | BE1 | FE | `GET /api/reseller/links`: Danh sách link tiếp thị kèm số click hợp lệ | CONTRACT AGREED |
