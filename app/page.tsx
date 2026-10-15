@@ -11,7 +11,7 @@ import {
   Send,
 } from "lucide-react";
 import { SiteHeader } from "@/src/components/site-header";
-import { Brand } from "@/src/components/brand";
+import { SiteFooter } from "@/src/components/site-footer";
 import { Button } from "@/src/components/ui/button";
 export default function Home() {
   return (
@@ -161,11 +161,7 @@ export default function Home() {
           </Button>
         </section>
       </main>
-      <footer className="container footer">
-        <Brand />
-        <p>Được xây dựng cho những trải nghiệm Việt Nam.</p>
-        <Link href="/chat">Trò chuyện cùng AI ↗</Link>
-      </footer>
+      <SiteFooter />
     </>
   );
 }

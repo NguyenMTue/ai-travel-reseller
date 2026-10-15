@@ -25,9 +25,15 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | BE2-W2-02/03 | Nguyễn Huỳnh | BE2 | Zod Structured Output Schema & Content Guardrails | READY | 13/10 | 13/10 17:00 |
 | BE3-W2-01/02 | Thái Thanh Tú | BE3 | Workflow n8n Campaign-to-AI-Content-Pipeline | READY | 12/10 | 13/10 17:00 |
 | BE3-W2-03/04 | Thái Thanh Tú | BE3 | Node kiểm duyệt & Lưu nội dung vào bảng `contents` | READY | 13/10 | 14/10 17:00 |
-| FE-W2-01/02 | Thành viên FE | FE | Layout Reseller Portal & Màn hình Bảng tin (`/reseller/campaigns`) | READY | 12/10 | 13/10 17:00 |
-| FE-W2-03/04 | Thành viên FE | FE | Màn hình Chi tiết Chiến dịch & Modal Lấy Tracking Link | READY | 13/10 | 14/10 17:00 |
-| FE-W2-05/06 | Thành viên FE | FE | Form tạo Campaign Merchant & Tích hợp dữ liệu thật DB | READY | 14/10 | 15/10 17:00 |
+| FE-W2-01 | Diệu | FE | Layout/server gate & Reseller Feed (`/reseller/campaigns`) | WAITING_REVIEW | 14/10 — tiếp quản | Gốc: 13/10 12:00; đã qua |
+| FE-W2-02 | Diệu | FE | Search & lọc danh mục/địa điểm/hoa hồng | WAITING_REVIEW | 14/10 — tiếp quản | Gốc: 13/10 17:00; đã qua |
+| FE-W2-03 | Diệu | FE | Chi tiết & Content Kit 4 persona | WAITING_REVIEW — người dùng kiểm tra thủ công Bà Nà Hills/4 persona PASS | 14/10 — lượt Content Kit | Gốc: 14/10 12:00 |
+| FE-W2-04 | Diệu | FE | Clipboard & modal Tracking Link | WAITING_REVIEW — Copy; Tracking BLOCKED | 14/10 — Copy | Gốc: 14/10 17:00 |
+| FE-W2-05 | Diệu | FE | Merchant Campaign form/action theo contract xác nhận | IN_PROGRESS — UI/mock PASS; ghi thật BLOCKED | 15/10 — form/loader/action/fixture | Gốc: 15/10 12:00 |
+| FE-W2-06 | Diệu | FE | Live data integration đã kiểm chứng | IN_PROGRESS — Content Kit/Copy localhost được người dùng xác nhận; pipeline/QA còn lại | 14/10 — chẩn đoán truy cập | Gốc: 15/10 17:00 |
+| FE-W2-07 | Diệu | FE | Mobile/keyboard & Full Playwright E2E; Tester 1 hỗ trợ QA | NOT_READY | Chưa bắt đầu | 16/10 12:00 |
+| FE-W2-08 | Diệu | FE | Public Terms of Service `/terms` | UI DONE — nội dung WAITING_APPROVAL | 15/10 — khung bản nháp | 16/10 12:00 — hạn chung sprint |
+| FE-W2-09 | Diệu | FE | Public Privacy Policy `/privacy` | UI DONE — nội dung WAITING_APPROVAL | 15/10 — khung bản nháp | 16/10 12:00 — hạn chung sprint |
 | UX-W2-01/02 | UI/UX Designer | UI/UX | Figma Hi-fi Reseller Feed & Suggested Content Kit | IN_PROGRESS | 12/10 | 13/10 12:00 |
 | T1-W2-01/02 | Tester 1 | QA Hybrid | Mock Data `campaign-demo.ts` & Hỗ trợ CSS Responsive | READY | 12/10 | 13/10 17:00 |
 | T1-W2-03/04 | Tester 1 | QA Hybrid | Bộ test tự động Playwright E2E (`tests/reseller.spec.ts`) | READY | 13/10 | 14/10 17:00 |
@@ -55,14 +61,17 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | BE1-W2-07/08 | BE1 | Migration Clicks Anti-Fraud & Module Lọc Bot Router `/r/[code]` | 20% | None | Viết migration SQL và module ua-parser |
 | BE2-W2-01 | BE2 | Soạn thảo Prompt System 4 Personas | 50% | None | Chạy test sinh thử với Gemini |
 | BE3-W2-01 | BE3 | Tạo Node Webhook tiếp nhận Campaign trên n8n | 50% | None (Đã có trigger BE1) | Cấu hình webhook URL cố định & test |
-| FE-W2-01 | FE | Khởi tạo cấu trúc router `/reseller/campaigns` | 30% | Chờ Figma từ UI/UX | Dựng layout chung bằng mock data |
+| FE-W2-01/02 | Diệu | Protected layout, server adapter/Feed, search/filter/states | Code + scoped lint/typegen/tsc/isolated build + 28/28 data/UI tests fixture pass; WAITING_REVIEW | Live RLS/types/status cần BE1/BE3; Figma/QA review chưa có | Tester 1/UIUX review JSON và ảnh sau sửa 320/390/1440px; không live DONE |
 
 ---
 
 ## 4. BLOCKED
 | Task ID | Owner | Blocked By | Required From | Impact |
 |---|---|---|---|---|
-| FE-W2-04 | FE | None (Đã giải tỏa bởi BE1) | BE1 | FE đã có API `POST /api/tracking/generate` để ghép Modal |
+| FE-W2-04 | Diệu | API hiện tin body reseller_id/admin client; role/campaign-product chưa xác minh; thiếu server key ở máy FE | BE1 | Endpoint có trên checkout; FE chưa thể coi runtime/security dependencies đã giải tỏa |
+| FE-W2-05 | Diệu | Chưa chốt status khởi tạo/biên ngày TIMESTAMP, quyền ghi session/RLS thật; AI notes chưa có contract/cột | BE1 / PM | UI/loader/action + 38 tests mock/UI pass; name/audience/location đã đối chiếu cột. Người dùng xác nhận chưa có BE về status/ngày; guard server chặn insert thật, không dùng active của Feed làm default tạo mới |
+| FE-W2-06 | Diệu | Negative RLS/login lifecycle/pipeline/QA chưa đủ bằng chứng | BE1 / BE3 | Người dùng xác nhận localhost/Reseller: Bà Nà Hills đủ4 persona, Copy4 phần dán Notepad đúng nội dung/xuống dòng. Đây là kiểm tra thủ công giới hạn tài khoản/campaign này; tách mock, không ghi full integration DONE |
+| FE-W2-08/09 (nội dung) | Diệu | Chưa có Điều khoản/Quyền riêng tư được công ty phê duyệt trong repo | Công ty / PM | Giao diện public đã có khung bản nháp; nội dung pháp lý chưa có hiệu lực, chờ copy và phê duyệt chính thức |
 | BE3-W2-02 | BE3 | Prompt templates & Zod schema chính thức | BE2 | n8n tạm dùng prompt thử nghiệm của W1 |
 | T3-W2-02 | Tester 3 | None (Đã giải tỏa bởi BE1) | BE1 | Tester 3 đã có router `/r/[code]` để chạy test suite 302 |
 
@@ -81,7 +90,8 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | BE1 | FE | API Báo cáo & Link Reseller (`GET /api/reseller/links`, `GET /api/reseller/analytics`) | READY | 15/10 |
 | BE1 | Tester 3 | RPC Functions & Test script lọc Bot, Rate limit, Analytics | READY | 15/10 |
 | BE3 | FE | Dữ liệu nội dung bài viết sinh tự động vào bảng `contents` | READY_FOR_HANDOFF | 14/10 |
-| FE | Tester 1 | Nhánh code Reseller Portal để viết Playwright test | READY_FOR_HANDOFF | 14/10 |
+| Diệu (FE) | Tester 1 / UI/UX | Code 01/02, fixtures có nhãn, scoped lint/tsc/build và 28/28 data/UI tests pass; ba ảnh sau sửa | WAITING_REVIEW; worktree có source, chưa push/PR/gửi bàn giao ngoài phiên | 14/10 |
+| Diệu (FE) | BE1 / BE3 / PM | Câu hỏi role/RLS/types/status/tracking/form/legal và analytics scope trong FE_W2 | WAITING_HANDOFF; câu hỏi đã ghi, chưa gửi qua công cụ nhắn tin | 14/10 |
 
 ---
 
@@ -96,6 +106,15 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | Bảng `contents` Schema | BE1 / BE3 | FE | Các cột: `product_id`, `persona`, `hook`, `script`, `caption`, `cta`, `status` | CONTRACT LIVE |
 | Reseller Links API | BE1 | FE | `GET /api/reseller/links`: Danh sách link tiếp thị kèm số click hợp lệ | CONTRACT AGREED |
 | Reseller Analytics API | BE1 | FE | `GET /api/reseller/analytics`: Dữ liệu biểu đồ timeseries, devices, top campaigns | CONTRACT AGREED |
+
+### FE audit — 14/10/2026 (không thay trạng thái bàn giao của BE)
+
+- Consumer hiện tại là Diệu. Các contract/status lịch sử của BE phía trên giữ nguyên; audit checkout chỉ xác nhận file hiện có, không chứng minh remote đã apply hay dịch vụ đang chạy.
+- Tracking response thực tế là `{ status: "success", data: { id, unique_code, short_url, destination_url, ... } }`, khác `{ short_url, tracking_id }` ở bảng cũ. FE-W2-04 sẽ tái dùng route với session và `{ campaign_id, product_id }`; việc FE bỏ reseller_id không sửa API trust body/admin hiện tại. BE1 cần chốt auth/role/quan hệ; public Supabase keys không thay server secret/service-role thiếu ở máy FE.
+- Feed dùng `campaigns.name`, `target_location`, `products.category`, commission của campaign theo phần trăm; parse `unknown` bằng Zod theo migrations, không any/casts che generated types rỗng. Exact `active` theo seed/API docs; `ACTIVE` trong index/benchmark là conflict chuyển BE1. Count nội dung chưa xác nhận đến khi BE1/BE3 chốt `APPROVED`/`published`; không đọc unapproved.
+- Quyền portal được kiểm tra ở server bằng `getUser()` và read-only `resellers.id = user.id` có căn cứ migration; không metadata/localStorage/service-role. Remote RLS/schema chưa xác minh.
+- Merchant form có chênh lệch name/title và AI notes chưa có cột riêng; FE-W2-05 chờ contract BE1/PM, không thêm field hoặc bỏ input. FE không gọi webhook trùng DB trigger.
+- API analytics BE1 là bàn giao mới cần PM xác nhận phạm vi FE; lượt này không thêm dashboard analytics/links/ví/checkout/admin.
 
 ---
 
@@ -145,12 +164,117 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | 12/10 11:30 | Bổ sung bàn giao Mock Data `campaign-demo.ts` từ Tester 1 cho FE | Tester 1 / PM |
 | 13/10 14:50 | Hoàn tất deliverables BE1-W2 (Schema, API, Redirect, Trigger); giải tỏa blockers cho FE & Tester 3 | BE1 (Nguyễn Minh Tuệ) |
 | 14/10 10:45 | Phân rã 4 modules nâng cấp BE1-W2-07 đến 10 (Anti-fraud bot, Device parser, RPC analytics, Reseller API) | BE1 / PM |
+| 14/10 | Diệu tiếp quản FE duy nhất; cập nhật plan/FE rows theo checkout Feature_FE_W2_Integration tại daa3880; giữ 01–07, thêm 08/09; triển khai 01/02, ghi conflicts/blockers có bằng chứng | Diệu (FE) |
+| 14/10 | Source FE-W2-01/02 đã có; scoped lint, regenerated Next types/tsc và isolated build pass; trạng thái WAITING_REVIEW, live FE06 còn BLOCKED; UI fixture tests cuối đang chạy | Diệu (FE) |
+| 14/10 — tiếp nối | Hoàn tất contrast tab active/padding input trong component; 28/28 data/UI tests fixture sau sửa + ba ảnh 320/390/1440px; scoped lint/tsc/build pass. 01/02 WAITING_REVIEW, live chưa kiểm chứng | Diệu (FE) |
 
 ---
 
 ## 11. DAILY UPDATE
 
+### 15/10/2026 (Thứ Năm)
+
+#### FE (Diệu — ghi nhận manual check và audit origin/dev)
+
+- **Người dùng xác nhận:** Đã đăng nhập Reseller trên localhost, Bà Nà Hills hiển thị đủ bốn persona; Copy Hook/Script/Caption/CTA dán Notepad đúng nội dung và xuống dòng. Ghi nhận manual live Content Kit/Copy PASS trong phạm vi đó, không phải agent chạy lại hoặc clipboard mock. Test tự động36/38 + recheck2/2 ở mục lịch sử bên dưới giữ nguyên; không suy ra negative RLS/production/full QA PASS.
+- Giữ03/Copy WAITING_REVIEW,06 IN_PROGRESS, tuần2 chưa hoàn thành. Merchant ghi thật vẫn BLOCKED status/ngày; Tracking/QR, legal approval và review còn lại không tự được mở.
+- **Fetch/audit:** Giữ nhánh Feature_FE_W2_Integration, HEAD daa3880; fetch origin/dev từ b21320f tới db9f9ea (0 ahead/10 behind theo commit). Mới thêm seeddata chuẩn hóa approved/4 persona; không chạy seed/DB. Đọc thêm chênh lệch BE1 APIs/anti-bot/RPCs/types và BE2 schema/docs từ HEAD, không nhập code.
+- **Nguy cơ đồng bộ:** TEAM_WORK_LOG và tsconfig cùng sửa ở local/remote;64 file untracked chưa trùng tên remote nhưng phải bảo toàn cùng tracked trước đồng bộ. API Reseller remote nhận ID từ query/header qua admin client, cần BE rà session/role trước tích hợp; mã Git không chứng minh RLS/migrations đã apply. Chi tiết và hướng chuẩn bị tại FE_W2 mục22; không sửa tiến độ BE trong log local.
+- Chỉ cập nhật FE_W2 và phần FE của TEAM_WORK_LOG; không đọc/in .env.local, không pull/merge/checkout/stash/commit/push hoặc ghi đè thay đổi hiện tại. Không chạy lại suites vì chỉ sửa tài liệu.
+
+#### FE (Diệu — Content Kit theo bổ sung approved)
+
+- Đọc docs/Fe-update-2026-10-15.md; phần bổ sung mới **thay thế published/public** trong phần cũ và docs/Fe.md. Policy chỉ `approved`, giữ campaign_id AND shared NULL/owned theo getUser + membership. Không mở rộng alias để làm dữ liệu xuất hiện.
+- Giữ local_guide/family/foodie/budget_traveler; persona ngoài contract vẫn bị loại, diagnostic development chỉ mã/quy tắc/tên trường. Không fallback local_guide, không hardcode mẫu vào portal.
+- **BE xác nhận/báo cáo:** Campaign `44444444-4444-4444-4444-444444444444`, product `33333333-3333-3333-3333-333333333333`, đủ bốn phần cho bốn persona và quyền reseller@example.com. FE chưa kiểm chứng dataset mới bằng session thật trong lượt này; không ghi Copy native PASS từ clipboard mock.
+- Kết quả test/check và hướng dẫn kiểm tra thật ghi tại FE_W2 mục 20. Giữ WAITING_REVIEW/IN_PROGRESS; không đổi tiến độ BE/QA, không triển khai Tracking/QR hoặc mở guard tạo Campaign Merchant; contract tạo status/ngày vẫn thiếu. Không sửa DB/seed/RLS, commit/push/merge.
+- **FE thực kiểm chứng:** Scoped lint/TypeScript/build PASS; lượt Content Kit chính 36/38 PASS (14 data/mock + 24 UI), hai desktop timeout; chạy lại nguyên trạng đúng hai ca lỗi 2/2 PASS. Không gọi đây là một lượt 38/38 sạch. 320/390px pass đầy đủ, đã xem cả ba ảnh 320/390/1440px. Chưa kết luận nguyên nhân timeout đầu; báo cáo chính và recheck giữ riêng tại FE_W2 mục20. Clipboard stub/fixture không chứng minh dữ liệu thật, RLS hoặc Copy native PASS; chưa có review/acceptance.
+
+#### FE (Diệu — Form tạo Campaign Merchant)
+
+- **Phạm vi:** Giữ `Feature_FE_W2_Integration`, toàn bộ Feed/Content Kit/Copy/legal và thay đổi chưa commit. Fetch/read `origin/dev` đến `b21320f` (HEAD vẫn `daa3880`), không pull/merge/cherry-pick/đổi nhánh hoặc lấy code Foundation.
+- **UI/luồng đã có:** `/merchant/campaigns/new`, loading, form tiếng Việt Coastal Editorial, nút Tạo chiến dịch từ Dashboard (preview trỏ fixture riêng). Có product/tên/hoa hồng 5–30%/ngày/đối tượng/địa điểm; lỗi từng trường, empty/load error, pending, kết quả và giữ input. Ghi chú AI disabled, không nhận rồi bỏ dữ liệu.
+- **Server:** getUser + merchants membership tại read/write; merchant_id từ danh tính xác minh, product query có owner và submit kiểm tra lại; dùng session client/RLS, không service-role. Core/SDK adapter map campaigns.name, validation calendar/GUID/finite commission; POST không retry. Sau dispatch nếu mất ACK/kết quả chưa rõ thì không tự tạo lại; success chỉ khi ACK hợp lệ, không khẳng định AI đã chạy.
+- **Contract/live BLOCKED:** Người dùng trả lời “Chưa có xác nhận BE” về status/ngày. Policy tạo thật vẫn null trong code server, không browser/env override. Repo + types mới origin/dev có name/audience/location, không ai_notes; anon SELECT projection limit=0 trên Supabase trả 200, OpenAPI 401. Đây không chứng minh kiểu/default/RLS/quyền ghi của Merchant hoặc pipeline. Không POST Supabase, không gọi n8n/API AI.
+- **Kiểm chứng:** Playwright riêng **38/38 PASS** (20 data/core/SDK fetch mock + 18 UI ở 320/390/1440px), 0 skipped/unexpected/flaky; scoped lint, TypeScript noEmit và build riêng **PASS** (53s compile/19s TypeScript/21 pages). Ảnh/report/lệnh chạy và BE handoff tại FE_W2 mục 19. Chưa QA/UIUX review, chưa live create; không thay trạng thái task cũ hoặc ghi FE-W2-05 DONE.
+- **Next:** BE1/PM chốt status, biên ngày/required fields/limits, membership và RLS INSERT/SELECT + product ownership; chốt notes riêng nếu hỗ trợ. Sau đó review policy, kiểm thử môi trường cô lập với BE3/QA trước khi cho phép ghi thật. Không sửa migration/seed/RLS/pipeline, không commit/push/merge.
+
+#### FE (Diệu — Terms / Privacy public)
+
+- **Phạm vi:** Tiếp tục trên `Feature_FE_W2_Integration`; kiểm tra status/diff trước code, giữ các thay đổi Content Kit/Feed hiện có. Campaign_id/persona và quyền Reseller tiếp tục chờ BE; không bỏ bộ lọc hay tự thêm mapping persona.
+- **UI hoàn thành:** `/terms` (6 mục), `/privacy` (7 mục) tiếng Việt, dùng Coastal Editorial và header/Brand/Button có sẵn; shell/mục lục dùng chung, neo h2 nhận focus, skip link, về đầu trang/trang chủ/liên kết chéo. Tách footer Landing dùng chung và thêm legal links vào layout Login/Register; không đổi form, checkbox hoặc luồng đăng ký.
+- **Nội dung WAITING_APPROVAL:** Tìm trong app/src/docs/README và .ai/role/process chưa thấy copy được công ty phê duyệt. Cả hai trang ghi “Bản nháp — chờ công ty phê duyệt” và chưa có hiệu lực; từng phần có ghi chú chờ bổ sung. Công ty cần cung cấp pháp nhân/đầu mối, điều khoản chính thức, danh mục/mục đích/cơ sở xử lý dữ liệu, chia sẻ/cookie/tracking, thời hạn lưu/xóa, quy trình yêu cầu, phiên bản/ngày hiệu lực và phê duyệt. Không tự đặt email, thời hạn hoặc cam kết pháp lý.
+- **Kiểm chứng:** Scoped lint, TypeScript noEmit và build riêng **PASS**; Playwright **9/9 PASS** tại 320/390/1440px (public 200, heading/mục lục, keyboard/focus/Back, links Landing/Auth, nội dung dài/overflow, không pageerror). Đã sửa lỗi history/focus của hash links và số mục bị xuống dòng. Full lint còn lỗi nền `database.types.ts` bị ESLint coi là binary + 2 warning cũ middleware, giữ nguyên. Báo cáo/ảnh/lệnh chạy và phục hồi artifact Next tại FE_W2 mục 18; không chạy lại toàn bộ Content Kit. Test server đã dừng, local review sau `npm.cmd run dev`: `/terms`, `/privacy` trên localhost:3000.
+- **Giữ phạm vi:** Không sửa database/seed/RLS, logic Auth, Tracking API hoặc Content Kit; không commit/push/merge, không gửi thông báo qua công cụ ngoài phiên. Hoàn thành UI 08/09 không thay trạng thái nghiệm thu pháp lý hoặc FE-W2-07 toàn portal.
+
 ### 14/10/2026 (Thứ Tư)
+
+#### FE (Diệu — nhận contract BE, nối contents thật, đối chiếu Feed)
+
+- **Contract nhận:** Đọc docs/Fe.md, giữ nguyên mẫu; published/public, không pending_approval/APPROVED; bốn key local_guide/family/foodie/budget_traveler; shared NULL/owned đúng session; campaign active. Blocker contract tương ứng RESOLVED, khác acceptance/data runtime.
+- **Code:** Query contents có session/membership/GUID guard, mọi trang AND campaign/status/shared-own, select tối thiểu; bỏ product predicate không có trong contract, không lọc quyền tại browser. Adapter không map persona lạ, missing fields/null an toàn; Copy giữ nguyên whitespace/newline/[LINK_MUA_VE], nhắc thêm link trước đăng, không Tracking. Detail dates dd/MM/yyyy không chuyển timezone; query error giữ campaign/info và phân loại Retry; global empty khác persona empty. Feed không tải counts/per-card query, ghi Xem Content Kit.
+- **Runtime thật:** Server 3000 session 83259: auth/member/detail OK; contents query OK có NO_ROW trước adapter, có ROW → PERSONA_UNMAPPED (field persona) → EMPTY, schema hợp lệ. Diệu kiểm tra sáu chiến dịch đều trống, sau đó Feed có tám chiến dịch; chưa có variant mapped/native Copy thật. Không coi test mock là Supabase acceptance. Log an toàn test-results/reseller-published-runtime.log.
+- **Hai Phong Nha:** Link IDs 1f7341fa-bed5-4a94-a32a-a43d2b5b2006 và fc0a908d-32b8-46cb-bde7-fa20f7d696a7 khác nhau; query UNIQUE_IDS/DISTINCT_IDS_SAME_TITLE và probe REPORTED_IDS_MATCH_QUERY xác nhận chính hai record. Probe ID tạm thời đã gỡ, không dữ liệu hardcode/fallback portal. Không sửa render để gộp theo tên hoặc đổi/xóa DB; câu hỏi BE1 đối chiếu hai campaign ở FE_W2 mục 17.
+- **Test:** Lần đầu startup webServer timeout, 0 tests executed, exit 1/report giữ lại. Full 69/69 pass sau đó; thêm regression identity rồi chạy trọn 70/70 PASS, exit 0, 0 unexpected/skipped/flaky, 25 data + 45 UI 320/390/1440. SDK dùng fetch mock, UI/source/clipboard fixture; assertions/timers giữ nguyên. Report cuối test-results/reseller-published-final/results.json; không cộng các lần để ghi full pass.
+- **Checks:** Scoped lint/tsc pass. Build đầu lỗi generated Next dev types; native typegen tái sinh đúng artifact, không disable typecheck hoặc sửa encoding nền. Build riêng build/fe-w2-access pass (37.6s/9.8s, sau đó 5.5s/12.8s); build sau cleanup probe bổ sung tại FE_W2 mục 17. Chỉ dừng verified server test 3105 khi teardown kẹt; giữ review 3000.
+- **Build cuối sau cleanup:** PASS, exit 0 tại build/fe-w2-access (34.3s compile/18.6s types/17 pages); không còn hai campaign ID được dùng trong probe tạm thời ở source portal. Không sửa dữ liệu để đạt test pass.
+- **Blocked/Next:** Contract đã chốt; cần BE1/BE3 đối chiếu runtime publication/persona và có row mapped trước native Copy/QA. Hai record cùng tên cần BE1 xác nhận có chủ đích; query/ID không chứng minh FE duplicate. 01/02 WAITING_REVIEW; 03 UI/read/query WAITING_REVIEW; 04 chỉ Copy, Tracking/QR chưa làm; 06 IN_PROGRESS. Không form/Terms/Privacy, DB mutation/seed/migration/RLS hoặc commit/push/merge. Câu hỏi cụ thể cùng query/field/ID tại FE_W2 mục 17, chưa gửi qua công cụ.
+
+#### FE (Diệu — sửa truy cập Reseller thật)
+
+- **Done (có bằng chứng server runtime, chưa full acceptance):** Giữ mọi thay đổi cũ và 01/02 WAITING_REVIEW. Xác minh `z.uuid()` từ chối seed UUID PostgreSQL vì RFC variant; dùng `z.guid()` cho membership/Feed/detail/content projections, vẫn giữ session + đúng hàng user. Không đổi proxy/RLS/DB hoặc metadata-based authorization.
+- **Runtime thật:** Review server 3000 session 68798 ghi VERIFIED → ROW → ALLOWED_POSTGRES_UUID (field id) → Feed query OK → READY. Chính hàng membership thật không qua rule UUID cũ; query đã thành công và khớp user. Log an toàn chỉ step/code/field tại `test-results/reseller-access-runtime.log`; khác server tests cô lập. Không chỉ dựa vào HTTP 200/mock để ghi pass.
+- **Kiểm tra thủ công:** Diệu xác nhận tải lại `/reseller/campaigns` thấy bốn chiến dịch, không còn lỗi xác minh quyền truy cập. UI Feed thật đã có bằng chứng người dùng; chưa kiểm tra filter/detail/clipboard thật hoặc negative RLS qua xác nhận này, 01/02 vẫn WAITING_REVIEW.
+- **Diagnostics:** Development/server-only, allowlist code/field, không raw message/ID/user payload/credential; tách auth/membership/query/validation/Feed/policy. Thông báo schema bỏ kết luận mặc định BE sai. Hướng dẫn Terminal/Thử lại và câu hỏi có query/code tại FE_W2 mục 16.
+- **Validation:** Scoped lint và tsc pass. Full suite Reseller đầu tiên 55/56 pass, 1 desktop navigation timeout 30s; report giữ nguyên. Chạy lại trọn suite cùng assertions: 56/56 PASS, exit 0, 0 skipped/flaky/failed, gồm đầy đủ 44 ca lịch sử và các ca bổ sung; không cộng retry. JSON `test-results/reseller-access-recheck/results.json`. Fixture UI/clipboard mock, policy unit; responsive/focus/long/overflow pass và xem ba ảnh mới 320/390/1440. Chi tiết giới hạn dev cold cache và teardown tại FE_W2 mục 16.
+- **Build cuối:** `NEXT_BUILD_DIR=build/fe-w2-access npm.cmd run build` PASS, exit 0 (compile 59s/types 50s/17 pages). Lint các lib/test sửa cuối PASS, exit 0; Next chỉ tự bổ sung include type paths trong tsconfig, không sửa encoding/cache nền.
+- **Blocked riêng:** Contents thật vẫn policy NULL, chưa gọi query vì status duyệt/persona/shared-owned/product scope chưa được BE1/BE3 xác nhận; khác lỗi access/Feed đã xử lý. 03 UI/fixture và 04 Copy WAITING_REVIEW (Tracking chưa làm); 06 chưa DONE. Không mở Tracking/form/Terms/Privacy, không DB mutation/commit/push/merge.
+- **Next:** Người dùng/QA thử filter/detail thật; Feed hiển thị đã được Diệu xác nhận. BE1 chốt active/ACTIVE, BE1/BE3 chốt quyền công bố contents. Nếu query tái lỗi gửi exact step/code/query, không hỏi chung tình trạng migrations.
+
+#### FE (Diệu — lượt Auth/Content Kit/Copy)
+
+- **Done (code/inspection, không phải live acceptance):**
+  - Giữ 01/02 WAITING_REVIEW, nối nút detail đúng ID, không prefetch theo từng card. Tạo `/reseller/campaigns/[id]` và preview development riêng; server đọc campaign/product theo exact active bằng query join, xác thực user + membership tại loader; xử lý invalid ID/not-found/loading/error.
+  - Content Kit bốn persona/nhiều biến thể/trường thiếu; Copy từng Hook/Script/Caption/CTA, chờ clipboard ghi thành công, disabled empty/pending, có thông báo/keyboard/manual copy khi bị từ chối hoặc API thiếu.
+  - Phân loại configuration/network/permission/schema/query; chỉ Reseller có server loaders được nhận lỗi mạng/Auth service thay vì giả định hết session; Merchant/Admin giữ chặn login. Empty/not-found không khẳng định DB rỗng khi RLS có thể lọc hàng.
+  - Kiểm tra local không session: login HTTP 200 giữ next, Feed/detail HTTP 307 về login đúng next. Không có browser connector gắn phiên người dùng; không đọc credential/token hoặc dùng service-role, chưa kiểm chứng login thành công/role/feed có session.
+  - Typegen + tsc pass; scoped lint 0 errors, hai warning middleware cũ; build `build/fe-w2-content` exit 0 (compile 25.4s/types 13.2s). Kết quả test cuối và ảnh bổ sung tại FE_W2 mục 15.
+  - Rà soát cuối giới hạn nhường lỗi Auth service chỉ cho Reseller loaders, không mở Merchant/Admin khi dịch vụ lỗi; helper thật kiểm tra 10 assertions bằng Node pass. Build cuối sau sửa exit 0 (64s/15.4s), scoped lint 0 errors/hai warning cũ. Unit case lưu thêm, không chạy lại mọi suite.
+  - Test related lần đầu 40/44 pass (report gốc giữ lại); sau sửa cold navigation wait/selector alert, đúng sáu ca ảnh hưởng ở ba viewport PASS 6/6 exit 0. Không disable tests. Copy success/pending/error/manual dùng mock; policy unit xác minh reads=0 khi chưa xác nhận, loại status alias/other owner/campaign/product. Không gọi Tracking/AI/shared DB.
+  - Case ảnh long variant sau reset scroll PASS 3/3 exit 0; đã xem ảnh mới 320/390/1440px. Preview detail server review 3000 HTTP 200 có nhãn fixture; reports/ảnh tại FE_W2 mục 15. Không coi logs HTTP 200 hoặc fixture là bằng chứng Auth/Feed có session thật.
+- **In Progress:**
+  - 03 UI/detail + Copy thuộc 04 WAITING_REVIEW; fixture/clipboard mock đã kiểm tra, không toàn bộ 03/04 DONE. Responsive/long/focus 320/390/1440 pass; ảnh và giới hạn kiểm chứng tại FE_W2 mục 15.
+- **Blocked:**
+  - Contents thật: producer `general/pending_approval` hoặc persona target_audience tự do/`published`; handoff đề xuất APPROVED/NEEDS_REVIEW, RLS SELECT contents USING(true). Chưa có giá trị/mẫu approved và quy tắc shared `reseller_id=NULL` / owned; `confirmedContentPolicy=null` chặn trước cả query contents.
+  - Tracking modal/link/QR, form Campaign chưa triển khai theo phạm vi lượt này; dependencies BE1/BE3 trước đó giữ nguyên.
+- **Handoff:**
+  - Adapter policy có test lọc exact status/persona/campaign/product/owner bằng policy fixture riêng; không mapping published→APPROVED. BE1/BE3 cần trả lời câu hỏi tại FE_W2 mục 15. Không sửa tiến độ BE/QA hoặc DB chung.
+- **Next:**
+  - Review UI/Copy; kiểm tra Auth/Feed có session thủ công; BE1/BE3 chốt contract trước khi bật đọc contents thật. Chưa commit/push/merge.
+
+#### FE (Diệu — tiếp quản)
+
+- **Done:**
+  - Audit hướng dẫn/Git/schema/contracts/env; branch `Feature_FE_W2_Integration`, HEAD `daa38805fa45f4622d0b3b0d45afa68c6d9fdcea`, initial clean/bằng cached origin/dev, chưa fetch.
+  - Cập nhật FE_W2/FE rows: Diệu primary owner, giữ FE-W2-01–07, thêm 08 Terms và 09 Privacy, hạn chung 12:00 16/10/2026 UTC+7. Không ghi task implementation DONE.
+  - Xác minh public Supabase URL/publishable có, secret/service-role thiếu; `.env.local` ignored/untracked, không in giá trị.
+  - Code 01/02: protected layout, session/membership gate tại server/data loader, paginated exact-active Feed, Zod adapter; filter/search bỏ dấu Đ/đ, category/location options từ data, strict >10/>15 và các khoảng commission, reset/states/retry.
+  - Scoped lint routes/components/lib/preview/tests/config mới exit 0; `next typegen` cập nhật stale Next types thành công, `node .../tsc --noEmit` exit 0; opt-in `NEXT_BUILD_DIR=build/fe-w2 npm.cmd run build` PASS (compile 44s, types 19.1s, page/routes generation).
+  - Lượt tiếp nối hoàn tất hai lỗi UI: tab active dùng lại Button để giữ contrast, input `pl-10!` tránh icon chồng placeholder; không sửa globals.css. TypeScript/scoped lint sau sửa pass; build mới exit 0 (compile 70s, types 36.4s).
+  - Suite sau sửa PASS 28/28, exit 0: 7 data/access/filter + 21 UI tại 320/390/1440px, 0 skip/failure/flaky. Contrast tab ≥4.5, icon/text gap ≥4px, overflow/keyboard/focus/states/filters pass; đã xem cả ba ảnh. JSON/ảnh local tại test-results/reseller, hướng dẫn tại FE_W2 mục 14. Fixture cô lập, không kiểm chứng Auth/Feed thật.
+- **In Progress:**
+  - FE-W2-01/02 WAITING_REVIEW; chờ Tester 1/UIUX review và live acceptance riêng. Dev-only preview + fixtures tách DB thật, Supabase config rỗng trong test process; membership được kiểm tra bằng unit tests, không ghi live role E2E DONE.
+  - Baseline full lint: parser error `database.types.ts` UTF16LE + 2 unused-var middleware warnings còn tồn tại; default build .next EPERM unlink cache kể cả retry ngoài sandbox chưa giải quyết. Dùng output riêng ignored; không xóa cache hoặc dừng process để xử lý lỗi build nền, không cài dependency. Stale Next types đã được typegen cập nhật, tsc hiện pass.
+  - Retry đầu dừng trước test vì 3101 còn server cũ; chuyển test sang 3103/output build/fe-w2-recheck. Sau test pass, đã xác minh và dọn đúng server test 3103 để giải tỏa Playwright teardown; CLI exit 0. Không dừng server cũ hoặc process khác; chưa chạy lại regression tuần 1 trong lượt tiếp nối.
+- **Blocked:**
+  - 04: tracking body reseller_id/admin trust, role/quan hệ/runtime key cần BE1; 05: contract campaign fields/AI notes/ownership cần BE1/PM.
+  - 06: generated types/remote RLS/schema và approved content/pipeline cần BE1/BE3; chưa kiểm chứng Auth/DB thật. 03 chờ exact persona/status; UIUX review chưa có.
+- **Handoff:**
+  - Source/docs và kết quả/ảnh sau sửa có để Tester 1/UIUX review; câu hỏi BE1/BE3/PM trong FE_W2. Local fixture `/preview/reseller`, portal `/reseller/campaigns` theo FE_W2 mục 14. Chưa gửi tin qua công cụ, commit/push/PR/merge.
+  - Dev localhost 3000 đã Ready; preview HTTP 200 có nhãn fixture, portal không session HTTP 307 về login giữ next. Đây là smoke check local, chưa kiểm chứng session/membership/dữ liệu Supabase thật.
+- **Next:**
+  - Tester 1/UIUX review 01/02; BE1/BE3 xác nhận runtime role/RLS/types/status rồi 03 → 04 → 05 → 06/07. Targeted search app/src/docs/.ai/role/process/README chưa thấy Terms/Privacy copy chính thức; 08/09 chờ PM hoặc khung có nhãn chờ duyệt, chưa code lượt này.
+  - Giữ root app và tokens Coastal Editorial; không DB/seed/migration/n8n mutation, không tạo campaign trên DB chung, không analytics/ ví/checkout/admin/auto-post.
 
 #### BE1 (Nguyễn Minh Tuệ)
 - **Done:**
@@ -197,7 +321,10 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 - **In Progress:** Cấu hình node truy vấn thông tin chi tiết tour từ Supabase.
 - **Next:** Nhận prompt từ BE2 và hoàn thiện luồng gọi Gemini API có retry.
 
-#### FE (Thành viên Frontend)
+#### FE (Thành viên Frontend — ghi chép lịch sử)
+
+*Audit FE ngày 14/10: Không tìm thấy layout Reseller hoặc `src/lib/campaign-demo.ts` trên commit nền daa3880 khi Diệu tiếp quản. Các dòng dưới được giữ làm lịch sử, chưa phải bằng chứng deliverable tại checkout này. Trạng thái hiện tại xem phần FE Diệu ngày 14/10.*
+
 - **Done:** Khởi tạo layout phân hệ Reseller `app/reseller/layout.tsx`.
 - **In Progress:** Dựng giao diện Reseller Campaign Feed sử dụng mock data từ Tester 1.
 - **Next:** Ghép hoàn thiện Campaign Card và bộ lọc theo địa điểm / hoa hồng.

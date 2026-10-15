@@ -171,12 +171,19 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
                   : "Thông tin sản phẩm là điểm bắt đầu cho mọi kết nối."}
               </p>
             </div>
-            <Button asChild variant="outline">
-              <Link href="/chat">
-                <MessageSquare />
-                Khám phá trợ lý AI
-              </Link>
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild>
+                <Link href={preview ? "/preview/merchant/campaigns/new" : "/merchant/campaigns/new"}>
+                  Tạo chiến dịch <ArrowUpRight />
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/chat">
+                  <MessageSquare />
+                  Khám phá trợ lý AI
+                </Link>
+              </Button>
+            </div>
           </div>
           {view === "loading" ? (
             <div

@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { supabaseUrl, supabasePublicKey as supabaseKey, hasSupabaseConfig } from "./config";
+import { canHandleAuthFailureAtResellerPage } from "../reseller/access";
 
 export const createClient = (request: NextRequest) => {
   // Create an unmodified response
@@ -74,14 +75,18 @@ export const updateSession = async (request: NextRequest) => {
   // KHÔNG chèn logic nào giữa createServerClient và getUser() – dễ gây mất session ngẫu nhiên.
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+    error: authError,
+  } = await supabase.auth.getUser().catch(() => ({ data: { user: null }, error: { status: 0 } }));
 
   const { pathname } = request.nextUrl;
   const isProtected = PROTECTED_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
   );
 
-  if (!user && isProtected) {
+  // A transport/service failure is not proof that a session has expired.
+  // Protected leaf loaders still fail closed and show the sanitized error.
+  const requiresLogin = !authError || !canHandleAuthFailureAtResellerPage(pathname, authError.status);
+  if (!user && isProtected && requiresLogin) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);
