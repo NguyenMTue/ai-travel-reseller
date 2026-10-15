@@ -41,6 +41,24 @@ function appendTrackingParams(rawUrl: string, resellerId: string, campaignId: st
   }
 }
 
+function getBaseUrl(request: Request): string {
+  // 1. Ưu tiên biến môi trường chính thức của dự án
+  const envUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL;
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, "");
+  }
+
+  // 2. Ưu tiên headers khi chạy sau Reverse Proxy (Vercel, Cloudflare, Nginx)
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
+  if (forwardedHost) {
+    return `${forwardedProto}://${forwardedHost.split(",")[0].trim()}`;
+  }
+
+  // 3. Fallback cho môi trường local dev
+  return new URL(request.url).origin;
+}
+
 export async function POST(request: Request) {
   try {
     let body: GenerateTrackingLinkBody;
@@ -69,40 +87,83 @@ export async function POST(request: Request) {
       );
     }
 
-    // Xác định reseller_id từ Supabase session hoặc từ request body
-    let resellerId =
+    // Xác định reseller_id từ Supabase session hoặc từ request body (cho test/dev)
+    let sessionUserId: string | null = null;
+    try {
+      const cookieStore = await cookies();
+      const supabaseAuth = createClient(cookieStore);
+      const {
+        data: { user },
+      } = await supabaseAuth.auth.getUser();
+      if (user?.id) {
+        sessionUserId = user.id;
+      }
+    } catch {
+      // Tiếp tục nếu không đọc được cookies
+    }
+
+    const requestedResellerId =
       typeof body.reseller_id === "string" ? body.reseller_id.trim() : "";
 
-    if (!resellerId) {
-      try {
-        const cookieStore = await cookies();
-        const supabaseAuth = createClient(cookieStore);
-        const {
-          data: { user },
-        } = await supabaseAuth.auth.getUser();
-        if (user?.id) {
-          resellerId = user.id;
-        }
-      } catch {
-        // Tiếp tục kiểm tra nếu không đọc được cookies
+    let resellerId = "";
+
+    if (sessionUserId) {
+      // Bảo vệ chống IDOR: Nếu đã đăng nhập, không cho phép sinh link mạo danh reseller khác
+      if (requestedResellerId && requestedResellerId !== sessionUserId) {
+        return NextResponse.json(
+          { error: "Forbidden: You cannot generate tracking links for other resellers" },
+          { status: 403 },
+        );
+      }
+      resellerId = sessionUserId;
+    } else {
+      // Cho phép truyền body.reseller_id khi chạy script test nội bộ / dev runner
+      if (requestedResellerId && UUID_PATTERN.test(requestedResellerId)) {
+        resellerId = requestedResellerId;
+      } else {
+        return NextResponse.json(
+          { error: "Unauthorized: Please sign in as a reseller to continue" },
+          { status: 401 },
+        );
       }
     }
 
-    if (!resellerId || !UUID_PATTERN.test(resellerId)) {
+    if (!UUID_PATTERN.test(resellerId)) {
       return NextResponse.json(
-        { error: "reseller_id is required and must be a valid UUID" },
+        { error: "reseller_id must be a valid UUID" },
         { status: 400 },
       );
     }
 
     const adminClient = createAdminClient();
 
-    // 1. Kiểm tra tồn tại của Campaign và Product
+    // 1. Kiểm tra tài khoản Reseller hợp lệ và đang hoạt động
+    const { data: reseller, error: resErr } = await adminClient
+      .from("resellers")
+      .select("id, status")
+      .eq("id", resellerId)
+      .maybeSingle();
+
+    if (resErr || !reseller) {
+      return NextResponse.json(
+        { error: `Reseller account not found with id: ${resellerId}` },
+        { status: 404 },
+      );
+    }
+
+    if (reseller.status && reseller.status !== "active" && reseller.status !== "approved") {
+      return NextResponse.json(
+        { error: `Reseller account is not active (current status: ${reseller.status})` },
+        { status: 403 },
+      );
+    }
+
+    // 2. Kiểm tra Campaign tồn tại và đang active
     const { data: campaign, error: campErr } = await adminClient
       .from("campaigns")
       .select("id, merchant_id, product_id, status")
       .eq("id", campaignId)
-      .single();
+      .maybeSingle();
 
     if (campErr || !campaign) {
       return NextResponse.json(
@@ -111,11 +172,27 @@ export async function POST(request: Request) {
       );
     }
 
+    if (campaign.status !== "active") {
+      return NextResponse.json(
+        { error: `Campaign is not active (current status: ${campaign.status})` },
+        { status: 400 },
+      );
+    }
+
+    // 3. Ràng buộc toàn vẹn: Campaign phải đúng với Product cung cấp
+    if (campaign.product_id !== productId) {
+      return NextResponse.json(
+        { error: "The provided product_id does not match the campaign specification" },
+        { status: 400 },
+      );
+    }
+
+    // 4. Kiểm tra Product tồn tại và đang active
     const { data: product, error: prodErr } = await adminClient
       .from("products")
       .select("id, name, payment_url, booking_url, status")
       .eq("id", productId)
-      .single();
+      .maybeSingle();
 
     if (prodErr || !product) {
       return NextResponse.json(
@@ -124,7 +201,14 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Kiểm tra Idempotent: Nếu Reseller đã có link cho Campaign + Product này thì trả về link cũ
+    if (product.status !== "active") {
+      return NextResponse.json(
+        { error: `Product is not active (current status: ${product.status})` },
+        { status: 400 },
+      );
+    }
+
+    // 5. Kiểm tra Idempotent & trạng thái link cũ
     const { data: existingLink } = await adminClient
       .from("affiliate_links")
       .select("*")
@@ -134,6 +218,13 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (existingLink) {
+      if (!existingLink.is_active) {
+        return NextResponse.json(
+          { error: "This affiliate link was previously generated but has been deactivated" },
+          { status: 400 },
+        );
+      }
+
       return NextResponse.json({
         status: "success",
         data: {
@@ -148,15 +239,18 @@ export async function POST(request: Request) {
       });
     }
 
-    // 3. Xác định Destination URL (Ưu tiên payment_url, fallback sang booking_url)
-    const targetUrl =
-      product.payment_url?.trim() ||
-      product.booking_url?.trim() ||
-      `/products/${productId}`;
+    // 6. Xác định Destination URL (Bắt buộc phải có URL thanh toán/đặt chỗ chính thức hợp lệ)
+    const targetUrl = product.payment_url?.trim() || product.booking_url?.trim();
+    if (!targetUrl || (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://"))) {
+      return NextResponse.json(
+        { error: "Product does not have a valid official payment or booking URL configured" },
+        { status: 400 },
+      );
+    }
 
     const destinationUrl = appendTrackingParams(targetUrl, resellerId, campaignId);
 
-    // 4. Sinh unique_code đảm bảo không trùng
+    // 7. Sinh unique_code đảm bảo không trùng
     let uniqueCode = generateUniqueCode(8);
     let attempts = 0;
     while (attempts < 5) {
@@ -171,11 +265,11 @@ export async function POST(request: Request) {
       attempts++;
     }
 
-    const requestUrl = new URL(request.url);
-    const origin = requestUrl.origin;
-    const shortUrl = `${origin}/r/${uniqueCode}`;
+    // 8. Tạo URL rút gọn chuẩn domain public
+    const baseUrl = getBaseUrl(request);
+    const shortUrl = `${baseUrl}/r/${uniqueCode}`;
 
-    // 5. Lưu vào bảng affiliate_links
+    // 9. Lưu vào bảng affiliate_links
     const { data: newLink, error: insertErr } = await adminClient
       .from("affiliate_links")
       .insert({
