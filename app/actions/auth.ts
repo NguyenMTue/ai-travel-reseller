@@ -8,8 +8,9 @@ import { hasSupabaseConfig } from "@/src/lib/supabase/config";
 import {
   loginSchema,
   signupSchema,
-  safeNextPath,
 } from "@/src/lib/auth-validation";
+import { resolveLoginDestination } from "@/src/lib/portal-access";
+import { createPortalAccessSource } from "@/src/lib/portal-access-source";
 
 export async function login(formData: FormData) {
   if (!hasSupabaseConfig)
@@ -18,7 +19,7 @@ export async function login(formData: FormData) {
 
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const next = safeNextPath(formData.get("next"));
+  const next = formData.get("next");
   if (!loginSchema.safeParse({ email, password }).success)
     return { error: "Vui lòng nhập email và mật khẩu hợp lệ." };
 
@@ -33,8 +34,10 @@ export async function login(formData: FormData) {
     };
   }
 
+  const destination = await resolveLoginDestination(createPortalAccessSource(supabase), next);
   revalidatePath("/", "layout");
-  redirect(next);
+  if (destination.status === "error") return { error: destination.error };
+  redirect(destination.path);
 }
 
 export async function signup(formData: FormData) {

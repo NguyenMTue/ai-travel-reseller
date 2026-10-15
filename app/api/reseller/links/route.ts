@@ -12,36 +12,48 @@ export async function GET(request: Request) {
     const limit = Math.min(100, Math.max(1, Number.parseInt(searchParams.get("limit") || "20", 10)));
     const offset = (page - 1) * limit;
 
-    // 1. Xác định reseller_id từ session cookie, query param hoặc header
-    let resellerId = searchParams.get("reseller_id")?.trim() || "";
-
-    if (!resellerId) {
-      try {
-        const cookieStore = await cookies();
-        const supabaseAuth = createClient(cookieStore);
-        const {
-          data: { user },
-        } = await supabaseAuth.auth.getUser();
-        if (user?.id) {
-          resellerId = user.id;
-        }
-      } catch {
-        // Tiếp tục nếu không có cookie
+    // 1. Xác định reseller_id từ session cookie (ưu tiên bảo mật)
+    let sessionUserId: string | null = null;
+    try {
+      const cookieStore = await cookies();
+      const supabaseAuth = createClient(cookieStore);
+      const {
+        data: { user },
+      } = await supabaseAuth.auth.getUser();
+      if (user?.id) {
+        sessionUserId = user.id;
       }
+    } catch {
+      // Tiếp tục nếu không có cookie
     }
 
-    if (!resellerId) {
-      const headerResellerId = request.headers.get("x-reseller-id")?.trim();
-      if (headerResellerId) {
-        resellerId = headerResellerId;
-      }
-    }
+    const requestedResellerId =
+      searchParams.get("reseller_id")?.trim() ||
+      request.headers.get("x-reseller-id")?.trim() ||
+      "";
 
-    if (!resellerId || !UUID_PATTERN.test(resellerId)) {
+    let resellerId = "";
+
+    if (sessionUserId) {
+      if (requestedResellerId && requestedResellerId !== sessionUserId) {
+        return NextResponse.json(
+          { success: false, error: "Forbidden: You cannot view links for other resellers" },
+          { status: 403 },
+        );
+      }
+      resellerId = sessionUserId;
+    } else if (
+      process.env.NODE_ENV !== "production" &&
+      requestedResellerId &&
+      UUID_PATTERN.test(requestedResellerId)
+    ) {
+      // CHỈ cho phép query param / header khi chạy test nội bộ ngoài production
+      resellerId = requestedResellerId;
+    } else {
       return NextResponse.json(
         {
           success: false,
-          error: "Unauthorized: Reseller session required or valid 'reseller_id' query param missing",
+          error: "Unauthorized: Reseller session required",
         },
         { status: 401 },
       );
