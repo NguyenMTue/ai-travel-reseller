@@ -42,21 +42,35 @@ function appendTrackingParams(rawUrl: string, resellerId: string, campaignId: st
 }
 
 function getBaseUrl(request: Request): string {
-  // 1. Ưu tiên biến môi trường chính thức của dự án
-  const envUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL;
+  // 1. Ưu tiên biến môi trường chính thức của dự án (Public Domain)
+  const envUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.APP_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : undefined) ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined);
+
   if (envUrl) {
     return envUrl.replace(/\/+$/, "");
   }
 
-  // 2. Ưu tiên headers khi chạy sau Reverse Proxy (Vercel, Cloudflare, Nginx)
+  // 2. Khi chạy sau Reverse Proxy (Vercel, Cloudflare, Nginx), xác thực và chuẩn hóa host chống Header Injection
   const forwardedHost = request.headers.get("x-forwarded-host");
   const forwardedProto = request.headers.get("x-forwarded-proto") || "https";
   if (forwardedHost) {
-    return `${forwardedProto}://${forwardedHost.split(",")[0].trim()}`;
+    const rawHost = forwardedHost.split(",")[0].trim();
+    if (/^[a-zA-Z0-9.-]+(?::[0-9]+)?$/.test(rawHost)) {
+      return `${forwardedProto}://${rawHost}`;
+    }
   }
 
-  // 3. Fallback cho môi trường local dev
-  return new URL(request.url).origin;
+  // 3. Fallback an toàn cho môi trường dev local
+  try {
+    return new URL(request.url).origin;
+  } catch {
+    return "http://localhost:3000";
+  }
 }
 
 export async function POST(request: Request) {
@@ -116,16 +130,19 @@ export async function POST(request: Request) {
         );
       }
       resellerId = sessionUserId;
+    } else if (
+      process.env.NODE_ENV !== "production" &&
+      requestedResellerId &&
+      UUID_PATTERN.test(requestedResellerId)
+    ) {
+      // CHỈ cho phép truyền body.reseller_id khi chạy script test nội bộ / dev runner ngoài production
+      resellerId = requestedResellerId;
     } else {
-      // Cho phép truyền body.reseller_id khi chạy script test nội bộ / dev runner
-      if (requestedResellerId && UUID_PATTERN.test(requestedResellerId)) {
-        resellerId = requestedResellerId;
-      } else {
-        return NextResponse.json(
-          { error: "Unauthorized: Please sign in as a reseller to continue" },
-          { status: 401 },
-        );
-      }
+      // Trên Production hoặc khi chưa đăng nhập, lập tức chặn lại và báo lỗi 401
+      return NextResponse.json(
+        { error: "Unauthorized: Please sign in as a reseller to continue" },
+        { status: 401 },
+      );
     }
 
     if (!UUID_PATTERN.test(resellerId)) {
@@ -225,12 +242,24 @@ export async function POST(request: Request) {
         );
       }
 
+      const baseUrl = getBaseUrl(request);
+      const currentShortUrl = `${baseUrl}/r/${existingLink.unique_code}`;
+
+      // Tự động đồng bộ short_url mới trong DB nếu trước đó lưu localhost/domain khác
+      if (existingLink.short_url !== currentShortUrl) {
+        adminClient
+          .from("affiliate_links")
+          .update({ short_url: currentShortUrl, updated_at: new Date().toISOString() })
+          .eq("id", existingLink.id)
+          .then();
+      }
+
       return NextResponse.json({
         status: "success",
         data: {
           id: existingLink.id,
           unique_code: existingLink.unique_code,
-          short_url: existingLink.short_url,
+          short_url: currentShortUrl,
           destination_url: existingLink.destination_url,
           clicks_count: existingLink.clicks_count,
           created_at: existingLink.created_at,

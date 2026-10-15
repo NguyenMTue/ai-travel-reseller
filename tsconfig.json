@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "allowImportingTsExtensions": true,
     "skipLibCheck": true,
@@ -20,7 +24,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
   "include": [
@@ -29,7 +35,22 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    "build/fe-w2/types/**/*.ts",
+    "build/fe-w2/dev/types/**/*.ts",
+    "build/fe-w2-test/types/**/*.ts",
+    "build/fe-w2-test/dev/types/**/*.ts",
+    "build/fe-w2-recheck/types/**/*.ts",
+    "build/fe-w2-recheck/dev/types/**/*.ts",
+    "build/fe-w2-content/types/**/*.ts",
+    "build/fe-w2-content/dev/types/**/*.ts",
+    "build/fe-w2-content-tests/types/**/*.ts",
+    "build/fe-w2-content-tests/dev/types/**/*.ts",
+    "build/fe-w2-access-test/types/**/*.ts",
+    "build/fe-w2-access-test/dev/types/**/*.ts",
+    "build/fe-w2-access/types/**/*.ts",
+    "build/fe-w2-access/dev/types/**/*.ts",
+    "build/fe-w2-access-test/dev/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",
