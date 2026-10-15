@@ -16,6 +16,23 @@
 | TypeScript | PASS |
 | Targeted ESLint | PASS |
 
+## Incremental verification — 2026-10-15
+
+| Check | Result |
+|---|---|
+| Deterministic unit tests | 14/14 PASS |
+| Persistence mapping | 10 rows: 5 complete + 5 hook-only PASS |
+| Database status normalization | `APPROVED` → `approved`; `NEEDS_REVIEW` → `needs_review` PASS |
+| Live Bà Nà Hills generations | local_guide + foodie PASS |
+| Live VinWonders generations | family + budget_traveler PASS |
+| Live schema parse and guardrails | 4/4 PASS |
+| TypeScript | PASS |
+| Targeted ESLint | PASS |
+
+The 15/10 live run remained read-only: it called Gemini and validated results in
+memory, but did not write Supabase or invoke n8n. Full BE2-W2-05 acceptance still
+depends on BE3's workflow writing the mapped rows to `contents`.
+
 The live test did not write to Supabase. It validated responses in memory and
 printed only run number, persona and PASS status; API keys and generated content
 were not logged.
@@ -31,6 +48,8 @@ npx.cmd eslint src/lib/ai/prompts src/lib/ai/schemas src/lib/ai/guardrails tests
 
 ## Open interface decision
 
-The output contract has 10 hooks and 5 scripts/captions/CTAs, while each
-`contents` row has one column for each asset. BE2, BE3 and FE must agree on the
-row mapping before the n8n batch insert is finalized.
+BE2 now provides a tested reference mapper for the unequal arrays: five complete
+rows plus five hook-only rows, without cycling or duplicating assets. It also
+normalizes guardrail statuses to lowercase database values so FE can display
+`approved` rows. BE3 and FE acceptance is still required during the first live
+workflow test.

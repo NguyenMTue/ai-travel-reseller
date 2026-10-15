@@ -90,19 +90,39 @@ Supported flags are `PRICE_MISMATCH`, `UNCONFIRMED_PROMO_CODE` and
 claim is true; Tester 2 must still review groundedness and prompt-injection
 cases.
 
-## Database mapping decision required
+## Database persistence contract ready for review
 
 `contents` stores one `hook`, `script`, `caption` and `cta` per row, while the
 agreed model output contains 10 hooks but only 5 scripts/captions/CTAs. The team
-documents do not define how those unequal arrays become rows.
+now has an executable BE2 reference mapper in
+`src/lib/ai/content-persistence.ts` with the following contract:
 
-Before BE3 writes the batch insert node, BE2 + BE3 + FE must choose one mapping:
+- One persona generation becomes exactly 10 `contents` rows.
+- Rows 0-4 contain `hook`, formatted `script`, `caption` and `cta`.
+- Rows 5-9 contain the remaining hooks; `script`, `caption` and `cta` are null.
+- `campaign_id` and `product_id` are required UUIDs.
+- `reseller_id` is null for campaign content shared with eligible resellers.
+- Guardrail `APPROVED` persists as lowercase `approved`; `NEEDS_REVIEW`
+  persists as lowercase `needs_review`. FE intentionally reads only exact
+  lowercase `approved`.
+- Never cycle or duplicate scripts, captions or CTAs to fill ten rows.
 
-- five complete rows plus five hook-only rows; or
-- five complete rows with two hooks represented by an agreed format; or
-- a revised database/output contract owned by BE1/PM.
+BE3 should mirror this mapper in the n8n transformation immediately before one
+batch insert. The reference implementation validates the structured output and
+rejects internally inconsistent guardrail results before producing rows.
 
-Do not silently cycle or duplicate scripts, captions or CTAs to fill ten rows.
+This is `READY_FOR_REVIEW`, not team acceptance: BE3 and FE must confirm the
+contract during the first live workflow test.
+
+### n8n structured-output requirements
+
+- Use a Basic LLM Chain for this stateless, one-shot generation.
+- Configure a manual Structured Output Parser using
+  `content-factory.schema.json`.
+- Enable auto-fix with a coding-capable fixer model.
+- Require raw JSON without Markdown fences in both main and retry prompts.
+- Validate the output again before mapping and persistence.
+- Use one batch insert per persona; do not insert rows individually.
 
 ## Verification
 
