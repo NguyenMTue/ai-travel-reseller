@@ -449,44 +449,70 @@ INSERT INTO public.contents (
   persona, hook, script, caption, cta, status
 )
 VALUES 
-  -- Content 1: Review Bà Nà Hills (Khớp ID cũ)
+  -- Content 1: Persona Foodie (Bà Nà Hills)
   (
     '66666666-6666-6666-6666-666666666666',
     '44444444-4444-4444-4444-444444444444',
     '22222222-2222-2222-2222-111111111111',
     '33333333-3333-3333-3333-333333333333',
-    'Reviewer năng động, GenZ mê check-in',
+    'foodie',
     'Đừng đi Đà Nẵng nếu bạn chưa biết bí quyết này để săn mây Bà Nà...',
     'Bà Nà Hills vừa có thêm góc check-in mới cực chất tại Cầu Vàng và Làng Pháp. Nếu đi sáng sớm trước 8h hoặc chiều sau 16h bạn sẽ có những khung hình không dính người!',
-    'Mẹo săn vé cáp treo Bà Nà Hills kèm buffet trưa tiết kiệm ngay 100k cho mùa hè này! Đặt ngay tại bio của mình nha mọi người ơi!',
-    'Click link ở bio để nhận ngay ưu đãi giảm 100k vé cáp treo Bà Nà Hills hôm nay!',
-    'public'
+    'Mẹo săn vé cáp treo Bà Nà Hills kèm buffet trưa tiết kiệm ngay 100k cho mùa hè này! Đặt ngay tại link chính thức của nhà cung cấp nha mọi người ơi! #danang #banahills #checkindanang',
+    'Click link ở bio để nhận ngay ưu đãi giảm 100k vé cáp treo Bà Nà Hills hôm nay! [LINK_MUA_VE]',
+    'approved'
   ),
-  -- Content 2: Review Cù Lao Chàm lặn san hô
+  -- Content 2: Persona Local Guide (Bà Nà Hills)
+  (
+    '66666666-6666-6666-6666-444444444441',
+    '44444444-4444-4444-4444-444444444444',
+    '22222222-2222-2222-2222-111111111111',
+    '33333333-3333-3333-3333-333333333333',
+    'local_guide',
+    'Kinh nghiệm người Đà Nẵng: 3 khung giờ vàng đi cáp treo Bà Nà không phải xếp hàng!',
+    'Là người Đà Nẵng, mình khuyên các bạn nên lên cáp treo lúc 7h30 sáng hoặc sau 15h chiều. Trưa ghé buffet Arapang ăn hơn 100 món, chiều chụp ảnh Cầu Vàng lúc hoàng hôn cực kỳ vắng người và thơ mộng.',
+    'Kinh nghiệm đi Bà Nà Hills chuẩn người bản địa. Đặt vé kèm buffet sớm để nhận ưu đãi tốt nhất! #kinhnghiemdulich #dananglocal',
+    'Bấm ngay link bio để đặt vé cáp treo Bà Nà Hills chính thức! [LINK_MUA_VE]',
+    'approved'
+  ),
+  -- Content 3: Persona Family (Bà Nà Hills)
+  (
+    '66666666-6666-6666-6666-444444444442',
+    '44444444-4444-4444-4444-444444444444',
+    '22222222-2222-2222-2222-111111111111',
+    '33333333-3333-3333-3333-333333333333',
+    'family',
+    'Bí quyết đưa cả gia đình đi Bà Nà Hills trọn vẹn, không lo mệt mỏi hay chen chúc!',
+    'Chuyến đi gia đình có trẻ nhỏ và người lớn tuổi cần ưu tiên sự tiện lợi: cáp treo khứ hồi nhẹ nhàng, buffet quốc tế tại nhà hàng rộng rãi, có sẵn xe đẩy và khu vui chơi Fantasy Park mát mẻ trong nhà.',
+    'Gợi ý lịch trình du lịch Bà Nà Hills lý tưởng cho cả gia đình mùa hè này. Đặt trước vé để nhận hướng dẫn chi tiết! #dulichgiadinh #banahills',
+    'Click ngay link để nhận combo vé gia đình ưu đãi đặc biệt hôm nay! [LINK_MUA_VE]',
+    'approved'
+  ),
+  -- Content 4: Persona Budget Traveler (Bà Nà Hills)
+  (
+    '66666666-6666-6666-6666-444444444443',
+    '44444444-4444-4444-4444-444444444444',
+    '22222222-2222-2222-2222-111111111111',
+    '33333333-3333-3333-3333-333333333333',
+    'budget_traveler',
+    'Tiết kiệm ngay 100.000đ khi đặt combo Cáp treo Bà Nà + Buffet trưa quốc tế!',
+    'Giá gốc 1.250.000đ nay chỉ còn 1.150.000đ trọn gói cả vé vào cổng, cáp treo khứ hồi và đại tiệc buffet hơn 100 món. Đặt trực tiếp qua hệ thống đại lý chính hãng để không lo phát sinh.',
+    'Deal vé Bà Nà Hills tiết kiệm nhất tháng này. Vé điện tử quét mã QR vào cổng không cần chờ đợi! #sandeal #vebana',
+    'Nhận ưu đãi giảm 100k ngay bằng cách ấn vào link bên dưới! [LINK_MUA_VE]',
+    'approved'
+  ),
+  -- Content 5: Cù Lao Chàm (Persona local_guide)
   (
     '66666666-6666-6666-6666-222222222222',
     '44444444-4444-4444-4444-222222222222',
     '22222222-2222-2222-2222-222222222222',
     '33333333-3333-3333-3333-222222222222',
-    'Linh Đan Travel - Trẻ trung, trải nghiệm thực tế',
+    'local_guide',
     'Chỉ 550k mà được đi cano lướt sóng cực đã và ngắm rạn san hô đẹp mê hồn tại Cù Lao Chàm?',
     'Một ngày làm ngư dân đảo Cù Lao Chàm: lặn biển ngắm san hô Bãi Chồng, uống nước giếng cổ thoát ế và ăn cua đá no nê. Trọn gói từ cảng Cửa Đại đã có hướng dẫn viên lo tất tần tật.',
-    'Review chân thật chuyến đi Cù Lao Chàm 1 ngày chỉ 550k bao gồm cano và ăn trưa hải sản. Xem hết video để lưu lại số cano uy tín nhé!',
-    'Nhắn tin hoặc bấm link bên dưới để đặt cano giá ưu đãi kèm bảo hiểm đầy đủ!',
-    'published'
-  ),
-  -- Content 3: Trải nghiệm Du thuyền Sông Hàn
-  (
-    '66666666-6666-6666-6666-333333333333',
-    '44444444-4444-4444-4444-111111111111',
-    '22222222-2222-2222-2222-111111111111',
-    '33333333-3333-3333-3333-444444444444',
-    'Dân bản địa sành điệu',
-    'Góc ngắm Cầu Rồng phun lửa đẹp nhất không phải đứng trên cầu mà là ngồi ở đây...',
-    'Đúng 21h thứ 7, du thuyền Marina sông Hàn thả trôi nhẹ ngay chân Cầu Rồng. Bạn vừa thưởng thức cocktail, nghe nhạc sống vừa ngắm trọn vẹn màn phun lửa nước ngoạn mục.',
-    'Vé du thuyền sông Hàn chỉ 150k cho 90 phút chill hết nấc giữa lòng Đà Nẵng về đêm!',
-    'Giữ chỗ ngay trước 18h để chọn được bàn tầng 2 view panorama nhé cả nhà!',
-    'pending_approval'
+    'Review chân thật chuyến đi Cù Lao Chàm 1 ngày chỉ 550k bao gồm cano và ăn trưa hải sản. Xem hết video để lưu lại số cano uy tín nhé! #culaocham #dulichhoian',
+    'Nhắn tin hoặc bấm link bên dưới để đặt cano giá ưu đãi kèm bảo hiểm đầy đủ! [LINK_MUA_VE]',
+    'approved'
   )
 ON CONFLICT (id) DO UPDATE SET
   persona = EXCLUDED.persona,

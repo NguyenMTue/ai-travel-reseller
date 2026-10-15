@@ -45,10 +45,10 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
 | BE1-W2-04 | Triển khai Redirect Router `/r/[tracking_id]` & Ghi nhận Click | P0 | DONE | BE1-W2-01, 02 | BE1 | Next.js route `app/r/[code]/route.ts` | 14/10 17:00 |
 | BE1-W2-05 | Cấu hình RLS Policies cho `campaigns`, `affiliate_links`, `clicks` | P1 | DONE | BE1-W2-01 | BE1 | Migration RLS SQL (bảo vệ link, cho phép public redirect) | 15/10 12:00 |
 | BE1-W2-06 | Tối ưu hóa truy vấn Feed & Hỗ trợ tích hợp kỹ thuật E2E | P2 | DONE | BE1-W2-04 | BE1 | Migration SQL (`20261013213000_optimize_feed_and_tracking_indexes.sql`), benchmark script `benchmark_performance.ps1` | 13/10 21:30 |
-| BE1-W2-07 | Migration mở rộng bảng `clicks` & Cập nhật Trigger đếm click hợp lệ | P1 | READY | BE1-W2-01 | BE1 | File migration SQL (`20261014110000_clicks_anti_fraud_and_device_analytics.sql`) | 14/10 17:00 |
-| BE1-W2-08 | Module Chống click tặc, Lọc Bot & Parser Thiết bị trong Router `/r/[code]` | P1 | READY | BE1-W2-04, 07 | BE1 | Code `app/r/[code]/route.ts` + `ua-parser.ts`, `rate-limiter.ts` | 15/10 12:00 |
-| BE1-W2-09 | Bộ Postgres RPC Hàm Thống Kê Nhanh (High-Performance Analytics RPCs) | P1 | READY | BE1-W2-07 | BE1 | File migration SQL (`20261014140000_reseller_analytics_rpc.sql`) | 15/10 17:00 |
-| BE1-W2-10 | API Quản Lý & Báo Cáo cho Reseller Dashboard (`/api/reseller/*`) | P1 | READY | BE1-W2-09 | BE1 | Routes `app/api/reseller/links/route.ts` & `app/api/reseller/analytics/route.ts` | 16/10 10:00 |
+| BE1-W2-07 | Migration mở rộng bảng `clicks` & Cập nhật Trigger đếm click hợp lệ | P1 | DONE | BE1-W2-01 | BE1 | File migration SQL (`20261014110000_clicks_anti_fraud_and_device_analytics.sql`) | 14/10 11:15 |
+| BE1-W2-08 | Module Chống click tặc, Lọc Bot & Parser Thiết bị trong Router `/r/[code]` | P1 | DONE | BE1-W2-04, 07 | BE1 | Code `app/r/[code]/route.ts` + `ua-parser.ts`, `rate-limiter.ts` | 14/10 11:30 |
+| BE1-W2-09 | Bộ Postgres RPC Hàm Thống Kê Nhanh (High-Performance Analytics RPCs) | P1 | DONE | BE1-W2-07 | BE1 | File migration SQL (`20261014140000_reseller_analytics_rpc.sql`) | 14/10 11:45 |
+| BE1-W2-10 | API Quản Lý & Báo Cáo cho Reseller Dashboard (`/api/reseller/*`) | P1 | DONE | BE1-W2-09 | BE1 | Routes `app/api/reseller/links/route.ts` & `app/api/reseller/analytics/route.ts` + `test_antibot_and_analytics.ps1` | 14/10 11:45 |
 
 ---
 
@@ -240,19 +240,28 @@ flowchart TD
 ### 14/10/2026 (Thứ Tư)
 **DONE:**
 - Phân rã toàn diện 4 module nâng cấp từ `SP_BE1_W2` thành các task chính thức (`BE1-W2-07` đến `BE1-W2-10`).
-- Hoàn thiện tài liệu kế hoạch kỹ thuật, thiết kế cấu trúc mở rộng bảng `clicks` (bot detection, devices parser) và đặc tả các hàm Postgres RPC Analytics.
-- Đồng bộ thông tin giao diện với FE Lead và Tester 3.
+- Hoàn thành migration `supabase/migrations/20261014110000_clicks_anti_fraud_and_device_analytics.sql`: Mở rộng bảng `clicks` (bot, device_type, os, browser, is_valid) và cập nhật trigger chỉ tăng click hợp lệ.
+- Xây dựng module nhận diện Bot và parser User-Agent siêu tốc (`src/lib/tracking/ua-parser.ts`) và Rate Limiter (`src/lib/tracking/rate-limiter.ts`).
+- Nâng cấp Router `app/r/[code]/route.ts`: Vừa chuyển hướng 302 an toàn giữ OpenGraph preview, vừa ghi nhận thông tin thiết bị và cờ lọc bot.
+- Hoàn thành migration `supabase/migrations/20261014140000_reseller_analytics_rpc.sql`: Cung cấp 4 hàm RPC Analytics (Overview, Timeseries 7/30d liên tục, Top campaigns, Device breakdown).
+- Triển khai 2 API Route Handlers:
+  - `GET /api/reseller/links`: Lấy danh sách link kèm số click hợp lệ, tour và campaign.
+  - `GET /api/reseller/analytics`: Trả về toàn bộ dữ liệu biểu đồ cho Frontend Dashboard.
+- Viết và thực thi test suite tự động `test_antibot_and_analytics.ps1`: Giả lập người thật, bot Facebook/ByteSpider, spam click > 10 lần -> Tất cả assertions PASS 100%.
+- Chạy `npm run build` thành công 100% (16 routes), TypeScript không lỗi.
 
 **IN PROGRESS:**
-- Viết file migration `supabase/migrations/20261014110000_clicks_anti_fraud_and_device_analytics.sql`.
-- Xây dựng module nhận diện Bot và parser User-Agent trong `src/lib/tracking/ua-parser.ts`.
+- Chuẩn bị tạo Pull Request từ nhánh `Feature_BE1_AntiBot` vào nhánh `dev`.
 
 **BLOCKED:**
 - Không có blocker.
 
+**HANDOFF:**
+- Bàn giao 2 API `/api/reseller/links` và `/api/reseller/analytics` cho FE để tích hợp màn hình Reseller Dashboard.
+- Bàn giao script test `test_antibot_and_analytics.ps1` và các hàm RPC cho Tester 3.
+
 **NEXT:**
-- Áp dụng migration mới lên local DB, cập nhật Route Handler `/r/[code]` và kiểm thử với script giả lập Bot / Rate Limit.
-- Triển khai bộ Postgres RPC và 2 API Route Handlers cho Reseller Dashboard.
+- Tạo PR `Feature_BE1_AntiBot` vào `dev`, đồng bộ DB remote và hỗ trợ toàn đội chạy test tích hợp E2E.
 
 ### 13/10/2026 (Thứ Ba)
 **DONE:**
@@ -301,7 +310,7 @@ flowchart TD
 - [x] Router `/r/[code]` ghi nhận lượt click vào bảng `clicks` và 302 redirect thành công
 - [x] Trigger database kích hoạt n8n thành công
 - [x] Đánh composite/partial indexes tối ưu truy vấn Feed, Content Kit và Click Analytics đạt < 1ms
-- [ ] Module Lọc bot & Parser thiết bị hoạt động trên route `/r/[code]`, không chặn OpenGraph preview của mạng xã hội
-- [ ] Các hàm Postgres RPC Analytics trả về số liệu tổng hợp chính xác, bảo mật theo `auth.uid()`
-- [ ] API `/api/reseller/links` và `/api/reseller/analytics` hoạt động ổn định và sẵn sàng cho FE tích hợp
+- [x] Module Lọc bot & Parser thiết bị hoạt động trên route `/r/[code]`, không chặn OpenGraph preview của mạng xã hội
+- [x] Các hàm Postgres RPC Analytics trả về số liệu tổng hợp chính xác, bảo mật theo `auth.uid()`
+- [x] API `/api/reseller/links` và `/api/reseller/analytics` hoạt động ổn định và sẵn sàng cho FE tích hợp
 - [ ] 100% PR được merge an toàn vào `dev` trước 12:00 PM Thứ Sáu (16/10/2026)
