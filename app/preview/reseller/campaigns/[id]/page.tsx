@@ -14,7 +14,7 @@ export default async function ContentKitPreviewPage({ params, searchParams }: {
   const { id } = await params;
   if (id !== fixtureCampaignDetail.id) notFound();
   const { state, tracking } = await searchParams;
-  const trackingScenario = trackingScenarios.find(value => value === tracking);
+  const trackingScenario = tracking ? trackingScenarios.find(value => value === tracking) : "success";
   const blocked = state === "blocked";
   const approved = state === "approved";
   const contentReason = new Map<string, DataFailureKind>([

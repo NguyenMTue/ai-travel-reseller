@@ -32,7 +32,7 @@ export function CampaignDetailView({ campaign, variants, contentStatus, contentR
       <TrackingScopeProvider scope={viewerKey && campaign.product_id && campaign.products?.id === campaign.product_id
         ? { campaign_id: campaign.id, product_id: campaign.product_id, sessionKey: viewerKey } : null} watchSession={!preview}>
       <ContentKit variants={variants} contentStatus={contentStatus} contentReason={contentReason} />
-      {tracking ?? <TrackingLinkModal key={`${campaign.id}:${campaign.product_id ?? "none"}`} input={campaign.product_id && campaign.products?.id === campaign.product_id
+      {tracking ?? <TrackingLinkModal key={`${campaign.id}:${campaign.product_id ?? "none"}`} preview={preview} input={campaign.product_id && campaign.products?.id === campaign.product_id
         ? { campaign_id: campaign.id, product_id: campaign.product_id } : null} />}
       </TrackingScopeProvider>
     </div>

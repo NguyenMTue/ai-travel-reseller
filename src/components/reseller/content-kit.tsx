@@ -115,8 +115,45 @@ export function ContentKit({ variants, contentStatus, contentReason }: {
               label={field === "cta" ? "CTA" : field.charAt(0).toUpperCase() + field.slice(1)} value={selected[field]} />)}
             <CopyCtaWithLink key={selected.id} cta={selected.cta} />
           </div>
+          <CannedResponsesSection />
         </>
       )}
     </section>
   );
 }
+
+function CannedResponsesSection() {
+  const { link } = useTrackingScope();
+  const trackingUrl = link?.shortUrl ?? "[LINK_MUA_VE]";
+  const cannedList = [
+    {
+      title: "Giá vé & ưu đãi",
+      response: `Chào bạn, giá vé ưu đãi đã bao gồm đầy đủ dịch vụ trọn gói. Bạn tham khảo và đặt vé chính thức tại link này nhé: ${trackingUrl}`,
+    },
+    {
+      title: "Địa điểm & lịch trình",
+      response: `Chào bạn, lịch trình khởi hành hàng ngày từ Đà Nẵng / Hội An. Bạn xem chi tiết thời gian và địa điểm đón tại link này nha: ${trackingUrl}`,
+    },
+    {
+      title: "Cách đặt vé & thanh toán",
+      response: `Bạn truy cập link này: ${trackingUrl} để chọn ngày đi và nhận vé điện tử gửi về điện thoại ngay sau khi đặt vé!`,
+    },
+  ];
+
+  return (
+    <div className="mt-8 rounded-xl border border-border bg-white p-5" data-testid="canned-responses-section">
+      <h3 className="text-lg font-medium [font-family:var(--font-display)]">
+        Câu trả lời soạn sẵn (Canned Responses - FR-RES-09)
+      </h3>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Bộ câu trả lời mẫu cho bình luận và tin nhắn khách hàng kèm link tiếp thị của bạn.
+      </p>
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        {cannedList.map((item, idx) => (
+          <CopyField key={idx} label={`Câu trả lời: ${item.title}`} value={item.response} />
+        ))}
+      </div>
+    </div>
+  );
+}
+

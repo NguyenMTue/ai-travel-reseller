@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { Button } from "@/src/components/ui/button";
-import { CampaignFeed } from "@/src/components/reseller/campaign-feed";
+import { ResellerPortalTabs } from "@/src/components/reseller/reseller-portal-tabs";
 import { FeedLoading, FeedNotice } from "@/src/components/reseller/feed-states";
 import type { CampaignFeedItem } from "@/src/lib/reseller/campaign-feed";
 
@@ -29,7 +29,7 @@ export function ResellerFeedPreview({ campaigns }: { campaigns: CampaignFeedItem
           {previewStates.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
       </aside>
-      {state === "ready" && <CampaignFeed campaigns={campaigns} detailBasePath="/preview/reseller/campaigns" />}
+      {state === "ready" && <ResellerPortalTabs campaigns={campaigns} detailBasePath="/preview/reseller/campaigns" />}
       {state === "loading" && <FeedLoading />}
       {state !== "ready" && state !== "loading" && (
         <>
