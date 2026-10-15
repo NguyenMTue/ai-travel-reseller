@@ -15,6 +15,8 @@ export const campaignScriptSchema = z.object({
   scenes: z.array(z.string().trim().min(10).max(500)).min(3).max(8),
 });
 
+export type CampaignScript = z.infer<typeof campaignScriptSchema>;
+
 const captionSchema = z
   .string()
   .trim()
