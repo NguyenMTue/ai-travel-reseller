@@ -10,7 +10,7 @@ export const merchantProductFixtures = [
   { id: "33333333-3333-3333-3333-111111111111", merchant_id: fixtureMerchantId, name: "Tour trải nghiệm miền Trung — sản phẩm mô phỏng" },
   { id: "33333333-3333-3333-3333-222222222222", merchant_id: fixtureMerchantId, name: "Hành trình gia đình tại Đà Nẵng và Hội An — sản phẩm mô phỏng có tên dài để kiểm tra hiển thị trên điện thoại" },
 ];
-export const fixtureCreatePolicy: CampaignCreatePolicy = { initialStatus: "FIXTURE_REVIEWED", calendarDates: "inclusive-local-day" };
+export const fixtureCreatePolicy: CampaignCreatePolicy = { initialStatus: "FIXTURE_REVIEWED", calendarDates: "inclusive-local-day", timeZone: "Asia/Ho_Chi_Minh" };
 export const validCampaignFixture: CampaignFormValues = {
   product_id: merchantProductFixtures[0].id,
   name: "Chiến dịch kiểm thử mô phỏng",

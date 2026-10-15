@@ -19,6 +19,7 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { demoProducts, demoMetrics } from "@/src/lib/merchant-demo";
 import { logout } from "@/app/actions/auth";
+import { CampaignCreatedNotice } from "./campaign-created-notice";
 export function Dashboard({ preview = false }: { preview?: boolean }) {
   const [tab, setTab] = useState("overview");
   const [query, setQuery] = useState("");
@@ -137,6 +138,7 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
           </Link>
         </header>
         <main id="main-content" className="dashboard-main">
+          <CampaignCreatedNotice preview={preview} />
           <div className="preview-banner">
             <span>
               <span className="dot" />{" "}

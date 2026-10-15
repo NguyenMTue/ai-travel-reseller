@@ -28,8 +28,8 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | FE-W2-01 | Diệu | FE | Layout/server gate & Reseller Feed (`/reseller/campaigns`) | WAITING_REVIEW | 14/10 — tiếp quản | Gốc: 13/10 12:00; đã qua |
 | FE-W2-02 | Diệu | FE | Search & lọc danh mục/địa điểm/hoa hồng | WAITING_REVIEW | 14/10 — tiếp quản | Gốc: 13/10 17:00; đã qua |
 | FE-W2-03 | Diệu | FE | Chi tiết & Content Kit 4 persona | WAITING_REVIEW — người dùng kiểm tra thủ công Bà Nà Hills/4 persona PASS | 14/10 — lượt Content Kit | Gốc: 14/10 12:00 |
-| FE-W2-04 | Diệu | FE | Clipboard & modal Tracking Link | WAITING_REVIEW — Copy; Tracking BLOCKED | 14/10 — Copy | Gốc: 14/10 17:00 |
-| FE-W2-05 | Diệu | FE | Merchant Campaign form/action theo contract xác nhận | IN_PROGRESS — UI/mock PASS; ghi thật BLOCKED | 15/10 — form/loader/action/fixture | Gốc: 15/10 12:00 |
+| FE-W2-04 | Diệu | FE | Clipboard & modal Tracking Link/QR local | WAITING_REVIEW — Copy; modal/QR fixture; Tracking thật BLOCKED | 14/10 — Copy; 15/10 — modal/QR | Gốc: 14/10 17:00 |
+| FE-W2-05 | Diệu | FE | Merchant Campaign form/action theo contract xác nhận | IN_PROGRESS — code mở theo BE active/ngày VN; chưa live acceptance/review | 15/10 — form/loader/action/fixture | Gốc: 15/10 12:00 |
 | FE-W2-06 | Diệu | FE | Live data integration đã kiểm chứng | IN_PROGRESS — Content Kit/Copy localhost được người dùng xác nhận; pipeline/QA còn lại | 14/10 — chẩn đoán truy cập | Gốc: 15/10 17:00 |
 | FE-W2-07 | Diệu | FE | Mobile/keyboard & Full Playwright E2E; Tester 1 hỗ trợ QA | NOT_READY | Chưa bắt đầu | 16/10 12:00 |
 | FE-W2-08 | Diệu | FE | Public Terms of Service `/terms` | UI DONE — nội dung WAITING_APPROVAL | 15/10 — khung bản nháp | 16/10 12:00 — hạn chung sprint |
@@ -72,8 +72,8 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 ## 4. BLOCKED
 | Task ID | Owner | Blocked By | Required From | Impact |
 |---|---|---|---|---|
-| FE-W2-04 | Diệu | API hiện tin body reseller_id/admin client; role/campaign-product chưa xác minh; thiếu server key ở máy FE | BE1 | Endpoint có trên checkout; FE chưa thể coi runtime/security dependencies đã giải tỏa |
-| FE-W2-05 | Diệu | Chưa chốt status khởi tạo/biên ngày TIMESTAMP, quyền ghi session/RLS thật; AI notes chưa có contract/cột | BE1 / PM | UI/loader/action + 38 tests mock/UI pass; name/audience/location đã đối chiếu cột. Người dùng xác nhận chưa có BE về status/ngày; guard server chặn insert thật, không dùng active của Feed làm default tạo mới |
+| FE-W2-04 | Diệu | Cả generate và alias dùng body reseller_id trước session/admin client, không membership/role/relation/eligibility; chưa kiểm chứng server key/runtime | BE1 | Modal/Copy link/QR và adapter đã có, production chặn trước fetch; handoff nói ready không thay bằng chứng handler. Không gọi thật, cần BE fix + QA positive/negative quyền |
+| FE-W2-05 (acceptance còn lại) | Diệu | Chưa kiểm chứng ghi session/RLS/trigger AI thật; AI notes chưa có contract/cột, required/limits ngoài phần đã xác nhận còn cần chốt | BE1 / PM / QA | Blocker status/ngày RESOLVED theo BE mới: active, đầu/hết ngày VN. Code đã mở, không tự tạo dữ liệu/AI trên Supabase chung; chưa reviewed hoặc live acceptance |
 | FE-W2-06 | Diệu | Negative RLS/login lifecycle/pipeline/QA chưa đủ bằng chứng | BE1 / BE3 | Người dùng xác nhận localhost/Reseller: Bà Nà Hills đủ4 persona, Copy4 phần dán Notepad đúng nội dung/xuống dòng. Đây là kiểm tra thủ công giới hạn tài khoản/campaign này; tách mock, không ghi full integration DONE |
 | FE-W2-08/09 (nội dung) | Diệu | Chưa có Điều khoản/Quyền riêng tư được công ty phê duyệt trong repo | Công ty / PM | Giao diện public đã có khung bản nháp; nội dung pháp lý chưa có hiệu lực, chờ copy và phê duyệt chính thức |
 | BE3-W2-02 | BE3 | Prompt templates & Zod schema chính thức | BE2 | n8n tạm dùng prompt thử nghiệm của W1 |
@@ -180,6 +180,44 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 ## 11. DAILY UPDATE
 
 ### 15/10/2026 (Thứ Năm)
+
+#### FE (Diệu — đối chiếu Tracking blocker và Copy CTA kèm link)
+
+- Fetch origin: dev vẫndb9f9ea; generate/alias/admin/redirect không khác localHEAD577b074. Chưa có fix chỉ trên remote; giữ mọi diff trước lượt, gồm login/membership/guard, không merge lại.
+- Bằng chứng source: body reseller_id ưu tiên session, admin client, thiếu Reseller membership/campaign eligibility/quan hệ product; reuse filter triple nhưng bỏ active/error; request origin tạo short_url localhost; fallback /products chưa có route. Giữ live gate false, không sửa BE handler/DB. Contract response/state/config/public origin và BE1 message cụ thể ở FE_W2 mục27.
+- Ảnh bảng người dùng mô tả:4 active links localhost, một owner22222222 và ba owner9ec38ccf, chưa thấy campaign VinWonders44444444…333333333333. Role postgres không chứng minh quyền session web; không hardcode/reuse link ảnh. Manual preview QR hiển thị/Copy Notepad khớp đã xác nhận; device scan/live create chưa xác nhận.
+- Thêm Copy CTA kèm link riêng: thay đúng token trong bản sao, CTA/Copy gốc không đổi, rỗng/không token/không link có thông báo trung thực; chỉ dùng short_url đúng scope campaign/product/verified session. State in-memory reset khi đổi scope/Auth event; stale pending không lẫn link. Copy await/manual fallback; QR/Copy/link nhất quán, cảnh báo localhost chưa chia sẻ public. Fixture/session controls riêng, không gọi Supabase hoặc /r/.
+- **Kiểm chứng:** Tracking/CTA35/35 PASS exit0 (8data+27UI320/390/1440). Sau fix SDK restore guard,20/20 PASS exit0 (8data recheck+12Copy regression gốc), không cộng lặp thành55ca riêng. Không làm yếu assertions; scoped lint0warning, tsc noEmit và build cuối PASS (2.5min compile/23.9s types/23pages), diff check PASS. Reports/ảnh và acceptance ở FE_W2 mục27; không coi mock/ảnh postgres là tạo link/redirect/click thật PASS. FE04/tuần2 chưa DONE/reviewed; Campaign thật/AI và session login thật sau sửa vẫn chưa kiểm chứng.
+- Không sửa role tài khoản/DB/RLS/seed/migration/API Tracking/.env.local, không webhook/ghi dữ liệu/click thật hoặc commit/push/merge. Chỉ bổ sung phần FE trong log team.
+
+#### FE (Diệu — sửa login theo membership và guard Merchant)
+
+- Người dùng xác nhận trước sửa: Reseller login không next về Merchant minh họa, nhưng next Feed vào được9 chiến dịch. Một lần không đọc thấy hồ sơ Reseller chưa rõ nguyên nhân, không kết luận RLS. Nguyên nhân code: login page tự điền next Merchant, action redirect không membership và Merchant root thiếu server guard.
+- Login/callback dùng getUser + merchants.id/resellers.id từ session client/RLS, không tin email/user_metadata. Default theo quyền; cả hai giữ default Merchant có kiểm chứng, không hồ sơ ở login với lỗi riêng. next internal an toàn và đúng quyền mới được dùng; Merchant layout/root loader có guard, form/action giữ kiểm tra Merchant/ownership độc lập. Proxy phân biệt lỗi Auth dịch vụ với hết phiên; preview public tách riêng, không redirect loop.
+- Thêm7data+6UI tests với fake Supabase HTTP server localhost, SSR Auth/session qua SDK và REST writes=0. Lượt chính11/13 PASS (7data+4UI); hai ca selector trùng Next announcer được scope về form, giữ assertion, chạy lại2/2 PASS exit0. Chi tiết/report và checks tại FE_W2 mục26. Đây là mock, session thật sau sửa chờ người dùng kiểm tra `/login` không next bằng từng tài khoản; không tự tạo dữ liệu.
+- **Checks hoàn tất:** tsc noEmit PASS sau native typegen khắc phục output cũ (không coi typegen là pass); scoped lint PASS,2 warning unused có sẵn ở middleware,0 error; build PASS exit0 (54s compile/24.8s types/23pages), diff check PASS. Giữ strict/includes, không chạy lại suite không bị ảnh hưởng.
+- **Manual Tracking từ người dùng:** modal mô phỏng tạo link/hiện QR, Copy dán Notepad đúng URL; chưa quét điện thoại hoặc tạo link thật. Giữ gate chặn live và API Tracking nguyên trạng; không coi23tests mock trước đó là live acceptance. Merchant Campaign/AI và manual reload thông báo vẫn chưa kiểm chứng, tuần2/review giữ trạng thái cũ.
+- Giữ HEAD577b074/toàn bộ diff trước lượt, không merge/checkpoint lại, DB/RLS/seed/migration/account-role/webhook/.env.local hoặc commit/push/merge. Không cập nhật phần BE/QA.
+
+#### FE (Diệu — Tracking modal/QR, live generation giữ chặn)
+
+- Đọc hướng dẫn/FE_W2/handoff cập nhật và riêng handler generate/alias. Giữ Feature_FE_W2_Integration/HEAD577b074, toàn bộ diff Merchant05; không merge lại, không sửa Content Kit/Copy nội dung hoặc nguồn dữ liệu.
+- Handoff BE nói ready nhưng code generate vẫn ưu tiên body.reseller_id trước getUser, dùng admin client và chỉ kiểm tra campaign/product tồn tại riêng lẻ; alias re-export cùng POST nên cùng bị ảnh hưởng. Đây là phát hiện cụ thể của endpoint tạo link, không suy từ GET Reseller APIs. Gate live cố định false ở code, UI thật giải thích chờ xác nhận quyền, adapter cũng chặn trước fetch.
+- Có modal native dialog, initial/pending/result/error/session/uncertain, explicit create, giữ kết quả qua đóng/mở và không retry POST chưa rõ; Copy chỉ success sau await clipboard, manual khi lỗi; QR local dùng cùng short_url đã validate. Không thay LINK_MUA_VE. Fixture development dùng mock transport, URL example.invalid có nhãn, không request API/đi qua /r/.
+- Thêm qrcode1.5.4, types1.5.6 và jsqr1.4.0 (decoder chỉ test), lockfile cập nhật; không dùng dịch vụ QR ngoài. Checks/kết quả/bằng chứng/blocker tại FE_W2 mục25; chưa live Tracking/RLS/redirect/Copy native/QR trên điện thoại, không reviewed/tuần2 DONE.
+- **Kiểm chứng:** Lượt đầu20/23 PASS,3 focus-loop FAIL; sửa focus handler, giữ nguyên assertion. Lượt cuối **23/23 PASS exit0** (5 data +18 UI ở320/390/1440,0 skipped/unexpected/flaky), QR từ SVG thực render giải mã đúng URL response bằng jsQR; CTA giữ nguyên. Scoped lint/TypeScript/build PASS (57s compile/15.4s types/23pages). Hai report/ảnh tại FE_W2 mục25; không coi là API/clipboard native/device QR đã pass.
+- Hash44 file Merchant/API/DB/legal/Content Kit/query/Copy giữ nguyên; không sửa guard Merchant hoặc các thay đổi chưa commit. API adapter có code nhưng gate false trước fetch, chờ BE sửa handler hai aliases; không đánh đồng lỗi quyền với mọi API Reseller hoặc mở live theo lời handoff.
+- Người dùng đã thấy Merchant lưu mô phỏng về Dashboard và thông báo; **manual reload chưa xác nhận**. Kết quả reload trong test tự động mục24 giữ riêng, chưa live Campaign/AI. Không sửa Merchant ở lượt này, không Supabase writes/seed/migration/RLS/webhook, không đọc/in secret/.env.local hoặc commit/push/merge.
+
+#### FE (Diệu — hoàn thiện05 theo xác nhận BE active/ngày VN)
+
+- **Contract mới từ BE qua người dùng:** status khởi tạo active, chưa lưu nháp; đầu/hết ngày Asia/Ho_Chi_Minh; INSERT tự trigger trg_on_campaign_created→n8n/Gemini/contents4 persona; sau ACK về /merchant. Thay thế blocker status/ngày cũ, không coi AI đã hoàn tất hoặc đang chạy.
+- Mở policy server; giữ getUser/membership/owner của sản phẩm, session client/RLS, validation5–30%/ngày/độ dài, ACK verified và INSERT không retry. Repo dùng timestamp without time zone, lưu giờ lịch VN 00:00:00–23:59:59.999999 không đổi UTC/múi giờ máy; trigger forward nguyên ngày, chưa thấy backend so sánh start/end trong mã bàn giao. Căn cứ/giới hạn tại FE_W2 mục24.
+- Sau success chuyển /merchant với thông báo một lần đúng nội dung yêu cầu, xóa receipt khi Dashboard nhận; fixture chỉ về /preview/merchant và có nhãn/namespace riêng. Pending/lỗi/uncertain giữ cơ chế chống trùng và giữ input. AI notes vẫn chưa hỗ trợ.
+- Checks/mock và giới hạn live ghi tại FE_W2 mục24; chưa tự tạo Campaign thật, chưa kiểm chứng RLS/trigger/pipeline AI. Giữ05 IN_PROGRESS/chưa reviewed, tuần2 chưa hoàn thành. Không commit/push/merge lại, không seed/migration/DB/RLS/webhook, không đọc/in secret hoặc sửa .env.local.
+- **Tiếp tục sau hết hạn mức:** Giữ source/diff hiện tại, không triển khai lại. Lượt cũ23 data PASS/hai UI timeout bị dừng; lượt recheck cũ có log tới ca41 nhưng thiếu report/exit cuối, không ghi hoàn tất. Native typegen không được coi là tsc pass. Lượt mới `tsc --noEmit` và scoped lint **PASS exit0**, data riêng **23/23 PASS exit0** có JSON; UI/build cuối ghi tiếp tại FE_W2 mục24. Giữ nguyên assertions và không chạy suites ngoài Merchant05.
+- **UI hoàn tất lượt mới:**18/18 PASS exit0 tại320/390/1440px,0 unexpected/skipped/flaky; hai ca timeout cũ nay pass, giữ assertions. Data23 và UI18 có report riêng, không cộng log dở thành lượt41/41. Đã xem ba ảnh; pending/lỗi/uncertain/redirect/thông báo một lần đều kiểm thử fixture, không coi là lưu thật/AI PASS. Dừng đúng server QA3110 để ghi report; build cuối theo FE_W2 mục24.
+- **Build cuối sau tiếp tục:**PASS exit0 bằng NEXT_BUILD_DIR=build/fe-w2-access (compile81s,TypeScript30.4s,23/23 pages). Tsc riêng/lint/data23/UI18 đều có kết quả hoàn tất, không dùng typegen thay bằng chứng. Diff check PASS; HEAD577b074 giữ nguyên, code/assertions không sửa thêm trong lượt tiếp tục. Chưa live write/RLS/trigger AI, chưa reviewed/tuần2 hoàn thành; không chạy suite ngoài05 hoặc commit/push/merge.
 
 #### FE (Diệu — checkpoint và merge origin/dev local)
 

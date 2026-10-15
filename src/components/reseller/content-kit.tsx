@@ -7,6 +7,8 @@ import { FeedNotice } from "./feed-states";
 import { personas, type Persona, type ContentVariant } from "@/src/lib/reseller/content-kit";
 import { dataFailureDescriptions, type DataFailureKind } from "@/src/lib/reseller/data-failure";
 import { FeedRetry } from "./campaign-feed";
+import { useTrackingScope } from "./tracking-scope";
+import { prepareCtaWithLink, trackingScopeKey, trackingUrlAudience } from "@/src/lib/reseller/tracking-cta";
 
 function CopyField({ label, value }: { label: string; value: string | null }) {
   const id = useId();
@@ -55,6 +57,20 @@ function CopyField({ label, value }: { label: string; value: string | null }) {
   );
 }
 
+function CopyCtaWithLink({ cta }: { cta: string | null }) {
+  const { scope, link } = useTrackingScope();
+  const prepared = prepareCtaWithLink(cta, link, scope);
+  if (prepared.status !== "ready") return <section className="rounded-xl border border-border bg-secondary p-4 sm:p-5" aria-label="CTA kèm link">
+    <h3 className="mb-3 font-medium">CTA kèm link</h3><p className="mb-4 text-sm">{prepared.message}</p>
+    <Button type="button" size="sm" variant="outline" disabled>Copy CTA kèm link</Button>
+  </section>;
+  return <div>
+    {link && trackingUrlAudience(link.shortUrl) === "local" && <p role="note" className="mb-3 text-sm">Link localhost/mạng nội bộ chỉ dùng kiểm thử local, chưa dùng để chia sẻ công khai.</p>}
+    <CopyField key={`${scope ? trackingScopeKey(scope) : ""}:${prepared.value}`} label="CTA kèm link" value={prepared.value} />
+    <p className="mt-2 text-xs text-muted-foreground">Chỉ thay [LINK_MUA_VE] trong bản sao. CTA gốc được giữ nguyên.</p>
+  </div>;
+}
+
 export function ContentKit({ variants, contentStatus, contentReason }: {
   variants: ContentVariant[]; contentStatus: "blocked" | "ready" | "error"; contentReason?: DataFailureKind;
 }) {
@@ -97,6 +113,7 @@ export function ContentKit({ variants, contentStatus, contentReason }: {
           <div className="grid min-w-0 gap-4 lg:grid-cols-2">
             {(["hook", "script", "caption", "cta"] as const).map((field) => <CopyField key={`${selected.id}-${field}`}
               label={field === "cta" ? "CTA" : field.charAt(0).toUpperCase() + field.slice(1)} value={selected[field]} />)}
+            <CopyCtaWithLink key={selected.id} cta={selected.cta} />
           </div>
         </>
       )}

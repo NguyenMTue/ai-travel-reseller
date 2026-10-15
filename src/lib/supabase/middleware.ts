@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { supabaseUrl, supabasePublicKey as supabaseKey, hasSupabaseConfig } from "./config";
-import { canHandleAuthFailureAtResellerPage } from "../reseller/access";
+import { canHandlePortalAuthFailure } from "../portal-access";
 
 export const createClient = (request: NextRequest) => {
   // Create an unmodified response
@@ -85,7 +85,7 @@ export const updateSession = async (request: NextRequest) => {
 
   // A transport/service failure is not proof that a session has expired.
   // Protected leaf loaders still fail closed and show the sanitized error.
-  const requiresLogin = !authError || !canHandleAuthFailureAtResellerPage(pathname, authError.status);
+  const requiresLogin = !authError || !canHandlePortalAuthFailure(pathname, authError.status);
   if (!user && isProtected && requiresLogin) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";

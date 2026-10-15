@@ -11,6 +11,7 @@ import {
   type CampaignField, type CampaignFieldErrors, type CampaignFormValues, type CampaignSaveResult, type CampaignSubmitAction, type MerchantProduct,
 } from "@/src/lib/merchant/campaign-form";
 import styles from "./campaign-create.module.css";
+import { rememberCampaignCreated } from "@/src/lib/merchant/campaign-receipt";
 
 export function CampaignReloadButton() {
   const router = useRouter();
@@ -32,6 +33,7 @@ export function CampaignForm({ products, canSave, submitAction, preview = false 
   const locked = result?.status === "success" || result?.status === "uncertain";
   const noProducts = products.length === 0;
   const dashboard = preview ? "/preview/merchant" : "/merchant";
+  const router = useRouter();
 
   useEffect(() => {
     if (result && result.status !== "invalid") resultRef.current?.focus();
@@ -59,6 +61,10 @@ export function CampaignForm({ products, canSave, submitAction, preview = false 
     try {
       const saved = await submitAction({ ...values });
       setResult(saved);
+      if (saved.status === "success") {
+        rememberCampaignCreated(preview);
+        router.replace(dashboard);
+      }
       if (saved.status === "invalid") {
         setErrors(saved.fieldErrors);
         focusFirstError(saved.fieldErrors);
@@ -93,7 +99,7 @@ export function CampaignForm({ products, canSave, submitAction, preview = false 
         <CampaignReloadButton />
       </section>}
       {result && <div ref={resultRef} tabIndex={-1} className={`${styles.result} ${result.status === "success" ? styles.success : ""}`} role={result.status === "success" ? "status" : "alert"}>
-        <p>{preview && result.status === "success" ? "Mô phỏng thành công — không tạo chiến dịch thật." : result.message}</p>
+        <p>{result.status === "success" ? (preview ? "Mô phỏng thành công — không tạo chiến dịch thật." : "Đã lưu chiến dịch. Đang về Dashboard…") : result.message}</p>
         {result.status === "success" && <p className={styles.receipt}>Mã chiến dịch{preview ? " mô phỏng" : ""}: <code>{result.campaignId}</code></p>}
         {result.status === "error" && result.reason === "session" && <Link href="/login?next=/merchant/campaigns/new">Đăng nhập lại ↗</Link>}
       </div>}
@@ -125,6 +131,7 @@ export function CampaignForm({ products, canSave, submitAction, preview = false 
       </fieldset>
       <fieldset disabled={pending || locked || noProducts} className={styles.fieldset}>
         <legend>Hoa hồng và thời gian</legend>
+        <p className={styles.help}>Thời gian áp dụng theo giờ Việt Nam (Asia/Ho_Chi_Minh): từ đầu ngày bắt đầu đến hết ngày kết thúc.</p>
         <div className={styles.field}>
           <label htmlFor="commission_rate">Hoa hồng (%) <span aria-hidden="true">*</span></label>
           <Input {...inputProps("commission_rate")} type="number" inputMode="decimal" min={5} max={30} step="any" placeholder="Ví dụ: 10.5" />
@@ -152,7 +159,7 @@ export function CampaignForm({ products, canSave, submitAction, preview = false 
       <div className={styles.actions}>
         <Link href={dashboard} className={styles.returnLink}>Quay lại Dashboard</Link>
         <Button type="submit" disabled={pending || locked || noProducts || !canSave} aria-describedby={!canSave ? "campaign-blocker" : undefined}>
-          {pending ? <><LoaderCircle className="spin" aria-hidden="true" /> Đang lưu…</> : <>{preview ? "Lưu mô phỏng" : "Lưu chiến dịch"}<ArrowRight aria-hidden="true" /></>}
+          {pending ? <><LoaderCircle className="spin" aria-hidden="true" /> Đang lưu…</> : <>{preview ? "Lưu mô phỏng" : "Tạo chiến dịch"}<ArrowRight aria-hidden="true" /></>}
         </Button>
       </div>
       <p className={styles.help}>Các trường có dấu * là bắt buộc. Lưu chiến dịch và kết quả tạo nội dung AI là hai bước riêng.</p>

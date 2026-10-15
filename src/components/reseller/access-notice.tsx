@@ -12,7 +12,7 @@ export function ResellerAccessNotice({ status, reason, next = "/reseller/campaig
       <FeedNotice
         title={status === "forbidden" ? "Bạn chưa có quyền Cộng tác viên" : "Chưa thể xác minh quyền truy cập"}
         description={status === "forbidden"
-          ? "Không tìm thấy hồ sơ Cộng tác viên trong dữ liệu được phép đọc. Nếu tài khoản đã có hồ sơ, cần BE1 kiểm tra RLS và quyền đọc."
+          ? "Không tìm thấy hồ sơ Cộng tác viên trong dữ liệu được phép đọc. Kết quả này chưa xác định nguyên nhân; vui lòng nhờ hỗ trợ đối chiếu hồ sơ và quyền đọc."
           : reason ? dataFailureDescriptions[reason] : "Dịch vụ xác thực hoặc kiểm tra tài khoản đang không khả dụng. Vui lòng thử lại."}
       >
         {status === "unavailable" && <FeedRetry />}

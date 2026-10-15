@@ -1,10 +1,11 @@
 import { z } from "zod";
 import { databaseUuidSchema } from "@/src/lib/reseller/database-uuid";
 import {
-  campaignContractMessage, campaignFailureMessages, campaignUncertainMessage, validateCampaignInput,
+  campaignContractMessage, campaignCreatedMessage, campaignFailureMessages, campaignUncertainMessage, validateCampaignInput,
   type CampaignFailure, type CampaignFormLoadResult, type CampaignInput, type CampaignSaveResult,
 } from "./campaign-form";
 import type { CampaignCreatePolicy } from "./campaign-policy";
+import { vietnamCampaignDates } from "./campaign-dates";
 
 export type SourceReply = { data: unknown; error: unknown; status?: number };
 export type CampaignInsert = Omit<CampaignInput, "start_date" | "end_date"> & {
@@ -106,15 +107,12 @@ export async function saveMerchantCampaign(
     const reason = classifyCampaignFailure(error, error instanceof TypeError ? 0 : undefined);
     return { status: "error", reason, message: campaignFailureMessages[reason] };
   }
-  if (!policy || !policy.initialStatus.trim() || policy.calendarDates !== "inclusive-local-day") {
+  if (!policy || !policy.initialStatus.trim() || policy.calendarDates !== "inclusive-local-day" || policy.timeZone !== "Asia/Ho_Chi_Minh") {
     return { status: "blocked", message: campaignContractMessage };
   }
   const payload: CampaignInsert = {
     ...validated.data, merchant_id: access.merchantId, status: policy.initialStatus,
-    // Only used with an explicitly confirmed policy (currently fixture only).
-    // Migration uses timestamp WITHOUT time zone: do not convert with Date/UTC.
-    start_date: `${validated.data.start_date}T00:00:00`,
-    end_date: `${validated.data.end_date}T23:59:59.999999`,
+    ...vietnamCampaignDates(validated.data.start_date, validated.data.end_date),
   };
   try {
     // Exactly one insert. No retry/upsert or second webhook after a transport failure.
@@ -130,7 +128,7 @@ export async function saveMerchantCampaign(
       || saved.data.product_id !== payload.product_id || saved.data.name !== payload.name) {
       return { status: "uncertain", message: campaignUncertainMessage };
     }
-    return { status: "success", campaignId: saved.data.id, message: "Đã xác nhận lưu chiến dịch. Kết quả tạo nội dung AI chưa được xác minh." };
+    return { status: "success", campaignId: saved.data.id, message: campaignCreatedMessage };
   } catch {
     return { status: "uncertain", message: campaignUncertainMessage };
   }

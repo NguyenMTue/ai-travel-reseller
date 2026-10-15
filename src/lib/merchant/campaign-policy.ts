@@ -1,10 +1,11 @@
 export type CampaignCreatePolicy = {
   initialStatus: string;
   calendarDates: "inclusive-local-day";
+  timeZone: "Asia/Ho_Chi_Minh";
 };
 
-// No browser/env override: user confirmed BE has NOT approved initial status
-// or calendar-day TIMESTAMP boundaries. A sample active row is not a create contract.
+// BE confirmation 15/10/2026: active and inclusive Vietnam calendar days.
+// Only server code selects this policy; no browser/env override.
 export function getConfirmedCampaignCreatePolicy(): CampaignCreatePolicy | null {
-  return null;
+  return { initialStatus: "active", calendarDates: "inclusive-local-day", timeZone: "Asia/Ho_Chi_Minh" };
 }

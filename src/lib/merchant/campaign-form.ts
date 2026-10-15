@@ -80,3 +80,4 @@ export const campaignFailureMessages: Record<CampaignFailure, string> = {
 };
 export const campaignContractMessage = "Chưa mở lưu chiến dịch: quy trình khởi tạo và thời gian áp dụng đang chờ xác nhận. Bạn có thể chuẩn bị thông tin trong biểu mẫu.";
 export const campaignUncertainMessage = "Chưa xác định được kết quả lưu. Không gửi lại để tránh tạo chiến dịch trùng. Giữ thông tin này và nhờ nhóm hỗ trợ kiểm tra trước khi tạo tiếp.";
+export const campaignCreatedMessage = "Chiến dịch đã tạo thành công. Nội dung AI sẽ xuất hiện sau khi hệ thống xử lý.";

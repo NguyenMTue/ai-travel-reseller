@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { validCampaignFixture } from "./fixtures/merchant-campaigns";
+import { campaignCreatedMessage } from "@/src/lib/merchant/campaign-form";
 
 const preview = "/preview/merchant/campaigns/new";
 async function fillCampaign(page: Page) {
@@ -82,10 +83,17 @@ test("pending prevents repeated submissions and success confirms only a simulate
   await expect(page.getByRole("form", { name: "Thông tin chiến dịch" })).toHaveAttribute("aria-busy", "true");
   await page.keyboard.press("Enter");
   await page.keyboard.press("Enter");
-  await expect(page.getByText("Mô phỏng thành công — không tạo chiến dịch thật.")).toBeVisible();
   await expect(page.getByText("Lượt lưu mô phỏng: 1")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Lưu mô phỏng" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Đang lưu…" })).toBeDisabled();
   await expect(page.locator("#name")).toHaveValue(validCampaignFixture.name);
+  await expect(page).toHaveURL(/\/preview\/merchant$/);
+  await expect(page.getByRole("status").filter({ hasText: campaignCreatedMessage })).toBeVisible();
+  await expect(page.getByText("Mô phỏng — không tạo chiến dịch thật.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("form", { name: "Thông tin chiến dịch" })).toHaveCount(0);
+  expect(await page.evaluate(() => sessionStorage.getItem("merchant-fixture-campaign-created"))).toBeNull();
+  expect(await page.evaluate(() => sessionStorage.getItem("merchant-campaign-created"))).toBeNull();
+  await page.reload();
+  await expect(page.getByText(campaignCreatedMessage, { exact: true })).toHaveCount(0);
 });
 
 test("known save errors retain all entered values and distinguish network/session/permission/schema", async ({ page }) => {
@@ -98,6 +106,8 @@ test("known save errors retain all entered values and distinguish network/sessio
     await expect(alert).toBeFocused();
     for (const [field, value] of Object.entries(validCampaignFixture)) await expect(page.locator(`#${field}`)).toHaveValue(value);
     await expect(page.getByRole("button", { name: "Lưu mô phỏng" })).toBeEnabled();
+    await expect(page).toHaveURL(new RegExp(`state=${state}$`));
+    expect(await page.evaluate(() => sessionStorage.getItem("merchant-fixture-campaign-created"))).toBeNull();
     await noOverflow(page);
   }
 });
@@ -111,6 +121,8 @@ test("uncertain outcome keeps input and blocks retries after a potentially commi
   await expect(page.locator("#name")).toHaveValue(validCampaignFixture.name);
   await page.keyboard.press("Enter");
   await expect(page.getByText("Lượt lưu mô phỏng: 1")).toBeVisible();
+  await expect(page).toHaveURL(/state=uncertain$/);
+  expect(await page.evaluate(() => sessionStorage.getItem("merchant-fixture-campaign-created"))).toBeNull();
 });
 
 test("loading, empty products, load errors, wrong role and unconfirmed contract have explicit states", async ({ page }) => {

@@ -5,9 +5,14 @@ import { formatCommission } from "@/src/lib/reseller/campaign-feed";
 import type { CampaignDetail, ContentVariant } from "@/src/lib/reseller/content-kit";
 import { formatCampaignDate } from "@/src/lib/reseller/campaign-date";
 import type { DataFailureKind } from "@/src/lib/reseller/data-failure";
+import { TrackingLinkModal } from "./tracking-link";
+import type { ReactNode } from "react";
+import { TrackingScopeProvider } from "./tracking-scope";
 
-export function CampaignDetailView({ campaign, variants, contentStatus, contentReason, feedPath = "/reseller/campaigns" }: {
+export function CampaignDetailView({ campaign, variants, contentStatus, contentReason, feedPath = "/reseller/campaigns", tracking, viewerKey, preview = false }: {
   campaign: CampaignDetail; variants: ContentVariant[]; contentStatus: "blocked" | "ready" | "error"; contentReason?: DataFailureKind; feedPath?: string;
+  tracking?: ReactNode;
+  viewerKey?: string; preview?: boolean;
 }) {
   return (
     <div className="min-w-0">
@@ -24,7 +29,12 @@ export function CampaignDetailView({ campaign, variants, contentStatus, contentR
         <h2 className="text-xl [font-family:var(--font-display)]">{campaign.products?.name ?? "Chưa có thông tin sản phẩm"}</h2>
         <div className="mt-3 whitespace-pre-wrap text-sm [overflow-wrap:anywhere]">{campaign.products?.description?.trim() ? campaign.products.description : "Chưa có mô tả sản phẩm."}</div>
       </section>
+      <TrackingScopeProvider scope={viewerKey && campaign.product_id && campaign.products?.id === campaign.product_id
+        ? { campaign_id: campaign.id, product_id: campaign.product_id, sessionKey: viewerKey } : null} watchSession={!preview}>
       <ContentKit variants={variants} contentStatus={contentStatus} contentReason={contentReason} />
+      {tracking ?? <TrackingLinkModal key={`${campaign.id}:${campaign.product_id ?? "none"}`} input={campaign.product_id && campaign.products?.id === campaign.product_id
+        ? { campaign_id: campaign.id, product_id: campaign.product_id } : null} />}
+      </TrackingScopeProvider>
     </div>
   );
 }

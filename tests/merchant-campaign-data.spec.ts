@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
-import { campaignFields, campaignLimits, validateCampaignInput } from "@/src/lib/merchant/campaign-form";
+import { campaignCreatedMessage, campaignFields, campaignLimits, validateCampaignInput } from "@/src/lib/merchant/campaign-form";
+import { vietnamCampaignDates } from "@/src/lib/merchant/campaign-dates";
+import { consumeCampaignCreated, rememberCampaignCreated } from "@/src/lib/merchant/campaign-receipt";
 import { getConfirmedCampaignCreatePolicy } from "@/src/lib/merchant/campaign-policy";
 import { createMerchantCampaignSource } from "@/src/lib/merchant/campaign-source";
 import { loadMerchantCampaignForm, saveMerchantCampaign, type CampaignInsert, type MerchantCampaignSource } from "@/src/lib/merchant/campaign-service";
@@ -8,6 +10,49 @@ import { fixtureCreatePolicy, fixtureMerchantId, fixtureOtherMerchantId, fixture
 
 const ok = (data: unknown) => ({ data, error: null, status: 200 });
 const failed = (code: string, status: number) => ({ data: null, error: { code, message: "private SQL detail must not reach UI" }, status });
+
+test("BE-confirmed active payload uses inclusive Vietnam wall-clock days independently of host timezone", async () => {
+  expect(getConfirmedCampaignCreatePolicy()).toEqual({ initialStatus: "active", calendarDates: "inclusive-local-day", timeZone: "Asia/Ho_Chi_Minh" });
+  const original = process.env.TZ;
+  try {
+    for (const zone of ["UTC", "America/Los_Angeles", "Asia/Ho_Chi_Minh", "Pacific/Auckland"]) {
+      process.env.TZ = zone;
+      const fixture = fixtureMerchantSource();
+      expect(await loadMerchantCampaignForm(fixture.source, getConfirmedCampaignCreatePolicy())).toMatchObject({ status: "ready", canSave: true });
+      const result = await saveMerchantCampaign(fixture.source, { ...validCampaignFixture, merchant_id: fixtureOtherMerchantId }, getConfirmedCampaignCreatePolicy());
+      expect(result).toMatchObject({ status: "success", message: campaignCreatedMessage });
+      expect(fixture.inserts).toEqual([{
+        ...validCampaignFixture, merchant_id: fixtureMerchantId, commission_rate: 10.5,
+        status: "active", start_date: "2028-02-29T00:00:00", end_date: "2028-03-02T23:59:59.999999",
+      }]);
+    }
+  } finally {
+    if (original === undefined) delete process.env.TZ;
+    else process.env.TZ = original;
+  }
+});
+
+test("Vietnam date boundaries preserve leap/year edges and reject invalid calendar input", () => {
+  expect(vietnamCampaignDates("2028-02-29", "2028-02-29")).toEqual({ start_date: "2028-02-29T00:00:00", end_date: "2028-02-29T23:59:59.999999" });
+  expect(vietnamCampaignDates("0001-01-01", "9999-12-31")).toEqual({ start_date: "0001-01-01T00:00:00", end_date: "9999-12-31T23:59:59.999999" });
+  for (const day of ["2026-02-29", "2028-02-30", "0000-01-01", "10000-01-01", "2028-03-02T00:00:00Z"]) {
+    expect(() => vietnamCampaignDates(day, "2028-03-02")).toThrow();
+    expect(() => vietnamCampaignDates("2028-02-29", day)).toThrow();
+  }
+  expect(() => vietnamCampaignDates("2028-03-02", "2028-02-29")).toThrow("END_BEFORE_START");
+});
+
+test("one-time campaign receipts keep real and preview separate even without browser storage", () => {
+  expect(consumeCampaignCreated(false)).toBe(false);
+  expect(consumeCampaignCreated(true)).toBe(false);
+  rememberCampaignCreated(true);
+  expect(consumeCampaignCreated(false)).toBe(false);
+  expect(consumeCampaignCreated(true)).toBe(true);
+  expect(consumeCampaignCreated(true)).toBe(false);
+  rememberCampaignCreated(false);
+  expect(consumeCampaignCreated(false)).toBe(true);
+  expect(consumeCampaignCreated(false)).toBe(false);
+});
 
 test("validates seed-shaped PostgreSQL UUID, decimal boundaries and same-day campaigns", () => {
   for (const commission_rate of ["5", "30", "10.5"]) {
@@ -103,9 +148,9 @@ test("rechecks product ownership at submit and prevents foreign/deleted products
   }
 });
 
-test("unconfirmed live contract makes zero inserts even with valid input and forged policy/merchant IDs", async () => {
+test("absent policy still makes zero inserts even with valid input and forged policy/merchant IDs", async () => {
   const fixture = fixtureMerchantSource();
-  const result = await saveMerchantCampaign(fixture.source, { ...validCampaignFixture, merchant_id: fixtureOtherMerchantId, role: "merchant", policy: fixtureCreatePolicy }, getConfirmedCampaignCreatePolicy());
+  const result = await saveMerchantCampaign(fixture.source, { ...validCampaignFixture, merchant_id: fixtureOtherMerchantId, role: "merchant", policy: fixtureCreatePolicy }, null);
   expect(result.status).toBe("blocked");
   expect(fixture.calls).toContainEqual({ name: "product", args: [fixtureMerchantId, validCampaignFixture.product_id] });
   expect(fixture.inserts).toEqual([]);
@@ -165,8 +210,9 @@ test("real SDK serializes ownership filters and minimum projections; POST retry 
   await source.listProducts(fixtureMerchantId, 0);
   await source.getProduct(fixtureMerchantId, validCampaignFixture.product_id);
   const fixture = fixtureMerchantSource();
-  await saveMerchantCampaign(fixture.source, validCampaignFixture, fixtureCreatePolicy);
+  await saveMerchantCampaign(fixture.source, validCampaignFixture, getConfirmedCampaignCreatePolicy());
   const payload: CampaignInsert = fixture.inserts[0];
+  expect(payload.status).toBe("active");
   const result = await source.insertCampaign(payload);
   expect(result.status).toBe(503);
   expect(requests.filter(request => request.method === "POST")).toHaveLength(1);
