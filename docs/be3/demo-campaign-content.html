@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>BE3 | Campaign Content Demo</title>
+<style>
+:root{--ink:#173b38;--muted:#59716d;--bg:#f4f8f5;--line:#dce7e1;--teal:#17675d;--deep:#104d47;--mint:#e5f3ed;--amber:#fff4df;--blue:#eaf2fa;font-family:Inter,"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);line-height:1.65}code,pre{font-family:"Cascadia Code",Consolas,monospace}code{font-size:.92em;overflow-wrap:anywhere}
+.hero{padding:60px 22px 48px;background:linear-gradient(125deg,#123f3c,#17675d 68%,#38836b);color:#fff}.wrap{width:min(1040px,calc(100% - 36px));margin:auto}.tag{color:#d6f1e5;font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.78rem}.hero h1{max-width:740px;margin:15px 0 10px;font:500 clamp(2.2rem,5vw,4rem)/1.08 Georgia,serif;letter-spacing:-.03em}.hero p{max-width:720px;margin:0;color:#e1f0e9;font-size:1.08rem}.chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}.chips span{padding:6px 10px;border-radius:8px;background:#ffffff20;font-size:.86rem}
+main{padding:28px 0 56px}.alert{padding:16px 18px;border:1px solid #eed8ac;border-radius:14px;background:var(--amber);color:#65420f}.alert b{display:block}.alert p{margin:2px 0 0}.section{margin-top:38px}.label{margin:0 0 4px;color:var(--teal);font-size:.75rem;font-weight:850;letter-spacing:.13em;text-transform:uppercase}h2{margin:0;font:500 clamp(1.6rem,3vw,2.2rem)/1.2 Georgia,serif}h3{margin:0 0 6px;font-size:1.02rem}.intro{margin:8px 0 17px;color:var(--muted);max-width:740px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.card,.step,.path,.checks{padding:19px;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 12px 30px #173b380b}.card p,.step p,.path p{margin:0;color:var(--muted)}.icon{display:grid;width:38px;height:38px;place-items:center;margin-bottom:11px;border-radius:11px;background:var(--mint);color:var(--teal);font-size:1.18rem}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:15px}.flow div{padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}.flow small{display:block;color:var(--teal);font-weight:850;font-size:.72rem;letter-spacing:.1em}.flow b{display:block;margin-top:6px}.flow p{margin:3px 0 0;color:var(--muted);font-size:.88rem}
+.contract{overflow:hidden;border:1px solid var(--line);border-radius:15px;background:#fff}.contract-head{padding:16px 19px;background:var(--mint)}.contract-head p{margin:3px 0 0;color:var(--muted)}.fields{display:grid;grid-template-columns:repeat(5,1fr)}.fields div{padding:13px;border-top:1px solid var(--line);border-right:1px solid var(--line)}.fields div:last-child{border-right:0}.fields b,.fields span{display:block}.fields span{color:var(--muted);font-size:.84rem}.mapping{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:13px}.row{display:flex;gap:5px;margin-top:12px}.row span{flex:1;padding:8px 2px;border-radius:7px;background:var(--mint);text-align:center;font-size:.69rem;font-weight:700}.row .hook{background:var(--blue);color:#315c86}
+.demo{counter-reset:n;display:grid;gap:10px}.step{display:grid;grid-template-columns:38px 1fr;gap:12px;padding:16px}.step:before{counter-increment:n;content:counter(n,decimal-leading-zero);display:grid;width:36px;height:36px;place-items:center;border-radius:11px;background:var(--teal);color:#fff;font-weight:800;font-size:.8rem}.step h3{margin:1px 0 3px}.step p{margin:3px 0}.step pre{overflow:auto;margin:10px 0 4px;padding:14px;border-radius:10px;background:#132b2a;color:#e2f4ed;font-size:.78rem;line-height:1.6}
+.paths{display:grid;grid-template-columns:1fr 1fr;gap:13px}.path small{color:#315c86;font-weight:850;letter-spacing:.06em}.path h3{margin-top:5px}.checks{box-shadow:none}.checks ul{margin:0;padding-left:20px;color:var(--muted)}.note{margin-top:13px;padding:14px 16px;border:1px solid #c9dced;border-radius:12px;background:var(--blue);color:#264766}.links{display:flex;flex-wrap:wrap;gap:9px}.links a{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;text-decoration:none;font-size:.87rem;font-weight:650}footer{padding:0 0 30px;color:var(--muted);font-size:.85rem}
+@media(max-width:760px){.cards{grid-template-columns:1fr}.flow{grid-template-columns:repeat(2,1fr)}.fields{grid-template-columns:repeat(2,1fr)}.fields div{border-right:1px solid var(--line)}}
+@media(max-width:560px){.hero{padding:42px 0 35px}.wrap{width:calc(100% - 28px)}.mapping,.paths{grid-template-columns:1fr}.step{grid-template-columns:31px 1fr;gap:9px;padding:13px}.step:before{width:30px;height:30px}.row{flex-wrap:wrap}.row span{min-width:48px}}
+@media(prefers-reduced-motion:no-preference){.card,.flow div,.step{animation:up .35s both}@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+<div class="tag">BE3 · Automation / n8n</div>
+<h1>Campaign Content<br>Chức năng &amp; Demo</h1>
+<p>Luồng tự động nhận campaign mới, lấy thông tin sản phẩm đã xác minh, tạo nội dung theo persona, kiểm tra guardrails và lưu vào Supabase để FE hiển thị.</p>
+<div class="chips"><span>n8n</span><span>Gemini</span><span>Python FastAPI</span><span>Supabase</span></div>
+</div></header>
+<main class="wrap">
+<div class="alert"><b>Trước khi demo</b><p>Code API và runbook có trong repo. Workflow Campaign Content đang nằm trên n8n của nhóm nhưng file export chưa được commit. Hãy chọn đúng workflow, credentials và Supabase project test; chạy thử sẽ ghi dữ liệu thật vào database.</p></div>
+
+<section class="section"><p class="label">Chức năng đã làm</p><h2>Campaign đi qua những bước nào?</h2><p class="intro">BE3 kết nối workflow n8n với API Python. Mỗi execution xử lý một persona và gửi một batch nội dung đến API lưu trữ.</p>
+<div class="cards">
+<article class="card"><div class="icon">↗</div><h3>Nhận &amp; làm giàu campaign</h3><p>Webhook nhận sự kiện INSERT. Endpoint <code>/campaigns/enrich</code> tra campaign/product trong Supabase và bổ sung ngữ cảnh RAG.</p></article>
+<article class="card"><div class="icon">✦</div><h3>Tạo nội dung có cấu trúc</h3><p>Basic LLM Chain gọi Gemini cho một persona. Code node parse và kiểm tra các ràng buộc BE2; Structured Output Parser đang có trong workflow nhưng chưa nối vào chain.</p></article>
+<article class="card"><div class="icon">✓</div><h3>Kiểm tra &amp; lưu nội dung</h3><p><code>/contents/batch</code> xác minh một batch 10 dòng, chạy guardrails rồi lưu vào <code>public.contents</code>.</p></article>
+</div>
+<div class="flow" aria-label="Sơ đồ luồng"><div><small>01 · TRIGGER</small><b>Campaign INSERT</b><p>Supabase gọi n8n Webhook.</p></div><div><small>02 · ENRICH</small><b>Campaign + Product + RAG</b><p>Python trả dữ liệu đã tra cứu.</p></div><div><small>03 · GENERATE</small><b>LLM + validation</b><p>Gemini tạo một persona/lượt.</p></div><div><small>04 · PERSIST</small><b>Mapper + API</b><p>Guardrail và ghi Supabase.</p></div></div>
+</section>
+
+<section class="section"><p class="label">Contract hiện dùng</p><h2>10 hooks, 5 bộ assets</h2><p class="intro">Một output model có đúng 5 key cấp gốc: persona, hooks, scripts, captions, ctas.</p>
+<div class="contract"><div class="contract-head"><b>Một persona mỗi lần chạy</b><p>local_guide · family · foodie · budget_traveler</p></div><div class="fields"><div><b>Hooks</b><span>10 chuỗi</span></div><div><b>Scripts</b><span>5 object</span></div><div><b>Captions</b><span>5 chuỗi + hashtag</span></div><div><b>CTAs</b><span>5 chuỗi + [LINK_MUA_VE]</span></div><div><b>Persona</b><span>Đúng persona đã chọn</span></div></div></div>
+<div class="mapping"><article class="card"><h3>Records 1–5 · đủ bộ</h3><p>Mỗi hook đi với một script, caption và CTA.</p><div class="row"><span>Hook 1<br>+ assets</span><span>Hook 2<br>+ assets</span><span>Hook 3<br>+ assets</span><span>Hook 4<br>+ assets</span><span>Hook 5<br>+ assets</span></div></article><article class="card"><h3>Records 6–10 · hook-only</h3><p>Ba trường asset còn lại là null; không lặp vòng assets.</p><div class="row"><span class="hook">Hook 6</span><span class="hook">Hook 7</span><span class="hook">Hook 8</span><span class="hook">Hook 9</span><span class="hook">Hook 10</span></div></article></div>
+<div class="note">Đây là mapping chuẩn theo handoff BE2 và người dùng xác nhận đã kiểm tra trên Supabase. Không lặp assets bằng <code>index % 5</code>. Khi nghiệm thu, lưu campaign/persona, execution ID và truy vấn xác nhận 10 dòng.</div>
+</section>
+
+<section class="section"><p class="label">Kịch bản demo</p><h2>Chạy một campaign test</h2><p class="intro">Demo nhanh bằng Test URL của webhook và một campaign đã tồn tại trong cùng Supabase project mà Python API đang dùng.</p>
+<div class="demo">
+<article class="step"><div><h3>Khởi động Python API</h3><p>Trong PowerShell ở thư mục repo, chạy:</p><pre>Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+.\.venv\Scripts\Activate.ps1
+Set-Location services\llm-service
+python -m uvicorn rag_api:app --host 0.0.0.0 --port 8000</pre><p>Mở <code>http://localhost:8000/health</code>, cần thấy status <code>ok</code>. Tạo <code>services/llm-service/.env</code> từ file mẫu và điền thông tin Supabase test cùng hai API key riêng.</p></div></article>
+<article class="step"><div><h3>Mở n8n &amp; kiểm tra kết nối</h3><p>Mở <code>http://localhost:5678</code>, chọn workflow Campaign Content. Kiểm tra Gemini credential, Header Auth cho <code>RAG_API_KEY</code> và credential riêng cho <code>CONTENTS_API_KEY</code>. n8n Docker gọi API trên máy Windows qua <code>http://host.docker.internal:8000</code>.</p></div></article>
+<article class="step"><div><h3>Lắng nghe Test Webhook</h3><p>Trong Webhook node chọn Test URL và bấm Listen for test event / Execute workflow. Thay UUID mẫu dưới đây bằng campaign test đang có thật trong cùng database:</p><pre>$payload = @{
+  type = "INSERT"
+  table = "campaigns"
+  schema = "public"
+  record = @{ id = "&lt;EXISTING_TEST_CAMPAIGN_UUID&gt;" }
+  old_record = $null
+} | ConvertTo-Json -Depth 8
+
+Invoke-RestMethod -Method Post -Uri "http://localhost:5678/webhook-test/supabase-campaign-created-content-test" -ContentType "application/json" -Body $payload</pre><p>Đường dẫn webhook phải khớp Path trong node. Test URL chỉ hoạt động trong lúc n8n đang lắng nghe.</p></div></article>
+<article class="step"><div><h3>Chạy persona &amp; theo dõi execution</h3><p>Chọn persona trong Set Persona, chạy workflow, rồi mở tab Executions. Nếu nghiệm thu đủ persona, chạy lần lượt cả bốn persona và lưu lại execution ID của từng lượt.</p></div></article>
+<article class="step"><div><h3>Kiểm tra API, database và FE</h3><p>Xác nhận mapper có 10 records; HTTP response có <code>inserted_count: 10</code> và 10 content IDs. Truy vấn <code>public.contents</code> theo campaign/persona, rồi tải lại trang cộng tác viên để xem các dòng approved.</p></div></article>
+</div></section>
+
+<section class="section"><p class="label">Kích hoạt</p><h2>Test URL hay tạo campaign từ FE?</h2><div class="paths">
+<article class="path"><small>TEST URL · chạy có kiểm soát</small><h3>POST payload vào Webhook</h3><p>Dùng khi cần quan sát một execution với campaign có sẵn. Không cần tạo campaign mới; chỉ gửi sau khi n8n bắt đầu lắng nghe.</p></article>
+<article class="path"><small>PRODUCTION URL · demo tích hợp</small><h3>Tạo campaign từ FE</h3><p>Bật workflow và xác nhận Supabase trigger trỏ tới URL Production. Tạo campaign test trên FE rồi kiểm tra execution mới xuất hiện trong n8n.</p></article>
+</div><div class="note">Supabase Cloud không gọi được <code>localhost</code>. Nếu n8n chạy local, cần HTTPS tunnel Cloudflare và cập nhật URL production đầy đủ trong cấu hình webhook. Quick Tunnel có thể đổi URL khi khởi động lại.</div></section>
+
+<section class="section"><p class="label">Tiêu chí demo thành công</p><h2>Checklist nghiệm thu nhanh</h2><div class="checks"><ul>
+<li>Execution chạy qua enrich → LLM/parser → validator → mapper → <code>/contents/batch</code>.</li>
+<li>Batch có đúng 10 dòng cho một persona; 5 dòng đầu đủ bộ, 5 dòng sau chỉ có hook theo handoff BE2.</li>
+<li>API trả <code>inserted_count: 10</code>, 10 content IDs, status và flags.</li>
+<li>FE hiển thị rows có <code>status = approved</code> (lowercase).</li>
+<li>Ghi lại campaign UUID, persona và execution ID để Tester 2/FE kiểm tra.</li>
+</ul></div><div class="note"><b>Về status:</b> API tự chạy guardrails cho giá, mã khuyến mãi và claim. Nếu database còn trigger auto-approve tạm của BE1, status approved có thể do trigger ghi đè; cần nêu rõ điều đó khi trình bày.</div></section>
+
+<section class="section"><p class="label">Còn cần xác nhận</p><h2>Không nhầm bằng chứng demo</h2>
+<div class="checks"><b>Các mục BE2 ghi nhận còn thiếu</b><ul>
+<li><code>workflow_campaign_content.json</code> đã được thêm từ export người dùng gửi và đã scan secret. Execution #223 đã succeeded theo ảnh; cần lưu raw output/response API gắn với lần chạy.</li>
+<li>Structured Output Parser chưa nối vào Basic LLM Chain; cần BE2 xác nhận validator Code hiện tại có thể thay thế hay phải nối parser và chạy lại.</li>
+<li>Cần lưu raw output/response API và đối chiếu chúng với execution #223 cùng 10 dòng trong Supabase.</li>
+<li><code>src/lib/database.types.ts</code> chưa có trường <code>generation_key</code>.</li>
+<li>Migration có trong repo nhưng chưa có bằng chứng đã apply vào Supabase.</li>
+<li>Chưa có Tester 2 acceptance.</li>
+</ul></div>
+<details><summary>Workflow JSON đã có trong repo chưa?</summary><p>Đã có <code>services/llm-service/workflow_campaign_content.json</code>, lấy từ export do người dùng cung cấp. Giá trị secret và n8n instanceId không có trong file; credential references vẫn được giữ và cần gán lại nếu import vào instance khác.</p></details>
+<details><summary>Retry/idempotency đã kiểm tra live chưa?</summary><p>Code dùng generation_key để upsert tránh trùng, nhưng cần xác nhận migration unique index đã apply vào đúng project và chạy retry trên Supabase thật. Unit test mock không phải bằng chứng live.</p></details>
+<details><summary>Workflow không chạy từ Cloud thì sao?</summary><p>Kiểm tra Production URL và trạng thái tunnel Cloudflare; URL public cần đúng path Webhook, không chỉ domain gốc. Với n8n Docker gọi Python trên cùng máy, dùng host.docker.internal.</p></details>
+</section>
+
+<section class="section"><p class="label">Tài liệu repo</p><div class="links">
+<a href="run-campaign-content-workflow.md">Runbook chi tiết</a>
+<a href="../be2/content-factory-handoff.md">Handoff BE2</a>
+<a href="../be2/content-factory.schema.json">JSON Schema</a>
+<a href="n8n-save-contents.md">API / persistence</a>
+<a href="../../.ai/process/Week2/BE3_W2_COMPLETION_REPORT.md">Báo cáo BE3</a>
+</div></section>
+</main>
+<footer class="wrap">BE3 · Campaign Content demo guide · Dùng nội bộ. Xác nhận đúng Supabase project và campaign test trước khi chạy vì workflow có ghi dữ liệu.</footer>
+</body>
+</html>
