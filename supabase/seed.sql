@@ -218,7 +218,7 @@ VALUES
     7.5,
     now(), now() + interval '180 days',
     'https://sunworld.vn/booking/ba-na-hills-buffet',
-    'https://checkout.sunworld.vn/pay/bana-01',
+    'https://sunworld.vn',
     'active'
   ),
   -- Product 2: Tour Cù Lao Chàm lặn ngắm san hô
@@ -293,7 +293,7 @@ VALUES
     10.0,
     now(), now() + interval '120 days',
     'https://sunworld.vn/tour/ngu-hanh-son-halfday',
-    'https://checkout.sunworld.vn/pay/nguhanhson-01',
+    'https://sunworld.vn',
     'active'
   )
 ON CONFLICT (id) DO UPDATE SET 

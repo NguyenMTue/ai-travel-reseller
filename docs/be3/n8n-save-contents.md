@@ -3,17 +3,21 @@
 ## Target flow
 
 ```text
-Campaign INSERT → Webhook → POST /campaigns/enrich → Gemini structured output
-→ Structured Output Parser (auto-fix) → deterministic guardrails → mapper
-→ POST /contents/batch → Supabase public.contents
+Campaign INSERT → Webhook → POST /campaigns/enrich → Basic LLM Chain + Gemini
+→ Code parse/validate → Code mapper (10 rows) → POST /contents/batch
+→ Supabase public.contents
 ```
 
-The existing file `services/llm-service/workflow_ai_travel_review.json` is an
-older review workflow, not an export of this Campaign Content pipeline. Export
-the actual workflow from the connected n8n instance as
-`services/llm-service/workflow_campaign_content.json` after its live nodes and
-credentials are checked. Remove credential values before committing; n8n
-credential references/IDs must also be reviewed for portability.
+The sanitized workflow export is
+`services/llm-service/workflow_campaign_content.json`; it comes from the
+user-provided Campaign → AI Content → Review Queue workflow. The older
+`workflow_ai_travel_review.json` is a separate review workflow. The current
+export includes a Structured Output Parser node, but it is **not connected** to
+Basic LLM Chain; the connected JavaScript node parses and validates the model
+output instead. Do not claim native parser validation is active until the
+workflow is deliberately rewired and retested. Credential references are
+preserved, but secret values and the source n8n `instanceId` are not in the
+export; rebind credentials when importing into a different n8n instance.
 
 ## API contract
 
@@ -31,13 +35,13 @@ Supabase database itself is cloud-hosted, however, its Database Webhook cannot
 reach a local-only n8n URL. In that case use a reachable HTTPS webhook address
 for the trigger, or run the demo against local Supabase.
 
-One request contains one persona and exactly ten mapped rows. For the Sprint 2
-demo, map the ten hooks to the five generated scripts, captions and CTAs using
-the same modulo index (`assetIndex = hookIndex % 5`), so all ten FE variants
-have a complete content kit. The API also accepts the legacy contract where
-rows 6–10 are hook-only; partial kits are rejected. Scripts may be objects
-`{title, duration, scenes}`; the API formats them as readable text. Do not include IDs, product_id, `reseller_id`,
-`generation_key`, or `status`; Python derives/verifies those values.
+One request contains one persona and exactly ten mapped rows. Follow the BE2
+reference mapper: rows 1–5 pair each of the first five hooks with one script,
+caption and CTA; rows 6–10 contain the remaining hooks and set `script`,
+`caption` and `cta` to `null`. Do not cycle/reuse the five assets. Scripts may
+be objects `{title, duration, scenes}`; the API formats them as readable text.
+Do not include IDs, product_id, `reseller_id`, `generation_key`, or `status`;
+Python derives/verifies those values.
 
 ```json
 {
@@ -63,31 +67,29 @@ rows 6–10 are hook-only; partial kits are rejected. Scripts may be objects
 ```
 
 The abbreviated payload above shows one full row only; a live request must have
-all ten rows. In the demo mapper, use `data.scripts[index % 5]`,
-`data.captions[index % 5]`, and `data.ctas[index % 5]` for each hook, formatting
-script objects with `scriptToText` if needed. The API rejects wrong row counts,
-mixed personas, incomplete first-five assets, partial assets in rows 6–10, and
-extra fields such as a model-supplied status. Rows 6–10 may still be hook-only
-for compatibility with earlier batches.
+all ten rows. Use the same index for each of the first five assets. For hooks
+at index 5–9, return `null` for all three asset fields. The API rejects wrong
+row counts, mixed personas, incomplete first-five assets, partially populated
+assets in rows 6–10, and extra fields such as a model-supplied status.
 
 The key mapping change in the existing Code mapper is:
 
 ```js
 const records = data.hooks.map((hook, index) => {
-  const assetIndex = index % 5;
+  const hasAssets = index < 5;
   return {
     persona: data.persona,
     hook,
-    script: scriptToText(data.scripts[assetIndex]),
-    caption: data.captions[assetIndex],
-    cta: data.ctas[assetIndex],
+    script: hasAssets ? scriptToText(data.scripts[index]) : null,
+    caption: hasAssets ? data.captions[index] : null,
+    cta: hasAssets ? data.ctas[index] : null,
   };
 });
 ```
 
 Keep the mapper's existing campaign ID lookup and output shape
-`{ campaign_id, records }`; the expression above replaces the old
-`index < 5 ? ... : null` asset mapping.
+`{ campaign_id, records }`. This matches the BE2 mapper in
+`src/lib/ai/content-persistence.ts` and test report dated 2026-10-15.
 
 ## Validation and status
 
@@ -200,6 +202,14 @@ Run only against a test campaign/product and test Supabase project:
 7. Simulate transient 429 and 503 responses in a staging workflow, capture the
    execution retry history, and confirm a permanent 422 is not retried.
 
-No live workflow export or external E2E was available in this workspace. Keep
-the workflow JSON, redacted execution evidence, and updated BE3 completion
-report as handoff artifacts after performing those checks in n8n/Supabase.
+The user supplied a screenshot of successful n8n execution `#223` (version
+`b23bbb6e`, 2026-10-16 11:16:35), confirmed the mapping was checked in
+Supabase, and provided the workflow export now stored in this repository. SQL
+screenshots from the Supabase `main` Production project confirm the
+`generation_key` column and unique index exist. A query also verified the
+10-row BE2 mapping for Bà Nà Hills / `family` (indices 0–4 full-kit and 5–9
+hook-only). Raw model output and the `/contents/batch` response linked to
+execution `#223` are still needed as handoff evidence; other campaign/persona
+E2E, generated TypeScript types, live retry/idempotency proof, and Tester 2
+acceptance remain outstanding. Do not substitute the older review workflow
+JSON.
