@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sổ Tay Hướng Dẫn Live Demo Sprint 2 | BE1 Lead</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --primary-light: #e0e7ff;
+      --secondary: #475569;
+      --success: #059669;
+      --success-light: #d1fae5;
+      --warning: #d97706;
+      --warning-light: #fef3c7;
+      --danger: #e11d48;
+      --danger-light: #ffe4e6;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, #312e81, #1e1b4b);
+      color: white;
+      padding: 36px 32px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+
+    .badge-header {
+      display: inline-block;
+      background: rgba(99, 102, 241, 0.3);
+      border: 1px solid rgba(129, 140, 248, 0.5);
+      color: #c7d2fe;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      color: #cbd5e1;
+      font-size: 1.05rem;
+    }
+
+    .meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 0.9rem;
+    }
+    .meta-item strong { color: white; }
+
+    .nav-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      position: sticky;
+      top: 12px;
+      z-index: 100;
+      background: var(--bg);
+      padding: 8px 0;
+    }
+
+    .nav-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--secondary);
+      padding: 10px 18px;
+      border-radius: 9999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .nav-btn:hover, .nav-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #0f172a;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    .step-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .checklist {
+      list-style: none;
+      margin-top: 12px;
+    }
+
+    .checklist li {
+      position: relative;
+      padding: 12px 14px 12px 42px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+
+    .checklist li::before {
+      content: '✔';
+      position: absolute;
+      left: 14px;
+      top: 12px;
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.92rem;
+    }
+
+    .data-table th, .data-table td {
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .data-table th {
+      background: #f1f5f9;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .copyable {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #f1f5f9;
+      border: 1px dashed #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.88rem;
+      color: #1e293b;
+      word-break: break-all;
+    }
+
+    .script-box {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 8px;
+      margin: 12px 0;
+      font-size: 0.92rem;
+      border-left: 4px solid var(--primary);
+    }
+    .script-box .speaker {
+      color: #38bdf8;
+      font-weight: bold;
+      margin-bottom: 6px;
+      display: block;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+    }
+
+    .callout {
+      padding: 16px 20px;
+      border-left: 4px solid var(--primary);
+      background: var(--primary-light);
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      font-size: 0.92rem;
+    }
+    .callout-warning { border-left-color: var(--warning); background: var(--warning-light); }
+    .callout-success { border-left-color: var(--success); background: var(--success-light); }
+
+    .qa-box {
+      margin-bottom: 16px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .qa-question {
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .qa-answer {
+      color: #334155;
+      font-size: 0.92rem;
+      padding-left: 24px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Header -->
+  <header>
+    <span class="badge-header">Sprint 2 Live Demo Playbook</span>
+    <h1>Sổ Tay Hướng Dẫn Live Demo Sprint 2</h1>
+    <p>Kịch bản dẫn dắt, thông số dữ liệu kiểm thử, thao tác từng bước & bộ câu hỏi phản biện</p>
+    <div class="meta-bar">
+      <div class="meta-item"><span>🎙️ Người trình diễn:</span> <strong>Nguyễn Minh Tuệ (BE1 Lead)</strong></div>
+      <div class="meta-item"><span>⏰ Khung giờ Demo:</span> <strong>13:30 - 17:30 ngày 16/10/2026</strong></div>
+      <div class="meta-item"><span>🎯 Mục tiêu:</span> <strong>Thuyết phục 100% Hội đồng Đánh giá</strong></div>
+    </div>
+  </header>
+
+  <!-- Navigation -->
+  <div class="nav-tabs">
+    <a href="#prep" class="nav-btn active">🛠️ Chuẩn bị máy</a>
+    <a href="#test-values" class="nav-btn">📋 Dữ liệu mẫu (Values)</a>
+    <a href="#step-by-step" class="nav-btn">🎬 4 Màn Trình diễn</a>
+    <a href="#qa-defense" class="nav-btn">🛡️ Ứng phó Q&A</a>
+  </div>
+
+  <!-- Section 1: Pre-flight Checklist -->
+  <section id="prep" class="card">
+    <div class="card-title">
+      <span>1. Các Bước Chuẩn Bị Trước Giờ Demo (Pre-flight Checklist)</span>
+    </div>
+    <p>Thực hiện các bước kiểm tra này <strong>trước 13:15</strong> để đảm bảo máy tính ở trạng thái hoàn hảo nhất:</p>
+    <ul class="checklist">
+      <li>
+        <strong>Kiểm tra Database Docker (Supabase Local):</strong>
+        Mở trình duyệt vào <a href="http://127.0.0.1:54323/" target="_blank">http://127.0.0.1:54323/</a>. Đảm bảo Studio mở bình thường và thấy các bảng: <code>campaigns</code>, <code>products</code>, <code>contents</code>, <code>affiliate_links</code>, <code>clicks</code>.
+      </li>
+      <li>
+        <strong>Kiểm tra Next.js Web Server:</strong>
+        Mở <a href="http://localhost:3000/" target="_blank">http://localhost:3000/</a>. Dev server đang chạy ổn định.
+      </li>
+      <li>
+        <strong>Đăng nhập sẵn phiên Reseller:</strong>
+        Vào <code>http://localhost:3000/login</code>, đăng nhập với tài khoản <code>linhdan.travel@example.com</code> (hoặc tài khoản demo có role active) để sẵn cookie session.
+      </li>
+      <li>
+        <strong>Chuẩn bị 3 Tab Trình Duyệt:</strong>
+        <br>• <strong>Tab 1:</strong> Giao diện Reseller Chiến dịch Bà Nà Hills (<code>http://localhost:3000/reseller/campaigns/44444444-4444-4444-4444-444444444444</code>).
+        <br>• <strong>Tab 2:</strong> Supabase Studio mở sẵn bảng <code>clicks</code> để chứng minh dữ liệu thời gian thực.
+        <br>• <strong>Tab 3:</strong> Một cửa sổ Trình duyệt Ẩn danh (Incognito Window) dùng để đóng vai khách hàng click vào link tiếp thị.
+      </li>
+    </ul>
+  </section>
+
+  <!-- Section 2: Test Values & Fixtures -->
+  <section id="test-values" class="card">
+    <div class="card-title">
+      <span>2. Bảng Giá Trị Dữ Liệu Kiểm Thử (Test Values)</span>
+    </div>
+    <p>Dưới đây là các UUID và thông số chính thức đã được seed sẵn trong Database phục vụ buổi demo:</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Mục</th>
+          <th>Tên Hiển Thị / Ý Nghĩa</th>
+          <th>Giá Trị / UUID Cần Dùng</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Chiến dịch Demo</strong></td>
+          <td>Bà Nà Hills - Đường Lên Tiên Cảnh (Hoa hồng 12%)</td>
+          <td><span class="copyable">44444444-4444-4444-4444-444444444444</span></td>
+        </tr>
+        <tr>
+          <td><strong>Sản phẩm Liên kết</strong></td>
+          <td>Vé Cáp Treo Bà Nà Hills + Buffet Trưa Quốc Tế</td>
+          <td><span class="copyable">33333333-3333-3333-3333-333333333333</span></td>
+        </tr>
+        <tr>
+          <td><strong>Reseller Đăng Nhập</strong></td>
+          <td>Linh Đan Travel & Food (Email: linhdan.travel@example.com)</td>
+          <td><span class="copyable">22222222-2222-2222-2222-222222222222</span></td>
+        </tr>
+        <tr>
+          <td><strong>URL Trực Tiếp</strong></td>
+          <td>Trang Chiến dịch & Content Kit</td>
+          <td><span class="copyable">http://localhost:3000/reseller/campaigns/44444444-4444-4444-4444-444444444444</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4 style="margin: 20px 0 10px 0;">Bộ 4 Persona Chuẩn Trong Database</h4>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Persona Key</th>
+          <th>Tên Đối Tượng</th>
+          <th>Đặc Điểm Nội Dung AI Sinh Ra</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>local_guide</code></td>
+          <td>Hướng dẫn viên bản địa</td>
+          <td>Góc nhìn chuyên gia địa phương, kinh nghiệm săn mây Cầu Vàng, tránh giờ cao điểm đông đúc.</td>
+        </tr>
+        <tr>
+          <td><code>family</code></td>
+          <td>Gia đình đa thế hệ</td>
+          <td>Tiện nghi cáp treo an toàn, buffet đa dạng cho trẻ nhỏ và người cao tuổi, khu vui chơi Fantasy Park.</td>
+        </tr>
+        <tr>
+          <td><code>foodie</code></td>
+          <td>Tín đồ ẩm thực</td>
+          <td>Khám phá đại tiệc buffet hơn 100 món Á - Âu, xúc xích Đức nướng tại Làng Pháp.</td>
+        </tr>
+        <tr>
+          <td><code>budget_traveler</code></td>
+          <td>Du lịch tiết kiệm thông minh</td>
+          <td>Bí kíp mua vé combo Cáp Treo + Buffet tiết kiệm tới 25% so với mua lẻ từng dịch vụ.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Section 3: Step-by-Step Flow -->
+  <section id="step-by-step" class="card">
+    <div class="card-title">
+      <span>3. Kịch Bản 4 Màn Trình Diễn Live Demo (Step-by-Step)</span>
+    </div>
+
+    <!-- Màn 1 -->
+    <div style="margin-bottom: 28px;">
+      <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+        <span class="step-badge">1</span> Màn 1: Trưng Bày Chiến Dịch & Content Kit 4 Persona (Tích Hợp n8n)
+      </h3>
+      <p><strong>Thao tác:</strong> Tại Tab 1, mở URL chiến dịch Bà Nà Hills. Cuộn chuột lần lượt qua 4 persona.</p>
+      <div class="script-box">
+        <span class="speaker">Lời thoại thuyết minh của BE1:</span>
+        "Thưa Thầy Cô và Hội Đồng, đây là màn hình chi tiết chiến dịch Bà Nà Hills. Toàn bộ nội dung tại đây được sinh hoàn toàn tự động qua workflow n8n của bạn BE3. Nhờ vào Trigger hòa giải tự động mà BE1 cài đặt trực tiếp trong PostgreSQL, dữ liệu từ n8n được tự động ánh xạ đúng sản phẩm, chuẩn hóa thành 4 Persona đặc trưng (Bản địa, Gia đình, Ẩm thực, Tiết kiệm) và tự động duyệt sang trạng thái approved để Reseller có thể sử dụng ngay mà không gặp độ trễ."
+      </div>
+      <p><strong>Thao tác tiếp theo:</strong> Bấm nút <strong>"Copy nội dung"</strong> và <strong>"Copy CTA"</strong> ở một Persona bất kỳ để chứng minh clipboard hoạt động tốt.</p>
+    </div>
+
+    <!-- Màn 2 -->
+    <div style="margin-bottom: 28px;">
+      <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+        <span class="step-badge">2</span> Màn 2: Tạo Link Tiếp Thị & Sinh Mã QR Bảo Mật (Tracking Engine)
+      </h3>
+      <p><strong>Thao tác:</strong> Bấm nút <strong>"Tạo link"</strong> ở góc trên bên phải. Modal xuất hiện.</p>
+      <p><strong>Giải thích đầu ra:</strong></p>
+      <ul style="padding-left: 20px; font-size: 0.92rem; margin: 8px 0;">
+        <li>Modal nhận diện chính xác Sản phẩm liên kết: <em>Vé Cáp Treo Bà Nà Hills + Buffet Trưa Quốc Tế</em>.</li>
+        <li>Bấm nút <strong>"Tạo link tiếp thị"</strong>.</li>
+        <li>Trong vòng <strong>20ms</strong>, hệ thống trả về URL rút gọn độc quyền dạng: <code>http://localhost:3000/r/[code]</code>.</li>
+        <li>Mã QR được render trực tiếp tại client từ URL tiếp thị.</li>
+      </ul>
+      <div class="script-box">
+        <span class="speaker">Lời thoại thuyết minh của BE1:</span>
+        "Khi bấm Tạo link, hệ thống thực hiện một HTTP POST lên Server API bảo mật của BE1. Server sẽ đọc Cookie Session của Reseller, kiểm tra trạng thái hoạt động trong cơ sở dữ liệu và bảo đảm tính Idempotent: nếu Reseller này đã tạo link cho chiến dịch này rồi, hệ thống sẽ trả lại đúng link đó chứ không bao giờ tạo rác hay cấp trùng lặp."
+      </div>
+      <p><strong>Thao tác tiếp theo:</strong> Bấm nút <strong>"Sao chép link"</strong> (sẽ copy link rút gọn vào bộ nhớ tạm).</p>
+    </div>
+
+    <!-- Màn 3 -->
+    <div style="margin-bottom: 28px;">
+      <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+        <span class="step-badge">3</span> Màn 3: Trải Nghiệm Khách Hàng - Click & Chuyển Hướng Tức Thời
+      </h3>
+      <p><strong>Thao tác:</strong> Chuyển sang Cửa sổ Trình duyệt Ẩn danh (Incognito Window) đã mở sẵn ở Tab 3. Dán link rút gọn vừa copy và nhấn <strong>Enter</strong>.</p>
+      <p><strong>Giải thích đầu ra:</strong></p>
+      <ul style="padding-left: 20px; font-size: 0.92rem; margin: 8px 0;">
+        <li>Trình duyệt lập tức chuyển hướng (HTTP 302 trong &lt; 50ms) đến trang chủ chính thức của Sun World (<code>https://sunworld.vn/</code>).</li>
+        <li>Màn hình mở ra hình ảnh Cáp Treo &amp; Cầu Vàng Bà Nà Hills thực tế tuyệt đẹp, chứng minh luồng chuyển hướng hoạt động 100% ngoài đời thực mà không gặp lỗi DNS.</li>
+      </ul>
+      <div class="script-box">
+        <span class="speaker">Lời thoại thuyết minh của BE1:</span>
+        "Tại Router `/r/[code]`, BE1 tối ưu hóa luồng xử lý bằng cách trả về mã Redirect 302 ngay lập tức cho người dùng, đồng thời đẩy sự kiện ghi nhận click vào hàng đợi xử lý bất đồng bộ để không chặn trải nghiệm của khách hàng."
+      </div>
+    </div>
+
+    <!-- Màn 4 -->
+    <div>
+      <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+        <span class="step-badge">4</span> Màn 4: Minh Chứng Dữ Liệu Thời Gian Thực & Lọc Bot Anti-Fraud (BE Proof)
+      </h3>
+      <p><strong>Thao tác:</strong> Chuyển sang Tab 2 (Supabase Studio đang mở bảng <code>clicks</code>) và bấm Refresh dữ liệu.</p>
+      <p><strong>Giải thích đầu ra trực tiếp trong DB:</strong></p>
+      <ul style="padding-left: 20px; font-size: 0.92rem; margin: 8px 0;">
+        <li>Một dòng click mới xuất hiện ngay trên đầu bảng.</li>
+        <li>Cột <code>affiliate_link_id</code>: Khớp chính xác với link vừa tạo ở Màn 2.</li>
+        <li>Cột <code>ip_address</code>: Ghi nhận địa chỉ IP khách hàng.</li>
+        <li>Cột <code>device_type</code>, <code>browser</code>, <code>os</code>: Đã được engine User-Agent Parser bóc tách tự động (ví dụ: Desktop, Chrome, Windows).</li>
+        <li>Cột <code>is_bot</code>: Hiển thị giá trị <code>false</code> (xác nhận người dùng thật).</li>
+      </ul>
+      <div class="script-box">
+        <span class="speaker">Lời thoại thuyết minh của BE1:</span>
+        "Như Hội đồng thấy trên màn hình cơ sở dữ liệu, sự kiện click đã được ghi nhận ngay lập tức với đầy đủ thông tin thiết bị và hệ điều hành. Hệ thống Anti-Fraud của BE1 đã tự động kiểm tra User-Agent: vì đây là trình duyệt thật, cờ is_bot được đánh dấu là false. Nếu phát hiện các crawler/bot tự động như Facebook Crawler hay Googlebot, hệ thống vẫn redirect khách hàng nhưng sẽ đánh dấu is_bot: true để loại bỏ khỏi báo cáo chi trả hoa hồng, bảo vệ ngân sách cho đối tác du lịch."
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Q&A Defense -->
+  <section id="qa-defense" class="card">
+    <div class="card-title">
+      <span>4. Bộ Câu Hỏi Phản Biện & Kịch Bản Ứng Phó (Q&A Defense Guide)</span>
+    </div>
+
+    <div class="qa-box">
+      <div class="qa-question">❓ Câu hỏi 1: Làm sao hệ thống chống được việc một Reseller cố tình click liên tục vào link của mình để ăn gian lượt click?</div>
+      <div class="qa-answer">
+        <strong>Trả lời của BE1:</strong> "Hệ thống backend đã trang bị 2 lớp bảo vệ: (1) In-memory Token Bucket Rate Limiter giới hạn tối đa 10 clicks/phút từ cùng một địa chỉ IP; (2) Cơ chế phát hiện Bot & Device Fingerprint. Ngoài ra, trong Sprint 3 khi triển khai luồng hoa hồng, chúng em chỉ tính hoa hồng dựa trên <em>đơn hàng hoàn tất thanh toán (Conversion)</em> chứ không trả hoa hồng thuần theo số lượt click (CPC), do đó hành vi spam click sẽ không thể trục lợi tài chính."
+      </div>
+    </div>
+
+    <div class="qa-box">
+      <div class="qa-question">❓ Câu hỏi 2: Tại sao lúc trước n8n đẩy content vào với status là 'NEEDS_REVIEW' mà trên giao diện Reseller lại hiển thị được?</div>
+      <div class="qa-answer">
+        <strong>Trả lời của BE1:</strong> "Theo quy chuẩn bảo mật RLS của bảng <code>contents</code>, chỉ những nội dung có trạng thái <code>approved</code> mới được hiển thị công khai cho Reseller. Để hỗ trợ tích hợp liên thông trong Sprint 2, BE1 đã xây dựng một PostgreSQL Trigger mang tên <code>fn_temp_contents_reconcile</code>. Trigger này tự động chuẩn hóa dữ liệu persona và duyệt sang <code>approved</code> ngay khi nhận batch từ n8n. Sang đầu Sprint 3, khi màn hình duyệt nội dung thủ công của Merchant hoàn thiện, trigger này sẽ được gỡ bỏ để chuyển sang quy trình kiểm duyệt chính thức."
+      </div>
+    </div>
+
+    <div class="qa-box">
+      <div class="qa-question">❓ Câu hỏi 3: Hai Reseller khác nhau có thể xem trộm số liệu click hoặc can thiệp link tiếp thị của nhau không?</div>
+      <div class="qa-answer">
+        <strong>Trả lời của BE1:</strong> "Hoàn toàn không thể. Chúng em áp dụng chính sách Row Level Security (RLS) ở mức sâu nhất trong PostgreSQL. Mỗi truy vấn từ client đều đi qua Supabase Auth Context, chính sách RLS so khớp <code>auth.uid() = reseller_id</code>. Một Reseller này cố tình gọi API lấy dữ liệu của Reseller khác sẽ bị PostgreSQL từ chối trả về dữ liệu (trả về 0 dòng)."
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 AI Travel Reseller Platform - Sprint 2 Live Demo Playbook</p>
+    <p>Biên soạn bởi: <strong>Nguyễn Minh Tuệ</strong> - Backend Lead (BE1)</p>
+  </footer>
+</div>
+
+</body>
+</html>

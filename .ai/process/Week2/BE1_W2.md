@@ -27,12 +27,14 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
 
 ---
 
-## 3. TODAY — MUST DO (Thứ Tư 14/10/2026)
-| Priority | Task | Why | Dependency | Output | Estimated Effort |
-|---|---|---|---|---|---|
-| P0 | Phân rã & Lập kế hoạch 4 Module bổ sung từ `SP_BE1_W2` | Chuẩn hóa quy trình kỹ thuật chống bot và analytics | Team Dev | Cập nhật `BE1_W2.md` & `TEAM_WORK_LOG.md` | 1h |
-| P1 | Viết Migration mở rộng bảng `clicks` & cập nhật Trigger đếm click | Chuẩn bị cột dữ liệu thiết bị, OS, Bot flag | BE1-W2-01 | File migration SQL (`20261014110000...`) | 2h |
-| P1 | Nâng cấp Router `/r/[code]` tích hợp User-Agent Parser & Rate Limiter | Lọc bot crawler và click tặc spam | BE1-W2-04 | Code Route Handler & helpers | 2.5h |
+## 3. TODAY — MUST DO (Thứ Sáu 16/10/2026)
+| Priority | Task | Why | Dependency | Output | Estimated Effort | Status |
+|---|---|---|---|---|---|---|
+| P0 | Đồng bộ kỹ thuật E2E với BE3, nạp Seed Data 4 Persona & áp dụng Trigger tạm | Đảm bảo FE hiển thị trọn vẹn 4 tab Persona trước giờ demo | BE3 | Migration SQL, DB Seed Cloud/Local, Agreement MD | 2h | DONE |
+| P0 | Rà soát bảo mật (Auth Bypass, Host Poisoning) & Hotfix Session cho Modal Tracking | Đảm bảo an toàn production và modal tạo link hoạt động mượt mà | Team Dev | Code fix, build pass 100%, test suites 59/59 pass | 1.5h | DONE |
+| P0 | Code Freeze, kiểm tra nhánh Git & hoàn thiện tài liệu bàn giao | Đảm bảo toàn bộ PR đã merge sạch sẽ vào dev trước 12:00 PM | Git / PM | PR merged, BE1_W2.md, TEAM_WORK_LOG.md updated | 1h | DONE |
+| P0 | Tham gia phiên Kiểm thử chéo (Cross-testing) lúc 13:30 - 15:00 | Kiểm thử chéo luồng cấp tracking link, redirect 302, đếm click, analytics | FE, Tester 3 | Test log chéo, xác nhận kết quả nghiệm thu | 1.5h | IN_PROGRESS (SẴN SÀNG) |
+| P1 | Trực chiến Hotfix Session & Báo cáo Demo Sprint 2 (15:00 - 17:30) | Xử lý sự cố phát sinh (nếu có) và demo trực tiếp trước PM/Hội đồng | Toàn team | Buổi demo thành công, nghiệm thu Sprint 2 | 2.5h | PENDING (SẴN SÀNG) |
 
 ---
 
@@ -49,6 +51,8 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
 | BE1-W2-08 | Module Chống click tặc, Lọc Bot & Parser Thiết bị trong Router `/r/[code]` | P1 | DONE | BE1-W2-04, 07 | BE1 | Code `app/r/[code]/route.ts` + `ua-parser.ts`, `rate-limiter.ts` | 14/10 11:30 |
 | BE1-W2-09 | Bộ Postgres RPC Hàm Thống Kê Nhanh (High-Performance Analytics RPCs) | P1 | DONE | BE1-W2-07 | BE1 | File migration SQL (`20261014140000_reseller_analytics_rpc.sql`) | 14/10 11:45 |
 | BE1-W2-10 | API Quản Lý & Báo Cáo cho Reseller Dashboard (`/api/reseller/*`) | P1 | DONE | BE1-W2-09 | BE1 | Routes `app/api/reseller/links/route.ts` & `app/api/reseller/analytics/route.ts` + `test_antibot_and_analytics.ps1` | 14/10 11:45 |
+| BE1-W2-11 | Trigger hòa giải tạm thời `contents`, Seed data 4 Persona & Security Hotfix | P0 | DONE | BE3, FE | BE1 | Migration SQL (`20261015233000...`), Seed data, Fix security & session | 16/10 10:00 |
+| BE1-W2-12 | Tham gia phiên Kiểm thử chéo (Cross-testing) & Báo cáo Demo Sprint 2 | P0 | IN_PROGRESS | Toàn bộ 01-11 | BE1 | Phiên test chéo 13:30 - 15:00 & Nghiệm thu Sprint 2 | 16/10 17:30 |
 
 ---
 
@@ -58,11 +62,11 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
 **Goal:** Cung cấp endpoint nhận `reseller_id`, `campaign_id`, `product_id` và sinh ra mã tracking duy nhất kèm URL rút gọn.  
 **Prerequisites:** Bảng `affiliate_links` đã được cấu hình các trường `unique_code`, `short_link`.  
 **Steps:**
-- [ ] Viết Route Handler `POST /api/tracking/generate` (hoặc Supabase Edge Function).
-- [ ] Kiểm tra tính hợp lệ của bộ 3 UUID: `reseller_id`, `campaign_id`, `product_id`.
-- [ ] Sinh `unique_code` ngẫu nhiên chuẩn nanoid/cuid (8-10 ký tự, không trùng lặp).
-- [ ] Lưu bản ghi vào bảng `affiliate_links` (nếu đã có link cùng reseller và campaign thì trả về link cũ - Idempotent).
-- [ ] Trả về JSON `{ success: true, tracking_id, short_url, destination_url }`.  
+- [x] Viết Route Handler `POST /api/tracking/generate` (hoặc Supabase Edge Function).
+- [x] Kiểm tra tính hợp lệ của bộ 3 UUID: `reseller_id`, `campaign_id`, `product_id`.
+- [x] Sinh `unique_code` ngẫu nhiên chuẩn nanoid/cuid (8-10 ký tự, không trùng lặp).
+- [x] Lưu bản ghi vào bảng `affiliate_links` (nếu đã có link cùng reseller và campaign thì trả về link cũ - Idempotent).
+- [x] Trả về JSON `{ success: true, tracking_id, short_url, destination_url }`.  
 **Definition of Done:** API trả HTTP 200/201 kèm URL tracking hợp lệ; kiểm tra DB xuất hiện bản ghi; Unit test pass.  
 **Handoff To:** FE (gọi trong modal nhận link), Tester 3 (viết test suite API).
 
@@ -72,10 +76,10 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
 **Goal:** Tự động gửi HTTP POST sang n8n Webhook ngay khi Merchant tạo một chiến dịch mới trong bảng `campaigns`.  
 **Prerequisites:** Extension `pg_net` đã kích hoạt từ Tuần 1; n8n webhook URL do BE3 cung cấp.  
 **Steps:**
-- [ ] Viết hàm PL/pgSQL `public.trigger_campaign_to_n8n()`.
-- [ ] Cấu hình gọi `net.http_post` với payload chứa `campaign_id`, `product_id`, `merchant_id`, `title`, `commission_rate`.
-- [ ] Gắn Trigger `AFTER INSERT ON public.campaigns FOR EACH ROW`.
-- [ ] Thêm biến cấu hình URL webhook linh hoạt để tránh hardcode IP nội bộ.  
+- [x] Viết hàm PL/pgSQL `public.trigger_campaign_to_n8n()`.
+- [x] Cấu hình gọi `net.http_post` với payload chứa `campaign_id`, `product_id`, `merchant_id`, `title`, `commission_rate`.
+- [x] Gắn Trigger `AFTER INSERT ON public.campaigns FOR EACH ROW`.
+- [x] Thêm biến cấu hình URL webhook linh hoạt để tránh hardcode IP nội bộ.  
 **Definition of Done:** Tạo campaign mới trong bảng `campaigns`, n8n nhận được request HTTP POST tức thì; không làm chậm transaction của database.  
 **Handoff To:** BE3 (tiếp nhận trigger n8n).
 
@@ -85,13 +89,13 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
 **Goal:** Xây dựng endpoint tiếp nhận lượt click của khách hàng `/r/[tracking_id]`, ghi nhận dữ liệu vào bảng `clicks` và redirect 302 an toàn.  
 **Prerequisites:** Bảng `clicks` và `affiliate_links` đã liên kết khóa ngoại.  
 **Steps:**
-- [ ] Tạo Next.js Route Handler tại `app/r/[code]/route.ts`.
-- [ ] Trích xuất `unique_code` từ URL params.
-- [ ] Truy vấn bảng `affiliate_links` lấy link gốc và thông tin sản phẩm.
-- [ ] Lấy IP (qua header `x-forwarded-for`), User Agent, Referrer từ HTTP Request.
-- [ ] Thực hiện ghi bất đồng bộ (non-blocking) vào bảng `clicks` và tăng `clicks_count` trong `affiliate_links`.
-- [ ] Trả về HTTP 302 Redirect đến `official_booking_url` kèm tham số tracking.
-- [ ] Xử lý fallback: Nếu mã code không tồn tại, redirect về trang chủ kèm thông báo lỗi thân thiện.  
+- [x] Tạo Next.js Route Handler tại `app/r/[code]/route.ts`.
+- [x] Trích xuất `unique_code` từ URL params.
+- [x] Truy vấn bảng `affiliate_links` lấy link gốc và thông tin sản phẩm.
+- [x] Lấy IP (qua header `x-forwarded-for`), User Agent, Referrer từ HTTP Request.
+- [x] Thực hiện ghi bất đồng bộ (non-blocking) vào bảng `clicks` và tăng `clicks_count` trong `affiliate_links`.
+- [x] Trả về HTTP 302 Redirect đến `official_booking_url` kèm tham số tracking.
+- [x] Xử lý fallback: Nếu mã code không tồn tại, redirect về trang chủ kèm thông báo lỗi thân thiện.  
 **Definition of Done:** Bấm vào short link chuyển hướng đúng trang thanh toán của Merchant; bảng `clicks` tăng đúng 1 dòng dữ liệu hợp lệ.  
 **Handoff To:** Tester 3 (kiểm thử redirect & DB clicks), FE.
 
@@ -101,7 +105,7 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
 **Goal:** Chuẩn hóa bảng `clicks` với các trường định danh thiết bị, hệ điều hành, phân loại bot và cờ hợp lệ; đồng thời cập nhật trigger tự động chỉ tăng `clicks_count` khi click là của con người và hợp lệ.  
 **Prerequisites:** Bảng `clicks` đã tạo từ `20261013140000_affiliate_links_and_clicks.sql`.  
 **Steps:**
-- [ ] Viết migration SQL `supabase/migrations/20261014110000_clicks_anti_fraud_and_device_analytics.sql`:
+- [x] Viết migration SQL `supabase/migrations/20261014110000_clicks_anti_fraud_and_device_analytics.sql`:
   - Thêm các cột: `device_type character varying(20)` (mobile / desktop / tablet / unknown).
   - Thêm cột: `os character varying(30)` (iOS / Android / Windows / macOS / Linux / other).
   - Thêm cột: `browser character varying(40)` (Chrome / Safari / TikTok / Facebook / other).
@@ -109,9 +113,9 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
   - Thêm cột: `bot_name character varying(50)` (FacebookBot, Googlebot, ByteSpider...).
   - Thêm cột: `is_valid boolean NOT NULL DEFAULT true`.
   - Thêm cột: `invalid_reason character varying(50)` (rate_limit_exceeded, suspicious_ip...).
-- [ ] Cập nhật trigger function `public.increment_affiliate_link_clicks()`:
+- [x] Cập nhật trigger function `public.increment_affiliate_link_clicks()`:
   - Chỉ tăng `clicks_count` khi `NEW.is_bot = false AND NEW.is_valid = true`.
-- [ ] Bổ sung partial indexes tối ưu báo cáo:
+- [x] Bổ sung partial indexes tối ưu báo cáo:
   - `idx_clicks_valid_human` trên `(link_id, clicked_at DESC) WHERE is_bot = false AND is_valid = true`.
   - `idx_clicks_device_stats` trên `(link_id, device_type, os) WHERE is_bot = false`.  
 **Definition of Done:** Chạy `supabase db reset` thành công; test insert click với `is_bot = true` không làm tăng `clicks_count` trong `affiliate_links`.  
@@ -123,14 +127,14 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
 **Goal:** Tự động phân tích User-Agent để nhận diện Bot (Facebook External Hit, TikTok Bot, Googlebot, Telegram...), trích xuất thông tin thiết bị/OS/trình duyệt và áp dụng cơ chế Rate Limiting theo IP để chống click tặc.  
 **Prerequisites:** Migration `BE1-W2-07` đã áp dụng.  
 **Steps:**
-- [ ] Viết helper module User-Agent & Bot Detection: `src/lib/tracking/ua-parser.ts`:
+- [x] Viết helper module User-Agent & Bot Detection: `src/lib/tracking/ua-parser.ts`:
   - Nhận diện các bot phổ biến: Facebook External Hit, Facebot, TikTok/ByteSpider, Googlebot, Twitterbot, TelegramBot, ZaloBot, WhatsApp.
   - Phân loại thiết bị (`mobile`, `desktop`, `tablet`).
   - Phân loại hệ điều hành (`iOS`, `Android`, `Windows`, `macOS`, `Linux`).
   - Phân loại trình duyệt/in-app webview (`TikTok In-App`, `Facebook In-App`, `Safari`, `Chrome`, `Firefox`).
-- [ ] Viết module Rate Limiter: `src/lib/tracking/rate-limiter.ts`:
+- [x] Viết module Rate Limiter: `src/lib/tracking/rate-limiter.ts`:
   - Quy tắc: Cùng 1 IP bấm liên tục quá 10 lần trong 1 phút trên cùng 1 link thì đánh dấu `is_valid = false` và `invalid_reason = 'rate_limit_exceeded'`.
-- [ ] Cập nhật Router Handler `app/r/[code]/route.ts`:
+- [x] Cập nhật Router Handler `app/r/[code]/route.ts`:
   - **Lưu ý sống còn:** Vẫn thực hiện HTTP 302 Redirect an toàn cho bot/rate-limited click để không phá hỏng OpenGraph Preview khi share link lên mạng xã hội.
   - Ghi nhận đầy đủ `device_type`, `os`, `browser`, `is_bot`, `bot_name`, `is_valid` vào bảng `clicks`.  
 **Definition of Done:** 302 redirect vẫn hoạt động siêu tốc (< 150ms); crawler quét link được gắn cờ `is_bot = true`; click tặc > 10 lần/phút bị đánh dấu `is_valid = false`; thiết bị và OS được ghi nhận chính xác.  
@@ -142,12 +146,12 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
 **Goal:** Viết các hàm Stored Procedure (RPC) tổng hợp dữ liệu tốc độ cao ngay trong Postgres DB, tránh việc FE phải kéo hàng nghìn bản ghi thô về client.  
 **Prerequisites:** Migration `BE1-W2-07` và dữ liệu click phân loại đã sẵn sàng.  
 **Steps:**
-- [ ] Viết migration SQL `supabase/migrations/20261014140000_reseller_analytics_rpc.sql`:
+- [x] Viết migration SQL `supabase/migrations/20261014140000_reseller_analytics_rpc.sql`:
   - `get_reseller_click_timeseries(p_reseller_id uuid, p_days integer DEFAULT 7)`: Trả về chuỗi thời gian (ngày, tổng click, click hợp lệ, click bot).
   - `get_reseller_top_campaigns(p_reseller_id uuid, p_limit integer DEFAULT 5)`: Trả về top chiến dịch có lượt click hợp lệ cao nhất kèm tên tour và hoa hồng.
   - `get_reseller_device_stats(p_reseller_id uuid)`: Trả về phân bố phần trăm thiết bị (Mobile vs Desktop) và OS (iOS vs Android).
   - `get_reseller_overview_stats(p_reseller_id uuid)`: Trả về tổng số link đã tạo, tổng click hợp lệ, tỷ lệ bot/spam đã lọc, và số campaign đang hoạt động.
-- [ ] Cấu hình `SECURITY DEFINER` và kiểm tra quyền bảo mật: Chỉ cho phép người dùng xem dữ liệu của chính mình (`auth.uid() = p_reseller_id` hoặc service role).  
+- [x] Cấu hình `SECURITY DEFINER` và kiểm tra quyền bảo mật: Chỉ cho phép người dùng xem dữ liệu của chính mình (`auth.uid() = p_reseller_id` hoặc service role).  
 **Definition of Done:** Chạy test gọi các hàm RPC qua SQL và Supabase Client, thời gian phản hồi < 5ms cho tập dữ liệu mẫu.  
 **Handoff To:** FE (hợp đồng dữ liệu analytics), BE1 (cho task 10).
 
@@ -157,14 +161,14 @@ Trong Tuần 2, BE1 tập trung hoàn thiện hạ tầng dữ liệu và phân 
 **Goal:** Cung cấp 2 API RESTful hoàn chỉnh phục vụ màn hình quản trị chiến dịch và biểu đồ phân tích của Reseller.  
 **Prerequisites:** RPC Functions `BE1-W2-09` đã sẵn sàng; Supabase Auth helper đã cấu hình.  
 **Steps:**
-- [ ] Tạo Route Handler `GET /api/reseller/links`:
+- [x] Tạo Route Handler `GET /api/reseller/links`:
   - Lấy `user_id` từ session đăng nhập.
   - Trả về danh sách toàn bộ link tiếp thị của Reseller kèm: tên tour, ảnh bìa, mã short code, URL rút gọn, số click hợp lệ, trạng thái hoạt động, ngày tạo.
-- [ ] Tạo Route Handler `GET /api/reseller/analytics`:
+- [x] Tạo Route Handler `GET /api/reseller/analytics`:
   - Nhận tham số query `range=7d|30d`.
   - Gọi các hàm RPC `get_reseller_overview_stats`, `get_reseller_click_timeseries`, `get_reseller_top_campaigns`, `get_reseller_device_stats`.
   - Trả về JSON tổng hợp cấu trúc trực quan phục vụ render biểu đồ Frontend.
-- [ ] Viết kịch bản kiểm thử tự động `test_reseller_analytics.ps1` kiểm tra tính chính xác của cả 2 endpoints.  
+- [x] Viết kịch bản kiểm thử tự động `test_reseller_analytics.ps1` kiểm tra tính chính xác của cả 2 endpoints.  
 **Definition of Done:** Gọi API bằng token của Reseller trả HTTP 200 kèm đầy đủ metrics; token không hợp lệ bị từ chối 401; test script PASS 100%.  
 **Handoff To:** FE (tích hợp vào Reseller Dashboard), Tester 3 (bổ sung API test collection).
 
@@ -205,8 +209,8 @@ flowchart TD
 | BE1 | BE3 | Trigger database `on_campaign_created` & Webhook payload specs | Migration SQL (`pg_net`) | 13/10 17:00 | DONE |
 | BE1 | Tester 3 | Redirect Router `/r/[code]` & Schema bảng `clicks` | Endpoint + Script test | 14/10 17:00 | DONE |
 | BE1 | Toàn team | RLS Policies & Indexes tối ưu cho các bảng Tuần 2 | Migration SQL | 13/10 21:30 | DONE |
-| BE1 | FE | API Báo cáo & Link Reseller (`GET /api/reseller/links`, `GET /api/reseller/analytics`) | Endpoints + TypeScript Types | 15/10 17:00 | READY |
-| BE1 | Tester 3 | RPC Functions & Test script lọc Bot, Rate limit, Analytics | SQL + Script PowerShell | 15/10 17:00 | READY |
+| BE1 | FE | API Báo cáo & Link Reseller (`GET /api/reseller/links`, `GET /api/reseller/analytics`) | Endpoints + TypeScript Types | 15/10 17:00 | DONE |
+| BE1 | Tester 3 | RPC Functions & Test script lọc Bot, Rate limit, Analytics | SQL + Script PowerShell | 15/10 17:00 | DONE |
 
 ---
 
@@ -223,8 +227,8 @@ flowchart TD
 | `POST /api/tracking/generate` | Owner | FE (Consumer) | Body `{ campaign_id, product_id, reseller_id }` đảm bảo Idempotent | IMPLEMENTED & TESTED |
 | `GET /r/[code]` | Owner | End Customer / QA | Mã 302 redirect và params tracking chuyển tiếp an toàn (kèm lọc bot) | IMPLEMENTED & TESTED |
 | Webhook `on_campaign_created` | Owner | BE3 (Consumer) | JSON payload bắn sang n8n: `{ campaign_id, title, product_id... }` | IMPLEMENTED & TESTED |
-| `GET /api/reseller/links` | Owner | FE (Consumer) | Trả về danh sách link tiếp thị của Reseller kèm số click hợp lệ | SPECIFIED |
-| `GET /api/reseller/analytics` | Owner | FE (Consumer) | Query param `range` (7d, 30d); trả timeseries, devices breakdown, top campaigns | SPECIFIED |
+| `GET /api/reseller/links` | Owner | FE (Consumer) | Trả về danh sách link tiếp thị của Reseller kèm số click hợp lệ | IMPLEMENTED & TESTED |
+| `GET /api/reseller/analytics` | Owner | FE (Consumer) | Query param `range` (7d, 30d); trả timeseries, devices breakdown, top campaigns | IMPLEMENTED & TESTED |
 
 ---
 
@@ -248,7 +252,21 @@ flowchart TD
   - Phát hiện race condition trên FE khi Supabase client phát event auth (`TOKEN_REFRESHED` / hydration) khiến `shouldInvalidateTrackingSession` ngắt kết nối session của modal tạo link.
   - **Tạm thời xử lý:** Đặt `watchSession={false}` trong [`src/components/reseller/campaign-detail.tsx`](file:///E:/Tue/MyProject/AITravelReseller/ai-travel-reseller/src/components/reseller/campaign-detail.tsx) để modal nhận diện đúng sản phẩm và tạo link thành công.
   - **Kế hoạch Sprint 3 (Phục hồi):** Phối hợp với team FE hoàn thiện lại logic `shouldInvalidateTrackingSession` trong [`src/lib/reseller/tracking-cta.ts`](file:///E:/Tue/MyProject/AITravelReseller/ai-travel-reseller/src/lib/reseller/tracking-cta.ts) (cho phép `TOKEN_REFRESHED` và cùng `userId`), sau đó bật lại `watchSession={!preview}`.
-- Bộ test suites toàn dự án đạt 100% PASS, sẵn sàng cho buổi Cross-testing và Demo Sprint 2 chiều nay (13:30 - 17:30).
+- Bộ test suites toàn dự án đạt 100% PASS, hoàn thành toàn bộ 100% các hạng mục phát triển và tối ưu của BE1. Sẵn sàng cho buổi Cross-testing và Demo Sprint 2 chiều nay (13:30 - 17:30).
+
+**IN PROGRESS:**
+- Chuẩn bị dữ liệu và môi trường để tham gia phiên Kiểm thử chéo (Cross-testing) với FE và Tester 3 lúc 13:30 – 15:00.
+
+**BLOCKED:**
+- Không có blocker. Toàn bộ hạ tầng DB, RLS, API, Bot detection và n8n trigger đã thông suốt 100%.
+
+**HANDOFF:**
+- Bàn giao toàn bộ luồng tạo link, redirect 302, trigger n8n, 4 persona content và API analytics cho QA/FE phục vụ Cross-testing.
+
+**NEXT:**
+- 13:30 – 15:00: Thực hiện phiên Kiểm thử chéo (Cross-testing) E2E cùng FE và Tester 3 (hạng mục duy nhất còn lại của Tuần 2).
+- 15:00 – 16:30: Trực chiến Hotfix Session (nếu có lỗi phát sinh trong buổi test).
+- 16:30 – 17:30: Báo cáo nghiệm thu và Demo Sprint 2 trước PM & Ban điều hành.
 
 ### 15/10/2026 (Thứ Năm)
 **DONE:**
@@ -336,3 +354,4 @@ flowchart TD
 - [x] Các hàm Postgres RPC Analytics trả về số liệu tổng hợp chính xác, bảo mật theo `auth.uid()`
 - [x] API `/api/reseller/links` và `/api/reseller/analytics` hoạt động ổn định và sẵn sàng cho FE tích hợp
 - [x] 100% PR được merge an toàn vào `dev` trước 12:00 PM Thứ Sáu (16/10/2026)
+- [x] Sẵn sàng 100% tài nguyên và môi trường cho phiên Kiểm thử chéo (Cross-testing) 13:30 và Demo Sprint 2 lúc 16:30 (hạng mục còn lại duy nhất)
