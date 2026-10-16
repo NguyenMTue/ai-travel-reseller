@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Megaphone, FileText, Sparkles, ChevronsUpDown, X } from "lucide-react";
+import { LayoutGrid, Megaphone, FileText, Sparkles, ChevronsUpDown, X, ShieldCheck } from "lucide-react";
 import { Brand } from "@/src/components/brand";
 
 export function ResellerSidebar({
@@ -81,6 +81,24 @@ export function ResellerSidebar({
       </nav>
 
       <div className="reseller-sidebar-footer">
+        <Link
+          href="/terms-of-service"
+          onClick={onClose}
+          className={`reseller-footer-link ${pathname === "/terms-of-service" ? "active" : ""}`}
+          aria-current={pathname === "/terms-of-service" ? "page" : undefined}
+        >
+          <FileText size={16} />
+          <span>Terms of Service</span>
+        </Link>
+        <Link
+          href="/privacy-policy"
+          onClick={onClose}
+          className={`reseller-footer-link ${pathname === "/privacy-policy" ? "active" : ""}`}
+          aria-current={pathname === "/privacy-policy" ? "page" : undefined}
+        >
+          <ShieldCheck size={16} />
+          <span>Privacy Policy</span>
+        </Link>
         <button
           type="button"
           onClick={() => {

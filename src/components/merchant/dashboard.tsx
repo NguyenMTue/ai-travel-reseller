@@ -13,6 +13,8 @@ import {
   SlidersHorizontal,
   X,
   ShieldCheck,
+  FileText,
+  Sparkles,
 } from "lucide-react";
 import { Brand } from "@/src/components/brand";
 import { Button } from "@/src/components/ui/button";
@@ -21,6 +23,7 @@ import { demoProducts, demoMetrics } from "@/src/lib/merchant-demo";
 import { MerchantHeader } from "@/src/components/merchant/merchant-header";
 import { CampaignCreateForm } from "@/src/components/merchant/campaign-create-form";
 import { MerchantProductsPanel } from "@/src/components/merchant/merchant-products-panel";
+import { DesignNotesModal } from "@/src/components/reseller/design-notes-modal";
 export function Dashboard({ preview = false, initialTab = "overview" }: { preview?: boolean; initialTab?: string }) {
   const pathname = usePathname();
   const [tab, setTab] = useState(initialTab);
@@ -32,6 +35,7 @@ export function Dashboard({ preview = false, initialTab = "overview" }: { previe
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [menu, setMenu] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [view, setView] = useState("sample");
   const products =
@@ -161,6 +165,17 @@ export function Dashboard({ preview = false, initialTab = "overview" }: { previe
               Đăng nhập tài khoản <ArrowUpRight size={16} />
             </Link>
           ) : null}
+          <div className="merchant-policy-links">
+            <Link href="/terms-of-service" onClick={() => setMenu(false)} aria-current={pathname === "/terms-of-service" ? "page" : undefined}>
+              <FileText size={16} /> Terms of Service
+            </Link>
+            <Link href="/privacy-policy" onClick={() => setMenu(false)} aria-current={pathname === "/privacy-policy" ? "page" : undefined}>
+              <ShieldCheck size={16} /> Privacy Policy
+            </Link>
+            <button type="button" onClick={() => { setMenu(false); setNotesOpen(true); }}>
+              <Sparkles size={16} /> Design Notes
+            </button>
+          </div>
         </div>
       </aside>
       <div className="dashboard-body">
@@ -425,6 +440,7 @@ export function Dashboard({ preview = false, initialTab = "overview" }: { previe
           )}
         </main>
       </div>
+      <DesignNotesModal open={notesOpen} onClose={() => setNotesOpen(false)} />
     </div>
   );
 }
