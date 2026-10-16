@@ -237,6 +237,28 @@ flowchart TD
 
 ## 12. END-OF-DAY UPDATE
 
+### 16/10/2026 (Thứ Sáu - Ngày Tổng Kết & Demo)
+**DONE:**
+- Đồng bộ kỹ thuật tích hợp E2E giữa BE1 và BE3 (Thái Thanh Tú):
+  - Xây dựng và áp dụng Migration Trigger hòa giải tạm thời `supabase/migrations/20261015233000_temp_contents_reconciliation.sql` lên cả Supabase Local và Supabase Cloud (`ykfosnwbgphlwpufnxrd`).
+  - Trigger tự động map `product_id` -> `campaign_id` Bà Nà Hills (`44444444-4444-4444-4444-444444444444`), chuẩn hóa `persona: general` -> `local_guide`, và chuyển `status: NEEDS_REVIEW` -> `approved` để Frontend hiển thị mượt mà.
+  - Hoàn tất nạp seed data chuẩn Tuần 2 với đủ 4 Persona (`local_guide`, `family`, `foodie`, `budget_traveler`) cho chiến dịch Bà Nà Hills, xác nhận trên cả Local và Cloud.
+  - Lập văn bản thống nhất tích hợp `.ai/process/Week2/BE1_BE3_INTEGRATION_AGREEMENT_20261016.md`, chốt kịch bản demo n8n và dữ liệu.
+- Hotfix phục vụ Demo Sprint 2 & Ghi nhận Technical Debt cho Sprint 3:
+  - Phát hiện race condition trên FE khi Supabase client phát event auth (`TOKEN_REFRESHED` / hydration) khiến `shouldInvalidateTrackingSession` ngắt kết nối session của modal tạo link.
+  - **Tạm thời xử lý:** Đặt `watchSession={false}` trong [`src/components/reseller/campaign-detail.tsx`](file:///E:/Tue/MyProject/AITravelReseller/ai-travel-reseller/src/components/reseller/campaign-detail.tsx) để modal nhận diện đúng sản phẩm và tạo link thành công.
+  - **Kế hoạch Sprint 3 (Phục hồi):** Phối hợp với team FE hoàn thiện lại logic `shouldInvalidateTrackingSession` trong [`src/lib/reseller/tracking-cta.ts`](file:///E:/Tue/MyProject/AITravelReseller/ai-travel-reseller/src/lib/reseller/tracking-cta.ts) (cho phép `TOKEN_REFRESHED` và cùng `userId`), sau đó bật lại `watchSession={!preview}`.
+- Bộ test suites toàn dự án đạt 100% PASS, sẵn sàng cho buổi Cross-testing và Demo Sprint 2 chiều nay (13:30 - 17:30).
+
+### 15/10/2026 (Thứ Năm)
+**DONE:**
+- Rà soát và xử lý triệt để 2 lỗ hổng bảo mật:
+  - Bypass Authentication ở môi trường Production (`app/api/tracking/generate/route.ts`).
+  - Host Header Poisoning tại `getBaseUrl()` (`app/api/reseller/links/route.ts`, `app/api/reseller/analytics/route.ts`).
+- Bật Live Tracking an toàn (`isLiveTrackingEnabled() = true`) trong `src/lib/reseller/tracking-link.ts`.
+- Hoàn tất merge PR #17 của Frontend vào nhánh `dev`. Kiểm thử toàn diện 100% test suites (59/59 tracking, 41/41 merchant, 9/9 legal, 7/7 portal-auth, `tsc --noEmit` clean).
+- Lập biên bản bàn giao đêm 15/10 `.ai/process/Week2/BE1_SESSION_HANDOVER_20261015.md` chuẩn bị tích hợp với BE3.
+
 ### 14/10/2026 (Thứ Tư)
 **DONE:**
 - Phân rã toàn diện 4 module nâng cấp từ `SP_BE1_W2` thành các task chính thức (`BE1-W2-07` đến `BE1-W2-10`).
@@ -313,4 +335,4 @@ flowchart TD
 - [x] Module Lọc bot & Parser thiết bị hoạt động trên route `/r/[code]`, không chặn OpenGraph preview của mạng xã hội
 - [x] Các hàm Postgres RPC Analytics trả về số liệu tổng hợp chính xác, bảo mật theo `auth.uid()`
 - [x] API `/api/reseller/links` và `/api/reseller/analytics` hoạt động ổn định và sẵn sàng cho FE tích hợp
-- [ ] 100% PR được merge an toàn vào `dev` trước 12:00 PM Thứ Sáu (16/10/2026)
+- [x] 100% PR được merge an toàn vào `dev` trước 12:00 PM Thứ Sáu (16/10/2026)

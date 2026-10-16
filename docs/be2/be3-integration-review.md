@@ -1,9 +1,9 @@
 # BE2 review of BE3 Campaign Content integration
 
 **Source branch:** `origin/Feature_BE3_n8n_Campaign_Content@6ae494e`  
-**Reviewed on dev:** `origin/dev@fba688a`  
+**Reviewed on dev:** `origin/dev@49d3032`
 **Review date:** 16/10/2026  
-**Outcome:** `MERGED TO DEV — CHANGES REQUIRED BEFORE LIVE ACCEPTANCE`
+**Outcome:** `DEMO MAPPING DOCUMENTED — LIVE ACCEPTANCE PENDING`
 
 ## Verified in this review
 
@@ -27,7 +27,13 @@ The BE2 output contract produces one persona object with ten hooks and five scri
 
 The BE3 integration guide instead instructs n8n to use `index % 5`, duplicating each script, caption and CTA across ten complete rows. The BE3 API accepts both layouts, but accepting both does not resolve which layout is authoritative.
 
-This must be decided by the interface owners before live acceptance. If ten complete variants are required, the clean contract is to change the generation schema to ten scripts, ten captions and ten CTAs, then update the prompt, Zod/JSON Schema, mapper, tests and token budget together. Repeating five generated assets under different hooks must not be presented as ten independently generated full variants.
+`origin/dev@49d3032` adds a BE1–BE3 agreement that documents modulo mapping as
+the preferred demo override so all ten FE variants are populated. This resolves
+the immediate demo presentation choice, but it does not change BE2's canonical
+10/5 generation schema. If ten independently generated complete variants are
+required after the demo, the clean contract is to change the schema to ten
+scripts, ten captions and ten CTAs, then update the prompt, mapper, tests and
+token budget together.
 
 ## Additional changes required before acceptance
 
@@ -52,4 +58,7 @@ This must be decided by the interface owners before live acceptance. If ten comp
 
 ## Acceptance decision
 
-The BE3 integration is now present on `dev`, but the merge itself is not evidence that BE2-W2-04/05 or BE3-W2-03/06 are complete. Live acceptance remains blocked on the mapping decision, generated database types, workflow export and live E2E evidence.
+The BE3 integration and demo mapping decision are now present on `dev`, but the
+merge itself is not evidence that BE2-W2-04/05 or BE3-W2-03/06 are complete.
+Live acceptance remains blocked on generated database types, workflow export
+and live E2E evidence. The canonical post-demo mapping still needs owner review.

@@ -1,7 +1,7 @@
 # TEAM WORK LOG
 Project: AI Travel Reseller MVP (TravelLink AI)  
 Week: Tuần 2 — 12/10/2026 – 16/10/2026 (Sprint 2)  
-Last Updated: 16/10/2026
+Last Updated: 16/10/2026 10:11 AM
 
 ---
 
@@ -21,6 +21,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | BE1-W2-08 | Nguyễn Minh Tuệ | BE1 | Module Lọc Bot & Parser Thiết bị trong Router `/r/[code]` | DONE | 14/10 | 14/10 11:30 |
 | BE1-W2-09 | Nguyễn Minh Tuệ | BE1 | Bộ Postgres RPC Hàm Thống Kê Nhanh (Analytics RPCs) | DONE | 14/10 | 14/10 11:45 |
 | BE1-W2-10 | Nguyễn Minh Tuệ | BE1 | API Quản Lý & Báo Cáo cho Reseller Dashboard (`/api/reseller/*`) | DONE | 14/10 | 14/10 12:00 |
+| BE1-W2-11 | Nguyễn Minh Tuệ | BE1 | Trigger hòa giải tạm thời bảng `contents` cho BE3 & Fix Auth Bypass | DONE | 15/10 | 16/10 10:00 |
 | BE2-W2-01 | Nguyễn Huỳnh | BE2 | Prompt System phân theo 4 Personas du lịch | DONE | 12/10 | 12/10 17:00 |
 | BE2-W2-02/03 | Nguyễn Huỳnh | BE2 | Zod Structured Output Schema & Content Guardrails | DONE | 13/10 | 13/10 17:00 |
 | BE3-W2-01/02 | Thái Thanh Tú | BE3 | Workflow n8n Campaign-to-AI-Content-Pipeline | READY | 12/10 | 13/10 17:00 |
@@ -56,6 +57,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | BE1-W2-08 | BE1 | Module UA Parser, Rate Limiter & Router `/r/[code]` anti-bot integration, Unit tests PASS 100%, Build PASS | 14/10/2026 11:30 | Tester 3, FE |
 | BE1-W2-09 | BE1 | Migration `reseller_analytics_rpc.sql`, 4 RPC functions (Overview, Timeseries, Top campaigns, Devices) test PASS 100%, types generated | 14/10/2026 11:45 | FE, BE1 (Task 10) |
 | BE1-W2-10 | BE1 | 2 API Route Handlers (`GET /api/reseller/links`, `GET /api/reseller/analytics`), Test E2E `test_antibot_and_analytics.ps1` PASS 100%, Build PASS 16/16 routes | 14/10/2026 12:00 | FE, Tester 3 |
+| BE1-W2-11 | BE1 | Migration Trigger hòa giải `fn_temp_contents_reconcile` (Local & Cloud), xử lý bảo mật Auth Bypass & Host Poisoning, hỗ trợ BE3 n8n thông luồng | 16/10/2026 09:30 | BE3, FE, Toàn team |
 
 ---
 
@@ -187,8 +189,8 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 - Hoàn thiện `src/lib/ai/content-batch.ts` để tạo payload chính xác cho `POST /contents/batch`: bốn persona, mười records/persona, năm bộ đầy đủ + năm hook-only, không modulo/duplicate assets.
 - Mở rộng BE2 lên **17/17 PASS**, gồm các ca từ chối script string, caption thiếu hashtag, CTA thiếu token và key ngoài schema. Tái chạy độc lập BE3 Python **8/8 PASS** với Supabase mock; FE approved-content contract **14/14 PASS**.
 - Production build PASS (23 routes), TypeScript PASS và targeted ESLint PASS.
-- Interface conflict vẫn tồn tại trên `dev`: BE3 dùng `index % 5` để lặp năm scripts/captions/CTAs cho mười rows, trong khi handoff/mapper BE2 quy định năm rows đầy đủ + năm hook-only và không duplicate. Ghi `NEEDS DECISION`; việc merge code không đồng nghĩa đã nghiệm thu contract.
-- Cần BE1/PM/BE2/BE3 chốt một mapping duy nhất, regenerate `database.types.ts` sau migration, rồi chạy E2E đủ bốn persona và FE đọc được rows `approved` trước khi nghiệm thu.
+- `dev@49d3032` bổ sung thỏa thuận BE1–BE3 dùng `index % 5` cho demo để mười biến thể đều đầy đủ. Ghi nhận đây là **demo override**; schema/mapper chuẩn BE2 vẫn giữ 5 full + 5 hook-only và không tự đổi contract dài hạn.
+- Cần chạy E2E đủ bốn persona, regenerate `database.types.ts` sau migration và xác nhận FE đọc được rows `approved`; sau demo, PM/BE1/BE2/BE3 chốt contract canonical trước khi coi mapping là nghiệm thu dài hạn.
 
 ### 15/10/2026 (Thứ Năm)
 
