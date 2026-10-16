@@ -51,7 +51,7 @@ const products = [
     description: "Vé vào cửa khu vui chơi VinWonders Nam Hội An.",
     category: "Vé vui chơi",
     original_price: 600_000,
-    sale_price: 550_000,
+    sale_price: 510_000,
     campaign_name: "Khám phá Nam Hội An 2026",
     target_audience: "Gia đình có trẻ nhỏ và nhóm bạn",
     target_location: "Quảng Nam, Đà Nẵng",
@@ -59,7 +59,7 @@ const products = [
       "Bao gồm vé vào cửa VinWonders Nam Hội An",
       "Không bao gồm chi phí ăn uống",
     ],
-    confirmed_offers: ["Giá bán chính thức 550.000 VND"],
+    confirmed_offers: ["Giá bán chính thức 510.000 VND"],
   },
 ];
 
