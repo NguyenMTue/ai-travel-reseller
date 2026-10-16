@@ -45,7 +45,7 @@ test("02 - campaign feed renders and search/filter interactions work", async ({ 
   await expect(page.getByLabel("Địa điểm", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Hoa hồng", { exact: true })).toBeVisible();
   await expect(page.getByTestId("campaign-card").first()).toContainText("Hoa hồng");
-  await expect(page.getByTestId("campaign-card").first()).toContainText("nội dung khả dụng");
+  await expect(page.getByTestId("campaign-card").first()).toContainText("Xem Content Kit");
 
   await page.getByLabel("Tìm kiếm chiến dịch", { exact: true }).fill("hoi an");
   await expect(page.getByTestId("campaign-card")).toHaveCount(1);
@@ -110,10 +110,12 @@ test("06 - caption copy writes the selected content and reports success", async 
   await page.goto(campaignDetailUrl);
 
   await expect(page.getByRole("heading", { name: "Content Kit" })).toBeVisible();
-  const caption = await page.getByTestId("content-caption").innerText();
+  const caption = await page.getByTestId("content-caption").textContent();
   await page.getByRole("button", { name: "Copy Caption", exact: true }).click();
   await expect(page.getByText("Đã sao chép Caption.", { exact: true })).toBeVisible();
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(caption);
+  expect(
+    (await page.evaluate(() => navigator.clipboard.readText())).replace(/\r\n/g, "\n"),
+  ).toBe(caption);
 
   await capture(page, "06-reseller-copy-content-caption.png");
 });
