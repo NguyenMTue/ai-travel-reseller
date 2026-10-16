@@ -167,6 +167,19 @@ _PROHIBITED_CLAIMS = (
     "đảm bảo rẻ nhất",
     "chắc chắn còn vé",
 )
+_UNVERIFIED_CLAIM_PATTERNS = (
+    re.compile(r"miễn phí vé trẻ em", re.IGNORECASE),
+    re.compile(r"trẻ em (?:được )?miễn phí", re.IGNORECASE),
+    re.compile(r"hoàn(?: tiền| hủy) (?:toàn bộ|miễn phí)", re.IGNORECASE),
+    re.compile(r"bảo hiểm du lịch", re.IGNORECASE),
+    re.compile(r"hỗ trợ xe lăn", re.IGNORECASE),
+    re.compile(r"có sẵn xe đẩy", re.IGNORECASE),
+    re.compile(r"ưu tiên người cao tuổi", re.IGNORECASE),
+    re.compile(r"chỉ còn(?: đúng)? \d+ vé", re.IGNORECASE),
+    re.compile(r"không mua[^.!?\n]{0,80}bị phạt", re.IGNORECASE),
+    re.compile(r"duy nhất hôm nay", re.IGNORECASE),
+    re.compile(r"sắp hết vé", re.IGNORECASE),
+)
 
 
 def _normalize_money(amount: str, unit: str) -> float:
@@ -211,6 +224,10 @@ def _guard_content(text: str, product: Dict[str, Any]) -> List[str]:
     normalized_text = text.lower()
     for claim in _PROHIBITED_CLAIMS:
         if claim in normalized_text and not any(claim in fact for fact in normalized_facts):
+            flags.add("PROHIBITED_CLAIM")
+    for pattern in _UNVERIFIED_CLAIM_PATTERNS:
+        match = pattern.search(normalized_text)
+        if match and not any(match.group(0) in fact for fact in normalized_facts):
             flags.add("PROHIBITED_CLAIM")
     return sorted(flags)
 

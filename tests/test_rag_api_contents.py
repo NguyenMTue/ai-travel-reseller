@@ -115,6 +115,16 @@ class ContentBatchContractTests(unittest.TestCase):
         ])
         self.assertEqual(_guard_content("Miễn phí khách sạn", product), [])
         self.assertEqual(_guard_content("Đảm bảo rẻ nhất", product), ["PROHIBITED_CLAIM"])
+        self.assertEqual(_guard_content("Miễn phí vé trẻ em", product), ["PROHIBITED_CLAIM"])
+        self.assertEqual(_guard_content("Chỉ còn đúng 2 vé hôm nay", product), ["PROHIBITED_CLAIM"])
+
+    def test_guardrails_allow_policy_claim_only_when_verified(self):
+        product = {
+            "original_price": 600_000,
+            "sale_price": 510_000,
+            "verified_facts": ["Trẻ em được miễn phí vé vào cửa"],
+        }
+        self.assertEqual(_guard_content("Trẻ em được miễn phí vé vào cửa", product), [])
 
     def test_gemini_cannot_supply_persistence_status(self):
         row = make_rows()[0] | {"status": "approved"}
