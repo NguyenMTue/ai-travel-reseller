@@ -38,7 +38,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | UX-W2-01/02 | UI/UX Designer | UI/UX | Figma Hi-fi Reseller Feed & Suggested Content Kit | IN_PROGRESS | 12/10 | 13/10 12:00 |
 | T1-W2-01/02 | Tester 1 | QA Hybrid | Mock Data `campaign-demo.ts` & Hỗ trợ CSS Responsive | READY | 12/10 | 13/10 17:00 |
 | T1-W2-03/04 | Tester 1 | QA Hybrid | Bộ test tự động Playwright E2E (`tests/reseller.spec.ts`) | READY | 13/10 | 14/10 17:00 |
-| T2-W2-01/06 | Tester 2 | AI Safety QA | Rubric, groundedness, policy, adversarial và benchmark | IN_REVIEW — 13/13 deterministic PASS; chờ n8n live acceptance | 16/10 | 16/10 12:00 |
+| T2-W2-01/06 | Tester 2 | AI Safety QA | Rubric, groundedness, policy, adversarial và benchmark | IN_REVIEW — 17/17 deterministic; direct Gemini 5/8 APPROVED, 3/8 NEEDS_REVIEW; adversarial PASS; chờ n8n | 16/10 | 16/10 12:00 |
 | T3-W2-01/02 | Tester 3 | System QA | Test Suite cho API Tracking Link & Redirect Router | READY | 12/10 | 14/10 17:00 |
 | PM-W2-01/06 | Nguyễn Minh Tuệ | PM | Điều phối Sprint 2, Code Review & Release Management | IN_PROGRESS | 12/10 | 16/10 17:30 |
 
@@ -197,9 +197,9 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 
 #### Tester 2 — AI Safety QA
 
-- **Done:** Hoàn thiện rubric và sáu tài liệu Tester2; thêm `tests/content-safety.test.ts` đạt **13/13 PASS**; hồi quy BE2 đạt **17/17 PASS**; bổ sung guardrail cho giá/mã ưu đãi, chính sách trẻ em, hoàn hủy, bảo hiểm, xe đẩy/xe lăn, người cao tuổi, prompt injection và khan hiếm giả.
-- **In Progress:** T2-W2-02/03/04/06 ở trạng thái `PARTIAL/IN_REVIEW`; contract, parser và deterministic guardrails đã PASS nhưng chưa có mẫu n8n live để chấm persona và groundedness đầu-cuối.
-- **Blocker:** BE3 chưa cung cấp workflow export, execution ID và tám mẫu live (hai sản phẩm × bốn persona). Python unit suite chưa chạy tại máy hiện tại do thiếu `fastapi`; Python syntax compile PASS.
+- **Done:** Hoàn thiện rubric và báo cáo Tester2; deterministic Tester2 **17/17 PASS**, BE2 **19/19 PASS**, Python API/guardrail **9/9 PASS**; direct Gemini adversarial **1/1 PASS**; ma trận 2 sản phẩm × 4 persona đã chấm xong (**5 APPROVED, 3 NEEDS_REVIEW**).
+- **In Progress:** T2-W2-02/03/06 ở trạng thái `PARTIAL/IN_REVIEW`; T2-W2-04 đã `DONE`. Contract, parser và guardrails đã PASS nhưng chưa có execution n8n live đầu-cuối.
+- **Blocker:** BE3 chưa cung cấp workflow export, execution ID và bản ghi Supabase từ cùng một execution cho tám mẫu (hai sản phẩm × bốn persona).
 - **Next:** Nhận bằng chứng live từ BE3, quét bản ghi `contents`, chấm rubric tối thiểu 80/100 và ký nghiệm thu benchmark.
 
 ### 15/10/2026 (Thứ Năm)

@@ -4,12 +4,12 @@
 
 | Persona | Kiểm tra định nghĩa/prompt | Sinh mẫu Gemini trước đó | Đánh giá thủ công mẫu n8n |
 |---|---|---|---|
-| Local Guide | PASS | PASS theo báo cáo BE2 | PENDING |
-| Family | PASS | PASS theo báo cáo BE2 | PENDING |
-| Foodie | PASS | PASS theo báo cáo BE2 | PENDING |
-| Budget Traveler | PASS | PASS theo báo cáo BE2 | PENDING |
+| Local Guide | PASS | 1 APPROVED, 1 NEEDS_REVIEW | PENDING n8n |
+| Family | PASS | 2/2 APPROVED | PENDING n8n |
+| Foodie | PASS | 0 APPROVED, 2 NEEDS_REVIEW | PENDING n8n |
+| Budget Traveler | PASS | 2/2 APPROVED | PENDING n8n |
 
-Bộ test `T2-W2-02` xác nhận bốn persona có bốn giọng riêng và mỗi persona có ba ưu tiên an toàn. Báo cáo BE2 hiện có bằng chứng 4/4 lượt Gemini parse/guardrail PASS, nhưng repo chưa lưu payload đầu ra và chưa có execution n8n để Tester2 chấm định tính theo rubric.
+Bộ test `T2-W2-02` xác nhận bốn persona có bốn giọng riêng và mỗi persona có ba ưu tiên an toàn. Repo hiện lưu đủ tám output Gemini trực tiếp và bảng chấm rubric tại `LIVE_MODEL_REVIEW_W2.md`. Ba output bị chuyển `NEEDS_REVIEW` vì tuyên bố chưa xác minh. Phần chấm output n8n vẫn chờ BE3.
 
 ## Tiêu chí nghiệm thu còn lại
 

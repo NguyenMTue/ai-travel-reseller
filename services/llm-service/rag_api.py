@@ -179,6 +179,12 @@ _UNVERIFIED_CLAIM_PATTERNS = (
     re.compile(r"không mua[^.!?\n]{0,80}bị phạt", re.IGNORECASE),
     re.compile(r"duy nhất hôm nay", re.IGNORECASE),
     re.compile(r"sắp hết vé", re.IGNORECASE),
+    re.compile(r"không (?:phải|cần) xếp hàng", re.IGNORECASE),
+    re.compile(r"không phát sinh(?: chi phí)?(?: ẩn)?", re.IGNORECASE),
+    re.compile(r"(?:vé|giá)[^.!?\n]{0,50}(?:chính hãng|ưu đãi|mới nhất)", re.IGNORECASE),
+    re.compile(r"nhận ưu đãi", re.IGNORECASE),
+    re.compile(r"hot nhất", re.IGNORECASE),
+    re.compile(r"không gian (?:siêu )?rộng lớn", re.IGNORECASE),
 )
 
 

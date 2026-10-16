@@ -10,6 +10,7 @@
     "test:ui": "playwright test",
     "test:be2": "node --experimental-strip-types --test tests/content-factory.test.ts",
     "test:tester2": "node --experimental-strip-types --test tests/content-safety.test.ts",
+    "test:tester2:live": "node --env-file=.env.local --experimental-strip-types tests/content-adversarial.live.ts",
     "test:be2:live": "node --env-file=.env.local --experimental-strip-types tests/content-factory.live.ts"
   },
   "dependencies": {
