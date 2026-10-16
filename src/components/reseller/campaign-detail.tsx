@@ -29,8 +29,11 @@ export function CampaignDetailView({ campaign, variants, contentStatus, contentR
         <h2 className="text-xl [font-family:var(--font-display)]">{campaign.products?.name ?? "Chưa có thông tin sản phẩm"}</h2>
         <div className="mt-3 whitespace-pre-wrap text-sm [overflow-wrap:anywhere]">{campaign.products?.description?.trim() ? campaign.products.description : "Chưa có mô tả sản phẩm."}</div>
       </section>
+      {/* TEMPORARY SPRINT 2 DEMO: Tạm thời đặt watchSession={false} (gốc: {!preview}) 
+          để tránh race condition do Supabase browser client phát sinh auth event làm invalidate session. 
+          Kế hoạch Sprint 3: Hoàn thiện logic shouldInvalidateTrackingSession và bật lại {!preview}. */}
       <TrackingScopeProvider scope={viewerKey && campaign.product_id && campaign.products?.id === campaign.product_id
-        ? { campaign_id: campaign.id, product_id: campaign.product_id, sessionKey: viewerKey } : null} watchSession={!preview}>
+        ? { campaign_id: campaign.id, product_id: campaign.product_id, sessionKey: viewerKey } : null} watchSession={false}>
       <ContentKit variants={variants} contentStatus={contentStatus} contentReason={contentReason} />
       {tracking ?? <TrackingLinkModal key={`${campaign.id}:${campaign.product_id ?? "none"}`} input={campaign.product_id && campaign.products?.id === campaign.product_id
         ? { campaign_id: campaign.id, product_id: campaign.product_id } : null} />}

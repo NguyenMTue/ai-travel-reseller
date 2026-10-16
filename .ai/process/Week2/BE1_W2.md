@@ -244,6 +244,10 @@ flowchart TD
   - Trigger tự động map `product_id` -> `campaign_id` Bà Nà Hills (`44444444-4444-4444-4444-444444444444`), chuẩn hóa `persona: general` -> `local_guide`, và chuyển `status: NEEDS_REVIEW` -> `approved` để Frontend hiển thị mượt mà.
   - Hoàn tất nạp seed data chuẩn Tuần 2 với đủ 4 Persona (`local_guide`, `family`, `foodie`, `budget_traveler`) cho chiến dịch Bà Nà Hills, xác nhận trên cả Local và Cloud.
   - Lập văn bản thống nhất tích hợp `.ai/process/Week2/BE1_BE3_INTEGRATION_AGREEMENT_20261016.md`, chốt kịch bản demo n8n và dữ liệu.
+- Hotfix phục vụ Demo Sprint 2 & Ghi nhận Technical Debt cho Sprint 3:
+  - Phát hiện race condition trên FE khi Supabase client phát event auth (`TOKEN_REFRESHED` / hydration) khiến `shouldInvalidateTrackingSession` ngắt kết nối session của modal tạo link.
+  - **Tạm thời xử lý:** Đặt `watchSession={false}` trong [`src/components/reseller/campaign-detail.tsx`](file:///E:/Tue/MyProject/AITravelReseller/ai-travel-reseller/src/components/reseller/campaign-detail.tsx) để modal nhận diện đúng sản phẩm và tạo link thành công.
+  - **Kế hoạch Sprint 3 (Phục hồi):** Phối hợp với team FE hoàn thiện lại logic `shouldInvalidateTrackingSession` trong [`src/lib/reseller/tracking-cta.ts`](file:///E:/Tue/MyProject/AITravelReseller/ai-travel-reseller/src/lib/reseller/tracking-cta.ts) (cho phép `TOKEN_REFRESHED` và cùng `userId`), sau đó bật lại `watchSession={!preview}`.
 - Bộ test suites toàn dự án đạt 100% PASS, sẵn sàng cho buổi Cross-testing và Demo Sprint 2 chiều nay (13:30 - 17:30).
 
 ### 15/10/2026 (Thứ Năm)
