@@ -14,6 +14,7 @@
 | Zod schema and response parser | `src/lib/ai/schemas/content-schema.ts` | Backend |
 | Portable JSON Schema | `docs/be2/content-factory.schema.json` | n8n Structured Output Parser |
 | Guardrails | `src/lib/ai/guardrails/content-validator.ts` | BE3 / Tester 2 |
+| `/contents/batch` payload mapper | `src/lib/ai/content-batch.ts` | BE3 / n8n |
 | Automated tests | `tests/content-factory.test.ts` | BE2 / CI |
 
 ## Generation contract
@@ -110,6 +111,16 @@ now has an executable BE2 reference mapper in
 BE3 should mirror this mapper in the n8n transformation immediately before one
 batch insert. The reference implementation validates the structured output and
 rejects internally inconsistent guardrail results before producing rows.
+
+For the current BE3 API boundary, use
+`mapCampaignContentToBatchPayload(output, campaignId)`. It produces only the
+fields accepted by `POST /contents/batch`: `campaign_id` and ten `records` with
+`persona`, `hook`, `script`, `caption`, and `cta`. It deliberately omits
+`product_id`, `reseller_id`, `status`, and `generation_key`; the Python API
+derives or verifies those server-side. The first five records keep script
+objects from the Structured Output Parser, while records 6-10 contain null
+assets. This gives BE3 a directly testable reference without duplicating the
+five generated asset sets.
 
 This is `READY_FOR_REVIEW`, not team acceptance: BE3 and FE must confirm the
 contract during the first live workflow test.

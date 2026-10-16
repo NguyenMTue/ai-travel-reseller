@@ -40,8 +40,8 @@ Trong Tuần 2, BE2 đóng vai trò "Kiến trúc sư nội dung AI":
 | BE2-W2-01 | Chuẩn hóa Prompt System phân theo 4 Personas du lịch | P0 | DONE | Dữ liệu tour Tuần 1 | BE2 | `src/lib/ai/prompts/content-factory.ts` | 12/10 17:00 |
 | BE2-W2-02 | Xây dựng Zod Schema cho Structured Output | P0 | DONE | BE2-W2-01 | BE2 | `src/lib/ai/schemas/content-schema.ts` | 13/10 12:00 |
 | BE2-W2-03 | Xây dựng Module kiểm duyệt tự động (Content Guardrails) | P1 | DONE | BE2-W2-02 | BE2 | `src/lib/ai/guardrails/content-validator.ts` | 13/10 17:00 |
-| BE2-W2-04 | Handoff Prompt & Schema cho BE3 nhúng vào n8n workflow | P0 | READY_FOR_REVIEW | BE2-W2-02, 03 | BE2 | `docs/be2/content-factory-handoff.md` + JSON Schema + persistence mapper | 13/10 18:00 |
-| BE2-W2-05 | Phối hợp BE3 test luồng sinh bài mẫu cho Bà Nà Hills & VinWonders | P1 | PARTIAL — BE2 fixtures/tests ready; waiting BE3 E2E | BE3-W2-01/03 | BE2 + BE3 | Báo cáo sinh nội dung mẫu | 14/10 17:00 |
+| BE2-W2-04 | Handoff Prompt & Schema cho BE3 nhúng vào n8n workflow | P0 | IN_REVIEW — mapper payload BE2 hoàn tất; mapping chung còn `NEEDS DECISION` | BE2-W2-02, 03 | BE2 | `docs/be2/content-factory-handoff.md` + JSON Schema + batch/persistence mappers | 13/10 18:00 |
+| BE2-W2-05 | Phối hợp BE3 test luồng sinh bài mẫu cho Bà Nà Hills & VinWonders | P1 | PARTIAL — BE2 17/17, BE3 mock 8/8, FE contract 14/14; chưa có live E2E | BE3-W2-01/03 | BE2 + BE3 | Báo cáo sinh nội dung mẫu | 14/10 17:00 |
 | BE2-W2-06 | Phối hợp Tester 2 rà soát Hallucination & Tối ưu Prompt | P1 | IN_PROGRESS — deterministic suite ready | BE2-W2-05 | BE2 + Tester 2 | Bộ prompt tối ưu | 15/10 17:00 |
 
 ---
@@ -134,8 +134,8 @@ flowchart TD
 ## 10. INTERFACE CHECK
 | Interface | Tôi | Người liên quan | Cần chốt | Status |
 |---|---|---|---|---|
-| LLM Output JSON Schema | Owner | BE3 (Consumer) | Khóa JSON: `persona`, `hooks`, `scripts`, `captions`, `ctas` | PROPOSED |
-| Guardrail Validation Rules | Owner | Tester 2 & BE3 | Quy tắc đối chiếu giá và phân loại trạng thái bài viết | PROPOSED |
+| LLM Output JSON Schema | Owner | BE3 (Consumer) | Khóa JSON: `persona`, `hooks`, `scripts`, `captions`, `ctas` | IMPLEMENTED; BE3 INTEGRATION IN REVIEW |
+| Guardrail Validation Rules | Owner | Tester 2 & BE3 | Quy tắc đối chiếu giá và phân loại trạng thái bài viết | IMPLEMENTED; LIVE ACCEPTANCE PENDING |
 
 ---
 
@@ -153,16 +153,30 @@ DONE:
 - BE2-W2-02: Zod + portable JSON Schema; 10/10 live generation parse PASS.
 - BE2-W2-03: Guardrails; 5/5 mẫu vi phạm bị phát hiện.
 IN PROGRESS:
-- BE2-W2-04: Handoff artifact đã sẵn sàng, chờ BE3 review.
+- BE2-W2-04: Tích hợp BE3 đã được merge vào `dev@fba688a`; review vẫn yêu cầu chốt lại mapper 10 hooks với 5 bộ assets trước nghiệm thu live.
 BLOCKED:
-- Cần BE2 + BE3 + FE chốt mapping 10 hooks với 5 scripts/captions/CTAs sang từng row `contents`.
+- Mã BE3 trên `dev` đang xoay vòng 5 scripts/captions/CTAs cho 10 rows, trái contract BE2 hiện tại không duplicate; cần PM/BE1/BE2/BE3 chốt một contract duy nhất trước nghiệm thu.
 HANDOFF:
 - `docs/be2/content-factory-handoff.md`
 - `docs/be2/content-factory.schema.json`
 - `docs/be2/content-factory-test-report.md`
 NEXT:
-- Review contract với BE3, sau đó test Bà Nà Hills và VinWonders qua workflow n8n.
+- BE3 sửa/đồng bộ mapper theo quyết định contract; sau đó chạy live E2E Bà Nà Hills và VinWonders đủ bốn persona.
 ```
+
+---
+
+## 12.1 BE3 INTEGRATION REVIEW — 16/10/2026
+
+- Đã pull `origin/dev@fba688a`, trong đó merge `Feature_BE3_n8n_Campaign_Content@6ae494e`, rồi review lại trên nhánh BE2.
+- `dev` có API `POST /campaigns/enrich`, `POST /contents/batch`, migration `generation_key`, tài liệu n8n và tám unit tests dùng Supabase giả lập. Báo cáo của chính BE3 giữ trạng thái `IN_PROGRESS`; chưa có workflow export hoặc live E2E Supabase → n8n → Gemini → `contents`.
+- Bổ sung mapper chuẩn `POST /contents/batch` và test các lỗi Structured Output thường gặp; bộ BE2 hiện **17/17 PASS**.
+- Tạo môi trường Python tạm và tái chạy độc lập test BE3: **8/8 PASS** với Supabase mock. FE contract đọc đúng lowercase `approved`: **14/14 PASS**.
+- Production build, TypeScript và targeted ESLint đều PASS.
+- **Contract conflict:** `docs/be3/n8n-save-contents.md` yêu cầu dùng `index % 5` để lặp năm scripts/captions/CTAs thành mười bộ đầy đủ. Contract BE2 và mapper tham chiếu hiện tại quy định năm rows đầy đủ + năm rows hook-only và cấm cycle/duplicate. Đây là thay đổi interface, không phải chi tiết triển khai của BE3; việc đã merge vào `dev` không thay thế quyết định chung trước nghiệm thu.
+- API BE3 chấp nhận cả hai hình dạng nhưng còn rộng hơn schema BE2 khi cho phép `script` dạng string. Structured Output Parser vẫn phải phát sinh script object đúng schema; compatibility API không được dùng để nới prompt/schema.
+- Migration mới chưa được phản ánh vào `src/lib/database.types.ts`; cần regenerate types sau khi apply migration để tránh schema/type drift.
+- Review outcome: **MERGED TO DEV / CHANGES REQUIRED / LIVE ACCEPTANCE PENDING**. Không nâng BE2-W2-04/05 hoặc BE3-W2-03/06 lên `DONE`.
 
 ---
 

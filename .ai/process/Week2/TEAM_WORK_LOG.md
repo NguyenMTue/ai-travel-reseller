@@ -1,7 +1,7 @@
 # TEAM WORK LOG
 Project: AI Travel Reseller MVP (TravelLink AI)  
 Week: Tuần 2 — 12/10/2026 – 16/10/2026 (Sprint 2)  
-Last Updated: 14/10/2026 10:45 AM
+Last Updated: 16/10/2026
 
 ---
 
@@ -178,6 +178,17 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 ---
 
 ## 11. DAILY UPDATE
+
+### 16/10/2026 (Thứ Sáu)
+
+#### BE2 — Review nhánh tích hợp BE3
+
+- Pull `origin/dev@fba688a` (đã merge `Feature_BE3_n8n_Campaign_Content@6ae494e`) vào nhánh BE2 bằng fast-forward, không xung đột; các thay đổi review cục bộ được bảo toàn.
+- Hoàn thiện `src/lib/ai/content-batch.ts` để tạo payload chính xác cho `POST /contents/batch`: bốn persona, mười records/persona, năm bộ đầy đủ + năm hook-only, không modulo/duplicate assets.
+- Mở rộng BE2 lên **17/17 PASS**, gồm các ca từ chối script string, caption thiếu hashtag, CTA thiếu token và key ngoài schema. Tái chạy độc lập BE3 Python **8/8 PASS** với Supabase mock; FE approved-content contract **14/14 PASS**.
+- Production build PASS (23 routes), TypeScript PASS và targeted ESLint PASS.
+- Interface conflict vẫn tồn tại trên `dev`: BE3 dùng `index % 5` để lặp năm scripts/captions/CTAs cho mười rows, trong khi handoff/mapper BE2 quy định năm rows đầy đủ + năm hook-only và không duplicate. Ghi `NEEDS DECISION`; việc merge code không đồng nghĩa đã nghiệm thu contract.
+- Cần BE1/PM/BE2/BE3 chốt một mapping duy nhất, regenerate `database.types.ts` sau migration, rồi chạy E2E đủ bốn persona và FE đọc được rows `approved` trước khi nghiệm thu.
 
 ### 15/10/2026 (Thứ Năm)
 
