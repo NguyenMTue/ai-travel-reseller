@@ -32,6 +32,20 @@ const PROHIBITED_CLAIMS = [
   "chắc chắn còn vé",
 ];
 
+const UNVERIFIED_CLAIM_PATTERNS = [
+  /miễn phí vé trẻ em/iu,
+  /trẻ em (?:được )?miễn phí/iu,
+  /hoàn(?: tiền| hủy) (?:toàn bộ|miễn phí)/iu,
+  /bảo hiểm du lịch/iu,
+  /hỗ trợ xe lăn/iu,
+  /có sẵn xe đẩy/iu,
+  /ưu tiên người cao tuổi/iu,
+  /chỉ còn(?: đúng)? \d+ vé/iu,
+  /không mua[^.!?\n]{0,80}bị phạt/iu,
+  /duy nhất hôm nay/iu,
+  /sắp hết vé/iu,
+];
+
 function normalizeMoney(rawAmount: string, rawUnit: string): number {
   const unit = rawUnit.toLocaleLowerCase("vi-VN");
 
@@ -98,6 +112,15 @@ export function validateContentGuardrails(
       !verifiedFacts.some((fact) => fact.includes(claim)),
   );
   if (hasProhibitedClaim) {
+    flags.add(CONTENT_GUARDRAIL_FLAGS.PROHIBITED_CLAIM);
+  }
+
+  const hasUnverifiedClaim = UNVERIFIED_CLAIM_PATTERNS.some((pattern) => {
+    const match = normalizedText.match(pattern)?.[0];
+    return match !== undefined &&
+      !verifiedFacts.some((fact) => fact.includes(match));
+  });
+  if (hasUnverifiedClaim) {
     flags.add(CONTENT_GUARDRAIL_FLAGS.PROHIBITED_CLAIM);
   }
 

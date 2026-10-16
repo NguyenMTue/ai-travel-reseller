@@ -1,7 +1,7 @@
 # TEAM WORK LOG
 Project: AI Travel Reseller MVP (TravelLink AI)  
 Week: Tuần 2 — 12/10/2026 – 16/10/2026 (Sprint 2)  
-Last Updated: 16/10/2026 09:40 AM
+Last Updated: 16/10/2026 11:07 AM
 
 ---
 
@@ -38,7 +38,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | UX-W2-01/02 | UI/UX Designer | UI/UX | Figma Hi-fi Reseller Feed & Suggested Content Kit | IN_PROGRESS | 12/10 | 13/10 12:00 |
 | T1-W2-01/02 | Tester 1 | QA Hybrid | Mock Data `campaign-demo.ts` & Hỗ trợ CSS Responsive | READY | 12/10 | 13/10 17:00 |
 | T1-W2-03/04 | Tester 1 | QA Hybrid | Bộ test tự động Playwright E2E (`tests/reseller.spec.ts`) | READY | 13/10 | 14/10 17:00 |
-| T2-W2-01/03 | Tester 2 | AI Safety QA | Rubric chấm điểm nội dung & Test chống ảo giác giá vé | READY | 12/10 | 14/10 17:00 |
+| T2-W2-01/06 | Tester 2 | AI Safety QA | Rubric, groundedness, policy, adversarial và benchmark | IN_REVIEW — 13/13 deterministic PASS; chờ n8n live acceptance | 16/10 | 16/10 12:00 |
 | T3-W2-01/02 | Tester 3 | System QA | Test Suite cho API Tracking Link & Redirect Router | READY | 12/10 | 14/10 17:00 |
 | PM-W2-01/06 | Nguyễn Minh Tuệ | PM | Điều phối Sprint 2, Code Review & Release Management | IN_PROGRESS | 12/10 | 16/10 17:30 |
 
@@ -180,6 +180,26 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 ---
 
 ## 11. DAILY UPDATE
+
+### 16/10/2026 (Thứ Sáu)
+
+#### BE2 — Review nhánh tích hợp BE3
+
+- Hoàn thành phần Tester2 có thể chạy trong repo: **13/13 PASS**, tạo đủ rubric/reports/benchmark; mở rộng guardrail policy và fake urgency ở TypeScript/Python. Sửa giá fixture VinWonders về **510.000đ** theo seed. Persona/groundedness live vẫn chờ workflow export + execution evidence BE3.
+- Recheck sau pull `origin/dev@9d3eff6`: fast-forward sạch; commit mới chỉ merge PR #22 của BE2, không thêm workflow export, live E2E hoặc kết quả Tester 2. BE2 test **17/17 PASS** sau pull.
+- Pull `origin/dev@fba688a` (đã merge `Feature_BE3_n8n_Campaign_Content@6ae494e`) vào nhánh BE2 bằng fast-forward, không xung đột; các thay đổi review cục bộ được bảo toàn.
+- Hoàn thiện `src/lib/ai/content-batch.ts` để tạo payload chính xác cho `POST /contents/batch`: bốn persona, mười records/persona, năm bộ đầy đủ + năm hook-only, không modulo/duplicate assets.
+- Mở rộng BE2 lên **17/17 PASS**, gồm các ca từ chối script string, caption thiếu hashtag, CTA thiếu token và key ngoài schema. Tái chạy độc lập BE3 Python **8/8 PASS** với Supabase mock; FE approved-content contract **14/14 PASS**.
+- Production build PASS (23 routes), TypeScript PASS và targeted ESLint PASS.
+- `dev@49d3032` bổ sung thỏa thuận BE1–BE3 dùng `index % 5` cho demo để mười biến thể đều đầy đủ. Ghi nhận đây là **demo override**; schema/mapper chuẩn BE2 vẫn giữ 5 full + 5 hook-only và không tự đổi contract dài hạn.
+- Cần chạy E2E đủ bốn persona, regenerate `database.types.ts` sau migration và xác nhận FE đọc được rows `approved`; sau demo, PM/BE1/BE2/BE3 chốt contract canonical trước khi coi mapping là nghiệm thu dài hạn.
+
+#### Tester 2 — AI Safety QA
+
+- **Done:** Hoàn thiện rubric và sáu tài liệu Tester2; thêm `tests/content-safety.test.ts` đạt **13/13 PASS**; hồi quy BE2 đạt **17/17 PASS**; bổ sung guardrail cho giá/mã ưu đãi, chính sách trẻ em, hoàn hủy, bảo hiểm, xe đẩy/xe lăn, người cao tuổi, prompt injection và khan hiếm giả.
+- **In Progress:** T2-W2-02/03/04/06 ở trạng thái `PARTIAL/IN_REVIEW`; contract, parser và deterministic guardrails đã PASS nhưng chưa có mẫu n8n live để chấm persona và groundedness đầu-cuối.
+- **Blocker:** BE3 chưa cung cấp workflow export, execution ID và tám mẫu live (hai sản phẩm × bốn persona). Python unit suite chưa chạy tại máy hiện tại do thiếu `fastapi`; Python syntax compile PASS.
+- **Next:** Nhận bằng chứng live từ BE3, quét bản ghi `contents`, chấm rubric tối thiểu 80/100 và ký nghiệm thu benchmark.
 
 ### 15/10/2026 (Thứ Năm)
 

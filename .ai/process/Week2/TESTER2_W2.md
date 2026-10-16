@@ -37,12 +37,12 @@ Trong Tuần 2, Tester 2 là "Người gác cổng an toàn nội dung AI":
 ## 4. THIS WEEK — MY TASKS
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|---|---|---|---|---|---|
-| T2-W2-01 | Xây dựng Bảng tiêu chí đánh giá chất lượng AI Content (Rubric) | P0 | READY | BE2 Personas | Tester 2 | `AI_CONTENT_RUBRIC.md` | 12/10 17:00 |
-| T2-W2-02 | Kiểm thử văn phong và độ hấp dẫn của 4 Personas du lịch | P1 | READY | BE3 bài mẫu | Tester 2 | Persona Review Notes | 13/10 17:00 |
-| T2-W2-03 | Kiểm thử chống ảo giác thông tin giá và chính sách ưu đãi | P0 | READY | Dữ liệu n8n sinh ra | Tester 2 | Groundedness Report | 14/10 17:00 |
-| T2-W2-04 | Kiểm thử cực đoan Adversarial & Prompt Injection | P0 | READY | BE2 Guardrails | Tester 2 | Security Test Log | 15/10 12:00 |
-| T2-W2-05 | Kiểm thử chính sách hoàn hủy và thông tin trẻ em/người cao tuổi | P1 | READY | T2-W2-03 | Tester 2 | Policy Compliance Check | 15/10 17:00 |
-| T2-W2-06 | Lập Báo cáo tổng kết chất lượng AI (AI Content Benchmark Report) | P0 | READY | T2-W2-01 -> 05 | Tester 2 | `AI_BENCHMARK_W2.md` | 16/10 12:00 |
+| T2-W2-01 | Xây dựng Bảng tiêu chí đánh giá chất lượng AI Content (Rubric) | P0 | DONE | BE2 Personas | Tester 2 | `docs/tester2/AI_CONTENT_RUBRIC.md` | 12/10 17:00 |
+| T2-W2-02 | Kiểm thử văn phong và độ hấp dẫn của 4 Personas du lịch | P1 | PARTIAL — contract PASS, chờ mẫu n8n để chấm thủ công | BE3 bài mẫu | Tester 2 | `docs/tester2/PERSONA_REVIEW_NOTES.md` | 13/10 17:00 |
+| T2-W2-03 | Kiểm thử chống ảo giác thông tin giá và chính sách ưu đãi | P0 | PARTIAL — deterministic PASS, chưa quét contents live | Dữ liệu n8n sinh ra | Tester 2 | `docs/tester2/GROUNDEDNESS_REPORT.md` | 14/10 17:00 |
+| T2-W2-04 | Kiểm thử cực đoan Adversarial & Prompt Injection | P0 | PARTIAL — boundary/parser PASS, chờ model live | BE2 Guardrails | Tester 2 | `docs/tester2/SECURITY_TEST_LOG.md` | 15/10 12:00 |
+| T2-W2-05 | Kiểm thử chính sách hoàn hủy và thông tin trẻ em/người cao tuổi | P1 | DONE — deterministic | T2-W2-03 | Tester 2 | `docs/tester2/POLICY_COMPLIANCE_CHECK.md` | 15/10 17:00 |
+| T2-W2-06 | Lập Báo cáo tổng kết chất lượng AI (AI Content Benchmark Report) | P0 | IN_REVIEW — báo cáo có, live acceptance còn chờ | T2-W2-01 -> 05 | Tester 2 | `docs/tester2/AI_BENCHMARK_W2.md` | 16/10 12:00 |
 
 ---
 
@@ -51,11 +51,12 @@ Trong Tuần 2, Tester 2 là "Người gác cổng an toàn nội dung AI":
 ### TASK T2-W2-03 — Kiểm Thử Chống Ảo Giác Giá & Tiện Ích Tour
 **Goal:** Đảm bảo 100% nội dung tiếp thị do n8n sinh ra khớp hoàn toàn với dữ kiện Merchant đã cam kết.  
 **Dữ liệu đối chiếu:**
-- Tour Bà Nà Hills: Giá người lớn 900.000 VNĐ, trẻ em 750.000 VNĐ; tiện ích gồm cáp treo 2 chiều và vé tham quan Cầu Vàng; KHÔNG bao gồm vé Bảo tàng sáp (trừ khi có gói riêng).
-- Tour VinWonders Nam Hội An: Giá vé tiêu chuẩn 600.000 VNĐ; vé vào cổng trọn gói các khu vui chơi, vườn thú River Safari; KHÔNG bao gồm buffet trưa nếu mua vé tiêu chuẩn.  
+- Tour Bà Nà Hills + Buffet: giá gốc 1.250.000 VNĐ, giá bán 1.150.000 VNĐ; gồm vé vào cổng, cáp treo khứ hồi, Cầu Vàng, Làng Pháp và buffet hơn 100 món.
+- Tour VinWonders Nam Hội An: giá gốc 600.000 VNĐ, giá bán 510.000 VNĐ; mô tả seed có River Safari, công viên nước, đảo dân gian và show 3D Mapping.
+- Nguồn chuẩn: `supabase/seed.sql`; số liệu 900.000/750.000 và fixture 550.000 trước đây đã lỗi thời.
 **Kịch bản kiểm thử:**
 - [ ] Quét toàn bộ các bài đăng sinh ra trong bảng `contents`: Trích xuất số tiền trong text, so sánh với trường `price` trong bảng `products`.
-- [ ] Kiểm tra từ khóa nhạy cảm: Nếu bài viết dùng từ "miễn phí vé trẻ em", "giảm giá 50%" mà dữ liệu gốc không có -> FAIL ngay lập tức.
+- [x] Kiểm tra từ khóa nhạy cảm deterministic: Nếu bài viết dùng từ "miễn phí vé trẻ em", mã giảm giá hoặc chính sách không có nguồn -> `NEEDS_REVIEW`.
 - [ ] Đánh giá tỷ lệ Groundedness: Bắt buộc đạt tỷ lệ chính xác dữ kiện **100%** trên tập mẫu kiểm tra.  
 **Definition of Done:** Không phát hiện bất kỳ bài đăng nào đưa sai giá vé hoặc bịa đặt quyền lợi không có thực.  
 **Handoff To:** BE2, BE3, PM.
@@ -88,16 +89,16 @@ flowchart TD
 ## 7. BLOCKERS
 | Blocker | Tôi cần gì | Người phụ trách | Deadline | Impact |
 |---|---|---|---|---|
-| Dữ liệu bài đăng mẫu từ n8n | Đợt sinh bài đầu tiên của n8n lưu vào Supabase | BE3 | 13/10 17:00 | Chưa có nội dung thực tế để chấm điểm |
+| Dữ liệu bài đăng mẫu từ n8n | Workflow export, execution ID và 8 mẫu (2 sản phẩm × 4 persona) lưu vào Supabase | BE3 | 13/10 17:00 | Chưa thể chấm persona/groundedness live |
 
 ---
 
 ## 8. TEAM HANDOFF
 | From | To | Deliverable | Format | Deadline | Status |
 |---|---|---|---|---|---|
-| Tester 2 | BE2 | Báo cáo đánh giá chất lượng văn phong 4 Personas | Markdown feedback | 13/10 17:00 | READY |
-| Tester 2 | BE3 + BE2 | Danh sách các lỗi sai dữ kiện (nếu có) để tinh chỉnh prompt | Bug list | 14/10 17:00 | READY |
-| Tester 2 | PM + Team | Báo cáo AI Content Benchmark Report hoàn chỉnh | `AI_BENCHMARK_W2.md` | 16/10 12:00 | PLANNED |
+| Tester 2 | BE2 | Báo cáo đánh giá chất lượng văn phong 4 Personas | Markdown feedback | 13/10 17:00 | PARTIAL — chờ mẫu live |
+| Tester 2 | BE3 + BE2 | Danh sách các lỗi sai dữ kiện và guardrail bổ sung | Bug list + tests | 14/10 17:00 | DONE — deterministic |
+| Tester 2 | PM + Team | Báo cáo AI Content Benchmark Report | `docs/tester2/AI_BENCHMARK_W2.md` | 16/10 12:00 | IN_REVIEW |
 
 ---
 
@@ -139,8 +140,19 @@ NEXT:
 ---
 
 ## 13. END-OF-WEEK CHECKLIST
-- [ ] Tiêu chuẩn đánh giá văn phong 4 Personas hoàn thiện và bàn giao cho BE2
-- [ ] 100% bài đăng kiểm tra không có lỗi sai giá vé hoặc bịa đặt ưu đãi ảo
-- [ ] Vượt qua toàn bộ bài kiểm tra tấn công Prompt Injection và JSON breaking
-- [ ] Hoàn thành tài liệu Báo cáo AI Content Benchmark Report
+- [x] Tiêu chuẩn đánh giá văn phong 4 Personas hoàn thiện và bàn giao cho BE2
+- [ ] 100% bài đăng live kiểm tra không có lỗi sai giá vé hoặc bịa đặt ưu đãi ảo
+- [x] Vượt qua toàn bộ bài kiểm tra deterministic Prompt Injection và JSON breaking
+- [x] Hoàn thành tài liệu Báo cáo AI Content Benchmark Report
 - [ ] Tham gia nghiệm thu chất lượng AI trong phiên chiều Thứ Sáu (16/10/2026)
+
+---
+
+## 14. UPDATE — 16/10/2026
+
+- Thêm `tests/content-safety.test.ts` và lệnh `npm run test:tester2`: **13/13 PASS**.
+- Hồi quy BE2: **17/17 PASS**; TypeScript và ESLint PASS.
+- Bổ sung guardrail cho chính sách trẻ em, hoàn/hủy, bảo hiểm, xe đẩy/xe lăn, người cao tuổi và khan hiếm giả; đồng bộ TypeScript/Python.
+- Sửa fixture VinWonders từ 550.000đ về 510.000đ theo seed.
+- Python syntax compile PASS; Python unit suite chưa chạy do môi trường hiện tại thiếu `fastapi`.
+- Chưa đóng T2-W2-02/03/04/06 vì thiếu workflow export và execution live từ BE3.

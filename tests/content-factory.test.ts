@@ -20,6 +20,7 @@ import {
   mapCampaignContentToRows,
   toPersistenceStatus,
 } from "../src/lib/ai/content-persistence.ts";
+import { mapCampaignContentToBatchPayload } from "../src/lib/ai/content-batch.ts";
 
 const validOutput = {
   persona: "local_guide" as const,
@@ -73,7 +74,7 @@ const vinWondersPromptProduct = {
   description: "Vé vào cửa khu vui chơi VinWonders Nam Hội An.",
   category: "Vé vui chơi",
   original_price: 600_000,
-  sale_price: 550_000,
+  sale_price: 510_000,
   campaign_name: "Khám phá Nam Hội An 2026",
   target_audience: "Gia đình có trẻ nhỏ và nhóm bạn",
   target_location: "Quảng Nam, Đà Nẵng",
@@ -81,7 +82,7 @@ const vinWondersPromptProduct = {
     "Bao gồm vé vào cửa VinWonders Nam Hội An",
     "Không bao gồm chi phí ăn uống",
   ],
-  confirmed_offers: ["Giá bán chính thức 550.000 VND"],
+  confirmed_offers: ["Giá bán chính thức 510.000 VND"],
 };
 
 test("all four persona prompts preserve the shared safety boundary", () => {
@@ -136,6 +137,29 @@ test("structured output enforces the exact 10/5/5/5 contract", () => {
   );
 });
 
+test("structured output rejects common n8n parser contract violations", () => {
+  assert.throws(() => campaignContentOutputSchema.parse({
+    ...validOutput,
+    scripts: validOutput.scripts.map((script) => script.title),
+  }));
+  assert.throws(() => campaignContentOutputSchema.parse({
+    ...validOutput,
+    captions: validOutput.captions.map(() =>
+      "Một caption đủ dài nhưng không chứa hashtag bắt buộc"
+    ),
+  }));
+  assert.throws(() => campaignContentOutputSchema.parse({
+    ...validOutput,
+    ctas: validOutput.ctas.map(() =>
+      "Xem thông tin chính thức và đặt dịch vụ ngay hôm nay"
+    ),
+  }));
+  assert.throws(() => campaignContentOutputSchema.parse({
+    ...validOutput,
+    variants: [],
+  }));
+});
+
 test("parser removes JSON markdown fences", () => {
   const parsed = parseCampaignContentOutput(
     `\n\`\`\`json\n${JSON.stringify(validOutput)}\n\`\`\`\n`,
@@ -181,6 +205,43 @@ test("persistence mapping creates five complete rows and five hook-only rows", (
   assert.equal(rows[0].status, "approved");
   assert.equal(rows[0].reseller_id, null);
   assert.match(rows[0].script ?? "", /Thời lượng: 30 giây/);
+});
+
+test("n8n batch payload covers all personas without cycling assets", () => {
+  for (const persona of Object.keys(CONTENT_PERSONAS)) {
+    const payload = mapCampaignContentToBatchPayload(
+      {
+        ...validOutput,
+        persona: persona as keyof typeof CONTENT_PERSONAS,
+      },
+      "44444444-4444-4444-4444-444444444444",
+    );
+
+    assert.equal(payload.records.length, 10);
+    assert.ok(payload.records.slice(0, 5).every((record) =>
+      record.script !== null &&
+      record.caption !== null &&
+      record.cta !== null
+    ));
+    assert.ok(payload.records.slice(5).every((record) =>
+      record.script === null &&
+      record.caption === null &&
+      record.cta === null
+    ));
+    assert.deepEqual(Object.keys(payload.records[0]).sort(), [
+      "caption",
+      "cta",
+      "hook",
+      "persona",
+      "script",
+    ]);
+  }
+});
+
+test("n8n batch payload rejects an invalid campaign id", () => {
+  assert.throws(
+    () => mapCampaignContentToBatchPayload(validOutput, "not-a-uuid"),
+  );
 });
 
 test("persistence status is lowercase and rejects inconsistent guardrail results", () => {
