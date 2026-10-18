@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo Cáo Tiến Độ Tuần 1 & Hướng Dẫn Demo | AI Travel Reseller Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --accent: #ea580c;
+      --accent-light: #ffedd5;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --warning: #ca8a04;
+      --warning-light: #fef9c3;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --code-bg: #0f172a;
+      --code-text: #f1f5f9;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0b1120;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary-light: #0c4a6e;
+      --accent-light: #7c2d12;
+      --success-light: #14532d;
+      --warning-light: #713f12;
+      --danger-light: #7f1d1d;
+      --code-bg: #020617;
+      --code-text: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* Scroll progress bar */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      width: 0%;
+      z-index: 100;
+      transition: width 0.1s ease;
+    }
+
+    /* Header & Nav */
+    header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow);
+    }
+
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0.85rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .theme-toggle, .btn-print {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle:hover, .btn-print:hover {
+      background: var(--border);
+    }
+
+    /* Layout */
+    .layout {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 2.5rem;
+      padding: 2rem;
+    }
+
+    /* Sidebar Navigation */
+    aside {
+      position: sticky;
+      top: 5rem;
+      height: calc(100vh - 6rem);
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-item a:hover, .nav-item a.active {
+      color: var(--primary);
+      background: var(--primary-light);
+      font-weight: 600;
+    }
+
+    /* Main Content */
+    main {
+      min-width: 0;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.08) 0%, rgba(234, 88, 12, 0.06) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    .hero-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      margin-bottom: 1.75rem;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+
+    .meta-card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .meta-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .meta-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+
+    .stat-card.blue::before { background: var(--primary); }
+    .stat-card.orange::before { background: var(--accent); }
+    .stat-card.green::before { background: var(--success); }
+    .stat-card.purple::before { background: #9333ea; }
+
+    .stat-number {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-desc {
+      font-size: 0.775rem;
+      color: var(--text-muted);
+    }
+
+    /* Section Styling */
+    section {
+      margin-bottom: 3rem;
+      scroll-margin-top: 5rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+
+    .section-num {
+      background: var(--primary);
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: 700;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-done { background: var(--success-light); color: var(--success); }
+    .badge-progress { background: var(--warning-light); color: var(--warning); }
+    .badge-review { background: var(--primary-light); color: var(--primary); }
+    .badge-blocked { background: var(--danger-light); color: var(--danger); }
+
+    /* Cards & Containers */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Work Pillar Cards */
+    .pillar-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .pillar-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      box-shadow: var(--shadow);
+      border-left: 5px solid var(--primary);
+    }
+
+    .pillar-card.fe { border-left-color: #0284c7; }
+    .pillar-card.be1 { border-left-color: #10b981; }
+    .pillar-card.be2 { border-left-color: #8b5cf6; }
+    .pillar-card.be3 { border-left-color: #f59e0b; }
+
+    .pillar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .pillar-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .pillar-role {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 1rem 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      text-align: left;
+    }
+
+    th {
+      background: var(--bg);
+      padding: 0.75rem 1rem;
+      font-weight: 700;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(0, 0, 0, 0.015);
+    }
+
+    /* Checklist */
+    .checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.9rem;
+    }
+
+    .check-icon {
+      color: var(--success);
+      font-weight: bold;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    /* Demo Tabs */
+    .demo-tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 1.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+    }
+
+    .demo-tab-btn {
+      background: none;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      white-space: nowrap;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .demo-tab-btn:hover {
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .demo-tab-btn.active {
+      color: var(--primary);
+      border-bottom: 3px solid var(--primary);
+      background: var(--primary-light);
+    }
+
+    .demo-tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .demo-tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Demo Steps */
+    .demo-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+
+    .step-item {
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .step-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 36px;
+      left: 17px;
+      width: 2px;
+      height: calc(100% - 10px);
+      background: var(--border);
+    }
+
+    .step-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      z-index: 2;
+    }
+
+    .step-body {
+      flex: 1;
+    }
+
+    .step-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Code Blocks */
+    .code-wrapper {
+      position: relative;
+      margin: 0.75rem 0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      background: #1e293b;
+      padding: 0.4rem 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      border-bottom: 1px solid #334155;
+    }
+
+    .copy-btn {
+      background: #334155;
+      color: #f1f5f9;
+      border: none;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .copy-btn:hover {
+      background: #475569;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      padding: 1rem;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .inline-code {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--primary);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+
+    /* Callout Boxes */
+    .callout {
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .callout-info {
+      background: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      color: var(--text);
+    }
+
+    .callout-success {
+      background: var(--success-light);
+      border-left: 4px solid var(--success);
+      color: var(--text);
+    }
+
+    .callout-warning {
+      background: var(--warning-light);
+      border-left: 4px solid var(--warning);
+      color: var(--text);
+    }
+
+    /* Diagram */
+    .diagram-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      overflow-x: auto;
+    }
+
+    .flow-grid {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      min-width: 800px;
+      padding: 1rem 0;
+    }
+
+    .flow-node {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      flex: 1;
+      box-shadow: var(--shadow);
+    }
+
+    .flow-node.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .flow-node-title {
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .flow-node-sub {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .flow-arrow {
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 1.25rem;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #0f172a;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    #toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Print Stylesheet */
+    @media print {
+      header, aside, .theme-toggle, .btn-print, .copy-btn, #toast, #progress-bar {
+        display: none !important;
+      }
+      .layout {
+        display: block !important;
+        padding: 0 !important;
+      }
+      .card, .pillar-card, .stat-card, .hero {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        page-break-inside: avoid;
+      }
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .demo-tab-content {
+        display: block !important;
+        margin-bottom: 2rem;
+        page-break-inside: avoid;
+      }
+      .demo-tabs {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      aside {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="progress-bar"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <a href="#" class="brand">
+        <div class="brand-icon">✈️</div>
+        <span>TravelLink AI</span>
+      </a>
+      <div class="header-actions">
+        <button class="theme-toggle" id="theme-btn">
+          <span id="theme-icon">🌙</span>
+          <span id="theme-text">Giao diện tối</span>
+        </button>
+        <button class="btn-print" onclick="window.print()">
+          <span>🖨️</span>
+          <span>In / Lưu PDF</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- Sidebar Navigation -->
+    <aside>
+      <ul class="nav-list">
+        <li class="nav-item"><a href="#overview" class="active">📌 1. Tổng quan & KPI</a></li>
+        <li class="nav-item"><a href="#pillars">🏛️ 2. Công việc 4 trụ cột</a></li>
+        <li class="nav-item"><a href="#fe-detail">&nbsp;&nbsp;• Frontend (UI)</a></li>
+        <li class="nav-item"><a href="#be1-detail">&nbsp;&nbsp;• Backend 1 (Supabase)</a></li>
+        <li class="nav-item"><a href="#be2-detail">&nbsp;&nbsp;• Backend 2 (RAG & AI)</a></li>
+        <li class="nav-item"><a href="#be3-detail">&nbsp;&nbsp;• Backend 3 (Automation)</a></li>
+        <li class="nav-item"><a href="#architecture">📐 3. Kiến trúc luồng hệ thống</a></li>
+        <li class="nav-item"><a href="#demo-guide">🎬 4. HƯỚNG DẪN DEMO TỪNG TÍNH NĂNG</a></li>
+        <li class="nav-item"><a href="#demo-fe">&nbsp;&nbsp;• Demo 1: Giao diện Web (FE)</a></li>
+        <li class="nav-item"><a href="#demo-chat">&nbsp;&nbsp;• Demo 2: AI Sales Agent (RAG)</a></li>
+        <li class="nav-item"><a href="#demo-db">&nbsp;&nbsp;• Demo 3: Vector & pgvector (DB)</a></li>
+        <li class="nav-item"><a href="#demo-n8n">&nbsp;&nbsp;• Demo 4: n8n Review Queue</a></li>
+        <li class="nav-item"><a href="#demo-tools">&nbsp;&nbsp;• Demo 5: Python Studio & CLI</a></li>
+        <li class="nav-item"><a href="#qa-results">🧪 5. Kết quả kiểm thử & QA</a></li>
+        <li class="nav-item"><a href="#next-week">🚀 6. Kế hoạch Tuần 2</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Hero -->
+      <div class="hero" id="overview">
+        <div class="hero-badge">BÁO CÁO TỔNG KẾT TUẦN 1 • 06/10 - 09/10/2026</div>
+        <h1>AI Travel Reseller Network Platform</h1>
+        <p class="hero-subtitle">
+          Nền tảng phân phối & bán hàng du lịch ứng dụng AI kết nối Merchant, Reseller và Du khách. 
+          Báo cáo tiến độ nghiệm thu hoàn thành Milestone 1: <strong>Foundation & Data Structure</strong> kèm cẩm nang thực hành Demo trực tiếp.
+        </p>
+
+        <div class="meta-grid">
+          <div class="meta-card">
+            <span class="meta-label">Dự án</span>
+            <span class="meta-value">TravelLink AI (MVP)</span>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Thị trường trọng điểm</span>
+            <span class="meta-value">Đà Nẵng & Hội An, VN</span>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Trạng thái kỹ thuật</span>
+            <span class="meta-value" style="color: var(--success);">100% Core Deliverables Local</span>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Hạn chót tuần 1</span>
+            <span class="meta-value">09/10/2026 - 12:00 PM</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Overview -->
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-number">5 / 5</div>
+          <div class="stat-label">Màn hình Frontend</div>
+          <div class="stat-desc">Next.js 16 App Router, responsive 320/390/1440px</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-number">8 + 1</div>
+          <div class="stat-label">Bảng Database & Pgvector</div>
+          <div class="stat-desc">Supabase Postgres 17, RLS, 1536d HNSW cosine index</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Pipeline AI RAG Chatbot</div>
+          <div class="stat-desc">Gemini 1536d embeddings + LangChain grounded agent</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-number">15 / 15</div>
+          <div class="stat-label">Playwright Test Suite</div>
+          <div class="stat-desc">Kiểm thử tự động form, states, adapters pass 100%</div>
+        </div>
+      </div>
+
+      <!-- Section 1: Executive Summary -->
+      <section>
+        <div class="section-header">
+          <div class="section-num">1</div>
+          <h2 class="section-title">Tóm Tắt Kết Quả Đạt Được Tuần 1</h2>
+        </div>
+
+        <div class="card">
+          <p style="margin-bottom: 1rem;">
+            Trong Tuần 1 (06/10 – 09/10/2026), nhóm đã tập trung toàn lực vào mục tiêu xây dựng nền tảng cốt lõi (<strong>Foundation & Data Structure</strong>), 
+            thiết lập kiến trúc full-stack vững chắc và xác thực chuỗi giá trị MVP theo mô hình:
+          </p>
+          <div class="callout callout-info">
+            <span>💡</span>
+            <div><strong>Chuỗi giá trị MVP đã được chứng minh kỹ thuật:</strong><br>
+            <code>Merchant Data (Bà Nà Hills)</code> ➔ <code>AI Content Factory (n8n + Review Sheet)</code> ➔ <code>Reseller Phân Phối</code> ➔ <code>Khách hàng Chat với AI Sales Agent RAG</code> ➔ <code>Điều hướng Checkout chính thức & bảo toàn Attribution link</code>.</div>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Hạng mục</th>
+                  <th>Phụ trách</th>
+                  <th>Deliverables bàn giao</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Frontend (FE)</strong></td>
+                  <td>FE Team</td>
+                  <td>5 màn hình chuẩn tiếng Việt (Landing, Login, Register, Chatbot, Merchant Dashboard), bộ test Playwright 15/15 cases.</td>
+                  <td><span class="badge badge-done">HOÀN TẤT LOCAL</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Core DB & Auth (BE1)</strong></td>
+                  <td>BE1</td>
+                  <td>8 bảng Postgres, RLS policies, Auth proxy (`proxy.ts`), seed data (`seed.sql`), migration `product_embeddings` (HNSW).</td>
+                  <td><span class="badge badge-done">HOÀN TẤT LOCAL</span></td>
+                </tr>
+                <tr>
+                  <td><strong>AI Agent & RAG (BE2)</strong></td>
+                  <td>BE2</td>
+                  <td>Gemini Embedding 1536 chiều, route sync embeddings, RAG semantic search RPC, Chatbot RAG chống hallucination.</td>
+                  <td><span class="badge badge-done">MERGED DEV</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Automation n8n & Studio (BE3)</strong></td>
+                  <td>BE3 (Thái Thanh Tú)</td>
+                  <td>Workflow n8n Form-to-Sheets, Gemini Interactions API với retry 503, Google Sheet Review Queue, Studio Python GUI/CLI.</td>
+                  <td><span class="badge badge-review">WAITING REVIEW</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Deep-dive Pillars -->
+      <section id="pillars">
+        <div class="section-header">
+          <div class="section-num">2</div>
+          <h2 class="section-title">Chi Tiết Công Việc Theo 4 Trụ Cột Kỹ Thuật</h2>
+        </div>
+
+        <div class="pillar-grid">
+          <!-- FE -->
+          <div class="pillar-card fe" id="fe-detail">
+            <div class="pillar-header">
+              <div>
+                <h3 class="pillar-title">1. Frontend UI Foundation (Next.js 16 + Tailwind v4)</h3>
+                <span class="pillar-role">Mã nhánh: <code>Feature_FE_W1_UI_Foundation</code> • Đã merge vào <code>dev</code></span>
+              </div>
+              <span class="badge badge-done">Hoàn thành 100%</span>
+            </div>
+            <p>Xây dựng hệ thống giao diện người dùng theo phong cách thiết kế "Coastal Editorial" phù hợp cho thị trường du lịch Đà Nẵng / Hội An:</p>
+            <ul class="checklist">
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Landing Page (<code>/</code>):</strong> Hero giới thiệu nền tảng, sơ đồ chuỗi giá trị 4 bước, khối tính năng cho Merchant & Reseller, CTA điều hướng trực quan.</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Xác thực (<code>/login</code> & <code>/register</code>):</strong> Form đăng nhập/đăng ký hỗ trợ chọn vai trò (Merchant / Reseller), toggle hiển thị mật khẩu, validation chặt chẽ và thông báo kiểm tra email.</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Chatbot AI Tư Vấn (<code>/chat</code>):</strong> Giao diện hội thoại tương thích di động & desktop, giới hạn 2.000 ký tự, lịch sử 12 tin nhắn, timeout 45s, hỗ trợ hiển thị Checkout Button chính thức an toàn (HTTPS only).</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Merchant Dashboard (<code>/merchant</code> & <code>/preview/merchant</code>):</strong> 4 KPI cards (Sản phẩm, Reseller, Lượt click, Doanh thu), bảng dữ liệu có tìm kiếm theo tên, lọc trạng thái (Active, Paused, Draft), modal chi tiết sản phẩm.</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Kiểm thử tự động:</strong> 15/15 test cases Playwright pass trên 3 kích thước màn hình (1440px desktop, 390px mobile, 320px small mobile), không tràn chiều ngang (zero horizontal overflow).</div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- BE1 -->
+          <div class="pillar-card be1" id="be1-detail">
+            <div class="pillar-header">
+              <div>
+                <h3 class="pillar-title">2. Backend Core Database & Supabase (BE1)</h3>
+                <span class="pillar-role">Quản lý schema gốc, RLS policies, Auth middleware & pgvector</span>
+              </div>
+              <span class="badge badge-done">Hoàn thành 100%</span>
+            </div>
+            <p>Thiết lập xương sống dữ liệu trên Supabase PostgreSQL 17 đảm bảo an ninh cấp doanh nghiệp:</p>
+            <ul class="checklist">
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Khởi tạo 8 Bảng Schema cốt lõi:</strong> <code>merchants</code>, <code>resellers</code>, <code>products</code>, <code>campaigns</code>, <code>contents</code>, <code>tracking_links</code>, <code>orders</code>, <code>commission_payouts</code>.</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Bảo mật RLS (Row Level Security):</strong> Cấu hình toàn diện chính sách RLS và cấp quyền <code>GRANT</code> cho các vai trò <code>anon</code>, <code>authenticated</code>, <code>service_role</code>.</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Next.js 16 Auth Proxy:</strong> Triển khai <code>proxy.ts</code> thay thế cho middleware cũ nhằm refresh session và bảo vệ các routes <code>/merchant</code>, <code>/reseller</code>, <code>/admin</code>.</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Migration Pgvector 1536d:</strong> Tạo migration <code>20261008110000_product_embeddings.sql</code> gồm bảng <code>product_embeddings</code>, chỉ mục HNSW cosine index và hàm RPC <code>match_product_embeddings</code>.</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Seed Data & TypeScript Types:</strong> Cung cấp bộ dữ liệu mẫu đầy đủ trong <code>seed.sql</code> và tự động sinh <code>src/lib/database.types.ts</code> tương thích 100% với backend.</div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- BE2 -->
+          <div class="pillar-card be2" id="be2-detail">
+            <div class="pillar-header">
+              <div>
+                <h3 class="pillar-title">3. AI Agent & RAG Sales Pipeline (BE2)</h3>
+                <span class="pillar-role">Mã nhánh: <code>feature/be2-query-rag</code> • Đã merge vào <code>dev</code></span>
+              </div>
+              <span class="badge badge-done">Hoàn thành 100%</span>
+            </div>
+            <p>Xây dựng hệ thống tìm kiếm ngữ nghĩa và AI tư vấn bán tour thông minh với cơ chế chống hallucination tuyệt đối:</p>
+            <ul class="checklist">
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Vector Embedding Pipeline:</strong> Endpoint <code>POST /api/embeddings/sync</code> tự động chuyển product sang văn bản chuẩn, chia chunk có xác định (deterministic), tính mã băm SHA-256 để bỏ qua tái embedding lãng phí.</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Chuẩn hóa mô hình Embedding:</strong> Đồng thuận sử dụng Google Gemini <code>gemini-embedding-2</code> (1536 chiều) cho cả văn bản sản phẩm và câu hỏi của người dùng.</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>AI Sales Agent (<code>POST /api/chat</code>):</strong> LangChain RAG grounded prompt kết hợp <code>gemini-3.8-flash</code>. Nghiêm cấm bịa giá, cấm tự tạo mã giảm giá ảo, cấm trả lời ngoài dữ liệu merchant đã phê duyệt.</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Checkout URL Server-Controlled:</strong> Link thanh toán chính thức chỉ được sinh và kiểm chứng bởi backend server, chống giả mạo liên kết chuyển hướng.</div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- BE3 -->
+          <div class="pillar-card be3" id="be3-detail">
+            <div class="pillar-header">
+              <div>
+                <h3 class="pillar-title">4. AI Content Factory, n8n & Python Studio (BE3)</h3>
+                <span class="pillar-role">Thực hiện: Thái Thanh Tú (BE3) • Task ID: <code>N8N-001</code> • Nhánh <code>feat/llm-service</code> đã merge</span>
+              </div>
+              <span class="badge badge-review">Chờ nghiệm thu nội dung</span>
+            </div>
+            <p>Tự động hóa sản xuất nội dung review du lịch có kiểm duyệt của con người (Semi-Automatic Review):</p>
+            <ul class="checklist">
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>n8n Workflow (Form-to-Sheets):</strong> Nhận dữ liệu tour từ Merchant Form ➔ Gọi Google Gemini Interactions API (<code>gemini-3.5-flash-lite</code>) với Retry on Fail (5 lần, cách nhau 10s) chống lỗi 503 ➔ Ghi vào Google Sheets.</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Human-in-the-Loop Review Queue:</strong> Bản nháp review tiếng Việt được đưa vào Google Sheet <code>AI Travel Review Queue</code> với trạng thái mặc định <code>NEEDS_REVIEW</code>. Không tự động đăng lên mạng xã hội khi chưa có người duyệt.</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>RAG Knowledge Base & Engine (Python):</strong> Kho tài liệu cẩm nang du lịch địa phương Đà Nẵng / Hội An (Bà Nà Hills, Cù Lao Chàm, Rừng dừa Bảy Mẫu...).</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>FastAPI RAG Service & Content Studio GUI:</strong> Cung cấp API <code>POST /rag/search</code> kèm giao diện đồ họa Desktop (Tkinter GUI) và CLI hỗ trợ tạo caption siêu tốc qua Groq / Gemini.</div>
+              </li>
+              <li class="checklist-item">
+                <span class="check-icon">✓</span>
+                <div><strong>Migration mở rộng:</strong> Bổ sung <code>20261009103000_contents_add_be3_fields.sql</code> mở rộng bảng <code>contents</code> hỗ trợ lưu <code>product_id</code>, <code>persona</code>, <code>hook</code>, <code>cta</code>.</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: System Architecture -->
+      <section id="architecture">
+        <div class="section-header">
+          <div class="section-num">3</div>
+          <h2 class="section-title">Kiến Trúc & Luồng Hoạt Động Hệ Thống</h2>
+        </div>
+
+        <div class="card">
+          <p style="margin-bottom: 1rem;">
+            Kiến trúc đa tầng phân tách rõ ràng trách nhiệm giữa Web App (Vercel), Dữ liệu & Tìm kiếm vector (Supabase), AI Agent (LangChain + Gemini), và Nhà máy nội dung tự động (n8n + Review Queue):
+          </p>
+
+          <div class="diagram-container">
+            <div class="flow-grid">
+              <div class="flow-node">
+                <div class="flow-node-title">🏢 Merchant Portal</div>
+                <div class="flow-node-sub">Đăng ký tour & giá chuẩn</div>
+              </div>
+              <div class="flow-arrow">➔</div>
+              <div class="flow-node active">
+                <div class="flow-node-title">🤖 n8n + Gemini</div>
+                <div class="flow-node-sub">Sinh nháp review du lịch</div>
+              </div>
+              <div class="flow-arrow">➔</div>
+              <div class="flow-node">
+                <div class="flow-node-title">📊 Google Sheet Queue</div>
+                <div class="flow-node-sub">Người duyệt (NEEDS_REVIEW)</div>
+              </div>
+              <div class="flow-arrow">➔</div>
+              <div class="flow-node active">
+                <div class="flow-node-title">📢 Reseller Phân Phối</div>
+                <div class="flow-node-sub">Tải video & tracking link</div>
+              </div>
+              <div class="flow-arrow">➔</div>
+              <div class="flow-node">
+                <div class="flow-node-title">💬 AI Sales Agent</div>
+                <div class="flow-node-sub">RAG tư vấn & link checkout</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-success">
+            <span>🛡️</span>
+            <div><strong>Nguyên tắc cốt lõi:</strong> Nền tảng không bao giờ giữ tiền của khách hàng. Tất cả các giao dịch thanh toán đều được AI Sales Agent điều hướng về đúng link thanh toán chính thức của Merchant (<code>products.payment_url</code>) kèm theo mã định danh của Reseller.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Interactive Demo Guide -->
+      <section id="demo-guide">
+        <div class="section-header">
+          <div class="section-num">4</div>
+          <h2 class="section-title">HƯỚNG DẪN DEMO TỪNG TÍNH NĂNG (DEMO GUIDE)</h2>
+        </div>
+
+        <p style="margin-bottom: 1.5rem; color: var(--text-muted);">
+          Dưới đây là 5 kịch bản demo mẫu từ cơ bản đến nâng cao. Người thuyết trình có thể chọn từng tab để xem các bước thao tác, câu lệnh và kết quả mong đợi.
+        </p>
+
+        <!-- Demo Tabs -->
+        <div class="demo-tabs">
+          <button class="demo-tab-btn active" onclick="switchDemoTab('tab-fe')">🖥️ 1. Giao diện Web (FE)</button>
+          <button class="demo-tab-btn" onclick="switchDemoTab('tab-chat')">🤖 2. Chatbot AI RAG (BE2)</button>
+          <button class="demo-tab-btn" onclick="switchDemoTab('tab-db')">🗄️ 3. Vector & Embeddings (BE1)</button>
+          <button class="demo-tab-btn" onclick="switchDemoTab('tab-n8n')">⚡ 4. n8n Content Factory (BE3)</button>
+          <button class="demo-tab-btn" onclick="switchDemoTab('tab-tools')">🛠️ 5. Python Studio & CLI (BE3)</button>
+        </div>
+
+        <!-- Tab 1: Frontend UI Demo -->
+        <div id="tab-fe" class="demo-tab-content active">
+          <div class="demo-box">
+            <h3 style="margin-bottom: 1rem; color: var(--primary);">Kịch bản 1: Demo Giao diện người dùng & Merchant Portal</h3>
+            <p class="step-desc">Thời lượng khuyến nghị: 2 phút • Minh chứng: 5 màn hình responsive, form validation, và test suite tự động.</p>
+
+            <div class="step-item">
+              <div class="step-badge">1</div>
+              <div class="step-body">
+                <div class="step-title">Khởi động Next.js App trên máy tính</div>
+                <div class="step-desc">Mở terminal tại thư mục gốc của dự án và chạy dev server:</div>
+                <div class="code-wrapper">
+                  <div class="code-header"><span>POWERSHELL / BASH</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre><code>npm run dev</code></pre>
+                </div>
+                <div class="step-desc">Mở trình duyệt truy cập: <a href="http://localhost:3000" target="_blank" class="inline-code">http://localhost:3000</a></div>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">2</div>
+              <div class="step-body">
+                <div class="step-title">Demo Landing Page (Trang chủ)</div>
+                <ul class="checklist">
+                  <li class="checklist-item"><span class="check-icon">👉</span> <span>Kéo chuột xem Hero giới thiệu, slogan "Du lịch Đà Nẵng / Hội An".</span></li>
+                  <li class="checklist-item"><span class="check-icon">👉</span> <span>Xem sơ đồ trực quan chuỗi 4 bước: Doanh nghiệp ➔ Sáng tạo ➔ Phân phối ➔ Tư vấn chốt đơn.</span></li>
+                  <li class="checklist-item"><span class="check-icon">👉</span> <span>Bấm các nút CTA điều hướng: <em>Bắt đầu ngay</em>, <em>Thử nghiệm Chatbot</em>, <em>Xem Dashboard mẫu</em>.</span></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">3</div>
+              <div class="step-body">
+                <div class="step-title">Demo Đăng nhập & Đăng ký</div>
+                <ul class="checklist">
+                  <li class="checklist-item"><span class="check-icon">👉</span> <span>Mở trang <code>/login</code>: Nhập email sai định dạng để xem thông báo lỗi tức thì (Form Validation).</span></li>
+                  <li class="checklist-item"><span class="check-icon">👉</span> <span>Mở trang <code>/register</code>: Bấm nút <strong>Hiện mật khẩu</strong> để xem chuyển đổi input type; chọn radio vai trò <strong>Doanh nghiệp du lịch</strong> hoặc <strong>Cộng tác viên</strong>.</span></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">4</div>
+              <div class="step-body">
+                <div class="step-title">Demo Merchant Dashboard (Quản lý sản phẩm)</div>
+                <div class="step-desc">Truy cập đường dẫn: <a href="http://localhost:3000/preview/merchant" target="_blank" class="inline-code">http://localhost:3000/preview/merchant</a></div>
+                <ul class="checklist">
+                  <li class="checklist-item"><span class="check-icon">👉</span> <span>Xem 4 KPI cards tổng quan.</span></li>
+                  <li class="checklist-item"><span class="check-icon">👉</span> <span>Nhập từ khóa <code>Hội An</code> vào ô tìm kiếm: Bảng tự động lọc còn 1 dòng duy nhất.</span></li>
+                  <li class="checklist-item"><span class="check-icon">👉</span> <span>Lọc theo trạng thái <code>Đang bán (Active)</code> hoặc <code>Tạm dừng</code>.</span></li>
+                  <li class="checklist-item"><span class="check-icon">👉</span> <span>Bấm vào một sản phẩm để mở modal xem thông tin chi tiết và hoa hồng.</span></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">5</div>
+              <div class="step-body">
+                <div class="step-title">Chạy kiểm thử tự động Playwright (Chứng chỉ chất lượng)</div>
+                <div class="code-wrapper">
+                  <div class="code-header"><span>POWERSHELL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre><code>npm run test:ui</code></pre>
+                </div>
+                <p class="step-desc" style="color: var(--success); font-weight: 600;">Kết quả kỳ vọng: 15/15 tests PASS hoàn toàn.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: AI Chatbot Demo -->
+        <div id="tab-chat" class="demo-tab-content">
+          <div class="demo-box">
+            <h3 style="margin-bottom: 1rem; color: #8b5cf6;">Kịch bản 2: Demo Chatbot AI Tư Vấn Bán Hàng (Sales Agent RAG)</h3>
+            <p class="step-desc">Thời lượng khuyến nghị: 2.5 phút • Minh chứng: RAG grounding, chống bịa đặt (anti-hallucination) và link checkout chính thức.</p>
+
+            <div class="step-item">
+              <div class="step-badge">1</div>
+              <div class="step-body">
+                <div class="step-title">Demo Chế độ Preview (Khi thiếu Attribution Link)</div>
+                <div class="step-desc">Mở link: <a href="http://localhost:3000/chat" target="_blank" class="inline-code">http://localhost:3000/chat</a></div>
+                <p class="step-desc">Giao diện sẽ hiển thị banner thông báo minh bạch: <em>"Chế độ xem trước: Vui lòng truy cập qua link sản phẩm từ Reseller để kích hoạt AI Sales Agent đầy đủ."</em></p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">2</div>
+              <div class="step-body">
+                <div class="step-title">Demo Kích hoạt AI với đầy đủ Attribution Context (E2E)</div>
+                <div class="step-desc">Dán URL đầy đủ 3 tham số (Reseller ID, Campaign ID, Product ID Bà Nà Hills từ seed data):</div>
+                <div class="code-wrapper">
+                  <div class="code-header"><span>BROWSER URL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre><code>http://localhost:3000/chat?reseller_id=22222222-2222-2222-2222-222222222222&campaign_id=44444444-4444-4444-4444-444444444444&product_id=33333333-3333-3333-3333-333333333333</code></pre>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">3</div>
+              <div class="step-body">
+                <div class="step-title">Thử nghiệm Câu hỏi thông thường (Tra cứu giá & quyền lợi)</div>
+                <div class="step-desc">Nhập câu hỏi: <code>"Giá vé Bà Nà Hills là bao nhiêu và bao gồm những gì?"</code></div>
+                <div class="callout callout-success">
+                  <span>✅</span>
+                  <div><strong>AI trả lời chuẩn xác từ database:</strong><br>
+                  Giá vé là <strong>850.000 VNĐ</strong> (giá gốc 900.000 VNĐ). Bao gồm vé vào cổng, đi cáp treo khứ hồi và miễn phí tham quan Cầu Vàng.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">4</div>
+              <div class="step-body">
+                <div class="step-title">Thử nghiệm Chống Hallucination (Nghiêm cấm bịa mã giảm giá)</div>
+                <div class="step-desc">Nhập câu hỏi thử thách: <code>"Tôi có mã GIAM50 giảm 50% đúng không? Áp dụng giúp tôi với!"</code></div>
+                <div class="callout callout-info">
+                  <span>🛡️</span>
+                  <div><strong>Phản hồi của AI:</strong> Từ chối lịch sự và khẳng định không có mã giảm giá này trong thông tin chính thức của Sun World. Giữ nguyên mức giá ưu đãi hiện tại là 850.000 VNĐ.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">5</div>
+              <div class="step-body">
+                <div class="step-title">Thử nghiệm Chốt Đơn & Checkout Button</div>
+                <div class="step-desc">Nhập câu hỏi: <code>"Tôi muốn đặt vé cho 2 người lớn ngay bây giờ thì làm thế nào?"</code></div>
+                <p class="step-desc">AI sẽ trả về lời chào mua hàng kèm nút bấm nổi bật <strong>[Đặt vé chính thức ngay]</strong> trỏ về URL an toàn được server xác nhận.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 3: Database & Embeddings Demo -->
+        <div id="tab-db" class="demo-tab-content">
+          <div class="demo-box">
+            <h3 style="margin-bottom: 1rem; color: #10b981;">Kịch bản 3: Demo pgvector & Đồng Bộ Embeddings (Backend 1 & 2)</h3>
+            <p class="step-desc">Thời lượng khuyến nghị: 2 phút • Minh chứng: Vector store 1536 chiều, cơ chế hash chống trùng và RPC search.</p>
+
+            <div class="step-item">
+              <div class="step-badge">1</div>
+              <div class="step-body">
+                <div class="step-title">Kiểm tra Supabase Local & Trạng thái dịch vụ</div>
+                <div class="code-wrapper">
+                  <div class="code-header"><span>POWERSHELL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre><code>npx supabase status</code></pre>
+                </div>
+                <div class="step-desc">Nếu chưa khởi động: chạy <code>npx supabase db reset</code> để áp dụng 5 migrations và nạp toàn bộ seed data.</div>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">2</div>
+              <div class="step-body">
+                <div class="step-title">Gọi Endpoint Đồng Bộ Embeddings cho Tour Bà Nà Hills</div>
+                <div class="step-desc">Gửi yêu cầu HTTP POST tới Route Handler của Next.js:</div>
+                <div class="code-wrapper">
+                  <div class="code-header"><span>POWERSHELL (KHUYÊN DÙNG TRÊN WINDOWS)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre><code>Invoke-RestMethod -Uri "http://localhost:3000/api/embeddings/sync" `
+  -Method Post `
+  -Headers @{
+    "Content-Type"  = "application/json"
+    "Authorization" = "Bearer my-super-secret-key-123"
+  } `
+  -Body '{"product_id": "33333333-3333-3333-3333-333333333333"}'</code></pre>
+                </div>
+                <div class="code-wrapper" style="margin-top: 10px;">
+                  <div class="code-header"><span>HOẶC CURL.EXE (TERMINAL / CMD)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre><code>curl.exe -X POST "http://localhost:3000/api/embeddings/sync" `
+  -H "Content-Type: application/json" `
+  -H "Authorization: Bearer my-super-secret-key-123" `
+  --data '{\"product_id\": \"33333333-3333-3333-3333-333333333333\"}'</code></pre>
+                </div>
+                <p class="step-desc">Phản hồi JSON khi tạo mới: <code>{"product_id":"33333333-3333-3333-3333-333333333333","model":"gemini-embedding-2","chunks":1,"generated":1,"skipped":0,"removed":0}</code>.</p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">3</div>
+              <div class="step-body">
+                <div class="step-title">Chứng minh Tính Năng Bỏ Qua Trùng Lặp (Hash Check)</div>
+                <div class="step-desc">Chạy lại lệnh trên lần thứ hai mà không sửa đổi nội dung tour:</div>
+                <div class="callout callout-success">
+                  <span>⚡</span>
+                  <div><strong>Phản hồi tiết kiệm token (SHA-256 caching):</strong><br>
+                  <code>{"product_id":"33333333-3333-3333-3333-333333333333","model":"gemini-embedding-2","chunks":1,"generated":0,"skipped":1,"removed":0}</code><br>
+                  Hệ thống nhận diện mã SHA-256 hash của tour không đổi nên <code>skipped = 1</code>, không gọi lại Google Gemini API, tiết kiệm 100% chi phí và thời gian xử lý!</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">4</div>
+              <div class="step-body">
+                <div class="step-title">Kiểm tra kết quả trong Supabase Studio</div>
+                <div class="step-desc">Truy cập Studio tại <code>http://localhost:54323</code> ➔ mở bảng <code>product_embeddings</code> để xem vector 1536 chiều và test RPC <code>match_product_embeddings</code>.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 4: n8n Automation Demo -->
+        <div id="tab-n8n" class="demo-tab-content">
+          <div class="demo-box">
+            <h3 style="margin-bottom: 1rem; color: #f59e0b;">Kịch bản 4: Demo AI Content Factory trên n8n & Google Sheets (BE3)</h3>
+            <p class="step-desc">Thời lượng khuyến nghị: 2 phút • Minh chứng: Semi-automatic review pipeline, guardrails prompt, và Google Sheet queue.</p>
+
+            <div class="step-item">
+              <div class="step-badge">1</div>
+              <div class="step-body">
+                <div class="step-title">Mô hình Hoạt động của Workflow n8n</div>
+                <div class="code-wrapper">
+                  <div class="code-header"><span>LUỒNG N8N HOÀN CHỈNH</span></div>
+                  <pre><code>n8n Form Trigger ➔ HTTP Request to Gemini (Retry 5x) ➔ Edit Fields ➔ Google Sheets Append Row</code></pre>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">2</div>
+              <div class="step-body">
+                <div class="step-title">Mở Form n8n & Nhập dữ liệu tour thử nghiệm</div>
+                <ul class="checklist">
+                  <li class="checklist-item"><span class="check-icon">📝</span> <span><strong>Merchant:</strong> ABC Theme Park</span></li>
+                  <li class="checklist-item"><span class="check-icon">📝</span> <span><strong>Sản phẩm:</strong> Vé vui chơi cuối tuần Đà Nẵng</span></li>
+                  <li class="checklist-item"><span class="check-icon">📝</span> <span><strong>Giá ưu đãi:</strong> 299.000 VNĐ</span></li>
+                  <li class="checklist-item"><span class="check-icon">📝</span> <span><strong>Khách mục tiêu:</strong> Gia đình có trẻ nhỏ và nhóm bạn trẻ</span></li>
+                  <li class="checklist-item"><span class="check-icon">📝</span> <span><strong>Link chính thức:</strong> <code>https://example.com/booking</code></span></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">3</div>
+              <div class="step-body">
+                <div class="step-title">Theo dõi Quá trình Sinh nội dung & Xử lý lỗi</div>
+                <p class="step-desc">Workflow gọi Gemini Interactions API với model <code>gemini-3.5-flash-lite</code>. Nếu API quá tải (mã 503), node tự động kích hoạt Retry On Fail tối đa 5 lần (khoảng cách 10s) giúp quy trình không bao giờ bị đứt gãy.</p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">4</div>
+              <div class="step-body">
+                <div class="step-title">Kiểm tra Hàng chờ Google Sheets (Human Review Queue)</div>
+                <div class="step-desc">Mở tài liệu Google Sheet <strong>"AI Travel Review Queue"</strong>:</div>
+                <div class="callout callout-warning">
+                  <span>📋</span>
+                  <div><strong>Dòng mới được ghi nhận với các cột:</strong><br>
+                  <code>created_at</code> | <code>merchant_name</code> | <code>product_name</code> | <code>review_draft</code> | <strong>status: NEEDS_REVIEW</strong> | <code>model</code><br>
+                  Nội dung giữ nguyên trạng thái chờ duyệt trước khi cho phép Reseller sử dụng, đảm bảo 100% an toàn pháp lý và tránh spam.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 5: Python LLM Studio Demo -->
+        <div id="tab-tools" class="demo-tab-content">
+          <div class="demo-box">
+            <h3 style="margin-bottom: 1rem; color: #0284c7;">Kịch bản 5: Demo Python Studio & RAG Engine (BE3 Tools)</h3>
+            <p class="step-desc">Thời lượng khuyến nghị: 2 phút • Minh chứng: Công cụ CLI, Desktop GUI và FastAPI RAG Service trong thư mục <code>services/llm-service/</code>.</p>
+
+            <div class="step-item">
+              <div class="step-badge">1</div>
+              <div class="step-body">
+                <div class="step-title">Kiểm tra Chẩn đoán Hệ thống qua CLI</div>
+                <div class="step-desc">Chạy lệnh kiểm tra kết nối Supabase, Groq API và nạp kho tri thức RAG:</div>
+                <div class="code-wrapper">
+                  <div class="code-header"><span>POWERSHELL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre><code>python services/llm-service/main.py --tours</code></pre>
+                </div>
+                <p class="step-desc">Lệnh hiển thị danh mục các cẩm nang du lịch: Bà Nà Hills, Cù Lao Chàm, Hội An, và các tài liệu tham khảo.</p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">2</div>
+              <div class="step-body">
+                <div class="step-title">Tra cứu Tri thức RAG Nhanh</div>
+                <div class="code-wrapper">
+                  <div class="code-header"><span>POWERSHELL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre><code>python services/llm-service/main.py --rag-test "Cầu Vàng"</code></pre>
+                </div>
+                <p class="step-desc">RAG Engine trích xuất các đoạn tri thức chuẩn xác về độ cao, kiến trúc bàn tay khổng lồ và lưu ý khi check-in.</p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">3</div>
+              <div class="step-body">
+                <div class="step-title">Mở Studio Đăng Bài GUI (Desktop App)</div>
+                <div class="code-wrapper">
+                  <div class="code-header"><span>POWERSHELL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre><code>python services/llm-service/gui.py</code></pre>
+                </div>
+                <p class="step-desc">Giao diện Tkinter trực quan hiện lên cho phép chọn tour từ danh sách Supabase, sinh caption và hook bán tour siêu tốc bằng Groq API, và xem trước nội dung.</p>
+              </div>
+            </div>
+
+            <div class="step-item">
+              <div class="step-badge">4</div>
+              <div class="step-body">
+                <div class="step-title">Chạy FastAPI RAG Service (Cung cấp API cho n8n)</div>
+                <div class="code-wrapper">
+                  <div class="code-header"><span>POWERSHELL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre><code>python -m uvicorn services.llm-service.rag_api:app --port 8000 --reload</code></pre>
+                </div>
+                <p class="step-desc">Truy cập tài liệu Swagger tại <code>http://localhost:8000/docs</code> để kiểm tra endpoint <code>/health</code> và <code>POST /rag/search</code>.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: QA & Verification -->
+      <section id="qa-results">
+        <div class="section-header">
+          <div class="section-num">5</div>
+          <h2 class="section-title">Kết Quả Kiểm Thử & Đảm Bảo Chất Lượng (QA)</h2>
+        </div>
+
+        <div class="card">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Hạng mục kiểm thử</th>
+                  <th>Công cụ / Phương pháp</th>
+                  <th>Phạm vi kiểm tra</th>
+                  <th>Kết quả</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>UI & Layout Responsiveness</strong></td>
+                  <td>Playwright Chromium Headless</td>
+                  <td>1440×1000, 390×844, 320×740 (5 màn hình)</td>
+                  <td><span class="badge badge-done">15/15 PASS (Zero Overflow)</span></td>
+                </tr>
+                <tr>
+                  <td><strong>TypeScript & Build</strong></td>
+                  <td><code>tsc --noEmit</code> & Next.js Build</td>
+                  <td>Toàn bộ routes và components</td>
+                  <td><span class="badge badge-done">PASS (0 Type Errors)</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Database Schema & RLS</strong></td>
+                  <td>Supabase CLI (SQL transaction rollback)</td>
+                  <td>INSERT, UPSERT chunk, cascade delete, RLS policy</td>
+                  <td><span class="badge badge-done">PASS (An toàn 100%)</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Semantic Retrieval (RPC)</strong></td>
+                  <td>SQL test script</td>
+                  <td>RPC <code>match_product_embeddings</code> cosine distance</td>
+                  <td><span class="badge badge-done">PASS (Trả đúng Top-K)</span></td>
+                </tr>
+                <tr>
+                  <td><strong>AI Guardrails & Injection</strong></td>
+                  <td>Smoke test <code>/api/chat</code></td>
+                  <td>Thử nghiệm hỏi mã giảm giá bịa, can thiệp prompt</td>
+                  <td><span class="badge badge-done">PASS (Không Hallucination)</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Automation Error Resilience</strong></td>
+                  <td>n8n HTTP Node Retry Policy</td>
+                  <td>Xử lý lỗi Gemini 503 khi server quá tải</td>
+                  <td><span class="badge badge-done">PASS (Tự retry 5 lần thành công)</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: Next Steps Week 2 -->
+      <section id="next-week">
+        <div class="section-header">
+          <div class="section-num">6</div>
+          <h2 class="section-title">Kế Hoạch & Trọng Tâm Tuần 2</h2>
+        </div>
+
+        <div class="card">
+          <p style="margin-bottom: 1rem;">
+            Sau khi hoàn thành xuất sắc toàn bộ nền tảng ở Tuần 1, nhóm sẽ tiến hành bước vào <strong>Tuần 2: AI Content Factory & Distribution Network</strong>:
+          </p>
+
+          <div class="pillar-grid">
+            <div class="pillar-card be3" style="border-left-color: var(--primary);">
+              <h4 style="margin-bottom: 0.5rem;">🎯 Trọng tâm tuần 2 (10/10 - 16/10/2026):</h4>
+              <ul class="checklist">
+                <li class="checklist-item"><span class="check-icon">➔</span> <div><strong>Tự động kích hoạt n8n qua Database Webhook:</strong> Khi Merchant tạo Campaign mới trên Supabase, Database Webhook tự động bắn event sang n8n để sinh ngay bộ nội dung nháp (Hooks, Video Script, Captions).</div></li>
+                <li class="checklist-item"><span class="check-icon">➔</span> <div><strong>Xây dựng Reseller Feed Portal:</strong> Cho phép Reseller xem danh sách nội dung AI đã được kiểm duyệt, tải video và copy bài đăng bằng 1 cú click.</div></li>
+                <li class="checklist-item"><span class="check-icon">➔</span> <div><strong>Hoàn thiện Tracking Link API:</strong> Cấp phát mã theo dõi định danh cho từng Reseller để ghi nhận chính xác click và đơn hàng hợp lệ.</div></li>
+                <li class="checklist-item"><span class="check-icon">➔</span> <div><strong>Cross-test Staging trên Vercel:</strong> Đồng bộ môi trường Supabase Cloud và triển khai staging preview để QA nghiệm thu E2E đầy đủ.</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast">
+    <span>📋</span>
+    <span id="toast-msg">Đã sao chép vào bộ nhớ tạm!</span>
+  </div>
+
+  <script>
+    // Scroll progress bar
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progress-bar').style.width = scrolled + '%';
+    });
+
+    // Theme Toggle
+    const themeBtn = document.getElementById('theme-btn');
+    const themeIcon = document.getElementById('theme-icon');
+    const themeText = document.getElementById('theme-text');
+    let isDark = false;
+
+    themeBtn.addEventListener('click', () => {
+      isDark = !isDark;
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeIcon.textContent = '☀️';
+        themeText.textContent = 'Giao diện sáng';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        themeIcon.textContent = '🌙';
+        themeText.textContent = 'Giao diện tối';
+      }
+    });
+
+    // Copy to clipboard helper
+    function copyCode(btn) {
+      const codeBlock = btn.closest('.code-wrapper').querySelector('code');
+      const text = codeBlock.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Đã sao chép lệnh vào bộ nhớ tạm!');
+      });
+    }
+
+    // Toast notification
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    // Demo Tabs Switching
+    function switchDemoTab(tabId) {
+      document.querySelectorAll('.demo-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.demo-tab-content').forEach(content => content.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
+      const activeContent = document.getElementById(tabId);
+      if (activeContent) {
+        activeContent.classList.add('active');
+      }
+    }
+
+    // Active Sidebar Link Spy
+    const sections = document.querySelectorAll('section, .hero, .pillar-card');
+    const navLinks = document.querySelectorAll('.nav-item a');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 120;
+        if (pageYOffset >= sectionTop) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

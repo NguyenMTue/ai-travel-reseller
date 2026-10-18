@@ -1,8 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+import { supabaseUrl, supabasePublicKey as supabaseKey, hasSupabaseConfig } from "./config";
+import { canHandlePortalAuthFailure } from "../portal-access";
 
 export const createClient = (request: NextRequest) => {
   // Create an unmodified response
@@ -34,4 +34,65 @@ export const createClient = (request: NextRequest) => {
   );
 
   return supabaseResponse
+};
+
+// Các route yêu cầu đăng nhập (Merchant / Reseller / Admin Portal)
+const PROTECTED_PREFIXES = ["/merchant", "/reseller", "/admin"];
+
+/**
+ * Refresh Supabase Auth session cho mỗi request (dùng trong proxy.ts – Next.js 16)
+ * và chuyển hướng về /login nếu truy cập route được bảo vệ khi chưa đăng nhập.
+ */
+export const updateSession = async (request: NextRequest) => {
+  let supabaseResponse = NextResponse.next({ request });
+  // Public UI remains reviewable without credentials; protected portals stay closed.
+  if (!hasSupabaseConfig) {
+    const pathname = request.nextUrl.pathname;
+    if (PROTECTED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("next", pathname);
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
+  }
+
+  const supabase = createServerClient(supabaseUrl!, supabaseKey!, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        supabaseResponse = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
+
+  // KHÔNG chèn logic nào giữa createServerClient và getUser() – dễ gây mất session ngẫu nhiên.
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser().catch(() => ({ data: { user: null }, error: { status: 0 } }));
+
+  const { pathname } = request.nextUrl;
+  const isProtected = PROTECTED_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+
+  // A transport/service failure is not proof that a session has expired.
+  // Protected leaf loaders still fail closed and show the sanitized error.
+  const requiresLogin = !authError || !canHandlePortalAuthFailure(pathname, authError.status);
+  if (!user && isProtected && requiresLogin) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.searchParams.set("next", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // Phải trả về supabaseResponse để cookie session mới được gửi về trình duyệt.
+  return supabaseResponse;
 };

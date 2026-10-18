@@ -246,7 +246,25 @@ npx supabase stop           # tắt khi xong
 
 Sau đó sửa `.env.local` trỏ về local: `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321` và key lấy từ `supabase status`. Supabase Studio local: http://127.0.0.1:54323.
 
-### 5.7 Checklist nhanh
+### 5.7 Chạy & Test Dịch vụ AI & n8n Automation (BE3 - AI Content Factory)
+
+Dịch vụ Python phục vụ tự động hóa nội dung du lịch và hàng chờ kiểm duyệt Google Sheets (Week 1 Milestone của BE3):
+
+1. **Khởi động n8n container:**
+   ```bash
+   docker run -d --name n8n -p 5678:5678 -v n8n_data:/home/node/.n8n n8nio/n8n:latest
+   ```
+2. **Import Workflow (1 Click):** Mở `http://127.0.0.1:5678` ➔ chọn menu `...` góc phải ➔ **Import from file** ➔ chọn `services/llm-service/workflow_ai_travel_review.json` ➔ mở node `Append to Google Sheets`, chọn Credential Google Sheets của bạn ➔ Bật **Active: ON**.
+3. **Chạy test nhanh:**
+   ```bash
+   cd services/llm-service
+   python -m main --demo-n8n
+   # hoặc khởi động giao diện Desktop trực quan:
+   python gui.py
+   ```
+Xem hướng dẫn chi tiết từng bước tại: [services/llm-service/README.md](services/llm-service/README.md).
+
+### 5.8 Checklist nhanh
 
 - [ ] `node -v` ≥ 20.9
 - [ ] `npm install` chạy không lỗi
@@ -427,11 +445,11 @@ CLI sẽ hỏi chọn skill và chọn agent đích (Claude Code, Kiro, Cursor�
 
 **Chưa có / cần xử lý:**
 - ⏳ Chưa có page nghiệp vụ (`app/page.tsx` vẫn là template), chưa cài shadcn/ui, `ai-services.ts` đang trống.
-- ⚠️ **Chưa có RLS policy và quyền `SELECT/INSERT/UPDATE/DELETE`** cho role `anon`/`authenticated`/`service_role` trong migration hiện tại → mọi truy vấn qua Supabase client sẽ bị **permission denied / trả về rỗng** cho tới khi BE1 thêm GRANT + policy.
+- ✅ **Đã có RLS policy và quyền `SELECT/INSERT/UPDATE/DELETE`** cho các role (hoàn thành bởi BE1).
 - ⚠️ Chưa có file `proxy.ts` ở root để refresh session Auth (Next.js 16 dùng `proxy.ts` thay cho `middleware.ts`). Helper [middleware.ts](src/lib/supabase/middleware.ts) mới tạo client nhưng chưa gọi `supabase.auth.getUser()`.
-- ⚠️ Chưa có `supabase/seed.sql` (config đang trỏ tới) – `db reset` local sẽ không có dữ liệu mẫu.
-- ⚠️ `.gitignore` có một dòng `.env.local` bị ghi sai encoding (UTF-16) ở cuối file – nên xóa dòng đó (đã có `.env*` bảo vệ).
-- ⚠️ File `env.text` **đã bị commit lên repo** (chứa Supabase URL + tên biến cũ `NEXT_PUBLIC_SUPABASE_ANON_KEY`). Nên xóa khỏi git (`git rm --cached env.text`) vì hướng dẫn trong đó đã được thay bằng mục 5 của README này.
+- ✅ Đã có `supabase/seed.sql` tạo dữ liệu mẫu thành công (hoàn thành bởi BE1).
+- ✅ `.gitignore` đã được dọn dẹp các dòng sai encoding (hoàn thành bởi BE1).
+- ✅ File `env.text` đã được xóa khỏi git tracking (`git rm --cached env.text`) (hoàn thành bởi BE1).
 
 ---
 
