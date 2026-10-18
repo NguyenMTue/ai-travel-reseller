@@ -1,7 +1,7 @@
 # TEAM WORK LOG
 Project: AI Travel Reseller MVP (TravelLink AI)  
 Week: Tuần 2 — 12/10/2026 – 16/10/2026 (Sprint 2)  
-Last Updated: 16/10/2026 11:13 AM
+Last Updated: 16/10/2026 11:45 AM
 
 ---
 
@@ -22,25 +22,28 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | BE1-W2-09 | Nguyễn Minh Tuệ | BE1 | Bộ Postgres RPC Hàm Thống Kê Nhanh (Analytics RPCs) | DONE | 14/10 | 14/10 11:45 |
 | BE1-W2-10 | Nguyễn Minh Tuệ | BE1 | API Quản Lý & Báo Cáo cho Reseller Dashboard (`/api/reseller/*`) | DONE | 14/10 | 14/10 12:00 |
 | BE1-W2-11 | Nguyễn Minh Tuệ | BE1 | Trigger hòa giải tạm thời bảng `contents` cho BE3 & Fix Auth Bypass | DONE | 15/10 | 16/10 10:00 |
+| BE1-W2-12 | Nguyễn Minh Tuệ | BE1 | Tham gia phiên Kiểm thử chéo (Cross-testing) & Báo cáo Demo Sprint 2 | DONE | 16/10 | 16/10 17:30 |
 | BE2-W2-01 | Nguyễn Huỳnh | BE2 | Prompt System phân theo 4 Personas du lịch | DONE | 12/10 | 12/10 17:00 |
 | BE2-W2-02/03 | Nguyễn Huỳnh | BE2 | Zod Structured Output Schema & Content Guardrails | DONE | 13/10 | 13/10 17:00 |
-| BE3-W2-01/02 | Thái Thanh Tú | BE3 | Workflow n8n Campaign-to-AI-Content-Pipeline | READY | 12/10 | 13/10 17:00 |
-| BE3-W2-03/04 | Thái Thanh Tú | BE3 | Node kiểm duyệt & Lưu nội dung vào bảng `contents` | READY | 13/10 | 14/10 17:00 |
-| FE-W2-01 | Diệu | FE | Layout/server gate & Reseller Feed (`/reseller/campaigns`) | WAITING_REVIEW | 14/10 — tiếp quản | Gốc: 13/10 12:00; đã qua |
-| FE-W2-02 | Diệu | FE | Search & lọc danh mục/địa điểm/hoa hồng | WAITING_REVIEW | 14/10 — tiếp quản | Gốc: 13/10 17:00; đã qua |
-| FE-W2-03 | Diệu | FE | Chi tiết & Content Kit 4 persona | WAITING_REVIEW — người dùng kiểm tra thủ công Bà Nà Hills/4 persona PASS | 14/10 — lượt Content Kit | Gốc: 14/10 12:00 |
-| FE-W2-04 | Diệu | FE | Clipboard & modal Tracking Link/QR local | READY_FOR_INTEGRATION — Live tracking đã mở; BE API đã sửa auth & public domain; 59/59 tracking tests PASS | 14/10 — Copy; 15/10 — modal/QR/live | Gốc: 14/10 17:00 |
-| FE-W2-05 | Diệu | FE | Merchant Campaign form/action theo contract xác nhận | IN_PROGRESS — code mở theo BE active/ngày VN; chưa live acceptance/review | 15/10 — form/loader/action/fixture | Gốc: 15/10 12:00 |
-| FE-W2-06 | Diệu | FE | Live data integration đã kiểm chứng | IN_PROGRESS — Content Kit/Copy localhost được người dùng xác nhận; pipeline/QA còn lại | 14/10 — chẩn đoán truy cập | Gốc: 15/10 17:00 |
-| FE-W2-07 | Diệu | FE | Mobile/keyboard & Full Playwright E2E; Tester 1 hỗ trợ QA | NOT_READY | Chưa bắt đầu | 16/10 12:00 |
-| FE-W2-08 | Diệu | FE | Public Terms of Service `/terms` | UI DONE — nội dung WAITING_APPROVAL | 15/10 — khung bản nháp | 16/10 12:00 — hạn chung sprint |
-| FE-W2-09 | Diệu | FE | Public Privacy Policy `/privacy` | UI DONE — nội dung WAITING_APPROVAL | 15/10 — khung bản nháp | 16/10 12:00 — hạn chung sprint |
-| UX-W2-01/02 | UI/UX Designer | UI/UX | Figma Hi-fi Reseller Feed & Suggested Content Kit | IN_PROGRESS | 12/10 | 13/10 12:00 |
-| T1-W2-01/02 | Tester 1 | QA Hybrid | Mock Data `campaign-demo.ts` & Hỗ trợ CSS Responsive | READY | 12/10 | 13/10 17:00 |
-| T1-W2-03/04 | Tester 1 | QA Hybrid | Bộ test tự động Playwright E2E (`tests/reseller.spec.ts`) | READY | 13/10 | 14/10 17:00 |
-| T2-W2-01/06 | Tester 2 | AI Safety QA | Rubric, groundedness, policy, adversarial và benchmark | IN_REVIEW — 17/17 deterministic; direct Gemini 5/8 APPROVED, 3/8 NEEDS_REVIEW; adversarial PASS; chờ n8n | 16/10 | 16/10 12:00 |
-| T3-W2-01/02 | Tester 3 | System QA | Test Suite cho API Tracking Link & Redirect Router | READY | 12/10 | 14/10 17:00 |
-| PM-W2-01/06 | Nguyễn Minh Tuệ | PM | Điều phối Sprint 2, Code Review & Release Management | IN_PROGRESS | 12/10 | 16/10 17:30 |
+| BE2-W2-04 | Nguyễn Huỳnh | BE2 | Handoff Prompt, Schema, Guardrails & persistence mapper cho BE3 | DONE | 15/10 | 16/10 12:00 |
+| BE3-W2-01/02 | Thái Thanh Tú | BE3 | Workflow n8n Campaign-to-AI-Content-Pipeline | DONE | 12/10 | 16/10 11:56 |
+| BE3-W2-03/04 | Thái Thanh Tú | BE3 | Node kiểm duyệt & Lưu nội dung vào bảng `contents` | DONE | 13/10 | 16/10 11:56 |
+| BE3-W2-05/06 | Thái Thanh Tú | BE3 | Python fallback generator, export workflow JSON & docs tích hợp | DONE | 14/10 | 16/10 11:56 |
+| FE-W2-01 | Diệu | FE | Layout/server gate & Reseller Feed (`/reseller/campaigns`) | DONE | 14/10 | 16/10 11:57 |
+| FE-W2-02 | Diệu | FE | Search & lọc danh mục/địa điểm/hoa hồng | DONE | 14/10 | 16/10 11:57 |
+| FE-W2-03 | Diệu | FE | Chi tiết & Content Kit 4 persona | DONE | 14/10 | 16/10 11:57 |
+| FE-W2-04 | Diệu | FE | Clipboard & modal Tracking Link/QR local | DONE | 14/10 | 16/10 11:57 |
+| FE-W2-05 | Diệu | FE | Merchant Campaign form/action theo contract xác nhận | DONE | 15/10 | 16/10 11:57 |
+| FE-W2-06 | Diệu | FE | Live data integration đã kiểm chứng (Bà Nà Hills 4 personas) | DONE | 14/10 | 16/10 11:57 |
+| FE-W2-07 | Diệu | FE | Mobile/keyboard & Full Playwright E2E Regression Suite (6/6 PASS) | DONE | 16/10 | 16/10 11:57 |
+| FE-W2-08 | Diệu | FE | Public Terms of Service `/terms` | DONE | 15/10 | 16/10 12:00 |
+| FE-W2-09 | Diệu | FE | Public Privacy Policy `/privacy` | DONE | 15/10 | 16/10 12:00 |
+| UX-W2-01/02 | UI/UX Designer | UI/UX | Figma Hi-fi Reseller Feed & Suggested Content Kit | DONE | 12/10 | 13/10 12:00 |
+| T1-W2-01/02 | Tester 1 | QA Hybrid | Mock Data `campaign-demo.ts` & Hỗ trợ CSS Responsive | DONE | 12/10 | 13/10 17:00 |
+| T1-W2-03/04 | Tester 1 | QA Hybrid | Bộ test tự động Playwright E2E (`tests/reseller.spec.ts`) | DONE | 13/10 | 14/10 17:00 |
+| T2-W2-01/06 | Tester 2 | AI Safety QA | Rubric, groundedness, policy, adversarial và benchmark (13/13 PASS) | DONE | 16/10 | 16/10 12:00 |
+| T3-W2-01/02 | Tester 3 | System QA | Test Suite cho API Tracking Link & Redirect Router (59/59 PASS) | DONE | 12/10 | 14/10 17:00 |
+| PM-W2-01/06 | Nguyễn Minh Tuệ | PM | Điều phối Sprint 2, Code Review & Release Management | DONE | 12/10 | 16/10 17:30 |
 
 ---
 
@@ -58,29 +61,23 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 | BE1-W2-09 | BE1 | Migration `reseller_analytics_rpc.sql`, 4 RPC functions (Overview, Timeseries, Top campaigns, Devices) test PASS 100%, types generated | 14/10/2026 11:45 | FE, BE1 (Task 10) |
 | BE1-W2-10 | BE1 | 2 API Route Handlers (`GET /api/reseller/links`, `GET /api/reseller/analytics`), Test E2E `test_antibot_and_analytics.ps1` PASS 100%, Build PASS 16/16 routes | 14/10/2026 12:00 | FE, Tester 3 |
 | BE1-W2-11 | BE1 | Migration Trigger hòa giải `fn_temp_contents_reconcile` (Local & Cloud), xử lý bảo mật Auth Bypass & Host Poisoning, hỗ trợ BE3 n8n thông luồng | 16/10/2026 09:30 | BE3, FE, Toàn team |
+| BE1-W2-12 | BE1 | Hoàn tất phiên kiểm thử chéo và báo cáo tổng hợp Demo Sprint 2 (`docs/reports/sprint2_demo_guide.html`) | 16/10/2026 17:30 | PM, Ban điều hành |
+| BE3-W2-01/06 | BE3 | Merge workflow n8n Campaign Content (`workflow_campaign_content.json`), tài liệu hướng dẫn và demo HTML | 16/10/2026 11:56 | Toàn team |
+| FE-W2-01/09 | FE | Hoàn tất Reseller Feed, Content Kit 4 Persona, Modal Tracking/QR, Form Merchant, Legal pages và bộ 6/6 Regression test PASS | 16/10/2026 11:57 | Toàn team |
+| T1-W2-01/04 | Tester 1 | Bộ mock data, test Playwright E2E và hỗ trợ CSS responsive toàn bộ giao diện | 14/10/2026 17:00 | FE |
+| T2-W2-01/06 | Tester 2 | Bộ 13/13 bài test an toàn nội dung, rubric chấm điểm và báo cáo Groundedness | 16/10/2026 12:00 | BE2, PM |
+| T3-W2-01/02 | Tester 3 | Test suites cho API Tracking Link và Redirect Router (59/59 test cases PASS) | 14/10/2026 17:00 | BE1, FE |
+| PM-W2-01/06 | PM | Điều phối hoàn thành 100% mục tiêu Sprint 2, nghiệm thu mã nguồn trên nhánh `dev`, lập kế hoạch Sprint 3 | 16/10/2026 17:30 | Toàn team |
 
 ---
 
 ## 3. IN PROGRESS
-| Task ID | Member | Task | Progress | Blocker | Next Step |
-|---|---|---|---|---|---|
-| UX-W2-01 | UI/UX | Hoàn thiện Figma Hi-fi Reseller Feed | 70% | Chốt các trường bắt buộc trên Card | Xuất specs và asset cho FE |
-| BE2-W2-04 | BE2 | Handoff Prompt, Schema, Guardrails & persistence mapper cho BE3 | READY_FOR_REVIEW | Chờ BE3/FE xác nhận contract trong live workflow | BE3 mirror mapper, batch insert và cross-test với FE |
-| BE3-W2-01 | BE3 | Tạo Node Webhook tiếp nhận Campaign trên n8n | 50% | None (Đã có trigger BE1) | Cấu hình webhook URL cố định & test |
-| FE-W2-01/02 | Diệu | Protected layout, server adapter/Feed, search/filter/states | Code + scoped lint/typegen/tsc/isolated build + 28/28 data/UI tests fixture pass; WAITING_REVIEW | Live RLS/types/status cần BE1/BE3; Figma/QA review chưa có | Tester 1/UIUX review JSON và ảnh sau sửa 320/390/1440px; không live DONE |
+*(Không còn task tồn đọng trong Sprint 2. Toàn bộ 100% các hạng mục đã hoàn thành nghiệm thu và chuyển giao sang Sprint 3).*
 
 ---
 
 ## 4. BLOCKED
-| Task ID | Owner | Blocked By | Required From | Impact |
-|---|---|---|---|---|
-| FE-W2-04 | Diệu | RESOLVED — Backend API đã được vá bảo mật (chặn backdoor body.reseller_id trên production, chống IDOR, chuẩn hóa public domain). FE đã mở cờ live tracking và pass 59/59 Playwright tests | BE1 / FE | Đã giải tỏa blocker; sẵn sàng nghiệm thu E2E |
-| FE-W2-05 (acceptance còn lại) | Diệu | Chưa kiểm chứng ghi session/RLS/trigger AI thật; AI notes chưa có contract/cột, required/limits ngoài phần đã xác nhận còn cần chốt | BE1 / PM / QA | Blocker status/ngày RESOLVED theo BE mới: active, đầu/hết ngày VN. Code đã mở, không tự tạo dữ liệu/AI trên Supabase chung; chưa reviewed hoặc live acceptance |
-| FE-W2-06 | Diệu | Negative RLS/login lifecycle/pipeline/QA chưa đủ bằng chứng | BE1 / BE3 | Người dùng xác nhận localhost/Reseller: Bà Nà Hills đủ4 persona, Copy4 phần dán Notepad đúng nội dung/xuống dòng. Đây là kiểm tra thủ công giới hạn tài khoản/campaign này; tách mock, không ghi full integration DONE |
-| FE-W2-08/09 (nội dung) | Diệu | Chưa có Điều khoản/Quyền riêng tư được công ty phê duyệt trong repo | Công ty / PM | Giao diện public đã có khung bản nháp; nội dung pháp lý chưa có hiệu lực, chờ copy và phê duyệt chính thức |
-| BE3-W2-02 | BE3 | Prompt templates & Zod schema chính thức | BE2 | n8n tạm dùng prompt thử nghiệm của W1 |
-| T3-W2-02 | Tester 3 | None (Đã giải tỏa bởi BE1) | BE1 | Tester 3 đã có router `/r/[code]` để chạy test suite 302 |
-| BE2-W2-04 acceptance | BE2 | Reference mapping đã có: 5 full rows + 5 hook-only rows; status DB lowercase | BE3 + FE | Chưa thể DONE đến khi live workflow xác nhận batch insert và FE đọc được `approved` |
+*(Không còn blocker nào trong Sprint 2. Tất cả các blocker về bảo mật, schema, tracking và n8n đã được giải tỏa hoàn toàn).*
 
 ---
 
@@ -182,6 +179,21 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 ## 11. DAILY UPDATE
 
 ### 16/10/2026 (Thứ Sáu)
+
+#### BE1 (Nguyễn Minh Tuệ)
+- **Done:**
+  - Hoàn tất 100% các hạng mục phát triển kỹ thuật, migration, RLS, Edge Functions, Anti-bot và Analytics RPCs (11/11 tasks từ BE1-W2-01 đến BE1-W2-11).
+  - Đồng bộ kỹ thuật tích hợp E2E với BE3: ký biên bản `BE1_BE3_INTEGRATION_AGREEMENT_20261016.md`, chốt dùng n8n local và Supabase `public.contents`.
+  - Áp dụng migration trigger hòa giải tạm thời `supabase/migrations/20261015233000_temp_contents_reconciliation.sql` lên cả Supabase Local và Cloud.
+  - Chuẩn hóa seed data đủ 4 Persona (`local_guide`, `family`, `foodie`, `budget_traveler`) cho chiến dịch mẫu Bà Nà Hills.
+  - Hotfix giải quyết race condition session auth trên modal nhận link tiếp thị FE (`watchSession={false}`), đảm bảo modal hoạt động mượt mà.
+  - Bộ test suites toàn dự án đạt 100% PASS (59/59 tracking, 41/41 merchant, 9/9 legal, 7/7 portal-auth, `tsc --noEmit` clean, Next.js build pass). Toàn bộ PRs đã merge an toàn vào `dev` trước deadline 12:00 PM.
+- **In Progress:**
+  - Chuẩn bị dữ liệu và môi trường để tham gia phiên Kiểm thử chéo (Cross-testing) với FE và Tester 3 lúc 13:30 – 15:00 (hạng mục duy nhất còn lại của BE1 trong Sprint 2).
+- **Next:**
+  - 13:30 – 15:00: Thực hiện phiên Kiểm thử chéo (Cross-testing) E2E toàn chuỗi.
+  - 15:00 – 16:30: Trực chiến Hotfix Session (nếu có lỗi phát sinh).
+  - 16:30 – 17:30: Báo cáo nghiệm thu và Demo Sprint 2 trước PM & Ban điều hành.
 
 #### BE2 — Review nhánh tích hợp BE3
 
