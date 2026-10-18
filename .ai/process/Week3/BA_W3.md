@@ -59,22 +59,22 @@ flowchart TD
     BA["Business Analyst (BA)"] -->|UI/UX Specs, PWA Flow & Media Grid| UIUX["UI/UX Designer"]
     BA -->|PWA Mobile Requirements, Web Share API| FE["FE Lead (Diệu)"]
     BA -->|Dumb UI Specs thẻ MediaCard & Guidelines| T3["Tester 3 (FE Phụ)"]
-    BA -->|Schema Orders, Commissions, Media DB, Math| BE1["BE1 Lead (Tuệ)"]
+    BA -->|Schema Orders, Commissions, Media DB, Core Video Engine| BE1["BE1 Lead (Tuệ)"]
     BA -->|Intent Taxonomy & Multimodal Video Prompt| BE2["BE2 Lead (Huỳnh)"]
-    BA -->|Notification Webhooks & Video Pipeline| BE3["BE3 Lead (Tú)"]
+    BA -->|Notification Webhooks & PostHog Funnel| BE3["BE3 Lead (Tú)"]
     BA -->|Acceptance Criteria PWA Mobile & Wallet| T1["Tester 1 (Lead QA)"]
     BA -->|Hallucination Test Cases & Video Groundedness| T2["Tester 2 (AI Safety)"]
 ```
 
 ### Chi tiết bàn giao theo vai trò:
-1. **BE1 (Supabase DB & Attribution):**
+1. **BE1 (Supabase DB, Attribution & Core Video Engine):**
    - Tài liệu: [BA_COMMERCE_AND_COMMISSION_SPEC.md](BA_COMMERCE_AND_COMMISSION_SPEC.md) (Mục 2 & 3).
-   - Nội dung: Công thức tính hoa hồng `gross_commission`, `platform_fee (20%)`, `reseller_commission (80%)`, bảng `orders`, `commissions`, bảng `media_references`.
+   - Nội dung: Công thức tính hoa hồng `gross_commission`, `platform_fee (20%)`, `reseller_commission (80%)`, bảng `orders`, `commissions`, bảng `media_references`, và kiến trúc Core Video Generation Engine (ghép assets tour với kịch bản BE2 để sinh video 9:16).
 2. **BE2 (AI Sales Agent & Multimodal):**
    - Tài liệu: [BA_AI_SALES_AGENT_SPEC.md](BA_AI_SALES_AGENT_SPEC.md).
-   - Nội dung: Bảng từ khóa Buying Intent (*"đặt vé", "giá bao nhiêu", "mua thế nào"*), kịch bản bung link checkout, prompt phân tích kịch bản video mẫu.
-3. **BE3 (n8n Automation & Video):**
-   - Nội dung: Payload webhook thông báo đơn hàng (Telegram/Zalo) và luồng nhận diện video mẫu để chạy pipeline tạo video.
+   - Nội dung: Bảng từ khóa Buying Intent (*"đặt vé", "giá bao nhiêu", "mua thế nào"*), kịch bản bung link checkout, prompt phân tích kịch bản video mẫu (bàn giao cho BE1 tích hợp).
+3. **BE3 (n8n Automation, Notifications & PostHog):**
+   - Nội dung: Payload webhook thông báo đơn hàng (Telegram/Zalo), cấu hình phễu chuyển đổi 5 bước PostHog Analytics, và webhook alert khi video được BE1 sinh hoàn tất.
 4. **FE Lead (Diệu):**
    - Nội dung: Yêu cầu PWA Core, thanh Bottom Nav, tích hợp Web Share API, khung chat bottom sheet di động và màn hình Ví hoa hồng.
 5. **Tester 3 (FE Phụ / Trainee):**

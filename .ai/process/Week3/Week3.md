@@ -67,19 +67,22 @@ Kế thừa kết quả nghiệm thu thành công của Tuần 2 (Nhà máy nộ
   * `T3-FE-W3-02 (Static Video Guidelines Modal)`: Viết component modal tĩnh `src/components/merchant/video-guidelines-modal.tsx` hiển thị nội dung hướng dẫn quy chuẩn video 9:16 (độ phân giải, thời lượng khuyến nghị 15-60s) cho Merchant.
 
 ### B. Backend Team
-* **Backend 1 — Core Database & Attribution (BE1-W3):**
+* **Backend 1 — Core Database, Attribution & Core Video Generation Engine (BE1-W3):**
   * `BE1-W3-01`: Thiết kế migration bảng `orders` (id, booking_ref, amount, merchant_id, product_id, reseller_id, click_id, status) và bảng `commissions`.
   * `BE1-W3-02`: Migration bảng `media_references` (id, merchant_id, title, video_url, platform, style_tags, created_at) cho Merchant Video Library.
   * `BE1-W3-03`: Xây dựng API `POST /api/merchant/media` quản lý tải lên/lưu trữ liên kết video mẫu.
   * `BE1-W3-04`: Engine ghi nhận đơn hàng (Attribution Engine): liên kết chính xác đơn hàng với lượt click hợp lệ trong bảng `clicks` và tính toán chia sẻ hoa hồng qua RPC `get_reseller_wallet_summary`.
   * `BE1-W3-05`: Dọn dẹp dứt điểm các trigger hòa giải tạm thời của Tuần 2.
+  * `BE1-W3-06 (Core Video Generation Engine)`: Trực tiếp xây dựng module tổng hợp video (`src/lib/video-engine/generator.ts`) trong backend codebase: kết nối kịch bản JSON từ BE2 với assets tour (ảnh/clip), xử lý ghép phân cảnh, lồng text hook 3s đầu, render video du lịch chuẩn 9:16.
+  * `BE1-W3-07 (Video API & Storage Pipeline)`: Xây dựng API `POST /api/merchant/video/generate`, quản lý tiến trình async job, upload video thành phẩm vào Supabase Storage bucket `campaign-videos` và lưu URL vào bảng `contents`.
 * **Backend 2 — AI Sales Agent & Multimodal Video Prompt (BE2-W3):**
   * `BE2-W3-01`: Tinh chỉnh System Prompt cho AI Sales Agent: Nhận diện ý định mua hàng (Buying Intent) để chủ động đưa ra link thanh toán có gắn ref.
   * `BE2-W3-02`: Thiết kế bộ Prompt Multimodal cho Gemini: Phân tích kịch bản video mẫu (Video Script & Visual Scenes Extractor) để bóc tách phong cách quay, âm thanh, nhịp cắt cảnh.
-  * `BE2-W3-03`: Bộ Prompt sinh kịch bản video mới tự động áp dụng thông tin sản phẩm và chiến dịch của Merchant.
-* **Backend 3 — Automation & Video Pipeline (BE3-W3):**
+  * `BE2-W3-03`: Bộ Prompt sinh kịch bản video mới tự động áp dụng thông tin sản phẩm và chiến dịch của Merchant (bàn giao cho BE1 tích hợp vào Core Video Engine).
+* **Backend 3 — Automation, Notifications & Analytics Pipeline (BE3-W3):**
   * `BE3-W3-01`: Xây dựng Workflow n8n tự động bắn thông báo (Webhook / Telegram / Zalo) khi Reseller có lượt click mới hoặc đơn hàng phát sinh.
-  * `BE3-W3-02`: Workflow n8n tích hợp pipeline sinh video / tự động hóa video từ kịch bản mẫu và asset sản phẩm du lịch của Merchant.
+  * `BE3-W3-02`: Thiết lập tích hợp PostHog Dashboard theo dõi 5 bước trong phễu chuyển đổi (*Click → Chat Open → Message → Checkout → Purchase*).
+  * `BE3-W3-03`: Workflow n8n thông báo thời gian thực khi Video chiến dịch được Core Engine của BE1 sinh thành công.
 
 ### C. QA Team
 * **Tester 1 (QA Lead & Hybrid QA):**
@@ -112,10 +115,10 @@ Kế thừa kết quả nghiệm thu thành công của Tuần 2 (Nhà máy nộ
 | :--- | :--- |
 | **Thứ Hai (19/10)** | Họp Kick-off Sprint 3 (09:00 AM). Phổ biến quy chế an toàn cho Tester 3. Chốt cấu trúc PWA Manifest, Hợp đồng bảng `orders`, schema `media_references` và kịch bản Demo C1/C3. UI/UX bàn giao bản vẽ Mobile & Media Library. |
 | **Thứ Ba (20/10)** | BE1 tạo migration bảng `orders`, `commissions`, `media_references`. FE Lead cấu hình PWA Core (`manifest.json`, Service Worker) và Bottom Nav. Tester 3 bắt đầu cắt component tĩnh `MediaCard`. BE2 viết prompt Multimodal video. |
-| **Thứ Tư (21/10)** | FE Lead hoàn thiện Web Share 1 chạm và Canvas QR. Tester 3 hoàn thành Modal Video Guidelines và nộp PR cho FE Lead review. BE1 hoàn thiện API Video Library. BE3 dựng workflow n8n thông báo đơn hàng. |
-| **Thứ Năm (22/10)** | Tích hợp E2E: Merchant tải video mẫu $\rightarrow$ AI phân tích kịch bản $\rightarrow$ Đặt đơn hàng thử nghiệm $\rightarrow$ Ghi nhận hoa hồng vào Ví Reseller. Tối ưu khung chat mobile cho khách hàng. |
-| **Thứ Sáu (23/10)** | QA chạy Regression Test toàn sàn (Desktop, PWA Mobile, Video Library). Rà soát và fix 100% bug High/Critical. Chạy diễn tập kịch bản Demo C3 và C1. Freeze code lúc 17:00. |
-| **Thứ Bảy (24/10)** | Họp Review Sprint 3 & Diễn tập Demo nghiệm thu MVP toàn diện (Showcase PWA trên điện thoại thật bằng Cloudflared và trình diễn Merchant Video Library). |
+| **Thứ Tư (21/10)** | FE Lead hoàn thiện Web Share 1 chạm và Canvas QR. Tester 3 hoàn thành Modal Video Guidelines và nộp PR cho FE Lead review. BE1 hoàn thiện API Video Library và bắt đầu module Core Video Engine. BE3 dựng workflow n8n thông báo đơn hàng. |
+| **Thứ Năm (22/10)** | BE1 hoàn thiện Core Video Generation Engine & Storage pipeline. Tích hợp E2E: Merchant tải video mẫu $\rightarrow$ AI phân tích kịch bản $\rightarrow$ BE1 render video 9:16 $\rightarrow$ Đặt đơn hàng thử nghiệm $\rightarrow$ Ghi nhận hoa hồng vào Ví Reseller $\rightarrow$ BE3 bắn thông báo Telegram. Tối ưu khung chat mobile cho khách hàng. |
+| **Thứ Sáu (23/10)** | QA chạy Regression Test toàn sàn (Desktop, PWA Mobile, Video Library & Video Engine). Rà soát và fix 100% bug High/Critical. Chạy diễn tập kịch bản Demo C3 và C1. Freeze code lúc 17:00. |
+| **Thứ Bảy (24/10)** | Họp Review Sprint 3 & Diễn tập Demo nghiệm thu MVP toàn diện (Showcase PWA trên điện thoại thật bằng Cloudflared và trình diễn Merchant Video Library kèm Video do BE1 Core Engine tạo). |
 
 ---
 

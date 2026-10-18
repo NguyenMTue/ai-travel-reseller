@@ -11,7 +11,7 @@
 ## 1. Context
 - Sprint 2 đã hoàn thành xuất sắc 100% mục tiêu (AI Content Factory, Tracking Link, Reseller Feed, Merchant Form, 6/6 Regression test PASS), toàn bộ mã nguồn đã merge an toàn vào `dev`.
 - Trọng tâm Tuần 3:
-  1. Điều phối triển khai trơn tru 3 trụ cột kỹ thuật mới: (1) Order Attribution & Commission Engine, (2) PWA Mobile Suite (Reseller & Khách hàng), (3) Thư viện Video Mẫu & Tạo Video AI cho Merchant.
+  1. Điều phối triển khai trơn tru 3 trụ cột kỹ thuật mới: (1) Order Attribution & Commission Engine, (2) PWA Mobile Suite (Reseller & Khách hàng), (3) Thư viện Video Mẫu & Core AI Video Generation Engine (do BE1 trực tiếp làm chủ phần lõi kỹ thuật, BE3 phụ trách notification & analytics).
   2. Thực thi nghiêm ngặt cơ chế kiểm soát rủi ro nhân sự khi chuyển Tester 3 sang làm FE phụ (cô lập nhánh, Dumb UI, review 2 cấp).
   3. Chuẩn bị chu đáo kịch bản diễn tập Demo khi chưa deploy (Phương án C3 qua Cloudflared và C1 qua Chrome Frame).
 - Nguồn tham chiếu: [Roadmap.md](../Roadmap.md), [Week3.md](Week3.md), [PromptCreateTask.md](../PromptCreateTask.md), [ai_progress_evaluation_template.md](../ai_progress_evaluation_template.md).

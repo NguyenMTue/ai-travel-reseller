@@ -69,16 +69,18 @@ flowchart LR
 
 ---
 
-### 2.3 BACKEND 1 — BE1 (Supabase DB, Orders & Commission RPCs)
+### 2.3 BACKEND 1 — BE1 (Supabase DB, Orders, Commission RPCs & Core Video Generation Engine)
 - **Tài liệu BA bàn giao:**
   - Cấu trúc bảng `orders` mở rộng và Index (Mục 6 [BA_COMMERCE_AND_COMMISSION_SPEC.md](file:///E:/Tue/MyProject/AITravelReseller/ai-travel-reseller/.ai/process/Week3/BA_COMMERCE_AND_COMMISSION_SPEC.md)).
   - Công thức tính toán toán học chuẩn & Quy tắc làm tròn (Mục 3).
   - Quy tắc Attribution 30 ngày & State Machine đơn hàng (Mục 2 & 4).
+  - Cấu trúc lưu trữ `media_references` và quy chuẩn video 9:16 cho Core Video Engine.
 - **Nhiệm vụ trọng tâm Tuần 3:**
   1. Viết migration cập nhật bảng `orders` (bổ sung `gross_commission`, `platform_fee`, `reseller_commission`, `paid_at`...).
   2. Viết Postgres Function / RPC tính toán hoa hồng tự động khi đơn hàng chuyển sang `confirmed`.
   3. Viết Route Handler tiếp nhận Webhook đơn hàng từ Merchant (`POST /api/webhooks/orders`).
   4. Cấu hình RLS bảo vệ bảng `orders`: Reseller chỉ thấy đơn của mình, Merchant thấy đơn của các tour thuộc sở hữu mình.
+  5. **Xây dựng Core AI Video Generation Engine backend:** Endpoint `POST /api/merchant/video/generate` tiếp nhận kịch bản từ BE2, trích xuất assets sản phẩm, tổng hợp video du lịch dọc 9:16, upload Supabase Storage bucket `campaign-videos` và lưu URL vào `contents.video_url`.
 - **Acceptance Criteria (Given - When - Then):**
   - **Scenario 1: Tính toán hoa hồng tự động khi có đơn hàng**
     - **Given** một đơn hàng mới được tạo với `order_amount` = 1.000.000 VNĐ và `commission_rate` = 10%,
@@ -88,7 +90,11 @@ flowchart LR
     - **Given** Reseller A đang đăng nhập,
     - **When** Reseller A thực hiện truy vấn `SELECT * FROM orders WHERE reseller_id = 'id_reseller_b'`,
     - **Then** Supabase RLS trả về mảng rỗng `[]`, tuyệt đối không rò rỉ đơn hàng của Reseller khác.
-- **Hành động ngay Thứ Hai (Day 1):** Viết file SQL Migration mở rộng bảng `orders` và tạo các Index cần thiết.
+  - **Scenario 3: Sinh video chiến dịch chuẩn 9:16 từ Core Engine**
+    - **Given** kịch bản phân cảnh hợp lệ từ BE2 và assets hình ảnh tour trong kho `products`,
+    - **When** API `POST /api/merchant/video/generate` được kích hoạt,
+    - **Then** Core Engine tổng hợp video định dạng dọc 9:16 có text hook 3s đầu, upload thành công vào bucket `campaign-videos` và lưu URL hợp lệ vào `contents.video_url`.
+- **Hành động ngay Thứ Hai (Day 1):** Viết file SQL Migration mở rộng bảng `orders`, `media_references` và tạo các Index cần thiết.
 
 ---
 
@@ -115,14 +121,14 @@ flowchart LR
 
 ---
 
-### 2.5 BACKEND 3 — BE3 (Automation, n8n & PostHog Analytics)
+### 2.5 BACKEND 3 — BE3 (Automation, Notifications & PostHog Analytics)
 - **Tài liệu BA bàn giao:**
   - Danh mục sự kiện Tracking và Phễu chuyển đổi (Mục 5 [BA_W3.md](file:///E:/Tue/MyProject/AITravelReseller/ai-travel-reseller/.ai/process/Week3/BA_W3.md)).
   - Luồng Webhook thông báo đơn hàng cho Reseller.
 - **Nhiệm vụ trọng tâm Tuần 3:**
-  1. Cấu hình n8n Workflow: `Order-Notification-Pipeline` (Lắng nghe sự kiện đơn hàng mới từ Supabase → Gửi thông báo hoa hồng cho Reseller).
+  1. Cấu hình n8n Workflow: `Order-Notification-Pipeline` (Lắng nghe sự kiện đơn hàng mới từ Supabase → Gửi thông báo hoa hồng cho Reseller qua Telegram/Zalo).
   2. Thiết lập tích hợp PostHog Dashboard theo dõi 5 bước trong phễu chuyển đổi: *Click → Chat Open → Message Sent → Checkout Click → Purchase*.
-  3. Hỗ trợ backup service ghi nhận log tracking khi lưu lượng click tăng cao.
+  3. Cấu hình n8n Workflow thông báo thời gian thực khi Video chiến dịch được Core Engine của BE1 hoàn thành.
 - **Acceptance Criteria (Given - When - Then):**
   - **Scenario 1: Gửi thông báo khi có đơn hàng thành công**
     - **Given** một đơn hàng của Reseller chuyển trạng thái sang `confirmed`,

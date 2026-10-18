@@ -23,19 +23,22 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | BE1-W3-01 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Migration bảng `orders` & `commissions` (Attribution schema) | READY | 19/10 | 20/10 12:00 |
 | BE1-W3-02 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Migration bảng `media_references` cho Merchant Video Library | READY | 19/10 | 20/10 17:00 |
 | BE1-W3-03 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | API `POST /api/merchant/media` quản lý video mẫu | READY | 20/10 | 21/10 12:00 |
-| BE1-W3-04 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Attribution Engine & RPC `get_reseller_wallet_summary` | READY | 20/10 | 22/10 17:00 |
+| BE1-W3-04 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Attribution Engine & RPC `get_reseller_wallet_summary` | READY | 20/10 | 21/10 17:00 |
 | BE1-W3-05 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Gỡ bỏ nợ kỹ thuật trigger hòa giải tạm thời Tuần 2 | READY | 19/10 | 19/10 12:00 |
+| BE1-W3-06 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Core AI Video Generation Engine (`generator.ts`) từ kịch bản BE2 & asset tour | READY | 21/10 | 22/10 17:00 |
+| BE1-W3-07 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Video API `POST /api/merchant/video/generate` & Storage pipeline `campaign-videos` | READY | 22/10 | 23/10 12:00 |
 | BE2-W3-01 | Nguyễn Huỳnh | BE2 | System Prompt AI Sales Agent nhận diện Buying Intent | READY | 19/10 | 20/10 17:00 |
 | BE2-W3-02 | Nguyễn Huỳnh | BE2 | Prompt Multimodal Gemini phân tích kịch bản video mẫu | READY | 19/10 | 21/10 12:00 |
-| BE2-W3-03 | Nguyễn Huỳnh | BE2 | Prompt sinh kịch bản video áp dụng thông tin chiến dịch | READY | 21/10 | 22/10 12:00 |
+| BE2-W3-03 | Nguyễn Huỳnh | BE2 | Prompt sinh kịch bản video áp dụng thông tin chiến dịch (bàn giao BE1) | READY | 21/10 | 22/10 12:00 |
 | BE3-W3-01 | Thái Thanh Tú | BE3 | Workflow n8n thông báo đơn hàng / click mới qua Telegram/Zalo | READY | 20/10 | 21/10 17:00 |
-| BE3-W3-02 | Thái Thanh Tú | BE3 | Workflow n8n tích hợp pipeline tạo video AI tự động | READY | 21/10 | 23/10 12:00 |
+| BE3-W3-02 | Thái Thanh Tú | BE3 | Tích hợp PostHog Analytics Dashboard & Phễu chuyển đổi 5 bước | READY | 21/10 | 22/10 17:00 |
+| BE3-W3-03 | Thái Thanh Tú | BE3 | Workflow n8n thông báo thời gian thực khi Video sinh xong từ Core Engine | READY | 22/10 | 23/10 12:00 |
 | FE-W3-01 | Diệu | FE Lead | Cấu hình PWA Core (`manifest.json`, Service Worker, Meta) | READY | 19/10 | 20/10 17:00 |
 | FE-W3-02 | Diệu | FE Lead | Bottom Navigation Bar & Responsive Safe Area cho Reseller | READY | 20/10 | 21/10 12:00 |
 | FE-W3-03 | Diệu | FE Lead | Tích hợp Web Share API 1 chạm & Canvas xuất ảnh QR | READY | 21/10 | 21/10 17:00 |
 | FE-W3-04 | Diệu | FE Lead | Giao diện Chat AI Sales Agent Mobile (Bottom Sheet widget) | READY | 21/10 | 22/10 17:00 |
 | FE-W3-05 | Diệu | FE Lead | Giao diện Màn hình Ví hoa hồng Reseller (`/reseller/wallet`) | READY | 22/10 | 23/10 12:00 |
-| FE-W3-06 | Diệu | FE Lead | Tích hợp Media Library & Kích hoạt tạo Video AI trên Merchant Portal | READY | 22/10 | 23/10 17:00 |
+| FE-W3-06 | Diệu | FE Lead | Tích hợp Media Library & Nút kích hoạt tạo Video qua API BE1 | READY | 22/10 | 23/10 17:00 |
 | T3-FE-W3-01 | Tester 3 | FE Phụ | Cắt Component tĩnh `MediaCard` (`src/components/merchant/media-card.tsx`) | READY | 20/10 | 21/10 12:00 |
 | T3-FE-W3-02 | Tester 3 | FE Phụ | Modal hướng dẫn quy chuẩn video 9:16 (`video-guidelines-modal.tsx`) | READY | 21/10 | 21/10 17:00 |
 | UX-W3-01 | UI/UX Designer | UI/UX | Figma Hi-fi Reseller Mobile (Bottom Nav, Thẻ chạm, Ví) | READY | 19/10 | 20/10 12:00 |
@@ -72,9 +75,10 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | UI/UX | Tester 3 (FE phụ) | Bản vẽ giao diện thẻ `MediaCard` tĩnh | READY | 20/10 |
 | BE1 | FE Lead | Database migration `orders`, `commissions` & Types gen | READY | 20/10 |
 | BE1 | Tester 3 (FE phụ) | Mock schema interface props cho `MediaCard` | READY | 20/10 |
-| BE2 | BE3 | Prompt Multimodal phân tích kịch bản video mẫu | READY | 21/10 |
+| BE2 | BE1 | Prompt Multimodal & JSON schema kịch bản video nạp Core Engine | READY | 21/10 |
 | Tester 3 (FE phụ) | FE Lead / PM | PR nhánh `feature/fe-t3-static-components` (Dumb UI components) | READY | 21/10 |
-| BE3 | FE Lead | Endpoint / Webhook trigger sinh video mẫu và cập nhật status | READY | 22/10 |
+| BE1 | FE Lead | Endpoint API `POST /api/merchant/video/generate` & status polling | READY | 22/10 |
+| BE1 | BE3 | Webhook event báo video hoàn tất để kích hoạt n8n notification | READY | 23/10 |
 | FE Lead | Tester 1 | Bản build PWA Mobile Suite trên dev server | READY | 22/10 |
 
 ---
