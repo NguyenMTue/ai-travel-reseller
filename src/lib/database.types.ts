@@ -1,4 +1,4 @@
-﻿
+
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -98,6 +98,43 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"commissions": {
+                  Row: {
+                    "campaign_id": string | null,"created_at": string,"gross_amount": number,"id": string,"merchant_id": string,"net_amount": number,"order_id": string,"payout_id": string | null,"platform_fee": number,"reseller_id": string,"status": string,"updated_at": string
+                  }
+                  Insert: {
+                    "campaign_id"?: string | null,"created_at"?: string,"gross_amount"?: number,"id"?: string,"merchant_id": string,"net_amount"?: number,"order_id": string,"payout_id"?: string | null,"platform_fee"?: number,"reseller_id": string,"status"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "campaign_id"?: string | null,"created_at"?: string,"gross_amount"?: number,"id"?: string,"merchant_id"?: string,"net_amount"?: number,"order_id"?: string,"payout_id"?: string | null,"platform_fee"?: number,"reseller_id"?: string,"status"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "commissions_campaign_id_fkey"
+      columns: ["campaign_id"]
+isOneToOne: false
+      referencedRelation: "campaigns"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "commissions_merchant_id_fkey"
+      columns: ["merchant_id"]
+isOneToOne: false
+      referencedRelation: "merchants"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "commissions_order_id_fkey"
+      columns: ["order_id"]
+isOneToOne: false
+      referencedRelation: "orders"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "commissions_reseller_id_fkey"
+      columns: ["reseller_id"]
+isOneToOne: false
+      referencedRelation: "resellers"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"contents": {
                   Row: {
                     "campaign_id": string | null,"caption": string | null,"created_at": string | null,"cta": string | null,"hook": string | null,"id": string,"persona": string | null,"product_id": string | null,"reseller_id": string | null,"script": string | null,"status": string | null,"tracking_url": string | null,"video_url": string | null
@@ -129,6 +166,25 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"media_references": {
+                  Row: {
+                    "analysis_metadata": Json,"created_at": string,"duration": number | null,"id": string,"merchant_id": string,"platform": string,"style_tags": string[],"thumbnail_url": string | null,"title": string,"updated_at": string,"video_url": string
+                  }
+                  Insert: {
+                    "analysis_metadata"?: Json,"created_at"?: string,"duration"?: number | null,"id"?: string,"merchant_id": string,"platform"?: string,"style_tags"?: string[],"thumbnail_url"?: string | null,"title": string,"updated_at"?: string,"video_url": string
+                  }
+                  Update: {
+                    "analysis_metadata"?: Json,"created_at"?: string,"duration"?: number | null,"id"?: string,"merchant_id"?: string,"platform"?: string,"style_tags"?: string[],"thumbnail_url"?: string | null,"title"?: string,"updated_at"?: string,"video_url"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "media_references_merchant_id_fkey"
+      columns: ["merchant_id"]
+isOneToOne: false
+      referencedRelation: "merchants"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"merchants": {
                   Row: {
                     "address": string | null,"created_at": string | null,"description": string | null,"id": string,"logo": string | null,"name": string,"phone": string | null,"status": string | null,"website": string | null
@@ -144,16 +200,28 @@ isOneToOne: false
                   ]
                 },"orders": {
                   Row: {
-                    "amount": number | null,"booking_reference": string | null,"commission_amount": number | null,"created_at": string | null,"id": string,"merchant_id": string | null,"product_id": string | null,"reseller_id": string | null,"status": string | null
+                    "amount": number | null,"booking_reference": string | null,"campaign_id": string | null,"click_id": string | null,"commission_amount": number | null,"commission_rate": number | null,"created_at": string | null,"currency": string,"customer_name": string | null,"customer_phone": string | null,"flag_self_purchase": boolean,"gross_commission": number,"id": string,"merchant_id": string | null,"notes": string | null,"paid_at": string | null,"platform_fee": number,"product_id": string | null,"reseller_commission": number,"reseller_id": string | null,"status": string | null,"updated_at": string
                   }
                   Insert: {
-                    "amount"?: number | null,"booking_reference"?: string | null,"commission_amount"?: number | null,"created_at"?: string | null,"id"?: string,"merchant_id"?: string | null,"product_id"?: string | null,"reseller_id"?: string | null,"status"?: string | null
+                    "amount"?: number | null,"booking_reference"?: string | null,"campaign_id"?: string | null,"click_id"?: string | null,"commission_amount"?: number | null,"commission_rate"?: number | null,"created_at"?: string | null,"currency"?: string,"customer_name"?: string | null,"customer_phone"?: string | null,"flag_self_purchase"?: boolean,"gross_commission"?: number,"id"?: string,"merchant_id"?: string | null,"notes"?: string | null,"paid_at"?: string | null,"platform_fee"?: number,"product_id"?: string | null,"reseller_commission"?: number,"reseller_id"?: string | null,"status"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "amount"?: number | null,"booking_reference"?: string | null,"commission_amount"?: number | null,"created_at"?: string | null,"id"?: string,"merchant_id"?: string | null,"product_id"?: string | null,"reseller_id"?: string | null,"status"?: string | null
+                    "amount"?: number | null,"booking_reference"?: string | null,"campaign_id"?: string | null,"click_id"?: string | null,"commission_amount"?: number | null,"commission_rate"?: number | null,"created_at"?: string | null,"currency"?: string,"customer_name"?: string | null,"customer_phone"?: string | null,"flag_self_purchase"?: boolean,"gross_commission"?: number,"id"?: string,"merchant_id"?: string | null,"notes"?: string | null,"paid_at"?: string | null,"platform_fee"?: number,"product_id"?: string | null,"reseller_commission"?: number,"reseller_id"?: string | null,"status"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "orders_campaign_id_fkey"
+      columns: ["campaign_id"]
+isOneToOne: false
+      referencedRelation: "campaigns"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "orders_click_id_fkey"
+      columns: ["click_id"]
+isOneToOne: false
+      referencedRelation: "clicks"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "orders_merchant_id_fkey"
       columns: ["merchant_id"]
 isOneToOne: false
@@ -300,7 +368,25 @@ isOneToOne: false
 { Args: { "filter_product_id"?: string,"match_count"?: number,"match_threshold"?: number,"query_embedding": string }; Returns: {
               "chunk_index": number,"content": string,"id": string,"metadata": Json,"product_id": string,"similarity": number
             }[]
-                           }
+                           },
+"get_reseller_wallet_summary":
+{ Args: { "p_reseller_id": string }; Returns: Json
+                            },
+"process_order_attribution":
+{ Args: {
+              "p_booking_reference": string,
+              "p_campaign_id"?: string | null,
+              "p_click_id"?: string | null,
+              "p_customer_name"?: string | null,
+              "p_customer_phone"?: string | null,
+              "p_merchant_id": string,
+              "p_notes"?: string | null,
+              "p_order_amount": number,
+              "p_product_id": string,
+              "p_reseller_id"?: string | null,
+              "p_status"?: string | null
+            }; Returns: Json
+                            }
           }
           Enums: {
             [_ in never]: never
