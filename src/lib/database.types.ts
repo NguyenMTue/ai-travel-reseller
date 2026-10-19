@@ -368,7 +368,25 @@ isOneToOne: false
 { Args: { "filter_product_id"?: string,"match_count"?: number,"match_threshold"?: number,"query_embedding": string }; Returns: {
               "chunk_index": number,"content": string,"id": string,"metadata": Json,"product_id": string,"similarity": number
             }[]
-                           }
+                           },
+"get_reseller_wallet_summary":
+{ Args: { "p_reseller_id": string }; Returns: Json
+                            },
+"process_order_attribution":
+{ Args: {
+              "p_booking_reference": string,
+              "p_campaign_id"?: string | null,
+              "p_click_id"?: string | null,
+              "p_customer_name"?: string | null,
+              "p_customer_phone"?: string | null,
+              "p_merchant_id": string,
+              "p_notes"?: string | null,
+              "p_order_amount": number,
+              "p_product_id": string,
+              "p_reseller_id"?: string | null,
+              "p_status"?: string | null
+            }; Returns: Json
+                            }
           }
           Enums: {
             [_ in never]: never
