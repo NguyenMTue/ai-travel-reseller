@@ -34,7 +34,8 @@ export function CampaignDetailView({ campaign, variants, contentStatus, contentR
           Kế hoạch Sprint 3: Hoàn thiện logic shouldInvalidateTrackingSession và bật lại {!preview}. */}
       <TrackingScopeProvider scope={viewerKey && campaign.product_id && campaign.products?.id === campaign.product_id
         ? { campaign_id: campaign.id, product_id: campaign.product_id, sessionKey: viewerKey } : null} watchSession={false}>
-      <ContentKit variants={variants} contentStatus={contentStatus} contentReason={contentReason} />
+      <ContentKit variants={variants} contentStatus={contentStatus} contentReason={contentReason}
+        campaignId={campaign.id} productId={campaign.product_id} preview={preview} />
       {tracking ?? <TrackingLinkModal key={`${campaign.id}:${campaign.product_id ?? "none"}`} input={campaign.product_id && campaign.products?.id === campaign.product_id
         ? { campaign_id: campaign.id, product_id: campaign.product_id } : null} />}
       </TrackingScopeProvider>
