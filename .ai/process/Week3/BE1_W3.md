@@ -36,21 +36,21 @@ BE1 sẽ trực tiếp dẫn dắt và thực thi mắt xích tài chính cùng 
 ## 3. TODAY — MUST DO (Thứ Hai 19/10/2026)
 | Priority | Task | Why | Dependency | Output | Estimated Effort | Status |
 |---|---|---|---|---|---|---|
-| P0 | Họp Kick-off Sprint 3 (09:00 AM) & Phổ biến quy chế an toàn cho Tester 3 | Thống nhất hợp đồng dữ liệu `orders`, `media_references` | Toàn team | Biên bản họp | 1.5h | READY |
-| P0 | BE1-W3-05: Gỡ bỏ trigger tạm `fn_temp_contents_reconcile` | Xóa nợ kỹ thuật, trả lại DB nguyên bản | Không | Migration SQL drop trigger | 1h | READY |
-| P0 | BE1-W3-01: Thiết kế migration bảng `orders` & `commissions` | Nền tảng cho phân hệ hoa hồng của FE và QA | Schema Tuần 1 | File migration SQL | 2.5h | READY |
-| P1 | BE1-W3-02: Thiết kế migration bảng `media_references` | Lưu trữ video mẫu cho Merchant | Schema Tuần 1 | File migration SQL | 2h | READY |
+| P0 | Họp Kick-off Sprint 3 (09:00 AM) & Phổ biến quy chế an toàn cho Tester 3 | Thống nhất hợp đồng dữ liệu `orders`, `media_references` | Toàn team | Biên bản họp | 1.5h | DONE |
+| P0 | BE1-W3-05: Gỡ bỏ trigger tạm `fn_temp_contents_reconcile` | Xóa nợ kỹ thuật, trả lại DB nguyên bản | Không | Migration SQL drop trigger | 1h | DONE |
+| P0 | BE1-W3-01: Thiết kế migration bảng `orders` & `commissions` | Nền tảng cho phân hệ hoa hồng của FE và QA | Schema Tuần 1 | File migration SQL | 2.5h | DONE |
+| P1 | BE1-W3-02: Thiết kế migration bảng `media_references` | Lưu trữ video mẫu cho Merchant | Schema Tuần 1 | File migration SQL | 2h | DONE |
 
 ---
 
 ## 4. THIS WEEK — MY TASKS
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|---|---|---|---|---|---|
-| BE1-W3-01 | Migration bảng `orders` & `commissions` | P0 | READY | DB Tuần 1 | BE1 | File SQL migration + regenerated types | 20/10 12:00 |
-| BE1-W3-02 | Migration bảng `media_references` cho Merchant Video Library | P0 | READY | DB Tuần 1 | BE1 | File SQL migration + regenerated types | 20/10 17:00 |
+| BE1-W3-01 | Migration bảng `orders` & `commissions` | P0 | DONE | DB Tuần 1 | BE1 | File SQL migration + regenerated types | 20/10 12:00 |
+| BE1-W3-02 | Migration bảng `media_references` cho Merchant Video Library | P0 | DONE | DB Tuần 1 | BE1 | File SQL migration + regenerated types | 20/10 17:00 |
 | BE1-W3-03 | API `POST /api/merchant/media` quản lý video mẫu | P1 | READY | BE1-W3-02 | BE1 | Next.js API Route + Zod validator | 21/10 12:00 |
 | BE1-W3-04 | Attribution Engine & Postgres RPC `get_reseller_wallet_summary` | P0 | READY | BE1-W3-01 | BE1 | Function RPC SQL + API route `/api/reseller/wallet` | 21/10 17:00 |
-| BE1-W3-05 | Xóa nợ kỹ thuật trigger hòa giải tạm thời Tuần 2 | P0 | READY | Không | BE1 | Migration SQL cleanup | 19/10 12:00 |
+| BE1-W3-05 | Xóa nợ kỹ thuật trigger hòa giải tạm thời Tuần 2 | P0 | DONE | Không | BE1 | Migration SQL cleanup | 19/10 12:00 |
 | BE1-W3-06 | **Core AI Video Generation Engine:** Xây dựng module tổng hợp video (`src/lib/video-engine/generator.ts`) từ kịch bản BE2 & assets tour | P0 | READY | BE2-W3-03 | BE1 | Core Engine module + Video synthesis pipeline 9:16 | 22/10 17:00 |
 | BE1-W3-07 | **Video API & Storage Pipeline:** Endpoint `POST /api/merchant/video/generate`, async job handling, upload Supabase Storage & update `contents.video_url` | P0 | READY | BE1-W3-06 | BE1 | API endpoint + Async Job tracker + Storage bucket | 23/10 12:00 |
 | BE1-W3-08 | Phối hợp E2E Integration & Demo kịch bản C3 (Cloudflared Tunnel) | P0 | READY | FE, BE2, QA | BE1 | Phiên nghiệm thu E2E & Báo cáo Demo | 23/10 17:00 |

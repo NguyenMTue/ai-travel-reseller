@@ -20,11 +20,11 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | BA-W3-06 | Business Analyst | BA | Hỗ trợ FE Lead (Diệu) & Tester 3 (FE phụ) xác thực luồng giao diện | READY | 21/10 | 21/10 17:00 |
 | BA-W3-07 | Business Analyst | BA | Đồng hành cùng QA Team (Tester 1, 2) chạy Bộ Test Nghiệp Vụ | READY | 22/10 | 22/10 17:00 |
 | BA-W3-08 | Business Analyst | BA | Thực hiện Nghiệm thu Nghiệp vụ (Business UAT) & Đánh giá Demo Sprint 3 | READY | 23/10 | 23/10 17:30 |
-| BE1-W3-01 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Migration bảng `orders` & `commissions` (Attribution schema) | READY | 19/10 | 20/10 12:00 |
-| BE1-W3-02 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Migration bảng `media_references` cho Merchant Video Library | READY | 19/10 | 20/10 17:00 |
+| BE1-W3-01 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Migration bảng `orders` & `commissions` (Attribution schema) | DONE | 19/10 | 20/10 12:00 |
+| BE1-W3-02 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Migration bảng `media_references` cho Merchant Video Library | DONE | 19/10 | 20/10 17:00 |
 | BE1-W3-03 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | API `POST /api/merchant/media` quản lý video mẫu | READY | 20/10 | 21/10 12:00 |
 | BE1-W3-04 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Attribution Engine & RPC `get_reseller_wallet_summary` | READY | 20/10 | 21/10 17:00 |
-| BE1-W3-05 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Gỡ bỏ nợ kỹ thuật trigger hòa giải tạm thời Tuần 2 | READY | 19/10 | 19/10 12:00 |
+| BE1-W3-05 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Gỡ bỏ nợ kỹ thuật trigger hòa giải tạm thời Tuần 2 | DONE | 19/10 | 19/10 12:00 |
 | BE1-W3-06 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Core AI Video Generation Engine (`generator.ts`) từ kịch bản BE2 & asset tour | READY | 21/10 | 22/10 17:00 |
 | BE1-W3-07 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Video API `POST /api/merchant/video/generate` & Storage pipeline `campaign-videos` | READY | 22/10 | 23/10 12:00 |
 | BE2-W3-01 | Nguyễn Huỳnh | BE2 | System Prompt AI Sales Agent nhận diện Buying Intent | READY | 19/10 | 20/10 17:00 |
@@ -53,7 +53,9 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 ---
 
 ## 2. COMPLETED WORK
-*(Chưa có — Sprint 3 bắt đầu từ 19/10/2026).*
+- `BE1-W3-05` (19/10): Gỡ bỏ trigger hòa giải tạm thời `fn_temp_contents_reconcile` (xóa nợ kỹ thuật Tuần 2).
+- `BE1-W3-01` (19/10): Hoàn thành migration mở rộng bảng `orders`, tạo bảng `commissions` kèm RLS policies và indexes.
+- `BE1-W3-02` (19/10): Hoàn thành migration bảng `media_references` cho Merchant Video Library; đồng bộ types `src/lib/database.types.ts`.
 
 ---
 
