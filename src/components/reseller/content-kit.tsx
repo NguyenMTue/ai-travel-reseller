@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
-import { Copy, Check, LoaderCircle } from "lucide-react";
+import { Copy, Check, LoaderCircle, Send } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { FeedNotice } from "./feed-states";
 import { personas, type Persona, type ContentVariant } from "@/src/lib/reseller/content-kit";
@@ -71,14 +71,43 @@ function CopyCtaWithLink({ cta }: { cta: string | null }) {
   </div>;
 }
 
-export function ContentKit({ variants, contentStatus, contentReason }: {
+export function ContentKit({ variants, contentStatus, contentReason, campaignId, productId, preview = false }: {
   variants: ContentVariant[]; contentStatus: "blocked" | "ready" | "error"; contentReason?: DataFailureKind;
+  campaignId: string; productId: string | null; preview?: boolean;
 }) {
   const [persona, setPersona] = useState<Persona>("local-guide");
   const [variantId, setVariantId] = useState("");
   const selectId = useId();
   const available = contentStatus === "ready" ? variants.filter((variant) => variant.persona === persona) : [];
   const selected = available.find((variant) => variant.id === variantId) ?? available[0];
+  const { link } = useTrackingScope();
+  const [telegramState, setTelegramState] = useState<"idle" | "pending" | "success" | "error">("idle");
+  const [telegramMessage, setTelegramMessage] = useState("");
+  const posting = useRef(false);
+
+  async function postToTelegram() {
+    if (!selected || !link || !productId || posting.current) return;
+    posting.current = true;
+    setTelegramState("pending");
+    setTelegramMessage("");
+    try {
+      const response = await fetch("/api/reseller/telegram/post", {
+        method: "POST", credentials: "same-origin", redirect: "error",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contentId: selected.id, campaignId, productId }),
+      });
+      const body: unknown = await response.json();
+      if (!response.ok || !body || typeof body !== "object" || !("message" in body) || typeof body.message !== "string") {
+        throw new Error(body && typeof body === "object" && "error" in body && typeof body.error === "string"
+          ? body.error : "Chưa thể đăng bài lên Telegram.");
+      }
+      setTelegramState("success");
+      setTelegramMessage(body.message);
+    } catch (error) {
+      setTelegramState("error");
+      setTelegramMessage(error instanceof Error ? error.message : "Chưa xác định được kết quả gửi. Vui lòng kiểm tra kênh Telegram trước khi thử lại.");
+    } finally { posting.current = false; }
+  }
   return (
     <section aria-labelledby="content-kit-heading" className="mt-8 min-w-0">
       <h2 id="content-kit-heading" className="text-2xl [font-family:var(--font-display)]">Content Kit</h2>
@@ -115,6 +144,19 @@ export function ContentKit({ variants, contentStatus, contentReason }: {
               label={field === "cta" ? "CTA" : field.charAt(0).toUpperCase() + field.slice(1)} value={selected[field]} />)}
             <CopyCtaWithLink key={selected.id} cta={selected.cta} />
           </div>
+          <section className="mt-5 rounded-xl border border-border bg-white p-4 sm:p-5" aria-label="Đăng lên Telegram">
+            <h3 className="font-medium">Đăng lên kênh Telegram của nền tảng</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Bài đăng gồm caption, CTA và link tiếp thị của bạn.</p>
+            {!productId && <p role="note" className="mt-3 text-sm">Chiến dịch chưa liên kết sản phẩm hợp lệ.</p>}
+            {!link && productId && <p role="note" className="mt-3 text-sm">Tạo link tiếp thị trước khi đăng để ghi nhận hoa hồng.</p>}
+            {preview && <p role="note" className="mt-3 text-sm">Bản xem trước không gửi bài thật.</p>}
+            <Button type="button" className="mt-4" onClick={postToTelegram}
+              disabled={preview || !productId || !link || telegramState === "pending" || telegramState === "success"}>
+              {telegramState === "pending" ? <LoaderCircle className="animate-spin" aria-hidden /> : <Send aria-hidden />}
+              {telegramState === "pending" ? "Đang đăng…" : telegramState === "success" ? "Đã đăng" : "Đăng lên Telegram"}
+            </Button>
+            {telegramMessage && <p role={telegramState === "error" ? "alert" : "status"} className="mt-3 text-sm">{telegramMessage}</p>}
+          </section>
         </>
       )}
     </section>
