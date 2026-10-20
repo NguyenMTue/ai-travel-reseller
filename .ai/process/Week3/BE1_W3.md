@@ -48,7 +48,7 @@ BE1 sẽ trực tiếp dẫn dắt và thực thi mắt xích tài chính cùng 
 |---|---|---|---|---|---|---|---|
 | BE1-W3-01 | Migration bảng `orders` & `commissions` | P0 | DONE | DB Tuần 1 | BE1 | File SQL migration + regenerated types | 20/10 12:00 |
 | BE1-W3-02 | Migration bảng `media_references` cho Merchant Video Library | P0 | DONE | DB Tuần 1 | BE1 | File SQL migration + regenerated types | 20/10 17:00 |
-| BE1-W3-03 | API `POST /api/merchant/media` quản lý video mẫu | P1 | READY | BE1-W3-02 | BE1 | Next.js API Route + Zod validator | 21/10 12:00 |
+| BE1-W3-03 | API `POST /api/merchant/media` quản lý video mẫu | P1 | DONE | BE1-W3-02 | BE1 | Next.js API Route + Zod validator | 21/10 12:00 |
 | BE1-W3-04 | Attribution Engine & Postgres RPC `get_reseller_wallet_summary` | P0 | DONE | BE1-W3-01 | BE1 | Function RPC SQL + API route `/api/reseller/wallet` | 21/10 17:00 |
 | BE1-W3-05 | Xóa nợ kỹ thuật trigger hòa giải tạm thời Tuần 2 | P0 | DONE | Không | BE1 | Migration SQL cleanup | 19/10 12:00 |
 | BE1-W3-06 | **Core AI Video Generation Engine:** Xây dựng module tổng hợp video (`src/lib/video-engine/generator.ts`) từ kịch bản BE2 & assets tour | P0 | READY | BE2-W3-03 | BE1 | Core Engine module + Video synthesis pipeline 9:16 | 22/10 17:00 |
