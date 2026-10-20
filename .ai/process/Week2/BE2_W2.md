@@ -41,8 +41,8 @@ Trong Tuần 2, BE2 đóng vai trò "Kiến trúc sư nội dung AI":
 | BE2-W2-02 | Xây dựng Zod Schema cho Structured Output | P0 | DONE | BE2-W2-01 | BE2 | `src/lib/ai/schemas/content-schema.ts` | 13/10 12:00 |
 | BE2-W2-03 | Xây dựng Module kiểm duyệt tự động (Content Guardrails) | P1 | DONE | BE2-W2-02 | BE2 | `src/lib/ai/guardrails/content-validator.ts` | 13/10 17:00 |
 | BE2-W2-04 | Handoff Prompt & Schema cho BE3 nhúng vào n8n workflow | P0 | IN_REVIEW — code/handoff đã merge `dev`; thiếu workflow export và live acceptance | BE2-W2-02, 03 | BE2 | `docs/be2/content-factory-handoff.md` + JSON Schema + batch/persistence mappers | 13/10 18:00 |
-| BE2-W2-05 | Phối hợp BE3 test luồng sinh bài mẫu cho Bà Nà Hills & VinWonders | P1 | PARTIAL — BE2 17/17, BE3 mock 8/8, FE contract 14/14; chưa có live E2E | BE3-W2-01/03 | BE2 + BE3 | Báo cáo sinh nội dung mẫu | 14/10 17:00 |
-| BE2-W2-06 | Phối hợp Tester 2 rà soát Hallucination & Tối ưu Prompt | P1 | IN_REVIEW — Tester2 13/13 PASS, guardrail đã mở rộng; thiếu mẫu live n8n | BE2-W2-05 | BE2 + Tester 2 | Bộ prompt tối ưu | 15/10 17:00 |
+| BE2-W2-05 | Phối hợp BE3 test luồng sinh bài mẫu cho Bà Nà Hills & VinWonders | P1 | PARTIAL — BE2 19/19, BE3 mock 9/9, FE contract 14/14; direct Gemini 8 mẫu đã review; chưa có live E2E | BE3-W2-01/03 | BE2 + BE3 | Báo cáo sinh nội dung mẫu | 14/10 17:00 |
+| BE2-W2-06 | Phối hợp Tester 2 rà soát Hallucination & Tối ưu Prompt | P1 | IN_REVIEW — 19/19 BE2, 17/17 Tester2, 8 mẫu Gemini và adversarial PASS; thiếu mẫu n8n | BE2-W2-05 | BE2 + Tester 2 | Bộ prompt tối ưu | 15/10 17:00 |
 
 ---
 
@@ -198,3 +198,15 @@ NEXT:
 - BE2-W2-05 giữ `PARTIAL`: chưa có execution/bản ghi live n8n → Gemini → Supabase đủ bốn persona cho Bà Nà Hills và VinWonders.
 - BE2-W2-06 chuyển `IN_REVIEW`: Tester2 deterministic **13/13 PASS**, rubric/benchmark đã có và guardrail policy đã mở rộng; vẫn cần mẫu live từ BE3 để nghiệm thu cuối.
 - `src/lib/database.types.ts` vẫn chưa có `generation_key`; migration trong repo không chứng minh đã apply lên Supabase.
+
+---
+
+## 15. RECHECK AFTER DEV SYNC — 16/10/2026 11:13 AM
+
+- Pull `origin/dev@309d1d7` thành công bằng fast-forward, không có xung đột; commit mới là merge PR #23 của Tester2.
+- Chạy lại sau pull: BE2 **17/17 PASS**, Tester2 **13/13 PASS**.
+- BE2-W2-01/02/03 giữ `DONE`.
+- BE2-W2-04 giữ `IN_REVIEW`: handoff đã merge nhưng vẫn thiếu `services/llm-service/workflow_campaign_content.json` và live acceptance.
+- BE2-W2-05 giữ `PARTIAL`: chưa có execution/bản ghi live cho hai sản phẩm × bốn persona.
+- BE2-W2-06 giữ `IN_REVIEW`: deterministic review đã merge `dev`; nghiệm thu model/workflow live vẫn chờ BE3.
+- `src/lib/database.types.ts` vẫn thiếu `generation_key`; chưa có bằng chứng migration đã apply lên Supabase.

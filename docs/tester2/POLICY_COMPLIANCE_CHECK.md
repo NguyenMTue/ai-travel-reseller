@@ -9,4 +9,4 @@ Guardrail được bổ sung để chuyển nội dung sang `NEEDS_REVIEW` khi x
 - Ưu tiên người cao tuổi.
 - Khan hiếm giả hoặc đe dọa phạt nếu không mua.
 
-Kết quả: toàn bộ mẫu vi phạm trong bộ Tester2 bị chặn; một chính sách chỉ được cho qua khi cùng cụm thông tin đã có trong `verified_facts`. Logic TypeScript và Python đã được giữ đồng nhất. TypeScript test/lint/typecheck PASS; Python syntax compile PASS. Python unit test đầy đủ chưa chạy vì môi trường hiện tại thiếu package `fastapi`.
+Kết quả: toàn bộ mẫu vi phạm trong bộ Tester2 bị chặn; một chính sách chỉ được cho qua khi cùng cụm thông tin đã có trong `verified_facts`. Bộ Tester2 đạt 17/17. Ma trận live đã chuyển đúng ba output có tuyên bố chưa xác minh sang `NEEDS_REVIEW`. Logic TypeScript và Python cần được BE3 đối chiếu lại trong workflow; TypeScript test/lint/typecheck PASS. Python syntax compile PASS và Python unit suite 9/9 PASS trong môi trường ảo tách biệt.

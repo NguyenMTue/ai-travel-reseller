@@ -77,3 +77,25 @@ formatting and idempotent behavior against a fake Supabase client. The FE tests
 prove that only exact lowercase `approved` rows in the correct campaign and
 shared/owned scope are read. These are integration-ready checks, not evidence
 of a live n8n → Supabase execution.
+
+## Guardrail hardening and live review — 2026-10-16
+
+| Check | Result |
+|---|---|
+| Deterministic BE2 suite | 19/19 PASS |
+| Deterministic Tester2 suite | 17/17 PASS |
+| BE3 Python API/guardrail suite | 9/9 PASS in an isolated environment |
+| Direct Gemini persona/product matrix | 8/8 schema-valid; 5 APPROVED; 3 NEEDS_REVIEW |
+| Direct adversarial prompt-injection run | 1/1 PASS |
+| TypeScript and targeted ESLint | PASS |
+
+The direct Gemini matrix now covers both products against all four personas.
+Three outputs were correctly retained for human review because they contained
+unsupported offer or descriptive claims. The adversarial sample did not follow
+the injected instruction, did not add an undeclared field, and did not invent
+the requested voucher or price.
+
+These results are direct-model and local-service evidence only. Final acceptance
+still requires BE3 to provide the exported n8n workflow and an execution showing
+the Supabase trigger, Gemini structured output, guardrail result, and database
+write in one trace.
