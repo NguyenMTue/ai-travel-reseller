@@ -4,7 +4,9 @@ import type {
   CreateMediaReferenceInput,
   MediaQueryInput,
   MediaReferenceItem,
+  MediaPlatform,
 } from "./media-schema";
+import { MEDIA_PLATFORMS } from "./media-schema";
 
 export type MediaListResult = {
   items: MediaReferenceItem[];
@@ -19,18 +21,26 @@ export type MediaListResult = {
 /**
  * Ánh xạ bản ghi thô từ Database sang interface MediaReferenceItem chuẩn
  */
-function mapMediaRow(row: any): MediaReferenceItem {
+type MediaReferenceRow = Database["public"]["Tables"]["media_references"]["Row"];
+
+function mapMediaRow(row: MediaReferenceRow): MediaReferenceItem {
+  const platform = MEDIA_PLATFORMS.includes(row.platform as MediaPlatform)
+    ? (row.platform as MediaPlatform)
+    : "other";
+
   return {
     id: row.id,
     merchantId: row.merchant_id,
     title: row.title,
     videoUrl: row.video_url,
     thumbnailUrl: row.thumbnail_url ?? null,
-    platform: row.platform,
+    platform,
     duration: row.duration ?? null,
     styleTags: Array.isArray(row.style_tags) ? row.style_tags : [],
     analysisMetadata:
-      typeof row.analysis_metadata === "object" && row.analysis_metadata !== null
+      typeof row.analysis_metadata === "object" &&
+      row.analysis_metadata !== null &&
+      !Array.isArray(row.analysis_metadata)
         ? row.analysis_metadata
         : {},
     createdAt: row.created_at,
@@ -118,7 +128,7 @@ export async function createMediaReference(
   input: CreateMediaReferenceInput,
 ): Promise<{ success: true; data: MediaReferenceItem } | { success: false; error: string }> {
   try {
-    const insertPayload: any = {
+    const insertPayload: Database["public"]["Tables"]["media_references"]["Insert"] = {
       merchant_id: merchantId,
       title: input.title,
       video_url: input.videoUrl,
