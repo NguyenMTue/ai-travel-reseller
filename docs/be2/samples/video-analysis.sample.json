@@ -1,0 +1,58 @@
+{
+  "source_summary": "Video dọc giới thiệu hành trình bằng các cảnh toàn và cận cảnh nhịp nhanh.",
+  "hook": {
+    "start_seconds": 0,
+    "end_seconds": 3,
+    "observed_visual": "Toàn cảnh điểm đến chuyển nhanh sang cận cảnh trải nghiệm.",
+    "on_screen_text": "Một ngày khám phá"
+  },
+  "pacing": {
+    "style": "fast",
+    "average_shot_seconds": 3
+  },
+  "visual_style": {
+    "aspect_ratio": "9:16",
+    "camera_angles": [
+      "toàn cảnh",
+      "cận cảnh"
+    ],
+    "lighting": "Ánh sáng tự nhiên ban ngày",
+    "color_palette": [
+      "xanh lá",
+      "vàng ấm"
+    ]
+  },
+  "audio": {
+    "music_mood": "Năng động",
+    "voiceover_style": "Thân thiện, nhanh gọn",
+    "sound_effects": [
+      "whoosh chuyển cảnh"
+    ]
+  },
+  "scenes": [
+    {
+      "index": 1,
+      "start_seconds": 0,
+      "end_seconds": 3,
+      "observed_visual": "Toàn cảnh điểm đến",
+      "camera_movement": "Bay tiến nhẹ",
+      "transition": "Cắt nhanh",
+      "on_screen_text": "Một ngày khám phá",
+      "spoken_words": null
+    },
+    {
+      "index": 2,
+      "start_seconds": 3,
+      "end_seconds": 30,
+      "observed_visual": "Chuỗi cận cảnh trải nghiệm của du khách",
+      "camera_movement": "Cầm tay ổn định",
+      "transition": "Match cut",
+      "on_screen_text": null,
+      "spoken_words": "Khám phá hành trình theo cách của bạn."
+    }
+  ],
+  "safety": {
+    "embedded_instructions_detected": false,
+    "unverified_claims": []
+  }
+}

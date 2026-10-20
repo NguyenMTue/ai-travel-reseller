@@ -1,7 +1,7 @@
 # TEAM WORK LOG
 Project: AI Travel Reseller MVP (TravelLink AI)  
 Week: Tuần 3 — 19/10/2026 – 24/10/2026 (Sprint 3)  
-Last Updated: 19/10/2026 08:30 AM  
+Last Updated: 20/10/2026
 
 ---
 
@@ -27,9 +27,9 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | BE1-W3-05 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Gỡ bỏ nợ kỹ thuật trigger hòa giải tạm thời Tuần 2 | DONE | 19/10 | 19/10 12:00 |
 | BE1-W3-06 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Core AI Video Generation Engine (`generator.ts`) từ kịch bản BE2 & asset tour | READY | 21/10 | 22/10 17:00 |
 | BE1-W3-07 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Video API `POST /api/merchant/video/generate` & Storage pipeline `campaign-videos` | READY | 22/10 | 23/10 12:00 |
-| BE2-W3-01 | Nguyễn Huỳnh | BE2 | System Prompt AI Sales Agent nhận diện Buying Intent | READY | 19/10 | 20/10 17:00 |
-| BE2-W3-02 | Nguyễn Huỳnh | BE2 | Prompt Multimodal Gemini phân tích kịch bản video mẫu | READY | 19/10 | 21/10 12:00 |
-| BE2-W3-03 | Nguyễn Huỳnh | BE2 | Prompt sinh kịch bản video áp dụng thông tin chiến dịch (bàn giao BE1) | READY | 21/10 | 22/10 12:00 |
+| BE2-W3-01 | Nguyễn Huỳnh | BE2 | System Prompt AI Sales Agent nhận diện Buying Intent | DONE | 20/10 | 20/10 17:00 |
+| BE2-W3-02 | Nguyễn Huỳnh | BE2 | Prompt Multimodal Gemini phân tích kịch bản video mẫu | OFFLINE DONE — LIVE PENDING | 20/10 | 21/10 12:00 |
+| BE2-W3-03 | Nguyễn Huỳnh | BE2 | Prompt sinh kịch bản video áp dụng thông tin chiến dịch (bàn giao BE1) | OFFLINE DONE — LIVE PENDING | 20/10 | 22/10 12:00 |
 | BE3-W3-01 | Thái Thanh Tú | BE3 | Workflow n8n thông báo đơn hàng / click mới qua Telegram/Zalo | READY | 20/10 | 21/10 17:00 |
 | BE3-W3-02 | Thái Thanh Tú | BE3 | Tích hợp PostHog Analytics Dashboard & Phễu chuyển đổi 5 bước | READY | 21/10 | 22/10 17:00 |
 | BE3-W3-03 | Thái Thanh Tú | BE3 | Workflow n8n thông báo thời gian thực khi Video sinh xong từ Core Engine | READY | 22/10 | 23/10 12:00 |
@@ -58,6 +58,9 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 - `BE1-W3-02` (19/10): Hoàn thành migration bảng `media_references` cho Merchant Video Library; đồng bộ types `src/lib/database.types.ts`.
 - `BE1-W3-04` (19/10): Xây dựng Attribution Engine, RPC `get_reseller_wallet_summary`, đồng bộ hoa hồng orders-commissions, API `GET /api/reseller/wallet` và các ràng buộc bảo mật / chống gian lận.
 - `BE1-W3-03` (20/10): Xây dựng API Quản lý Video Mẫu Merchant (`GET / POST / DELETE /api/merchant/media`), bộ kiểm tra Zod `createMediaReferenceSchema` và bàn giao interface `MediaReferenceItem` cho FE.
+- `BE2-W3-01` (20/10): Hoàn thành taxonomy 6 intent, server-side checkout gate, attribution URL đầy đủ và 5/5 test offline.
+- `BE2-W3-02/03` (20/10): Hoàn thành prompt, adapter contract, Zod/JSON Schema và guardrails offline; kiểm thử Gemini live tạm hoãn theo kế hoạch quota.
+- `BE2-W3-04/05` (20/10): Hoàn thành tài liệu handoff, sample output và benchmark deterministic; trạng thái benchmark live còn pending.
 
 ---
 
