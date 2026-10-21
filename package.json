@@ -12,7 +12,8 @@
     "test:be2": "node --experimental-strip-types --test tests/content-factory.test.ts tests/n8n-campaign-workflow.test.ts tests/sales-agent.test.ts tests/video-pipeline.test.ts",
     "test:tester2": "node --experimental-strip-types --test tests/content-safety.test.ts",
     "test:tester2:live": "node --env-file=.env.local --experimental-strip-types tests/content-adversarial.live.ts",
-    "test:be2:live": "node --env-file=.env.local --experimental-strip-types tests/content-factory.live.ts"
+    "test:be2:live": "node --env-file=.env.local --experimental-strip-types tests/content-factory.live.ts",
+    "test:video-engine": "node --experimental-strip-types --test tests/video-engine.test.ts"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "^5.3.0",
@@ -29,6 +30,7 @@
     "langsmith": "^0.10.8",
     "lucide-react": "^1.53.0",
     "next": "16.3.8",
+    "posthog-js": "^1.438.13",
     "qrcode": "1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",

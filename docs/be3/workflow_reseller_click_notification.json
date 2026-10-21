@@ -1,0 +1,133 @@
+{
+  "name": "Reseller – Telegram Click Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "affiliate-click-notification",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4c0bb737-6cab-4eb5-b017-7c515d4d38e3",
+      "name": "Webhook",
+      "webhookId": "fe7b7dc2-18b4-405d-bb1f-520a057491c4",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "N2OMtRHXwFi8X35x",
+          "name": "Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "dfb39cc2-44ed-4cb5-9b9d-75e043e88a49",
+              "leftValue": "={{$json.body.record.is_bot}}",
+              "rightValue": "={{$json.body.record.is_valid}}",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "0ce7e94a-5f3e-40af-9262-eba3881aa5bf",
+              "leftValue": "={{$json.body.record.is_valid}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "febdfa8e-2146-484a-b785-d15242cbc8e5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "-1004373825301",
+        "text": "=🔔 Có lượt click hợp lệ mới  Reseller: {{$json.body.record.metadata.reseller_id}} Campaign: {{$json.body.record.metadata.campaign_id}} Product: {{$json.body.record.metadata.product_id}} Mã link: {{$json.body.record.metadata.code}} Thời gian: {{$json.body.record.clicked_at}} Thiết bị: {{$json.body.record.device_type}} / {{$json.body.record.os}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        432,
+        -96
+      ],
+      "id": "1738212f-7b42-4821-9700-f5fd03e155be",
+      "name": "Send a text message",
+      "webhookId": "9d4db653-eae6-4067-9be6-3849e24dbd50",
+      "credentials": {
+        "telegramApi": {
+          "id": "T1z3iZA7jr0AkRrW",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "versionId": "39974052-6e04-43c9-9fbe-1bc66eb6bdd1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7f580e2a70967a163f770f4c3d3c86f9a975254335c991179574062d4218a0e9"
+  },
+  "nodeGroups": [],
+  "id": "eXMv30RX1BqW9iSC",
+  "tags": []
+}

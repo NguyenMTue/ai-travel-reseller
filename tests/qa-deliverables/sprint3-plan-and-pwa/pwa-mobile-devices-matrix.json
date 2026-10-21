@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PWA Mobile Devices & Emulation Matrix",
+  "description": "Ma trận cấu hình thiết bị di động, khung nhìn (viewports), tỷ lệ pixel (DPR) và User-Agent phục vụ kiểm thử thủ công và tự động hóa Playwright E2E cho dự án AI Travel Reseller Network.",
+  "version": "1.0.0",
+  "sprint": "Sprint 3",
+  "devices": [
+    {
+      "id": "iphone-13-14",
+      "name": "Apple iPhone 13 / 14 / 15",
+      "tier": "Tier 1 - Primary Target (iOS Standard)",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "deviceScaleFactor": 3,
+      "isMobile": true,
+      "hasTouch": true,
+      "platform": "iOS",
+      "osVersion": "17.4",
+      "browser": "Mobile Safari",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1",
+      "targetAudience": "Reseller & Khách hàng phổ thông iOS",
+      "testFocus": ["Responsive không tràn ngang", "Touch target >= 44px", "Copy to Clipboard", "Safari Standalone Display"]
+    },
+    {
+      "id": "pixel-7",
+      "name": "Google Pixel 7 / Galaxy S21 (Android Standard)",
+      "tier": "Tier 1 - Primary Target (Android Standard)",
+      "viewport": {
+        "width": 393,
+        "height": 851
+      },
+      "deviceScaleFactor": 2.75,
+      "isMobile": true,
+      "hasTouch": true,
+      "platform": "Android",
+      "osVersion": "14.0",
+      "browser": "Chrome Mobile",
+      "userAgent": "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.82 Mobile Safari/537.36",
+      "targetAudience": "Reseller & Khách hàng phổ thông Android",
+      "testFocus": ["Web App Manifest A2HS prompt", "Theme color status bar", "Touch scrolling", "QR Code rendering"]
+    },
+    {
+      "id": "iphone-se-3",
+      "name": "Apple iPhone SE (3rd Gen) / iPhone 8",
+      "tier": "Tier 1 - Primary Target (Compact iOS)",
+      "viewport": {
+        "width": 375,
+        "height": 667
+      },
+      "deviceScaleFactor": 2,
+      "isMobile": true,
+      "hasTouch": true,
+      "platform": "iOS",
+      "osVersion": "17.4",
+      "browser": "Mobile Safari",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1",
+      "targetAudience": "Người dùng điện thoại màn hình nhỏ",
+      "testFocus": ["Không tràn ngang (scrollWidth <= 375)", "Modal dialog fit màn hình", "Virtual keyboard overlap khi nhập chat"]
+    },
+    {
+      "id": "small-mobile-legacy",
+      "name": "Ultra Small Mobile (Edge-case Viewport)",
+      "tier": "Tier 2 - Edge Case (Minimum Spec Constraint)",
+      "viewport": {
+        "width": 320,
+        "height": 740
+      },
+      "deviceScaleFactor": 2,
+      "isMobile": true,
+      "hasTouch": true,
+      "platform": "Android/iOS",
+      "osVersion": "Any",
+      "browser": "Generic Mobile WebKit",
+      "userAgent": "Mozilla/5.0 (Linux; U; Android 10; vi-vn; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.0.0 Mobile Safari/537.36",
+      "targetAudience": "Thiết bị ngân sách thấp / màn hình siêu nhỏ",
+      "testFocus": ["scrollWidth <= 320px", "Header text wrapping", "Button label không bị cắt cụt"]
+    },
+    {
+      "id": "ipad-mini-portrait",
+      "name": "Apple iPad Mini (Portrait Tablet)",
+      "tier": "Tier 2 - Tablet Breakpoint",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "deviceScaleFactor": 2,
+      "isMobile": true,
+      "hasTouch": true,
+      "platform": "iPadOS",
+      "osVersion": "17.4",
+      "browser": "Mobile Safari",
+      "userAgent": "Mozilla/5.0 (iPad; CPU OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1",
+      "targetAudience": "Merchant / Reseller dùng tablet kiểm tra số liệu",
+      "testFocus": ["Breakpoint md: (768px)", "Sidebar collapsed vs expanded", "Content Kit grid 2 cột"]
+    },
+    {
+      "id": "tiktok-in-app-ios",
+      "name": "TikTok In-App Browser (iOS)",
+      "tier": "Tier 1 - Social Traffic In-App WebView",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "deviceScaleFactor": 3,
+      "isMobile": true,
+      "hasTouch": true,
+      "platform": "iOS",
+      "osVersion": "17.4",
+      "browser": "TikTok In-App Webview",
+      "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 musical_ly_33.5.0 ByteLocale/vi BytedanceWebview/d8a4f1a",
+      "targetAudience": "Khách hàng bấm vào link bio TikTok của Reseller",
+      "testFocus": ["Chuyển hướng /r/[code] không bị kẹt", "OpenGraph metadata", "Khung Chat AI hoạt động mượt trong WebView", "Cookie/Attribution preservation"]
+    },
+    {
+      "id": "facebook-in-app-android",
+      "name": "Facebook In-App Browser (Android)",
+      "tier": "Tier 1 - Social Traffic In-App WebView",
+      "viewport": {
+        "width": 393,
+        "height": 851
+      },
+      "deviceScaleFactor": 2.75,
+      "isMobile": true,
+      "hasTouch": true,
+      "platform": "Android",
+      "osVersion": "14.0",
+      "browser": "Facebook In-App Webview",
+      "userAgent": "Mozilla/5.0 (Linux; Android 14; Pixel 7 Build/UQ1A.240205.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.82 Mobile Safari/537.36 [FB_IAB/FB4A;FBAV/456.0.0.39.90;]",
+      "targetAudience": "Khách hàng bấm vào link bài đăng Facebook/Reels của Reseller",
+      "testFocus": ["Xử lý cookie third-party", "Khả năng redirect sang cổng thanh toán Merchant", "Hiển thị thông báo minh bạch RULE-01"]
+    },
+    {
+      "id": "zalo-in-app-android",
+      "name": "Zalo In-App Browser (Android)",
+      "tier": "Tier 1 - Social Traffic In-App WebView",
+      "viewport": {
+        "width": 393,
+        "height": 851
+      },
+      "deviceScaleFactor": 2.75,
+      "isMobile": true,
+      "hasTouch": true,
+      "platform": "Android",
+      "osVersion": "14.0",
+      "browser": "Zalo In-App Webview",
+      "userAgent": "Mozilla/5.0 (Linux; Android 14; SM-A536B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/120.0.6099.230 Mobile Safari/537.36 Zalo/24.03.01",
+      "targetAudience": "Khách hàng nhận link giới thiệu qua tin nhắn Zalo",
+      "testFocus": ["Ghi nhận deviceType=mobile, browser=Zalo In-App vào bảng clicks", "Redirect 302 không bị chặn"]
+    }
+  ],
+  "networkProfiles": [
+    {
+      "name": "Fast 4G / Wi-Fi",
+      "downloadThroughput": 4000000,
+      "uploadThroughput": 3000000,
+      "latency": 20
+    },
+    {
+      "name": "Slow 3G / Mobile Field Conditions",
+      "downloadThroughput": 500000,
+      "uploadThroughput": 500000,
+      "latency": 300
+    },
+    {
+      "name": "Offline Mode (PWA Fallback)",
+      "downloadThroughput": 0,
+      "uploadThroughput": 0,
+      "latency": 0
+    }
+  ],
+  "accessibilityConstraints": {
+    "minimumTouchTargetWidth": 44,
+    "minimumTouchTargetHeight": 44,
+    "recommendedTouchTargetWidth": 48,
+    "recommendedTouchTargetHeight": 48,
+    "maximumHorizontalScrollDelta": 0,
+    "contrastRatioNormalText": "4.5:1",
+    "contrastRatioLargeText": "3.0:1"
+  }
+}
