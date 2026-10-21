@@ -5,16 +5,20 @@ import { House, Layers3 } from "lucide-react";
 import { Brand } from "@/src/components/brand";
 import { Button } from "@/src/components/ui/button";
 import { ResellerSignout } from "./signout";
+import { ResellerBottomNav } from "./bottom-nav";
+import styles from "./bottom-nav.module.css";
 
 export function ResellerShell({
   children,
   preview = false,
+  mobileNavigation = true,
 }: {
   children: ReactNode;
   preview?: boolean;
+  mobileNavigation?: boolean;
 }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-background">
+    <div className={`${mobileNavigation ? styles.shell : ""} flex min-h-dvh flex-col bg-background`}>
       <header className="border-b border-border bg-background">
         <div className="mx-auto flex w-full max-w-[1320px] flex-wrap items-center justify-between gap-4 px-4 py-5 sm:px-6 lg:px-10">
           <Brand />
@@ -22,10 +26,10 @@ export function ResellerShell({
             Không gian Cộng tác viên
           </p>
         </div>
-        <div className="mx-auto flex w-full max-w-[1320px] flex-wrap items-center justify-between gap-3 px-4 pb-4 sm:px-6 lg:px-10">
+        <div className={`${preview ? styles.previewToolbar : ""} mx-auto flex w-full max-w-[1320px] flex-wrap items-center justify-between gap-3 px-4 pb-4 sm:px-6 lg:px-10`}>
           <nav
             aria-label="Điều hướng Cộng tác viên"
-            className="flex min-w-0 flex-wrap gap-2 text-xs"
+            className={`${mobileNavigation ? styles.desktopNav : "flex"} min-w-0 flex-wrap gap-2 text-xs`}
           >
             <Button asChild size="sm">
               <Link
@@ -60,6 +64,7 @@ export function ResellerShell({
           TravelLink AI · Kết nối trải nghiệm Việt
         </p>
       </footer>
+      {mobileNavigation && <ResellerBottomNav preview={preview} />}
     </div>
   );
 }

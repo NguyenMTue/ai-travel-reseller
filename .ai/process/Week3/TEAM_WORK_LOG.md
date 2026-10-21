@@ -33,8 +33,8 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | BE3-W3-01 | Thái Thanh Tú | BE3 | Workflow n8n thông báo đơn hàng / click mới qua Telegram/Zalo | READY | 20/10 | 21/10 17:00 |
 | BE3-W3-02 | Thái Thanh Tú | BE3 | Tích hợp PostHog Analytics Dashboard & Phễu chuyển đổi 5 bước | READY | 21/10 | 22/10 17:00 |
 | BE3-W3-03 | Thái Thanh Tú | BE3 | Workflow n8n thông báo thời gian thực khi Video sinh xong từ Core Engine | READY | 22/10 | 23/10 12:00 |
-| FE-W3-01 | Diệu | FE Lead | Cấu hình PWA Core (`manifest.json`, Service Worker, Meta) | READY | 19/10 | 20/10 17:00 |
-| FE-W3-02 | Diệu | FE Lead | Bottom Navigation Bar & Responsive Safe Area cho Reseller | READY | 20/10 | 21/10 12:00 |
+| FE-W3-01 | Diệu | FE Lead | Cấu hình PWA Core (manifest, Service Worker, Meta) | IN PROGRESS — local PASS, chờ QA thiết bị thật | 19/10 | 20/10 17:00 |
+| FE-W3-02 | Diệu | FE Lead | Bottom Navigation Bar & Responsive Safe Area cho Reseller | IN PROGRESS — Chờ UI/UX review | 20/10 | 21/10 12:00 |
 | FE-W3-03 | Diệu | FE Lead | Tích hợp Web Share API 1 chạm & Canvas xuất ảnh QR | READY | 21/10 | 21/10 17:00 |
 | FE-W3-04 | Diệu | FE Lead | Giao diện Chat AI Sales Agent Mobile (Bottom Sheet widget) | READY | 21/10 | 22/10 17:00 |
 | FE-W3-05 | Diệu | FE Lead | Giao diện Màn hình Ví hoa hồng Reseller (`/reseller/wallet`) | READY | 22/10 | 23/10 12:00 |
@@ -94,3 +94,28 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
    * CẤM chạm vào `src/lib/supabase/`, các API routes tại `app/api/` và router tracking `app/r/[code]`.
 3. **Chỉ làm Dumb Component:** Nhận dữ liệu qua props, render thẻ card / modal tĩnh, không fetch API, không quản lý state phức tạp.
 4. **Quy chế Merge 2 cấp:** Bắt buộc phải có Approval từ FE Lead (Diệu) và PM/BE1 (Tuệ). Cấm tự ý merge vào `dev`.
+
+## 7. FE Lead — session 19/10/2026
+- Git: fetch riêng dev với refspec rõ ràng và fast-forward thành công; nền `fe50aee54a6a4e17ceba6226d67e758b73f03a3f`, nhánh local `Feature_FE_W3_PWA_Mobile_Commerce`. Không sửa remote refs hoa/thường, lock/config, không commit/push.
+- FE-W3-01: thêm manifest theo convention Next.js (`app/manifest.ts`), icons PNG từ Compass thương hiệu có sẵn, Apple/viewport metadata, một đăng ký SW production-only, offline document chung và `/sw.js` no-store. Cache chỉ 4 tài nguyên tĩnh `/pwa/`; không lưu HTML/RSC/session/account/API, bỏ qua tracking `/r/`, Auth, Server Actions và cross-origin. Worker update chờ đóng các tab cũ, dev unregister worker/cache của ứng dụng.
+- Bằng chứng FE: unit SW 3/3 PASS, TypeScript PASS, lint toàn bộ code mới/sửa PASS, production build Next.js 16.3.8 PASS (24/24 static generation), `git diff --check` PASS. Chromium local revision 1243 có sẵn: manifest/meta/icons/scope/headers PASS, cache chỉ 4 static assets, portal offline chung, tracking bypass và online recovery PASS. Playwright mặc định cần revision 1248 chưa cài; test dùng executable override. Không xác nhận iOS/Android thật hay review hoàn tất.
+- FE-W3-02 → 03 là việc tiếp theo, chờ UX-W3-01. Review FE-W3-07 ngay khi Tester 3 nộp 21–22/10, trước FE-W3-06; chưa review/approve. Các task khác chưa triển khai.
+- Nhánh Tester 3 chưa thấy trong truy vấn local/remote có mục tiêu; cần chuẩn bị nhánh/skeleton MediaCard và VideoGuidelinesModal, chốt lệch deadline specs/card với UIUX/PM. Không ghi đè file của Tester 3 hoặc tự push nhánh.
+- BE1 log đã ghi wallet API DONE; cần xác minh contract/mock cho FE-W3-05, Media API còn chờ BE1-W3-03. Chờ Figma và QA iOS/Android thật; chưa xác nhận cài đặt/standalone, chưa mở tunnel.
+- Kế hoạch đủ 8 task, hướng dẫn chạy production/dev và checklist demo sau: xem `FE_W3.md`, mục 6. POST Tracking 500 chưa tái hiện ở phiên này, không kết luận nguyên nhân và không sửa backend.
+
+### FE — kiểm tra thủ công do người dùng xác nhận (tách khỏi test tự động)
+- Chrome tại `http://127.0.0.1:3183`: Service Worker hiển thị `activated and is running`; bật Offline và truy cập `/reseller` thấy “Bạn đang ngoại tuyến”; bỏ Offline và bấm “Thử lại” tải được `/login?next=%2Freseller`.
+- Chưa kiểm tra cài đặt/standalone trên điện thoại thật; không nâng trạng thái FE-W3-01 thành hoàn tất hoặc đã review.
+- Lượt này chỉ ghi nhận tài liệu FE, không chạy lại test hoặc sửa code, không commit/push.
+
+### FE-W3-02 — bản đề xuất local, Chờ UI/UX review
+- Tiếp tục đúng nhánh, không fetch/pull; giữ nguyên PWA Core và kết quả thủ công FE-W3-01. Chưa có Figma/spec UX-W3-01 bàn giao trong repo, không xác nhận khớp Figma.
+- Thêm dock mobile <768px và safe-area trong ResellerShell; desktop giữ navigation cũ. Guard session/role giữ nguyên, dock portal chỉ hiện khi access allowed; preview chỉ fixture development-only.
+- Mapping: Khám phá → danh sách chiến dịch; Nội dung AI/Link & QR → anchor trong chính chiến dịch đang mở, ở danh sách là nút hướng dẫn chọn chiến dịch; Ví hoa hồng → thông báo Sắp có, chưa tạo route FE-W3-05. Không dùng ID fixture trong portal, không tự tạo link/campaign hoặc đổi Tracking.
+- Style dùng token Coastal Editorial, Lucide hiện có; active có nền/viền/chữ đậm/dấu gạch, focus và touch target, reduced motion. Chừa đáy theo 88px + safe-area + 16px; native dialog nằm trên dock; hỗ trợ ẩn dock theo visualViewport khi bàn phím mở.
+- Bằng chứng FE-W3-02: TypeScript PASS; Chromium fixture PASS ở 320/390/768/1440 (không tràn, không che footer, nav đúng breakpoint, active route/hash, ≥44×44px, Enter/Escape/focus, Content Kit/QR modal mock và lịch sử Back). PASS mô phỏng keyboard visualViewport và inset 34px; không có page errors/API/write/external requests. Đã chụp và xem ảnh, chỉnh khoảng trống header preview và chữ phụ ở 320px; production build output riêng `build/fe-w3-nav-prod` PASS, gồm TypeScript và 24/24 static generation. Next dev badge chuyển lên góc trên phải để tránh che nav khi xem local, không đổi PWA headers.
+- Chờ UIUX review, BA xác nhận điều hướng tổng hợp và wallet/commissions; chưa thử bàn phím/safe area trên điện thoại thật. Không coi mô phỏng viewport là kiểm tra thiết bị thật.
+- Lint code FE-W3-02: 0 lỗi, 1 warning có sẵn (`preview` chưa dùng trong CampaignDetailView); chưa thay logic Tracking.
+- Đã dừng server dev kiểm chứng, khôi phục đường dẫn output tự sinh của tsconfig/next-env; giữ output PWA cũ. `git diff --check` PASS. FE-W3-02 vẫn chờ UIUX/BA và thiết bị thật, không xác nhận cả tuần hoàn tất; không commit/push.
+- Hướng dẫn và mapping chi tiết: FE_W3.md mục 7. Không commit/push/merge, không sửa DB/backend/PWA.

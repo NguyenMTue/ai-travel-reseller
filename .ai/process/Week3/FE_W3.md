@@ -45,8 +45,8 @@ FE Lead chịu trách nhiệm đưa trải nghiệm di động của Reseller v�
 ## 4. THIS WEEK — MY TASKS
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|---|---|---|---|---|---|
-| FE-W3-01 | Cấu hình PWA Core (`manifest.json`, Service Worker, Meta) | P0 | READY | Không | Diệu | `public/manifest.json` + `sw.js` + meta layout | 20/10 17:00 |
-| FE-W3-02 | Bottom Navigation Bar & Responsive Safe Area cho Reseller | P0 | READY | UX-W3-01 | Diệu | Component `bottom-nav.tsx` + layout update | 21/10 12:00 |
+| FE-W3-01 | Cấu hình PWA Core (manifest, Service Worker, Meta) | P0 | IN PROGRESS — local PASS, chờ QA thiết bị thật | Không | Diệu | `app/manifest.ts` + `public/sw.js` + metadata layout | 20/10 17:00 |
+| FE-W3-02 | Bottom Navigation Bar & Responsive Safe Area cho Reseller | P0 | IN PROGRESS — Chờ UI/UX review | UX-W3-01 | Diệu | Component `bottom-nav.tsx` + layout update | 21/10 12:00 |
 | FE-W3-03 | Tích hợp Web Share API 1 chạm & Canvas xuất ảnh QR | P0 | READY | FE-W3-02 | Diệu | Module `share.ts` + `canvas-qr.ts` | 21/10 17:00 |
 | FE-W3-04 | Giao diện Chat AI Sales Agent Mobile (Bottom Sheet widget) | P1 | READY | UX-W3-02 | Diệu | Component `mobile-chat-sheet.tsx` | 22/10 17:00 |
 | FE-W3-05 | Giao diện Màn hình Ví hoa hồng Reseller (`/reseller/wallet`) | P0 | READY | BE1-W3-04 | Diệu | Route `app/reseller/wallet/page.tsx` | 23/10 12:00 |
@@ -80,3 +80,95 @@ FE Lead chịu trách nhiệm đưa trải nghiệm di động của Reseller v�
 - Cần UI/UX bàn giao bản vẽ Figma Mobile (390px/320px) vào sáng Thứ Ba (20/10).
 - Cần BE1 bàn giao API Ví hoa hồng và API Media Library đúng tiến độ.
 - Cần Tester 3 tuân thủ nghiêm ngặt ranh giới công việc, chỉ commit vào nhánh `feature/fe-t3-static-components`.
+
+## 6. FE session handoff — 19/10/2026
+
+### Git đã xác minh
+- Worktree sạch trước cập nhật; không có tiến trình `git.exe` khi kiểm tra.
+- Chỉ fetch `git fetch --no-tags origin refs/heads/dev:refs/remotes/origin/dev`, sau đó `git merge --ff-only origin/dev` thành công (6 commit).
+- Commit nền: `fe50aee54a6a4e17ceba6226d67e758b73f03a3f`; nhánh local mới: `Feature_FE_W3_PWA_Mobile_Commerce`.
+- Không sửa lock, refs/config thủ công hoặc các nhánh remote xung đột hoa/thường; không commit/push.
+
+### Kế hoạch theo hạn và phụ thuộc
+| ID | Đầu ra | Hạn (GMT+7, 2026) | Phụ thuộc | Hiện trạng | Việc tiếp theo |
+|---|---|---|---|---|---|
+| FE-W3-01 | Manifest, icons 192/512/180, metadata, SW | 20/10 17:00 | Không | Code và checks local PASS | QA trên điện thoại thật; chờ review |
+| FE-W3-02 | Bottom Nav và safe area Reseller | 21/10 12:00 | UX-W3-01, hạn 20/10 12:00 | Bản đề xuất local; viewport/interaction PASS | Chờ UI/UX review và BA xác nhận điều hướng theo chiến dịch |
+| FE-W3-03 | Native Web Share, poster Canvas QR | 21/10 17:00 | FE-W3-02 | Chưa triển khai | Chia sẻ có fallback, xử lý ảnh và QR |
+| FE-W3-07 | Review MediaCard và VideoGuidelinesModal | 21–22/10 | Tester 3 bàn giao 2 component | Chưa có bàn giao xác minh | Review ngay khi nhận, không đợi 06; chưa gửi approval |
+| FE-W3-04 | Chat mobile Bottom Sheet | 22/10 17:00 | UX-W3-02, hạn 20/10 17:00 | Chưa triển khai | Nhận specs, xử lý bàn phím và viewport |
+| FE-W3-05 | /reseller/wallet | 23/10 12:00 | BE1-W3-04, UX-W3-01 | BE1 log ghi DONE, FE chưa tích hợp | Xác minh contract GET /api/reseller/wallet bằng mock |
+| FE-W3-06 | Merchant Media Library | 23/10 17:00 | Component đã review; BE1-W3-03 | Chờ handoff | Tích hợp UI/API sau review, không kích hoạt AI ở lượt này |
+| FE-W3-08 | Checklist và diễn tập C1/C3 | 23/10 17:00 | FE-W3-01, Tester 1, thiết bị thật | Chưa diễn tập | Kiểm tra local trước; tunnel/HTTPS demo ở phiên sau |
+
+### Chuẩn bị Tester 3 và điểm cần chốt
+- Truy vấn local và `git ls-remote --heads` đúng tên không thấy `feature/fe-t3-static-components`; chưa có bằng chứng PR bàn giao. Không tạo/push hoặc ghi đè công việc Tester 3 trong phiên PWA này.
+- Cần chuẩn bị nhánh từ dev đã xác minh, skeleton riêng `src/components/merchant/media-card.tsx` với `MediaCardProps` trong TESTER3_W3.md và `video-guidelines-modal.tsx` với `isOpen/onClose`. Chỉ props/render, không API/Auth/Supabase và không sửa core/config/tests.
+- Cần UIUX chốt handoff MediaCard: deadline component 21/10 12:00 sớm hơn specs UX-W3-04 21/10 14:00. TESTER3_W3 có mốc PR 22/10 10:00 trong khi phần mở đầu yêu cầu 21/10 17:00; dành cửa sổ review 21–22/10.
+- BA_HANDOFF_MATRIX còn ghi Tester 3 làm API/RLS test và route `/reseller/commissions`; kế hoạch FE_W3/TESTER3_W3 dùng trainee UI và `/reseller/wallet`. Không tự mở rộng phạm vi; cần PM/BA đồng bộ trước tích hợp liên quan.
+
+### PWA Core đã viết
+- Một manifest duy nhất qua convention Next.js `app/manifest.ts` → `/manifest.webmanifest`; scope/start_url `/`, standalone, tên TravelLink AI và màu hiện có.
+- Icons PNG 192/512/180 raster từ chính Lucide Compass đang dùng trong Brand; script tái tạo `node scripts/generate-pwa-icons.mjs`. Không đổi logo hiện tại.
+- `app/layout.tsx`: applicationName, Apple web app/touch icon, `Viewport.themeColor`; một `PwaRegistration` production-only.
+- SW chỉ precache 4 đường dẫn `/pwa/` cố định (offline HTML và icons), tải không credentials. Không cache HTML/RSC/Server Actions, token/session, API/Auth/Supabase; `/r/` không respondWith nên không can thiệp redirect/click.
+- Navigation dùng network no-store, lỗi mạng trả offline chung không có dữ liệu tài khoản. Không lưu dữ liệu người dùng nên không thể phát lại tài khoản cũ từ SW cache sau logout.
+- Lifecycle: tăng `travellink-pwa-v1` khi đổi assets/offline; SW mới chờ các tab cũ đóng hết, không skipWaiting/clients.claim. Activate chỉ xóa cache cũ cùng prefix. `/sw.js` có no-store và root scope. Dev không register, chỉ unregister `/sw.js` của ứng dụng và xóa cache cùng prefix; đóng/mở lại tab khi chuyển từ production sang dev.
+
+### Kiểm tra và tự chạy
+- Unit SW: `node --test tests/pwa-worker.test.mjs` — 3/3 PASS.
+- TypeScript `node node_modules/typescript/bin/tsc --noEmit`: PASS. Production build Next.js 16.3.8: PASS, gồm TypeScript và prerender 24/24. Build dùng output riêng `build/fe-w3-pwa`, không thay output dev cũ; đã khôi phục phần Next.js tự thêm vào tsconfig và next-env về trạng thái trước build.
+- Lint tất cả file code đã sửa/thêm: PASS (`app/manifest.ts`, `app/layout.tsx`, `src/components/pwa/registration.tsx`, `public/sw.js`, `next.config.ts`, script icons và 2 tệp kiểm tra PWA). `git diff --check`: PASS.
+- Chromium local: PASS manifest/metadata, icons đúng kích thước, SW active/root scope và headers, cache chính xác 4 static assets, offline `/reseller` + `/merchant` trả trang chung, `/r/` lỗi mạng khi offline (không redirect/fallback), trở lại Online tải trang thật. Không chạy toàn bộ regression suite và chưa test trên thiết bị thật.
+- Playwright mặc định đòi revision 1248 chưa cài; dùng Chromium revision 1243 có sẵn qua `$env:PLAYWRIGHT_CHROMIUM_PATH="$env:LOCALAPPDATA\ms-playwright\chromium-1243\chrome-win64\chrome.exe"`, rồi `node tests/pwa-browser.mjs`. Không tải/cài thêm browser. Next.js hiện tại phát `mobile-web-app-capable=yes` và Apple title/status metadata theo tài liệu kèm bản cài; test đã xác nhận HTML thực tế.
+- Production local (PowerShell): `$env:NEXT_BUILD_DIR='build/fe-w3-pwa'; npm.cmd run build`, rồi `$env:NEXT_BUILD_DIR='build/fe-w3-pwa'; npm.cmd run start -- --hostname 127.0.0.1 --port 3183`.
+- Mở `http://127.0.0.1:3183/privacy`; DevTools → Application → Manifest/Service Workers/Cache Storage. Reload lần hai để tab được worker kiểm soát. Cache chỉ có 4 tài nguyên `/pwa/`.
+- Trong DevTools đặt Offline rồi điều hướng `/reseller` hoặc `/merchant`: chỉ thấy thông báo offline chung. `/r/` phải lỗi mạng, không trả trang/redirect đã cache. Bật Online và tải lại để phục hồi.
+- Browser check: `node tests/pwa-browser.mjs` khi production local đang nghe 3183. Không gọi API tạo dữ liệu, không test AI.
+- Dev: `npm.cmd run dev`; URL theo terminal (thường http://localhost:3000). Dev không dùng SW mới.
+- Demo sau: cùng Tester 1 chuẩn bị HTTPS được cho phép, iOS Safari Add to Home Screen và Android Chrome Install, mở standalone, kiểm tra offline/update/logout với tài khoản thử nghiệm. Phiên này không mở tunnel/public deployment và chưa xác nhận cài trên thiết bị thật.
+- POST Tracking 500 là lỗi nền chưa kết luận; phiên này không gửi POST Tracking để tái hiện, không sửa backend.
+
+### Kiểm tra thủ công trên Chrome — người dùng xác nhận
+Kết quả do người dùng trực tiếp kiểm tra tại `http://127.0.0.1:3183`, ghi nhận riêng với các kiểm tra tự động ở trên:
+- Service Worker hiển thị `activated and is running`.
+- Bật Offline rồi truy cập `/reseller`: hiển thị trang “Bạn đang ngoại tuyến”.
+- Bỏ Offline và bấm “Thử lại”: tải được `/login?next=%2Freseller`.
+- Phạm vi xác nhận: SW hoạt động và luồng offline → online → trang đăng nhập trên Chrome local. Chưa kiểm tra cài đặt/Add to Home Screen hoặc standalone trên điện thoại thật; FE-W3-01 vẫn chờ QA thiết bị thật và review.
+- Lượt ghi nhận này chỉ cập nhật tài liệu, không chạy lại test, không sửa code, không commit/push.
+
+## 7. FE-W3-02 — Bottom Navigation & Safe Area
+
+### Phạm vi và mapping trước triển khai
+- Giữ nhánh `Feature_FE_W3_PWA_Mobile_Commerce`, nền `fe50aee`; không fetch/pull/chuyển nhánh. Giữ toàn bộ PWA Core và bằng chứng thủ công FE-W3-01 ở trên.
+- Chưa thấy link Figma/spec bàn giao UX-W3-01 trong repo: đây là bản đề xuất theo token Coastal Editorial hiện có, **Chờ UI/UX review**, chưa xác nhận khớp Figma.
+
+| Mục | Portal thật | Preview fixture local | Trạng thái / cần xác nhận |
+|---|---|---|---|
+| Khám phá | `/reseller/campaigns`; `/reseller` đã redirect tới danh sách | `/preview/reseller` | Route có sẵn; active cả khi xem chi tiết chưa chọn khu vực |
+| Nội dung AI | Trên chi tiết chiến dịch đang mở: `#reseller-content-kit` | Cùng anchor trên chi tiết fixture | Ở danh sách: nút hướng dẫn chọn chiến dịch, không giả route tổng hợp hoặc tự chọn ID; chờ BA/UIUX xác nhận điều hướng dài hạn |
+| Link & QR | Trên chi tiết chiến dịch đang mở: `#reseller-tracking` | Cùng anchor trên chi tiết fixture | Chỉ cuộn/focus tới khu vực Tracking đang có, không mở tạo link tự động hoặc đổi cơ chế Tracking; ở danh sách: hướng dẫn chọn chiến dịch |
+| Ví hoa hồng | Chưa nối route vì `/reseller/wallet` chưa tồn tại | Không giả số dư/tài khoản | Nút “Sắp có” mở giải thích; FE-W3-05 chưa triển khai. BA matrix còn dùng `/reseller/commissions`, cần đồng bộ |
+
+### Giao diện và tương tác
+- `bottom-nav.tsx` + CSS Module dùng nền kem, teal, accent đất nung và Lucide icons 22px/1.75 từ hệ thống có sẵn. Không đổi font/logo/CSS toàn cục.
+- Mobile <768px: thay navigation đầu trang bằng dock bốn mục; desktop ≥768px giữ navigation hiện có. Portal chỉ bật dock sau guard `allowed`; preview vẫn dùng fixture development-only, không đọc dữ liệu tài khoản thật.
+- Active có nền, viền, chữ đậm và dấu gạch nhỏ, không chỉ khác màu. `aria-current=page` cho Khám phá, `location` cho Content Kit/Tracking theo hash. Anchor focus được, hỗ trợ lịch sử hash và reduced motion.
+- Nav cao 88px; shell chừa 88px + `env(safe-area-inset-bottom)` + 16px. Safe area ngang hỗ trợ landscape; `viewportFit=cover` chỉ ở layout Reseller, giữ root PWA như cũ.
+- Z-index nav 20; Tracking và hộp hướng dẫn dùng native dialog/top layer, giữ modal cao hơn dock. Nút ít nhất 44×44px, focus rõ; hướng dẫn đóng bằng Escape và trả focus về nút mở.
+- Khi đang nhập và visualViewport thu hẹp >150px, dock tạm ẩn để tránh nổi trên bàn phím. Đây là hỗ trợ theo visualViewport, chưa phải bằng chứng bàn phím iOS/Android thật.
+- Nút hướng dẫn chờ hydration trước khi nhận thao tác, tránh lần tải đầu bấm khi JavaScript chưa sẵn sàng. Next.js dev indicator chuyển sang góc trên phải trong `next.config.ts` để không che Khám phá khi kiểm tra local; giữ nguyên cấu hình PWA headers.
+
+### Kiểm chứng và cách xem
+- TypeScript trước build: PASS. Browser fixture Chromium revision 1243: PASS 320/390/768/1440, không tràn ngang ở danh sách/chi tiết, mobile chỉ một navigation, desktop giữ header nav, active route/hash đúng, nút ≥44×44px, chữ không bị cắt, footer không bị che.
+- PASS thao tác hướng dẫn bằng Enter/Escape và trả focus, focus outline, reduced motion, điều hướng Content Kit/Tracking và Back theo hash, modal QR mock giữ focus bên trong/top layer không bị dock đè, quay lại Khám phá, lọc tìm kiếm, ngoài Reseller (`/privacy`) không có dock. Không có page errors hoặc API/write/external requests trong bài test; không dùng session thật.
+- PASS mô phỏng visualViewport 420px khi focus tìm kiếm (ẩn dock), phục hồi viewport (hiện lại), và override inset đáy 34px (nav/shell cùng tăng khoảng đệm, footer vẫn không bị che). Đây là mô phỏng, không phải bằng chứng bàn phím/safe area thật.
+- Đã chụp và mở xem ảnh trong `build/fe-w3-nav-evidence/`: feed 320/390/768/1440, Content Kit và Tracking modal 320/390, inset 34px ở 390. Sau xem ảnh đã bỏ hàng trống preview mobile và rút chữ phụ thành “Mở chiến dịch” để thoáng hơn ở 320px. Ảnh review chỉ ẩn badge inspector của Next trong trình duyệt test, không ẩn thành phần ứng dụng.
+- Lần kiểm tra đầu gặp cold compile/filesystem chậm và badge Next dev chặn click; sau warm-up/điều chỉnh công cụ test, bộ kiểm tra mục tiêu trên đã PASS. Production build `$env:NEXT_BUILD_DIR='build/fe-w3-nav-prod'; npm.cmd run build`: PASS, gồm TypeScript cuối cùng và sinh 24/24 trang. Không chạy toàn bộ suite không liên quan. Đã dừng dev server kiểm chứng và khôi phục các đường dẫn Next.js tự sinh trong tsconfig/next-env về trạng thái đầu phiên; không thay output PWA build cũ.
+- Lint phần code sửa/thêm (nav, shell, detail anchors, Reseller layout, next.config, test mục tiêu): 0 lỗi, 1 cảnh báo có sẵn về prop `preview` chưa dùng trong `campaign-detail.tsx`; không sửa logic Tracking để xử lý cảnh báo này.
+- Dev fixture: `$env:NEXT_BUILD_DIR='build/fe-w3-nav'; node node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3184`.
+- Mở `http://127.0.0.1:3184/preview/reseller`, chọn Device Mode 320/390px. Bấm Nội dung AI hoặc Link & QR ở danh sách để xem hướng dẫn; bấm “Xem chi tiết Hội An Foodie” để vào Content Kit/Tracking đúng chiến dịch fixture.
+- Chi tiết mock Tracking: `http://127.0.0.1:3184/preview/reseller/campaigns/11111111-1111-4111-8111-111111111111?state=approved&tracking=success`. ID này chỉ phục vụ route preview fixture có sẵn, không đưa vào navigation portal thật.
+- Kiểm tra tự động có mục tiêu: `$env:PLAYWRIGHT_CHROMIUM_PATH="$env:LOCALAPPDATA\ms-playwright\chromium-1243\chrome-win64\chrome.exe"; node tests/reseller-bottom-nav.mjs`.
+- Chưa thử safe area/bàn phím trên điện thoại thật; chưa có UIUX review hoặc xác nhận của BA về trang tổng hợp. Không đánh dấu cả tuần hoàn thành.
+- File của FE-W3-02: `src/components/reseller/bottom-nav.tsx`, `bottom-nav.module.css`, `shell.tsx`, `campaign-detail.tsx` (chỉ thêm wrapper anchor), `app/reseller/layout.tsx`, `next.config.ts` (dev badge), `tests/reseller-bottom-nav.mjs`, FE_W3.md và phần FE TEAM_WORK_LOG.md. `git diff --check`: PASS. Không chỉnh root layout, manifest/SW, Auth/backend/Tracking logic, .env.local, DB hoặc nhánh FE tuần 2 trong phiên này.
