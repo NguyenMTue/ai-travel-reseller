@@ -1,0 +1,141 @@
+{
+  "merchant_name": "ABC Theme Park Da Nang",
+  "product_name": "Vé Combo Cuối Tuần",
+  "location": "Đà Nẵng",
+  "sale_price": 299000,
+  "original_price": 450000,
+  "official_cta": "Comment ABC để nhận link đặt vé chính thức",
+  "booking_url": "https://travellink.vn/book/abc-weekend",
+  "target_platforms": ["TIKTOK", "INSTAGRAM_REELS", "FACEBOOK_REELS"],
+  "content_type": "CONVERSION",
+  "persona": "Local Guide",
+  "target_duration_sec": 28.0,
+  "allow_3d_spatial_effects": true,
+  "media_assets": [
+    {
+      "asset_id": "asset_real_aerial_01",
+      "url": "https://storage.travellink.vn/media/aerial_01.jpg",
+      "type": "IMAGE",
+      "shot_type": "AERIAL_WIDE",
+      "resolution": "2160x3840",
+      "description": "Ảnh toàn cảnh công viên và quần thể cáp treo từ trên cao góc rộng"
+    },
+    {
+      "asset_id": "asset_real_clip_02",
+      "url": "https://storage.travellink.vn/media/clip_02.mp4",
+      "type": "VIDEO",
+      "shot_type": "HUMAN_POV",
+      "resolution": "1080x1920",
+      "description": "Video du khách xếp hàng đông đúc tại cổng chính giờ cao điểm"
+    },
+    {
+      "asset_id": "asset_real_scenic_03",
+      "url": "https://storage.travellink.vn/media/scenic_03.jpg",
+      "type": "IMAGE",
+      "shot_type": "SCENIC_MEDIUM",
+      "resolution": "1080x1920",
+      "description": "Ảnh cổng phụ số 2 buổi sáng sớm vắng vẻ và thoáng đãng"
+    },
+    {
+      "asset_id": "asset_real_scenic_04",
+      "url": "https://storage.travellink.vn/media/scenic_04.jpg",
+      "type": "IMAGE",
+      "shot_type": "SCENIC_MEDIUM",
+      "resolution": "1080x1920",
+      "description": "Cabin cáp treo lướt qua cánh rừng nguyên sinh yên bình"
+    },
+    {
+      "asset_id": "asset_real_aerial_05",
+      "url": "https://storage.travellink.vn/media/aerial_05.jpg",
+      "type": "IMAGE",
+      "shot_type": "AERIAL_WIDE",
+      "resolution": "2160x3840",
+      "description": "Toàn cảnh làng kiến trúc Pháp giữa biển mây bồng bềnh"
+    },
+    {
+      "asset_id": "asset_real_clip_06",
+      "url": "https://storage.travellink.vn/media/clip_06.mp4",
+      "type": "VIDEO",
+      "shot_type": "HUMAN_POV",
+      "resolution": "1080x1920",
+      "description": "Video du khách trải nghiệm tàu lượn siêu tốc hò reo phấn khích"
+    },
+    {
+      "asset_id": "asset_real_food_07",
+      "url": "https://storage.travellink.vn/media/food_07.jpg",
+      "type": "IMAGE",
+      "shot_type": "CLOSEUP_FOOD",
+      "resolution": "1080x1920",
+      "description": "Cận cảnh quầy đồ nướng buffet hải sản nghi ngút khói"
+    },
+    {
+      "asset_id": "asset_real_scenic_08",
+      "url": "https://storage.travellink.vn/media/scenic_08.jpg",
+      "type": "IMAGE",
+      "shot_type": "SCENIC_MEDIUM",
+      "resolution": "1080x1920",
+      "description": "Quảng trường mây mù se lạnh buổi chiều lãng mạn"
+    },
+    {
+      "asset_id": "asset_real_aerial_09",
+      "url": "https://storage.travellink.vn/media/aerial_09.jpg",
+      "type": "IMAGE",
+      "shot_type": "AERIAL_WIDE",
+      "resolution": "2160x3840",
+      "description": "Góc quay flycam toàn cảnh Cầu Vàng sương giăng"
+    },
+    {
+      "asset_id": "asset_real_clip_10",
+      "url": "https://storage.travellink.vn/media/clip_10.mp4",
+      "type": "VIDEO",
+      "shot_type": "HUMAN_POV",
+      "resolution": "1080x1920",
+      "description": "Khoảnh khắc gia đình check-in rạng rỡ bên đài phun nước"
+    },
+    {
+      "asset_id": "asset_real_scenic_11",
+      "url": "https://storage.travellink.vn/media/scenic_11.jpg",
+      "type": "IMAGE",
+      "shot_type": "SCENIC_MEDIUM",
+      "resolution": "1080x1920",
+      "description": "Bảng thông tin vé combo ưu đãi chính hãng cuối tuần"
+    },
+    {
+      "asset_id": "asset_real_scenic_12",
+      "url": "https://storage.travellink.vn/media/scenic_12.jpg",
+      "type": "IMAGE",
+      "shot_type": "SCENIC_MEDIUM",
+      "resolution": "1080x1920",
+      "description": "Không gian nhà hàng buffet sang trọng và ấm cúng"
+    },
+    {
+      "asset_id": "asset_real_scenic_13",
+      "url": "https://storage.travellink.vn/media/scenic_13.jpg",
+      "type": "IMAGE",
+      "shot_type": "SCENIC_MEDIUM",
+      "resolution": "1080x1920",
+      "description": "Cổng soát vé tự động quét QR code tiện lợi"
+    },
+    {
+      "asset_id": "asset_real_aerial_14",
+      "url": "https://storage.travellink.vn/media/aerial_14.jpg",
+      "type": "IMAGE",
+      "shot_type": "AERIAL_WIDE",
+      "resolution": "2160x3840",
+      "description": "Toàn cảnh hoàng hôn buông xuống khu du lịch tuyệt đẹp"
+    }
+  ],
+  "authentic_tips": [
+    "Đi trước 8h30 sáng qua Cổng số 2 vắng khách, lên thẳng cáp treo không phải chen chúc",
+    "Đỉnh núi buổi chiều hay có sương mù se lạnh, nhớ mang theo áo khoác nhẹ cho bé"
+  ],
+  "audio_config": {
+    "voice_persona_id": "vn_danang_youth_female_energetic",
+    "ambient_sound_tags": [
+      "tiếng gió đỉnh núi",
+      "tiếng cáp treo vận hành",
+      "tiếng xèo xèo buffet",
+      "tiếng bước chân"
+    ]
+  }
+}

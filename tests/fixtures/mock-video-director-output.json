@@ -1,0 +1,473 @@
+{
+  "status": "READY_FOR_RENDER",
+  "can_proceed": true,
+  "campaign_metadata": {
+    "merchant_name": "ABC Theme Park Da Nang",
+    "product_name": "Vé Combo Cuối Tuần",
+    "persona": "Local Guide",
+    "content_type": "CONVERSION",
+    "target_platforms": ["TIKTOK", "INSTAGRAM_REELS", "FACEBOOK_REELS"],
+    "total_duration_sec": 28.0,
+    "aspect_ratio": "9:16",
+    "safe_zone_enforced": true
+  },
+  "anti_ai_compliance_check": {
+    "real_footage_100_percent": true,
+    "generative_pixel_ai_used": false,
+    "allowed_spatial_ai_techniques": [
+      "2.5D_AERIAL_PARALLAX",
+      "DEPTH_BASED_3D_KEN_BURNS",
+      "SINGLE_IMAGE_3D_MESH_PROJECTION",
+      "NONE_REAL_VIDEO"
+    ],
+    "average_scene_duration_sec": 2.0,
+    "no_ai_cliche_words": true,
+    "verified_merchant_price_and_cta": true
+  },
+  "audio_config": {
+    "voice_persona_id": "vn_danang_youth_female_energetic",
+    "speaking_rate": 1.08,
+    "bgm_style": "Upbeat Acoustic Travel Vlog (Volume: 18%)",
+    "full_voiceover_script_with_pauses": "Đi ABC Theme Park cuối tuần mà không biết 2 lưu ý này [pause 0.3s] là xác định đứng xếp hàng dưới nắng cả tiếng đồng hồ! [breath] Thứ nhất là mọi người nhớ đi trước 8 rưỡi sáng và rẽ qua cổng phụ số 2 nha. Thứ hai là trên đỉnh chiều hay có sương mù se lạnh [pause 0.2s], nhớ mang theo áo khoác nhẹ cho bé. Đợt này combo vé chính hãng chỉ 299 cành lại còn tặng kèm buffet trưa siêu hời. Comment ngay bên dưới để mình gửi lịch trình chi tiết và link đặt vé chính thức nha!"
+  },
+  "timeline_scenes": [
+    {
+      "scene_index": 1,
+      "time_range_sec": "0.0 - 2.0",
+      "duration_sec": 2.0,
+      "source_asset_id": "asset_real_aerial_01",
+      "asset_type": "IMAGE",
+      "shot_type": "AERIAL_WIDE",
+      "spatial_ai_technique": "2.5D_AERIAL_PARALLAX",
+      "camera_motion": {
+        "effect": "DRONE_TRUCK_LEFT",
+        "direction": "RIGHT_TO_LEFT",
+        "speed": "SMOOTH_MEDIUM",
+        "max_displacement_percent": 10,
+        "depth_layers": 3
+      },
+      "transition_out": "HARD_JUMP_CUT",
+      "voiceover_segment": "Đi ABC Theme Park cuối tuần mà không biết 2 lưu ý này",
+      "ambient_sfx": {
+        "sound": "Tiếng gió nhẹ trên cao + âm thanh náo nhiệt công viên từ xa",
+        "volume_percent": 30
+      },
+      "on_screen_text": {
+        "type": "HOOK_HEADLINE",
+        "text": "⚠️ 2 LƯU Ý SỐNG CÒN KHI ĐI ABC CUỐI TUẦN!",
+        "font": "Be Vietnam Pro ExtraBold",
+        "color": "#FFD700",
+        "stroke": "#000000",
+        "position": "CENTER_SAFE_ZONE",
+        "animation": "POP_BOUNCE"
+      }
+    },
+    {
+      "scene_index": 2,
+      "time_range_sec": "2.0 - 3.8",
+      "duration_sec": 1.8,
+      "source_asset_id": "asset_real_clip_02",
+      "asset_type": "VIDEO",
+      "shot_type": "HUMAN_POV",
+      "spatial_ai_technique": "NONE_REAL_VIDEO",
+      "camera_motion": {
+        "effect": "NATURAL_HANDHELD_POV",
+        "direction": "FORWARD",
+        "speed": "NORMAL",
+        "max_displacement_percent": 0,
+        "depth_layers": 1
+      },
+      "transition_out": "HARD_JUMP_CUT",
+      "voiceover_segment": "[pause 0.3s] là xác định đứng xếp hàng dưới nắng cả tiếng đồng hồ!",
+      "ambient_sfx": {
+        "sound": "Tiếng bước chân + tiếng đám đông ồn ào thực tế",
+        "volume_percent": 35
+      },
+      "on_screen_text": {
+        "type": "DYNAMIC_CAPTION",
+        "text": "xác định *xếp hàng cả tiếng* 🥵",
+        "font": "Montserrat Bold",
+        "highlight_word": "xếp hàng cả tiếng",
+        "highlight_color": "#FF3B30",
+        "position": "LOWER_MIDDLE_SAFE_ZONE",
+        "animation": "WORD_BY_WORD_HIGHLIGHT"
+      }
+    },
+    {
+      "scene_index": 3,
+      "time_range_sec": "3.8 - 6.0",
+      "duration_sec": 2.2,
+      "source_asset_id": "asset_real_scenic_03",
+      "asset_type": "IMAGE",
+      "shot_type": "SCENIC_MEDIUM",
+      "spatial_ai_technique": "SINGLE_IMAGE_3D_MESH_PROJECTION",
+      "camera_motion": {
+        "effect": "DRONE_TRUCK_LEFT_WITH_SLIGHT_PUSH_IN",
+        "direction": "RIGHT_TO_LEFT_AND_IN",
+        "speed": "SLOW_CINEMATIC",
+        "max_displacement_percent": 8,
+        "depth_layers": 3
+      },
+      "transition_out": "WHIP_PAN_SHORT",
+      "voiceover_segment": "[breath] Thứ nhất là mọi người nhớ đi trước 8 rưỡi sáng và rẽ qua cổng phụ số 2 nha,",
+      "ambient_sfx": {
+        "sound": "Tiếng chim hót buổi sáng + tiếng nước chảy khu vực cổng",
+        "volume_percent": 25
+      },
+      "on_screen_text": {
+        "type": "DYNAMIC_CAPTION",
+        "text": "📍 Mẹo 1: Đi trước *8h30 sáng* qua *Cổng số 2*",
+        "font": "Montserrat Bold",
+        "highlight_word": "Cổng số 2",
+        "highlight_color": "#34C759",
+        "position": "LOWER_MIDDLE_SAFE_ZONE",
+        "animation": "WORD_BY_WORD_HIGHLIGHT"
+      }
+    },
+    {
+      "scene_index": 4,
+      "time_range_sec": "6.0 - 8.0",
+      "duration_sec": 2.0,
+      "source_asset_id": "asset_real_scenic_04",
+      "asset_type": "IMAGE",
+      "shot_type": "SCENIC_MEDIUM",
+      "spatial_ai_technique": "DEPTH_BASED_3D_KEN_BURNS",
+      "camera_motion": {
+        "effect": "KEN_BURNS_PUSH_IN",
+        "direction": "CENTER_FORWARD",
+        "speed": "SMOOTH_MEDIUM",
+        "max_displacement_percent": 6,
+        "depth_layers": 3
+      },
+      "transition_out": "HARD_JUMP_CUT",
+      "voiceover_segment": "tuyến này vắng tênh, lên thẳng cáp treo không phải chen chúc.",
+      "ambient_sfx": {
+        "sound": "Tiếng ròng rọc cáp treo vận hành êm ái",
+        "volume_percent": 20
+      },
+      "on_screen_text": {
+        "type": "DYNAMIC_CAPTION",
+        "text": "Tuyến cáp *vắng tênh*, lên thẳng đỉnh",
+        "font": "Montserrat Bold",
+        "highlight_word": "vắng tênh",
+        "highlight_color": "#007AFF",
+        "position": "LOWER_MIDDLE_SAFE_ZONE",
+        "animation": "WORD_BY_WORD_HIGHLIGHT"
+      }
+    },
+    {
+      "scene_index": 5,
+      "time_range_sec": "8.0 - 10.0",
+      "duration_sec": 2.0,
+      "source_asset_id": "asset_real_aerial_05",
+      "asset_type": "IMAGE",
+      "shot_type": "AERIAL_WIDE",
+      "spatial_ai_technique": "2.5D_AERIAL_PARALLAX",
+      "camera_motion": {
+        "effect": "DRONE_TRUCK_RIGHT",
+        "direction": "LEFT_TO_RIGHT",
+        "speed": "SMOOTH_MEDIUM",
+        "max_displacement_percent": 10,
+        "depth_layers": 3
+      },
+      "transition_out": "WHIP_PAN_SHORT",
+      "voiceover_segment": "Lên tới nơi view mây núi cực kỳ mãn nhãn luôn.",
+      "ambient_sfx": {
+        "sound": "Tiếng gió lộng đỉnh núi quang đãng",
+        "volume_percent": 25
+      },
+      "on_screen_text": {
+        "type": "DYNAMIC_CAPTION",
+        "text": "View mây núi *siêu mãn nhãn* ☁️",
+        "font": "Montserrat Bold",
+        "highlight_word": "siêu mãn nhãn",
+        "highlight_color": "#FF9500",
+        "position": "LOWER_MIDDLE_SAFE_ZONE",
+        "animation": "WORD_BY_WORD_HIGHLIGHT"
+      }
+    },
+    {
+      "scene_index": 6,
+      "time_range_sec": "10.0 - 12.0",
+      "duration_sec": 2.0,
+      "source_asset_id": "asset_real_clip_06",
+      "asset_type": "VIDEO",
+      "shot_type": "HUMAN_POV",
+      "spatial_ai_technique": "NONE_REAL_VIDEO",
+      "camera_motion": {
+        "effect": "NATURAL_HANDHELD_POV",
+        "direction": "FORWARD",
+        "speed": "NORMAL",
+        "max_displacement_percent": 0,
+        "depth_layers": 1
+      },
+      "transition_out": "HARD_JUMP_CUT",
+      "voiceover_segment": "Các trò chơi cảm giác mạnh thì bao la, chơi mệt nghỉ.",
+      "ambient_sfx": {
+        "sound": "Tiếng hò reo vui vẻ của du khách",
+        "volume_percent": 30
+      },
+      "on_screen_text": {
+        "type": "DYNAMIC_CAPTION",
+        "text": "Trò chơi cảm giác mạnh *thả ga* 🎢",
+        "font": "Montserrat Bold",
+        "highlight_word": "thả ga",
+        "highlight_color": "#AF52DE",
+        "position": "LOWER_MIDDLE_SAFE_ZONE",
+        "animation": "WORD_BY_WORD_HIGHLIGHT"
+      }
+    },
+    {
+      "scene_index": 7,
+      "time_range_sec": "12.0 - 14.0",
+      "duration_sec": 2.0,
+      "source_asset_id": "asset_real_food_07",
+      "asset_type": "IMAGE",
+      "shot_type": "CLOSEUP_FOOD",
+      "spatial_ai_technique": "DEPTH_BASED_3D_KEN_BURNS",
+      "camera_motion": {
+        "effect": "KEN_BURNS_PUSH_IN",
+        "direction": "CENTER_FORWARD",
+        "speed": "SLOW_CINEMATIC",
+        "max_displacement_percent": 5,
+        "depth_layers": 3
+      },
+      "transition_out": "HARD_JUMP_CUT",
+      "voiceover_segment": "Ăn trưa buffet hơn bảy mươi món ngon chuẩn vị.",
+      "ambient_sfx": {
+        "sound": "Tiếng dao dĩa và xèo xèo món nướng hấp dẫn",
+        "volume_percent": 28
+      },
+      "on_screen_text": {
+        "type": "DYNAMIC_CAPTION",
+        "text": "Buffet trưa hơn *70 món nóng hổi* 🍜",
+        "font": "Montserrat Bold",
+        "highlight_word": "70 món nóng hổi",
+        "highlight_color": "#FF2D55",
+        "position": "LOWER_MIDDLE_SAFE_ZONE",
+        "animation": "WORD_BY_WORD_HIGHLIGHT"
+      }
+    },
+    {
+      "scene_index": 8,
+      "time_range_sec": "14.0 - 16.0",
+      "duration_sec": 2.0,
+      "source_asset_id": "asset_real_scenic_08",
+      "asset_type": "IMAGE",
+      "shot_type": "SCENIC_MEDIUM",
+      "spatial_ai_technique": "SINGLE_IMAGE_3D_MESH_PROJECTION",
+      "camera_motion": {
+        "effect": "STATIC",
+        "direction": "NONE",
+        "speed": "NORMAL",
+        "max_displacement_percent": 0,
+        "depth_layers": 2
+      },
+      "transition_out": "WHIP_PAN_SHORT",
+      "voiceover_segment": "Thứ hai là trên đỉnh chiều hay có sương mù se lạnh [pause 0.2s],",
+      "ambient_sfx": {
+        "sound": "Tiếng gió lạnh se se và tiếng lá cây xào xạc",
+        "volume_percent": 25
+      },
+      "on_screen_text": {
+        "type": "DYNAMIC_CAPTION",
+        "text": "📍 Mẹo 2: Đỉnh núi chiều hay *sương mù se lạnh*",
+        "font": "Montserrat Bold",
+        "highlight_word": "sương mù se lạnh",
+        "highlight_color": "#5856D6",
+        "position": "LOWER_MIDDLE_SAFE_ZONE",
+        "animation": "WORD_BY_WORD_HIGHLIGHT"
+      }
+    },
+    {
+      "scene_index": 9,
+      "time_range_sec": "16.0 - 18.2",
+      "duration_sec": 2.2,
+      "source_asset_id": "asset_real_aerial_09",
+      "asset_type": "IMAGE",
+      "shot_type": "AERIAL_WIDE",
+      "spatial_ai_technique": "2.5D_AERIAL_PARALLAX",
+      "camera_motion": {
+        "effect": "DRONE_TRUCK_LEFT",
+        "direction": "RIGHT_TO_LEFT",
+        "speed": "SMOOTH_MEDIUM",
+        "max_displacement_percent": 9,
+        "depth_layers": 3
+      },
+      "transition_out": "HARD_JUMP_CUT",
+      "voiceover_segment": "nhớ mang theo áo khoác nhẹ cho bé để tha hồ dạo chơi chụp hình.",
+      "ambient_sfx": {
+        "sound": "Tiếng gió lùa thoáng đãng sảng khoái",
+        "volume_percent": 25
+      },
+      "on_screen_text": {
+        "type": "DYNAMIC_CAPTION",
+        "text": "Nhớ mang *áo khoác nhẹ* cho gia đình nha 🧥",
+        "font": "Montserrat Bold",
+        "highlight_word": "áo khoác nhẹ",
+        "highlight_color": "#FF9500",
+        "position": "LOWER_MIDDLE_SAFE_ZONE",
+        "animation": "WORD_BY_WORD_HIGHLIGHT"
+      }
+    },
+    {
+      "scene_index": 10,
+      "time_range_sec": "18.2 - 20.2",
+      "duration_sec": 2.0,
+      "source_asset_id": "asset_real_clip_10",
+      "asset_type": "VIDEO",
+      "shot_type": "HUMAN_POV",
+      "spatial_ai_technique": "NONE_REAL_VIDEO",
+      "camera_motion": {
+        "effect": "NATURAL_HANDHELD_POV",
+        "direction": "FORWARD",
+        "speed": "NORMAL",
+        "max_displacement_percent": 0,
+        "depth_layers": 1
+      },
+      "transition_out": "HARD_JUMP_CUT",
+      "voiceover_segment": "Góc nào sống ảo cũng đẹp lung linh không góc chết.",
+      "ambient_sfx": {
+        "sound": "Tiếng bấm máy ảnh tách tách vui tươi",
+        "volume_percent": 25
+      },
+      "on_screen_text": {
+        "type": "DYNAMIC_CAPTION",
+        "text": "Góc check-in *lung linh* siêu đỉnh 📸",
+        "font": "Montserrat Bold",
+        "highlight_word": "lung linh",
+        "highlight_color": "#FF2D55",
+        "position": "LOWER_MIDDLE_SAFE_ZONE",
+        "animation": "WORD_BY_WORD_HIGHLIGHT"
+      }
+    },
+    {
+      "scene_index": 11,
+      "time_range_sec": "20.2 - 22.2",
+      "duration_sec": 2.0,
+      "source_asset_id": "asset_real_scenic_11",
+      "asset_type": "IMAGE",
+      "shot_type": "SCENIC_MEDIUM",
+      "spatial_ai_technique": "DEPTH_BASED_3D_KEN_BURNS",
+      "camera_motion": {
+        "effect": "KEN_BURNS_PUSH_IN",
+        "direction": "CENTER_FORWARD",
+        "speed": "SMOOTH_MEDIUM",
+        "max_displacement_percent": 6,
+        "depth_layers": 3
+      },
+      "transition_out": "HARD_JUMP_CUT",
+      "voiceover_segment": "Đợt này combo vé chính hãng chỉ hai trăm chín chín cành,",
+      "ambient_sfx": {
+        "sound": "Tiếng nhạc chuông ting ting vui nhộn",
+        "volume_percent": 22
+      },
+      "on_screen_text": {
+        "type": "OFFER_CALLOUT",
+        "text": "🔥 VÉ COMBO CHÍNH HÃNG CHỈ 299.000đ",
+        "font": "Be Vietnam Pro ExtraBold",
+        "color": "#FFD700",
+        "stroke": "#000000",
+        "position": "CENTER_SAFE_ZONE",
+        "animation": "POP_BOUNCE"
+      }
+    },
+    {
+      "scene_index": 12,
+      "time_range_sec": "22.2 - 24.2",
+      "duration_sec": 2.0,
+      "source_asset_id": "asset_real_scenic_12",
+      "asset_type": "IMAGE",
+      "shot_type": "SCENIC_MEDIUM",
+      "spatial_ai_technique": "SINGLE_IMAGE_3D_MESH_PROJECTION",
+      "camera_motion": {
+        "effect": "STATIC",
+        "direction": "NONE",
+        "speed": "NORMAL",
+        "max_displacement_percent": 0,
+        "depth_layers": 2
+      },
+      "transition_out": "CROSS_DISSOLVE_FAST",
+      "voiceover_segment": "lại còn tặng kèm suất buffet trưa siêu hời cho cả nhà.",
+      "ambient_sfx": {
+        "sound": "Tiếng cười nói ấm cúng của gia đình",
+        "volume_percent": 25
+      },
+      "on_screen_text": {
+        "type": "DYNAMIC_CAPTION",
+        "text": "Tặng kèm *Buffet Trưa* chuẩn vị 🎁",
+        "font": "Montserrat Bold",
+        "highlight_word": "Buffet Trưa",
+        "highlight_color": "#34C759",
+        "position": "LOWER_MIDDLE_SAFE_ZONE",
+        "animation": "WORD_BY_WORD_HIGHLIGHT"
+      }
+    },
+    {
+      "scene_index": 13,
+      "time_range_sec": "24.2 - 26.2",
+      "duration_sec": 2.0,
+      "source_asset_id": "asset_real_scenic_13",
+      "asset_type": "IMAGE",
+      "shot_type": "SCENIC_MEDIUM",
+      "spatial_ai_technique": "SINGLE_IMAGE_3D_MESH_PROJECTION",
+      "camera_motion": {
+        "effect": "STATIC",
+        "direction": "NONE",
+        "speed": "NORMAL",
+        "max_displacement_percent": 0,
+        "depth_layers": 2
+      },
+      "transition_out": "HARD_JUMP_CUT",
+      "voiceover_segment": "Vé quét mã QR vào cổng trực tiếp, cam kết chính hãng một trăm phần trăm.",
+      "ambient_sfx": {
+        "sound": "Tiếng tít máy quét mã vé QR thành công",
+        "volume_percent": 30
+      },
+      "on_screen_text": {
+        "type": "DYNAMIC_CAPTION",
+        "text": "Quét mã QR *vào cổng trực tiếp* 🎟️",
+        "font": "Montserrat Bold",
+        "highlight_word": "vào cổng trực tiếp",
+        "highlight_color": "#007AFF",
+        "position": "LOWER_MIDDLE_SAFE_ZONE",
+        "animation": "WORD_BY_WORD_HIGHLIGHT"
+      }
+    },
+    {
+      "scene_index": 14,
+      "time_range_sec": "26.2 - 28.0",
+      "duration_sec": 1.8,
+      "source_asset_id": "asset_real_aerial_01",
+      "asset_type": "IMAGE",
+      "shot_type": "AERIAL_WIDE",
+      "spatial_ai_technique": "2.5D_AERIAL_PARALLAX",
+      "camera_motion": {
+        "effect": "DRONE_TRUCK_LEFT",
+        "direction": "RIGHT_TO_LEFT",
+        "speed": "SMOOTH_MEDIUM",
+        "max_displacement_percent": 8,
+        "depth_layers": 3
+      },
+      "transition_out": "HARD_JUMP_CUT",
+      "voiceover_segment": "Comment ngay bên dưới để mình gửi lịch trình chi tiết và link đặt vé chính thức nha!",
+      "ambient_sfx": {
+        "sound": "Tiếng nhạc BGM dâng lên kết thúc tươi sáng",
+        "volume_percent": 30
+      },
+      "on_screen_text": {
+        "type": "OFFICIAL_CTA",
+        "text": "👇 COMMENT ABC ĐỂ NHẬN LINK VÉ CHÍNH HÃNG",
+        "font": "Be Vietnam Pro ExtraBold",
+        "color": "#FFFFFF",
+        "stroke": "#000000",
+        "position": "LOWER_MIDDLE_SAFE_ZONE",
+        "animation": "POP_BOUNCE"
+      }
+    }
+  ],
+  "social_publishing_package": {
+    "caption": "Kinh nghiệm xương máu đi ABC Theme Park cuối tuần không phải xếp hàng dài 🥵 Lưu ngay lại để cuối tuần đi cùng gia đình nhé! #DaNang #ReviewDaNang #ABCThemePark",
+    "official_cta_text": "Comment ABC để nhận thông tin và link thanh toán chính thức trực tiếp từ đối tác ABC."
+  }
+}

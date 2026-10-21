@@ -1,0 +1,29 @@
+{
+  "evidence_type": "supabase_contents_count_snapshot",
+  "captured_on": "2026-10-19",
+  "source": "SQL query output supplied by the user",
+  "campaign_id": "409695b2-9eed-43f2-b8a0-49dac50eabb9",
+  "persona": "family",
+  "row_count": 10,
+  "unique_keys": 10,
+  "content_ids": [
+    "0b6a57ca-ccf1-4edd-a47e-b85671c1ddae",
+    "1e5aab66-8bfc-40ca-b054-90362dc85ba2",
+    "9e7a3438-d4d4-4015-b079-25574a0c511d",
+    "70b92ee6-2219-459e-b73d-05260b7f659a",
+    "1d6cfd7d-fc1a-4643-b23b-27822aa8da0e",
+    "6111063b-60ae-48f4-babc-bdf9bf07927b",
+    "46a33603-3b81-400b-8ee6-e111571f6346",
+    "102cc2d4-3ee4-4a51-b013-60dc91b14cc9",
+    "2343c8a8-9df3-400e-8f7b-cf31319ef987",
+    "000eb6ab-faf1-4680-b1b2-908681b57578"
+  ],
+  "retry_comparison": {
+    "state": "passed",
+    "execution_id": "241",
+    "row_count_after_retry": 10,
+    "unique_keys_after_retry": 10,
+    "content_ids_unchanged": true,
+    "duplicate_rows_added": 0
+  }
+}

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { captureChatFunnelEvent } from "@/src/lib/analytics";
 import {
   ArrowUp,
   MessageCircle,
@@ -44,9 +45,17 @@ export function ChatPanel({
   const bottom = useRef<HTMLDivElement>(null);
   const controller = useRef<AbortController | null>(null);
   const busy = useRef(false);
+  const trackedChatOpen = useRef(false);
   useEffect(() => {
     bottom.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [messages, pending]);
+  useEffect(() => {
+    if (trackedChatOpen.current) return;
+    trackedChatOpen.current = true;
+    captureChatFunnelEvent("chat_opened", attribution, {
+      page: "chat",
+    });
+  }, [attribution]);
   useEffect(() => () => controller.current?.abort(), []);
   async function send(text: string) {
     const question = text.trim();
@@ -62,6 +71,10 @@ export function ChatPanel({
     const history = messages
       .slice(-12)
       .map(({ role, content }) => ({ role, content }));
+    captureChatFunnelEvent("chat_message_sent", attribution, {
+      message_length: question.length,
+      message_number: messages.filter((message) => message.role === "user").length + 1,
+    });
     setMessages((prev) => [...prev, { role: "user", content: question }]);
     if (!attribution) {
       setMessages((prev) => [
@@ -218,6 +231,11 @@ export function ChatPanel({
                     href={m.checkout}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() =>
+                      captureChatFunnelEvent("checkout_clicked", attribution, {
+                        checkout_domain: new URL(m.checkout).hostname,
+                      })
+                    }
                   >
                     Đến trang thanh toán của doanh nghiệp ↗
                     <small>{new URL(m.checkout).hostname}</small>
