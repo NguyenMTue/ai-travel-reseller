@@ -65,6 +65,22 @@ class GeneratedClaimGuardrailTests(unittest.TestCase):
             [],
         )
 
+    def test_unverified_activities_and_experience_quantity_requires_review(self):
+        self.assertEqual(
+            _guard_content("Vô vàn trải nghiệm tại VinWonders.", self.vinwonders),
+            ["PROHIBITED_CLAIM"],
+        )
+        self.assertEqual(
+            _guard_content("Vô vàn hoạt động tại VinWonders.", self.vinwonders),
+            ["PROHIBITED_CLAIM"],
+        )
+
+    def test_single_day_duration_claim_requires_review(self):
+        self.assertEqual(
+            _guard_content("Khám phá VinWonders trong 1 ngày trọn vẹn.", self.vinwonders),
+            ["UNVERIFIED_DURATION"],
+        )
+
     def test_cost_and_price_assurances_require_product_facts(self):
         copy = "Giá đã được xác thực, không lo chi phí ẩn."
         self.assertEqual(
@@ -81,6 +97,23 @@ class GeneratedClaimGuardrailTests(unittest.TestCase):
             _guard_content("Giá đã được xác thực, không lo chi phí ẩn.", product),
             [],
         )
+
+    def test_unverified_spaciousness_claim_requires_review(self):
+        self.assertEqual(
+            _guard_content("Không gian rộng lớn tại VinWonders Nam Hội An.", self.vinwonders),
+            ["PROHIBITED_CLAIM"],
+        )
+
+    def test_spaciousness_allowed_when_present_in_product_facts(self):
+        product = {
+            **self.vinwonders,
+            "verified_facts": ["Khuôn viên có không gian rộng lớn."],
+        }
+        self.assertEqual(
+            _guard_content("Không gian rộng lớn tại VinWonders Nam Hội An.", product),
+            [],
+        )
+
 
 
 class RetryEvidenceTests(unittest.TestCase):
@@ -108,8 +141,9 @@ class RetryEvidenceTests(unittest.TestCase):
                 self.keys = set(values)
                 return self
 
-            def upsert(self, rows, **_options):
+            def upsert(self, rows, on_conflict=None, ignore_duplicates=False, **_options):
                 self.pending = rows
+                self.ignore_duplicates = ignore_duplicates
                 return self
 
             def execute(self):
@@ -123,19 +157,25 @@ class RetryEvidenceTests(unittest.TestCase):
                         "description": "Vé vào cửa VinWonders Nam Hội An.",
                     }})()
                 if self.pending is not None:
-                    inserted = []
+                    upserted = []
                     for row in self.pending:
-                        if not any(
-                            saved["generation_key"] == row["generation_key"]
-                            for saved in self.database.rows
-                        ):
+                        match_idx = None
+                        for i, saved in enumerate(self.database.rows):
+                            if saved["generation_key"] == row["generation_key"]:
+                                match_idx = i
+                                break
+                        if match_idx is not None:
+                            if not getattr(self, "ignore_duplicates", False):
+                                self.database.rows[match_idx] = {**self.database.rows[match_idx], **row}
+                            upserted.append(self.database.rows[match_idx])
+                        else:
                             saved = {**row, "id": f"content-{len(self.database.rows)}"}
                             self.database.rows.append(saved)
-                            inserted.append(saved)
-                    return type("Result", (), {"data": inserted})()
+                            upserted.append(saved)
+                    return type("Result", (), {"data": upserted})()
                 saved = [
                     row for row in self.database.rows
-                    if row["generation_key"] in self.keys
+                    if self.keys and row["generation_key"] in self.keys
                 ]
                 return type("Result", (), {"data": saved})()
 

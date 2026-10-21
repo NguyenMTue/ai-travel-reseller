@@ -22,7 +22,7 @@ const captionSchema = z
   .trim()
   .min(40)
   .max(2_200)
-  .regex(/#[\p{L}\p{N}_]+/u, {
+  .regex(/#[^\s#]+/, {
     message: "Caption must include at least one relevant hashtag",
   });
 
