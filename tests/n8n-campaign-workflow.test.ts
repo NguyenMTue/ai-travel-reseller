@@ -84,10 +84,9 @@ test("native structured parser is wired without an extra fixer-model call", () =
     String(nodes.get("Validate Content Schema")?.parameters.inputSchema),
   ) as {
     required: string[];
-    properties: { output: { required: string[] } };
+    properties: Record<string, unknown>;
   };
-  assert.deepEqual(parserSchema.required, ["output"]);
-  assert.deepEqual(parserSchema.properties.output.required.sort(), [
+  assert.deepEqual(parserSchema.required.sort(), [
     "captions",
     "ctas",
     "hooks",
