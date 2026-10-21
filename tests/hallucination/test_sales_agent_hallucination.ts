@@ -406,8 +406,14 @@ export function generateStubSalesReply(
 
 /**
  * TEST RUNNER SUITE
+ * Chỉ kích hoạt khi file được thực thi trực tiếp bởi Node Test runner,
+ * tránh chạy lặp lại khi được import bởi run_hallucination_suite.mjs
  */
-describe("AI Sales Agent Anti-Hallucination Adversarial Test Suite", () => {
+const isDirectTestRunner =
+  !process.argv[1] || !process.argv[1].endsWith("run_hallucination_suite.mjs");
+
+if (isDirectTestRunner) {
+  describe("AI Sales Agent Anti-Hallucination Adversarial Test Suite", () => {
   const isLive = Boolean(process.env.GEMINI_API_KEY?.trim());
 
   test("Kiểm tra chế độ thực thi (Live LLM vs Offline Stub Guardrail)", () => {
@@ -465,3 +471,4 @@ describe("AI Sales Agent Anti-Hallucination Adversarial Test Suite", () => {
     });
   }
 });
+}
