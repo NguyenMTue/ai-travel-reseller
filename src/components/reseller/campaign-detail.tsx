@@ -39,7 +39,7 @@ export function CampaignDetailView({ campaign, variants, contentStatus, contentR
       <ContentKit variants={variants} contentStatus={contentStatus} contentReason={contentReason} />
       </div>
       <div id="reseller-tracking" tabIndex={-1} className={navigationStyles.anchor}>
-      {tracking ?? <TrackingLinkModal key={`${campaign.id}:${campaign.product_id ?? "none"}`} input={campaign.product_id && campaign.products?.id === campaign.product_id
+      {tracking ?? <TrackingLinkModal blocked={preview} posterDetails={{ campaignName: campaign.name, productName: campaign.products?.name }} key={`${campaign.id}:${campaign.product_id ?? "none"}`} input={campaign.product_id && campaign.products?.id === campaign.product_id
         ? { campaign_id: campaign.id, product_id: campaign.product_id } : null} />}
       </div>
       </TrackingScopeProvider>

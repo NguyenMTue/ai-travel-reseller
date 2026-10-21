@@ -47,7 +47,7 @@ FE Lead chịu trách nhiệm đưa trải nghiệm di động của Reseller v�
 |---|---|---|---|---|---|---|---|
 | FE-W3-01 | Cấu hình PWA Core (manifest, Service Worker, Meta) | P0 | IN PROGRESS — local PASS, chờ QA thiết bị thật | Không | Diệu | `app/manifest.ts` + `public/sw.js` + metadata layout | 20/10 17:00 |
 | FE-W3-02 | Bottom Navigation Bar & Responsive Safe Area cho Reseller | P0 | IN PROGRESS — Chờ UI/UX review | UX-W3-01 | Diệu | Component `bottom-nav.tsx` + layout update | 21/10 12:00 |
-| FE-W3-03 | Tích hợp Web Share API 1 chạm & Canvas xuất ảnh QR | P0 | READY | FE-W3-02 | Diệu | Module `share.ts` + `canvas-qr.ts` | 21/10 17:00 |
+| FE-W3-03 | Tích hợp Web Share API 1 chạm & Canvas xuất ảnh QR | P0 | IN PROGRESS — fixture PASS; Git integration blocked; chờ UIUX/thiết bị thật | FE-W3-02 | Diệu | Module `share.ts` + `canvas-qr.ts` + UI modal | 21/10 17:00 |
 | FE-W3-04 | Giao diện Chat AI Sales Agent Mobile (Bottom Sheet widget) | P1 | READY | UX-W3-02 | Diệu | Component `mobile-chat-sheet.tsx` | 22/10 17:00 |
 | FE-W3-05 | Giao diện Màn hình Ví hoa hồng Reseller (`/reseller/wallet`) | P0 | READY | BE1-W3-04 | Diệu | Route `app/reseller/wallet/page.tsx` | 23/10 12:00 |
 | FE-W3-06 | Tích hợp Merchant Media Library (ghép `MediaCard` từ Tester 3) | P1 | READY | T3-FE-W3-01, BE1-W3-03 | Diệu | Route `app/merchant/library/page.tsx` | 23/10 17:00 |
@@ -94,7 +94,7 @@ FE Lead chịu trách nhiệm đưa trải nghiệm di động của Reseller v�
 |---|---|---|---|---|---|
 | FE-W3-01 | Manifest, icons 192/512/180, metadata, SW | 20/10 17:00 | Không | Code và checks local PASS | QA trên điện thoại thật; chờ review |
 | FE-W3-02 | Bottom Nav và safe area Reseller | 21/10 12:00 | UX-W3-01, hạn 20/10 12:00 | Bản đề xuất local; viewport/interaction PASS | Chờ UI/UX review và BA xác nhận điều hướng theo chiến dịch |
-| FE-W3-03 | Native Web Share, poster Canvas QR | 21/10 17:00 | FE-W3-02 | Chưa triển khai | Chia sẻ có fallback, xử lý ảnh và QR |
+| FE-W3-03 | Native Web Share, poster Canvas QR | 21/10 17:00 | FE-W3-02 | Đã triển khai UI/helper; unit/Chromium fixture PASS | Gỡ blocker Git, xác minh lại trên dev tích hợp và thiết bị thật; chờ UIUX review |
 | FE-W3-07 | Review MediaCard và VideoGuidelinesModal | 21–22/10 | Tester 3 bàn giao 2 component | Chưa có bàn giao xác minh | Review ngay khi nhận, không đợi 06; chưa gửi approval |
 | FE-W3-04 | Chat mobile Bottom Sheet | 22/10 17:00 | UX-W3-02, hạn 20/10 17:00 | Chưa triển khai | Nhận specs, xử lý bàn phím và viewport |
 | FE-W3-05 | /reseller/wallet | 23/10 12:00 | BE1-W3-04, UX-W3-01 | BE1 log ghi DONE, FE chưa tích hợp | Xác minh contract GET /api/reseller/wallet bằng mock |
@@ -172,3 +172,58 @@ Kết quả do người dùng trực tiếp kiểm tra tại `http://127.0.0.1:3
 - Kiểm tra tự động có mục tiêu: `$env:PLAYWRIGHT_CHROMIUM_PATH="$env:LOCALAPPDATA\ms-playwright\chromium-1243\chrome-win64\chrome.exe"; node tests/reseller-bottom-nav.mjs`.
 - Chưa thử safe area/bàn phím trên điện thoại thật; chưa có UIUX review hoặc xác nhận của BA về trang tổng hợp. Không đánh dấu cả tuần hoàn thành.
 - File của FE-W3-02: `src/components/reseller/bottom-nav.tsx`, `bottom-nav.module.css`, `shell.tsx`, `campaign-detail.tsx` (chỉ thêm wrapper anchor), `app/reseller/layout.tsx`, `next.config.ts` (dev badge), `tests/reseller-bottom-nav.mjs`, FE_W3.md và phần FE TEAM_WORK_LOG.md. `git diff --check`: PASS. Không chỉnh root layout, manifest/SW, Auth/backend/Tracking logic, .env.local, DB hoặc nhánh FE tuần 2 trong phiên này.
+
+## 8. FE-W3-03 — Share link & Canvas poster QR — 21/10/2026
+
+### Bảo toàn và đồng bộ Git: chưa hoàn tất
+- Nhánh giữ nguyên `Feature_FE_W3_PWA_Mobile_Commerce`. HEAD đầu phiên `fe50aee54a6a4e17ceba6226d67e758b73f03a3f`.
+- Không thấy tiến trình Git/server của dự án khi kiểm tra trước đồng bộ. Fetch đúng một ref: `git fetch --no-tags origin refs/heads/dev:refs/remotes/origin/dev` thành công, `origin/dev` = `86babd02f0a073c0da9a0bc97f5906173da4a675`.
+- Đã kiểm tra diff/staged và tạo checkpoint LOCAL `c5137460375923620d1e9a990efdf40d9a3c680c`: 20 file PWA/Bottom Nav/source/test/tài liệu/icons thương hiệu. Không có env/build/cache/ảnh bằng chứng, không stage mù toàn bộ. `tsconfig.json` có sẵn hai đường dẫn `build/fe-w3-nav-local` được giữ riêng, không commit.
+- `git merge --no-commit origin/dev` thất bại với lỗi Windows nguyên văn:
+  ```text
+  error: unable to unlink old 'src/components/reseller/content-kit.tsx': Invalid argument
+  error: unable to unlink old 'src/lib/ai/prompts/content-factory.ts': Invalid argument
+  Merge with strategy ort failed.
+  ```
+- Đã dừng thao tác cập nhật Git, không thử merge lại, không xóa lock/sửa ACL/reset/clean. HEAD sau lỗi vẫn `c513746`, không có `MERGE_HEAD`/conflict mở, không có merge commit; **dev 86babd0 CHƯA được tích hợp**.
+- Một số file mới từ dev còn untracked sau lần merge lỗi (Merchant Media/Wallet/Telegram APIs, BE2 video modules/schemas/handoff/tests/scripts và Tester 2 evidence). Giữ nguyên để xử lý sau; không gộp/commit các file này như sản phẩm FE-W3-03. Các thay đổi FE-W3-03 sau checkpoint để người dùng review, không commit thêm/push/PR.
+
+### Đối chiếu bàn giao (đọc từ origin/dev đã fetch, không coi là đã merge)
+- Dev bổ sung Media Library API `GET/POST/DELETE /api/merchant/media` và `MediaReferenceItem`; Wallet handler được chuyển từ `src/app/api/reseller/wallet` sang `app/api/reseller/wallet`.
+- BE2 thêm pipeline video offline/schema/sample và taxonomy intent + checkout attribution; live Gemini còn pending. Content Kit nhận thêm campaign/product/preview props và thao tác Telegram trong dev. Các cập nhật này chưa có đủ trong tracked worktree do merge lỗi; không gọi Telegram/AI để kiểm chứng.
+- Không có thay đổi Tracking endpoint/FE parser trong diff dev lần này: vẫn `/api/tracking-links/generate` và `data.short_url`. POST Tracking 500 chưa được tái hiện bằng API thật, **chưa kết luận đã hết**.
+- UIUX_W3/BA_HANDOFF_MATRIX/TESTER3_W3 không có bàn giao mới trong diff; chưa thấy spec/asset poster hay Figma mới. FE-W3-02 và bố cục poster FE-W3-03 vẫn **Chờ UI/UX review**.
+- `git ls-remote --heads` thấy nhánh `feature/fe-t3-static-components` tại `f66ff8cbb9c40c8917f5cfd9dc7e31fefbf7432f`; tree tại commit đó chưa có `media-card.tsx`/`video-guidelines-modal.tsx`. Chưa có component để review FE-W3-07 được xác minh; chưa merge/review/approve trên GitHub.
+
+### Đã triển khai độc lập với backend
+- `share.ts`: payload giữ nguyên link đang hiển thị; Web Share được gọi trực tiếp từ click, không tạo link/đi theo `/r/`. Có pending/chống bấm lặp, phân biệt AbortError (hủy) và lỗi; khi không hỗ trợ hướng dẫn Copy link sẵn có. Không xác nhận đã đăng/gửi từ kết quả native dialog và không hứa có ứng dụng mạng xã hội cụ thể.
+- `canvas-qr.ts`: PNG 1080×1440, tên campaign/product đã có, font/màu Coastal Editorial và Compass/icon thương hiệu hiện có. Campaign contract hiện không có trường ảnh sản phẩm, nên dùng minh họa `public/coast.svg` và ghi rõ không phải ảnh sản phẩm; lỗi ảnh/CORS/taint dùng nền thương hiệu. Không thêm proxy backend, không tự bịa giá/ưu đãi/hoa hồng.
+- QR dùng nguyên `short_url`, contrast đen/trắng, quiet zone 4 module và ô pixel nguyên; URL/tên dài wrap/ellipsis trong khung cố định, QR vẫn chứa URL đầy đủ. Không dùng destination_url làm QR.
+- `share-actions.tsx` trong modal Tracking: xem preview, tải PNG, chia sẻ file khi canShare(files) hỗ trợ; fallback tải ảnh nếu không hỗ trợ. Object URL preview bị revoke khi đổi phạm vi/unmount; URL tải tạm revoke sau dùng. Không cache/lưu poster vào SW/localStorage.
+- Kết quả async có generation/mount guard; đổi campaign/product/session/link làm reset dữ liệu và bỏ kết quả cũ. Panel live chỉ quan sát `onAuthStateChange` và guard phiên hiện có, không gọi Auth/DB trong callback; khi phiên thay đổi xóa preview và chặn Share/Poster tới khi tải lại. Cơ chế Tracking request/contract/QR/Copy cũ được tái sử dụng; dialog UI thêm key và bỏ kết quả request của component đã unmount để không nhận link cũ vào phạm vi mới.
+- Preview development-only luôn dùng request fixture, kể cả không có query tracking; nhãn mô phỏng/localhost giữ rõ. Fallback Tracking trong CampaignDetail bị chặn nếu preview thiếu injection, không rơi sang API thật. Có fixture chữ/link dài, thiếu ảnh/sản phẩm và CORS.
+- Tham chiếu observer phiên: [Supabase onAuthStateChange](https://supabase.com/docs/reference/javascript/auth-onauthstatechange). Đã đọc hướng dẫn Next.js kèm bản cài về Client Components trước khi dùng navigator/canvas.
+
+### Bằng chứng kiểm chứng (không phải kiểm tra thủ công của người dùng)
+- Unit `node --experimental-strip-types --test tests/reseller-share.test.ts`: **4/4 PASS**.
+- TypeScript riêng phần FE `node node_modules/typescript/bin/tsc --noEmit -p tests/tsconfig.fe-w3-share.json`: **PASS**, gồm lần chốt sau thay đổi cuối. Config này chỉ xác minh FE; không thay thế kết quả toàn repo. Lint tất cả source/test FE-W3-03 sửa/thêm: **PASS, 0 lỗi/0 cảnh báo**.
+- TypeScript toàn repo chạy trước phần FE: FAIL với 6 lỗi từ file mới còn lại sau merge lỗi: `toGeminiJsonSchema` không export ở content-schema; `detectSalesIntent`, `salesAgentResponseSchema` và `SalesReply.intentDetected` thiếu ở code Sales Agent tracked cũ. Không sửa backend hay giảm assertions để làm sạch giả.
+- Chromium fixture tại 320/390/768/1440: PASS Share payload URL, file PNG, pending/dedup, supported/unsupported/cancel/error, Copy mock, download, layout không tràn, focus trap/return, modal trên Bottom Nav.
+- **Đã tải PNG rồi giải mã bằng jsQR** và so đúng URL textarea: PASS poster bình thường, URL/tên tiếng Việt dài, thiếu ảnh/product label, ảnh lỗi, CORS thực bằng HTTP fixture loopback không ACAO, canvas taint fallback. Canvas xuất thất bại hoàn toàn có lỗi rõ và không đưa preview giả.
+- PASS đổi session/campaign: thu hồi URL cũ, xóa kết quả, giữ request ảnh đang pending bằng fixture URL riêng theo scope rồi nhả sau đổi campaign; không có object URL/kết quả poster muộn lọt vào phạm vi mới. Preview không query tracking cũng dùng mock; trạng thái chưa có link và cảnh báo localhost PASS.
+- Bài test chặn API/POST/tracking redirect/external requests: không phát sinh request bị cấm/page errors. HTTP asset server 3186 chỉ thuộc test, phục vụ SVG local, không proxy/gọi ra ngoài; đã đóng sau test. Native Share và Clipboard được mock, không phải bằng chứng chia sẻ/copy thủ công hay đăng bài thực tế.
+- Đã chụp và mở xem poster/modal, ảnh trong `build/fe-w3-share-evidence-20261021/`; ảnh review chỉ ẩn badge dev inspector, không ẩn UI ứng dụng. Bố cục poster vẫn chờ UIUX review.
+- Production build output riêng `build/fe-w3-share-prod-20261021`: bundle **Compiled successfully**, nhưng **BUILD FAIL ở TypeScript**, đúng 6 lỗi baseline AI/Sales nêu trên. Không tắt type checking/giảm assertions/sửa backend để che lỗi. Không tái dùng/xóa cache `build/fe-w3-nav`, không sửa quyền Windows.
+- Đã dừng dev server do phiên này tạo. Chỉ bỏ các include output `fe-w3-share-*` do Next tự thêm; giữ nguyên hai include `fe-w3-nav-local` đã có đầu phiên. `next-env.d.ts` trỏ lại output dev local `build/fe-w3-nav-local` đang có. Không đụng .env.local/exclude/backups hoặc xóa output cũ. `git diff --check`: PASS.
+- File FE-W3-03 mới: `src/lib/reseller/share.ts`, `canvas-qr.ts`, `src/components/reseller/share-actions.tsx`, `tests/reseller-share.test.ts`, `reseller-share-browser.mjs`, `tsconfig.fe-w3-share.json`. File sửa: Tracking modal/CSS, CampaignDetail poster props, preview page/TrackingPreview, fixture Tracking và hai tài liệu FE. Không nhầm các file dev untracked còn lại sau merge lỗi với danh sách này.
+
+### Cách chạy và việc tiếp theo
+```powershell
+$env:NEXT_BUILD_DIR='build/fe-w3-share-dev-20261021'
+npm.cmd run dev -- --hostname 127.0.0.1 --port 3185
+```
+- Preview: `http://127.0.0.1:3185/preview/reseller/campaigns/11111111-1111-4111-8111-111111111111?state=approved&tracking=success` → Tạo link → Tạo link tiếp thị (mô phỏng) → Chia sẻ link/Tạo poster QR → xem ảnh/Tải PNG/Chia sẻ ảnh nếu thiết bị hỗ trợ.
+- Biến thể fixture: `tracking=long-link&poster=long`, `tracking=success&poster=no-image`, `tracking=localhost`, `tracking=error`, `tracking=scope`. Chỉ dùng ID này trong preview, không đưa vào portal thật. `poster=cors` cần HTTP fixture của bài test, không phải asset công khai.
+- Chạy test browser khi dev server 3185 đang mở: `$env:PLAYWRIGHT_CHROMIUM_PATH="$env:LOCALAPPDATA\ms-playwright\chromium-1243\chrome-win64\chrome.exe"; node tests/reseller-share-browser.mjs`.
+- Portal thật: `http://127.0.0.1:3185/reseller/campaigns` (cần session Reseller hợp lệ) → chọn campaign thật → Link & QR. Phiên này không tạo link/campaign thật, không gọi AI, Telegram, `/r/` hoặc ghi Supabase dùng chung. Chưa xác minh native Share/file download/quét QR bằng điện thoại thật.
+- Ưu tiên kế tiếp: xử lý quyền/unlink Windows theo người dùng/PM để tích hợp dev an toàn; kiểm chứng lại type/build/contract sau đồng bộ; review FE-W3-07 ngay khi Tester 3 bàn giao trong 21–22/10; FE-W3-04 trước 22/10 17:00, FE-W3-05 trước 23/10 12:00, FE-W3-06 và 08 trước 23/10 17:00. Giữ nguyên trạng thái chờ thiết bị thật/UIUX của FE-W3-01/02.

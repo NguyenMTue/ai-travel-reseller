@@ -35,7 +35,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | BE3-W3-03 | Thái Thanh Tú | BE3 | Workflow n8n thông báo thời gian thực khi Video sinh xong từ Core Engine | READY | 22/10 | 23/10 12:00 |
 | FE-W3-01 | Diệu | FE Lead | Cấu hình PWA Core (manifest, Service Worker, Meta) | IN PROGRESS — local PASS, chờ QA thiết bị thật | 19/10 | 20/10 17:00 |
 | FE-W3-02 | Diệu | FE Lead | Bottom Navigation Bar & Responsive Safe Area cho Reseller | IN PROGRESS — Chờ UI/UX review | 20/10 | 21/10 12:00 |
-| FE-W3-03 | Diệu | FE Lead | Tích hợp Web Share API 1 chạm & Canvas xuất ảnh QR | READY | 21/10 | 21/10 17:00 |
+| FE-W3-03 | Diệu | FE Lead | Tích hợp Web Share API 1 chạm & Canvas xuất ảnh QR | IN PROGRESS — fixture PASS; Git blocked; chờ UIUX/thiết bị thật | 21/10 | 21/10 17:00 |
 | FE-W3-04 | Diệu | FE Lead | Giao diện Chat AI Sales Agent Mobile (Bottom Sheet widget) | READY | 21/10 | 22/10 17:00 |
 | FE-W3-05 | Diệu | FE Lead | Giao diện Màn hình Ví hoa hồng Reseller (`/reseller/wallet`) | READY | 22/10 | 23/10 12:00 |
 | FE-W3-06 | Diệu | FE Lead | Tích hợp Media Library & Nút kích hoạt tạo Video qua API BE1 | READY | 22/10 | 23/10 17:00 |
@@ -119,3 +119,13 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 - Lint code FE-W3-02: 0 lỗi, 1 warning có sẵn (`preview` chưa dùng trong CampaignDetailView); chưa thay logic Tracking.
 - Đã dừng server dev kiểm chứng, khôi phục đường dẫn output tự sinh của tsconfig/next-env; giữ output PWA cũ. `git diff --check` PASS. FE-W3-02 vẫn chờ UIUX/BA và thiết bị thật, không xác nhận cả tuần hoàn tất; không commit/push.
 - Hướng dẫn và mapping chi tiết: FE_W3.md mục 7. Không commit/push/merge, không sửa DB/backend/PWA.
+
+### FE-W3-03 — 21/10/2026
+- Bảo toàn FE-W3-01/02 bằng checkpoint LOCAL `c513746` từ nền `fe50aee` (20 file source/test/docs/icons, không env/build/bằng chứng); giữ hai đường dẫn tsconfig local `build/fe-w3-nav-local` ngoài commit.
+- Fetch riêng dev thành công tới `86babd0`; merge vào nhánh FE lỗi `unable to unlink ... content-kit.tsx: Invalid argument` và `... content-factory.ts: Invalid argument`. Đã dừng cập nhật Git, không retry/xóa lock/ACL/reset/clean. HEAD vẫn `c513746`, không MERGE_HEAD/merge commit; dev CHƯA được tích hợp. File mới từ dev còn untracked được giữ riêng, không commit như công việc FE.
+- Đọc bàn giao origin/dev: Media API và Wallet route mới, BE2 Sales/Video offline + Telegram Content Kit; Tracking contract/UIUX/spec Tester 3 không đổi. Chưa kết luận Tracking POST 500 đã hết. Nhánh Tester 3 có tại `f66ff8c` nhưng chưa thấy MediaCard/VideoGuidelinesModal tại commit được truy vấn; chưa review/approve/merge.
+- Triển khai Share link từ short_url hợp lệ hiện có, không tạo thêm link; pending/dedup, hủy khác lỗi, Copy fallback và thông báo không xác nhận đăng bài. Poster PNG Canvas 1080×1440 dùng thông tin campaign/product, Compass/Coastal tokens/minh họa coast.svg, QR đúng short_url, preview/download/canShare(files), fallback ảnh/CORS/taint, không bịa thông tin hoặc proxy backend.
+- State Share/Poster theo campaign/product/session/link, observer phiên chỉ đọc, hủy kết quả muộn và revoke object URL. Preview luôn request fixture (kể cả URL không query tracking), không gọi API thật; giữ cảnh báo mô phỏng/local. PWA/Bottom Nav và bằng chứng thủ công FE-W3-01 giữ nguyên; poster/FE-W3-02 vẫn Chờ UIUX review.
+- Unit Share 4/4 PASS; TypeScript FE scope PASS cả lần chốt cuối, lint source/test FE-W3-03 0 lỗi/0 cảnh báo. TypeScript toàn repo baseline FAIL 6 lỗi AI/Sales do file untracked từ lần merge lỗi và code tracked cũ không khớp; không sửa backend để che lỗi.
+- Chromium mock PASS 320/390/768/1440, payload/native states/file/download/focus/modal/nav; PNG tải xuống được jsQR giải mã đúng URL, gồm tên/link dài, ảnh lỗi/CORS và canvas fallback; session/campaign reset + kết quả muộn + URL revoke PASS. Không có page errors/API write/tracking click/external calls. Copy/native Share chỉ mock, chưa được người dùng xác nhận thủ công hay kiểm tra trên điện thoại thật.
+- Ảnh đã mở xem: `build/fe-w3-share-evidence-20261021/`. Build riêng compile bundle thành công nhưng FAIL tại TypeScript với đúng 6 lỗi baseline nêu trên; không tắt type checking/xóa cache/sửa quyền. Đã dừng server phiên này và bỏ include output mới, giữ tsconfig local cũ; next-env trỏ lại output dev nav-local đang có. Chi tiết lỗi/lệnh/URL/kế hoạch tiếp theo: FE_W3.md mục 8. Không commit thêm sau checkpoint, push/PR/merge GitHub hoặc sửa DB/env.

@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": { "incremental": false },
+  "include": [
+    "../next-env.d.ts",
+    "../src/lib/reseller/share.ts",
+    "../src/lib/reseller/canvas-qr.ts",
+    "../src/components/reseller/share-actions.tsx",
+    "../src/components/reseller/tracking-link.tsx",
+    "../src/components/reseller/campaign-detail.tsx",
+    "../app/preview/reseller/campaigns/[id]/page.tsx",
+    "../app/preview/reseller/campaigns/[id]/tracking-preview.tsx",
+    "./reseller-share.test.ts"
+  ],
+  "exclude": ["../node_modules"]
+}
