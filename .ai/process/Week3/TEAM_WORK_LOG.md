@@ -1,7 +1,7 @@
 # TEAM WORK LOG
 Project: AI Travel Reseller MVP (TravelLink AI)  
 Week: Tuần 3 — 19/10/2026 – 24/10/2026 (Sprint 3)  
-Last Updated: 21/10/2026
+Last Updated: 21/10/2026 10:45 AM
 
 ---
 
@@ -25,7 +25,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | BE1-W3-03 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | API `POST /api/merchant/media` quản lý video mẫu | DONE | 20/10 | 21/10 12:00 |
 | BE1-W3-04 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Attribution Engine & RPC `get_reseller_wallet_summary` | DONE | 19/10 | 21/10 17:00 |
 | BE1-W3-05 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Gỡ bỏ nợ kỹ thuật trigger hòa giải tạm thời Tuần 2 | DONE | 19/10 | 19/10 12:00 |
-| BE1-W3-06 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Core AI Video Generation Engine (`generator.ts`) từ kịch bản BE2 & asset tour | READY | 21/10 | 22/10 17:00 |
+| BE1-W3-06 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Core AI Video Generation Engine (`generator.ts`) từ kịch bản BE2 & asset tour | DONE | 21/10 | 22/10 17:00 |
 | BE1-W3-07 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Video API `POST /api/merchant/video/generate` & Storage pipeline `campaign-videos` | READY | 22/10 | 23/10 12:00 |
 | BE2-W3-01 | Nguyễn Huỳnh | BE2 | System Prompt AI Sales Agent nhận diện Buying Intent | DONE | 20/10 | 20/10 17:00 |
 | BE2-W3-02 | Nguyễn Huỳnh | BE2 | Prompt Multimodal Gemini phân tích kịch bản video mẫu | OFFLINE DONE — LIVE PENDING | 20/10 | 21/10 12:00 |
@@ -53,6 +53,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 ---
 
 ## 2. COMPLETED WORK
+- `BE1-W3-06` (21/10): Hoàn thành Core AI Video Generation Engine (`src/lib/video-engine/generator.ts`), Data Contract Zod (`types.ts`), Pre-flight Gate chống pixel giả & Fail-Fast, storyboard CapCut UGC 9:16 và bộ test đạt 9/9 pass.
 - `BE1-W3-05` (19/10): Gỡ bỏ trigger hòa giải tạm thời `fn_temp_contents_reconcile` (xóa nợ kỹ thuật Tuần 2).
 - `BE1-W3-01` (19/10): Hoàn thành migration mở rộng bảng `orders`, tạo bảng `commissions` kèm RLS policies và indexes.
 - `BE1-W3-02` (19/10): Hoàn thành migration bảng `media_references` cho Merchant Video Library; đồng bộ types `src/lib/database.types.ts`.
@@ -61,7 +62,6 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 - `BE2-W3-01` (20/10): Hoàn thành taxonomy 6 intent, server-side checkout gate, attribution URL đầy đủ và 5/5 test offline.
 - `BE2-W3-02/03` (20/10): Hoàn thành prompt, adapter contract, Zod/JSON Schema và guardrails offline; kiểm thử Gemini live tạm hoãn theo kế hoạch quota.
 - `BE2-W3-04/05` (20/10): Hoàn thành tài liệu handoff, sample output và benchmark deterministic; trạng thái benchmark live còn pending.
-- `T2-W3-01` (21/10): Hoàn thành nâng cấp toàn diện Rubric đánh giá kịch bản Video AI (Short-form 9:16) & AI Sales Agent v3.0 (`docs/tester2/AI_VIDEO_RUBRIC_W3.md`) tích hợp đầy đủ tiêu chuẩn định tính 1-5, trọng số %, 7 Fatal Flaws, 10 Test Cases mẫu và JSON schema cho LLM Judge. Bàn giao cho BE1, BE2 và QA Team.
 
 ---
 
@@ -88,7 +88,6 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | BE1 | FE Lead | Endpoint API `POST /api/merchant/video/generate` & status polling | READY | 22/10 |
 | BE1 | BE3 | Webhook event báo video hoàn tất để kích hoạt n8n notification | READY | 23/10 |
 | FE Lead | Tester 1 | Bản build PWA Mobile Suite trên dev server | READY | 22/10 |
-| Tester 2 | Toàn team (BE1, BE2, QA) | Rubric đánh giá kịch bản Video AI & AI Sales Agent v3.0 (`docs/tester2/AI_VIDEO_RUBRIC_W3.md`) | DONE | 21/10 |
 
 ---
 
