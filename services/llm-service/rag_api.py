@@ -110,6 +110,8 @@ class SaveCampaignContentsResponse(BaseModel):
     content_ids: List[UUID]
     status: Literal["approved", "needs_review"]
     flags: List[str]
+    persisted_count: Optional[int] = None
+    updated_count: Optional[int] = None
 
 
 class CampaignWebhookRequest(BaseModel):
@@ -518,21 +520,37 @@ def save_campaign_contents(
         for index, draft in enumerate(request.records)
     ]
 
+    keys = [row["generation_key"] for row in rows]
     try:
-        upsert_response = supabase.table("contents").upsert(
-            rows, on_conflict="generation_key", ignore_duplicates=True
-        ).execute()
-        # Postgres INSERT ... ON CONFLICT DO NOTHING RETURNING only returns
-        # rows inserted by this attempt. Keep this separate from the follow-up
-        # select, which returns all persisted rows, including prior retries.
-        inserted_count = len(upsert_response.data or [])
-        keys = [row["generation_key"] for row in rows]
-        response = (
+        existing_res = (
             supabase.table("contents")
-            .select("id,generation_key")
+            .select("id,generation_key,status")
             .in_("generation_key", keys)
             .execute()
         )
+        existing_keys = {
+            r["generation_key"]
+            for r in (existing_res.data or [])
+            if r.get("generation_key")
+        }
+    except Exception:
+        existing_keys = set()
+
+    try:
+        upsert_response = (
+            supabase.table("contents")
+            .upsert(rows, on_conflict="generation_key", ignore_duplicates=False)
+            .execute()
+        )
+        saved_rows = upsert_response.data or []
+        if len(saved_rows) != len(rows):
+            follow_up = (
+                supabase.table("contents")
+                .select("id,generation_key,status")
+                .in_("generation_key", keys)
+                .execute()
+            )
+            saved_rows = follow_up.data or []
     except Exception as exc:
         logger.exception("Idempotent Supabase upsert into public.contents failed")
         raise HTTPException(
@@ -540,14 +558,22 @@ def save_campaign_contents(
             detail="Supabase could not save contents. Apply the contents generation_key unique-index migration and check service logs.",
         ) from exc
 
-    saved_rows = response.data or []
     if len(saved_rows) != len(rows):
         raise HTTPException(status_code=502, detail="Could not verify all 10 persisted content rows.")
+
+    new_keys_count = len([k for k in keys if k not in existing_keys])
+    updated_keys_count = len([k for k in keys if k in existing_keys])
+
+    db_statuses = {row.get("status") for row in saved_rows}
+    persisted_status = "needs_review" if "needs_review" in db_statuses else "approved"
+
     return {
         "campaign_id": request.campaign_id,
         "product_id": product_id,
-        "inserted_count": inserted_count,
+        "inserted_count": new_keys_count,
+        "persisted_count": len(saved_rows),
+        "updated_count": updated_keys_count,
         "content_ids": [row["id"] for row in saved_rows if row.get("id")],
-        "status": persistence_status,
+        "status": persisted_status,
         "flags": guardrail_flags,
     }
