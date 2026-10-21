@@ -179,6 +179,22 @@ _UNVERIFIED_CLAIM_PATTERNS = (
     re.compile(r"không mua[^.!?\n]{0,80}bị phạt", re.IGNORECASE),
     re.compile(r"duy nhất hôm nay", re.IGNORECASE),
     re.compile(r"sắp hết vé", re.IGNORECASE),
+    # Marketing copy must not imply package inclusions that are absent from
+    # the product facts (for example, that food or every attraction is included).
+    re.compile(r"\b(?:trọn gói|bao trọn gói)\b", re.IGNORECASE),
+    # Do not present generated copy as a real customer's verified review.
+    re.compile(r"\breview\s+(?:chân thực|thật|thực tế)\b", re.IGNORECASE),
+    # Catch unsupported quantity claims while allowing them when product facts
+    # explicitly contain the same phrase.
+    re.compile(
+        r"\b(?:vô vàn|hàng trăm|hàng nghìn)\s+"
+        r"(?:trò chơi|hoạt động|trải nghiệm)\b",
+        re.IGNORECASE,
+    ),
+    # Cost and price assurances need merchant-provided product facts.
+    re.compile(r"\bkhông\s+(?:lo\s+)?(?:có\s+)?chi phí ẩn\b", re.IGNORECASE),
+    re.compile(r"\bkhông phát sinh(?: thêm)? chi phí\b", re.IGNORECASE),
+    re.compile(r"\bgiá (?:đã\s+)?(?:được\s+)?xác thực\b", re.IGNORECASE),
     re.compile(r"không (?:phải|cần) xếp hàng", re.IGNORECASE),
     re.compile(r"không phát sinh(?: chi phí)?(?: ẩn)?", re.IGNORECASE),
     re.compile(r"(?:vé|giá)[^.!?\n]{0,50}(?:chính hãng|ưu đãi|mới nhất)", re.IGNORECASE),
@@ -186,6 +202,21 @@ _UNVERIFIED_CLAIM_PATTERNS = (
     re.compile(r"hot nhất", re.IGNORECASE),
     re.compile(r"không gian (?:siêu )?rộng lớn", re.IGNORECASE),
 )
+_DURATION_PATTERN = re.compile(
+    r"\b\d+\s*(?:ngày(?:\s*\d+\s*đêm)?|đêm)\b",
+    re.IGNORECASE,
+)
+
+
+def _product_facts(product: Dict[str, Any]) -> List[str]:
+    """Combine product description and verified facts for groundedness checks."""
+    facts: List[str] = []
+    for value in (product.get("description"), product.get("verified_facts")):
+        if isinstance(value, str):
+            facts.append(value)
+        elif isinstance(value, list):
+            facts.extend(str(fact) for fact in value if fact is not None)
+    return facts
 
 
 def _normalize_money(amount: str, unit: str) -> float:
@@ -223,10 +254,7 @@ def _guard_content(text: str, product: Dict[str, Any]) -> List[str]:
     if any(match.group(0).upper() not in allowed_codes for match in _PROMO_PATTERN.finditer(text)):
         flags.add("UNCONFIRMED_PROMO_CODE")
 
-    facts = product.get("verified_facts") or product.get("description") or []
-    if isinstance(facts, str):
-        facts = [facts]
-    normalized_facts = [str(fact).lower() for fact in facts]
+    normalized_facts = [fact.lower() for fact in _product_facts(product)]
     normalized_text = text.lower()
     for claim in _PROHIBITED_CLAIMS:
         if claim in normalized_text and not any(claim in fact for fact in normalized_facts):
@@ -235,6 +263,9 @@ def _guard_content(text: str, product: Dict[str, Any]) -> List[str]:
         match = pattern.search(normalized_text)
         if match and not any(match.group(0) in fact for fact in normalized_facts):
             flags.add("PROHIBITED_CLAIM")
+    for match in _DURATION_PATTERN.finditer(normalized_text):
+        if not any(match.group(0) in fact for fact in normalized_facts):
+            flags.add("UNVERIFIED_DURATION")
     return sorted(flags)
 
 
@@ -488,9 +519,13 @@ def save_campaign_contents(
     ]
 
     try:
-        supabase.table("contents").upsert(
+        upsert_response = supabase.table("contents").upsert(
             rows, on_conflict="generation_key", ignore_duplicates=True
         ).execute()
+        # Postgres INSERT ... ON CONFLICT DO NOTHING RETURNING only returns
+        # rows inserted by this attempt. Keep this separate from the follow-up
+        # select, which returns all persisted rows, including prior retries.
+        inserted_count = len(upsert_response.data or [])
         keys = [row["generation_key"] for row in rows]
         response = (
             supabase.table("contents")
@@ -511,7 +546,7 @@ def save_campaign_contents(
     return {
         "campaign_id": request.campaign_id,
         "product_id": product_id,
-        "inserted_count": len(saved_rows),
+        "inserted_count": inserted_count,
         "content_ids": [row["id"] for row in saved_rows if row.get("id")],
         "status": persistence_status,
         "flags": guardrail_flags,
