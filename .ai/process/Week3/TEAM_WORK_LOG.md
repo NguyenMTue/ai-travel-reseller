@@ -1,7 +1,7 @@
 # TEAM WORK LOG
 Project: AI Travel Reseller MVP (TravelLink AI)  
 Week: Tuần 3 — 19/10/2026 – 24/10/2026 (Sprint 3)  
-Last Updated: 20/10/2026
+Last Updated: 21/10/2026
 
 ---
 
@@ -61,6 +61,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 - `BE2-W3-01` (20/10): Hoàn thành taxonomy 6 intent, server-side checkout gate, attribution URL đầy đủ và 5/5 test offline.
 - `BE2-W3-02/03` (20/10): Hoàn thành prompt, adapter contract, Zod/JSON Schema và guardrails offline; kiểm thử Gemini live tạm hoãn theo kế hoạch quota.
 - `BE2-W3-04/05` (20/10): Hoàn thành tài liệu handoff, sample output và benchmark deterministic; trạng thái benchmark live còn pending.
+- `T2-W3-01` (21/10): Hoàn thành nâng cấp toàn diện Rubric đánh giá kịch bản Video AI (Short-form 9:16) & AI Sales Agent v3.0 (`docs/tester2/AI_VIDEO_RUBRIC_W3.md`) tích hợp đầy đủ tiêu chuẩn định tính 1-5, trọng số %, 7 Fatal Flaws, 10 Test Cases mẫu và JSON schema cho LLM Judge. Bàn giao cho BE1, BE2 và QA Team.
 
 ---
 
@@ -87,6 +88,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | BE1 | FE Lead | Endpoint API `POST /api/merchant/video/generate` & status polling | READY | 22/10 |
 | BE1 | BE3 | Webhook event báo video hoàn tất để kích hoạt n8n notification | READY | 23/10 |
 | FE Lead | Tester 1 | Bản build PWA Mobile Suite trên dev server | READY | 22/10 |
+| Tester 2 | Toàn team (BE1, BE2, QA) | Rubric đánh giá kịch bản Video AI & AI Sales Agent v3.0 (`docs/tester2/AI_VIDEO_RUBRIC_W3.md`) | DONE | 21/10 |
 
 ---
 

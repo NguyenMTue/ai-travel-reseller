@@ -29,7 +29,7 @@ Tester 2 đóng vai trò chốt chặn an toàn cho mọi output AI trong hệ s
 ## 3. THIS WEEK — MY TASKS
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|---|---|---|---|---|---|
-| T2-W3-01 | Nâng cấp Rubric đánh giá kịch bản Video AI & AI Sales Agent | P1 | READY | BE2-W3-01 | Tester 2 | File `docs/tester2/AI_VIDEO_RUBRIC_W3.md` | 20/10 17:00 |
+| T2-W3-01 | Nâng cấp Rubric đánh giá kịch bản Video AI & AI Sales Agent | P1 | DONE | BE2-W3-01 | Tester 2 | File `docs/tester2/AI_VIDEO_RUBRIC_W3.md` | 20/10 17:00 |
 | T2-W3-02 | Chạy Test Suite tấn công chống Hallucination AI Sales Agent | P0 | READY | BE2-W3-01 | Tester 2 | Bộ 10 test cases adversarial + log kết quả | 22/10 12:00 |
 | T2-W3-03 | Đánh giá kịch bản video do n8n sinh từ video mẫu Merchant | P0 | READY | BE3-W3-02, BE2-W3-03 | Tester 2 | Báo cáo Groundedness Video Script | 23/10 12:00 |
 | T2-W3-04 | Báo cáo Tổng kết An toàn AI Sprint 3 (AI Safety Acceptance) | P0 | READY | T2-W3-01..03 | Tester 2 | Báo cáo nghiệm thu an toàn AI | 23/10 17:00 |
@@ -45,3 +45,8 @@ Tester 2 đóng vai trò chốt chặn an toàn cho mọi output AI trong hệ s
 ### Những thứ tôi yêu cầu từ team:
 - Cần BE2 bàn giao prompt Buying Intent và mẫu kịch bản video trước Thứ Tư (21/10).
 - Cần BE3 xuất 3-5 mẫu kịch bản video sinh tự động từ n8n để chạy kiểm tra.
+
+---
+
+## 5. NHẬT KÝ TIẾN ĐỘ THỰC HIỆN (PROGRESS WORK LOG)
+- **21/10/2026:** Hoàn thành task **T2-W3-01** (Nâng cấp Rubric đánh giá kịch bản Video AI & AI Sales Agent v3.0). Đã xuất xưởng tài liệu `docs/tester2/AI_VIDEO_RUBRIC_W3.md` tích hợp chuẩn chỉnh 6 tiêu chí Video AI Script (Hook, Visual Cues, Voice/Avatar, Pacing, Duration, CTA) và 6 tiêu chí AI Sales Agent (Greeting, Value Proposition/Groundedness, Qualification, Objection Handling, Closing/CTA, Persona Consistency). Tích hợp bộ 7 Fatal Flaws loại trực tiếp, 10 Test Cases thực chiến và Prompt LLM Judge JSON output schema. Task chuyển trạng thái sang **`DONE`**. Sẵn sàng cho task **T2-W3-02** (Adversarial Testing).
