@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "source_summary": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 1000
+    },
+    "hook": {
+      "type": "object",
+      "properties": {
+        "start_seconds": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "end_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 3
+        },
+        "observed_visual": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 500
+        },
+        "on_screen_text": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "start_seconds",
+        "end_seconds",
+        "observed_visual",
+        "on_screen_text"
+      ],
+      "additionalProperties": false
+    },
+    "pacing": {
+      "type": "object",
+      "properties": {
+        "style": {
+          "type": "string",
+          "enum": [
+            "slow",
+            "moderate",
+            "fast",
+            "mixed"
+          ]
+        },
+        "average_shot_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 60
+        }
+      },
+      "required": [
+        "style",
+        "average_shot_seconds"
+      ],
+      "additionalProperties": false
+    },
+    "visual_style": {
+      "type": "object",
+      "properties": {
+        "aspect_ratio": {
+          "type": "string",
+          "enum": [
+            "9:16",
+            "1:1",
+            "16:9",
+            "other"
+          ]
+        },
+        "camera_angles": {
+          "minItems": 1,
+          "maxItems": 8,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          }
+        },
+        "lighting": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 200
+        },
+        "color_palette": {
+          "minItems": 1,
+          "maxItems": 8,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          }
+        }
+      },
+      "required": [
+        "aspect_ratio",
+        "camera_angles",
+        "lighting",
+        "color_palette"
+      ],
+      "additionalProperties": false
+    },
+    "audio": {
+      "type": "object",
+      "properties": {
+        "music_mood": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "voiceover_style": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sound_effects": {
+          "maxItems": 12,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          }
+        }
+      },
+      "required": [
+        "music_mood",
+        "voiceover_style",
+        "sound_effects"
+      ],
+      "additionalProperties": false
+    },
+    "scenes": {
+      "minItems": 1,
+      "maxItems": 20,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "start_seconds": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 60
+          },
+          "end_seconds": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 60
+          },
+          "observed_visual": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 1000
+          },
+          "camera_movement": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 200
+          },
+          "transition": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 200
+          },
+          "on_screen_text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "spoken_words": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "index",
+          "start_seconds",
+          "end_seconds",
+          "observed_visual",
+          "camera_movement",
+          "transition",
+          "on_screen_text",
+          "spoken_words"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "safety": {
+      "type": "object",
+      "properties": {
+        "embedded_instructions_detected": {
+          "type": "boolean"
+        },
+        "unverified_claims": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 500
+          }
+        }
+      },
+      "required": [
+        "embedded_instructions_detected",
+        "unverified_claims"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "source_summary",
+    "hook",
+    "pacing",
+    "visual_style",
+    "audio",
+    "scenes",
+    "safety"
+  ],
+  "additionalProperties": false
+}

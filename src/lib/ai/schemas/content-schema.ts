@@ -60,9 +60,9 @@ const GEMINI_UNSUPPORTED_SCHEMA_KEYS = new Set([
   "pattern",
 ]);
 
-function removeUnsupportedGeminiSchemaKeywords(value: unknown): unknown {
+export function toGeminiJsonSchema(value: unknown): unknown {
   if (Array.isArray(value)) {
-    return value.map(removeUnsupportedGeminiSchemaKeywords);
+    return value.map(toGeminiJsonSchema);
   }
 
   if (value !== null && typeof value === "object") {
@@ -71,7 +71,7 @@ function removeUnsupportedGeminiSchemaKeywords(value: unknown): unknown {
         .filter(([key]) => !GEMINI_UNSUPPORTED_SCHEMA_KEYS.has(key))
         .map(([key, child]) => [
           key,
-          removeUnsupportedGeminiSchemaKeywords(child),
+          toGeminiJsonSchema(child),
         ]),
     );
   }
@@ -84,7 +84,7 @@ function removeUnsupportedGeminiSchemaKeywords(value: unknown): unknown {
  * the full Zod parser after receiving a provider-valid response.
  */
 export const geminiCampaignContentJsonSchema =
-  removeUnsupportedGeminiSchemaKeywords(campaignContentJsonSchema);
+  toGeminiJsonSchema(campaignContentJsonSchema);
 
 export function stripJsonMarkdownFence(value: string): string {
   const trimmed = value.trim().replace(/^\uFEFF/, "");

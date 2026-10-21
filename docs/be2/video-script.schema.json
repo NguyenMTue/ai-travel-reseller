@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "format": {
+      "type": "string",
+      "const": "9:16"
+    },
+    "duration_seconds": {
+      "type": "integer",
+      "minimum": 15,
+      "maximum": 60
+    },
+    "style_summary": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 500
+    },
+    "hook": {
+      "type": "object",
+      "properties": {
+        "duration_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 3
+        },
+        "text": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 150
+        }
+      },
+      "required": [
+        "duration_seconds",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "scenes": {
+      "minItems": 3,
+      "maxItems": 12,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "start_seconds": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 60
+          },
+          "end_seconds": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 60
+          },
+          "visual_prompt": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 1000
+          },
+          "shot_instruction": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 500
+          },
+          "narration": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "on_screen_text": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "verified_fact_refs": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "required": [
+          "index",
+          "start_seconds",
+          "end_seconds",
+          "visual_prompt",
+          "shot_instruction",
+          "narration",
+          "on_screen_text",
+          "verified_fact_refs"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "audio_plan": {
+      "type": "object",
+      "properties": {
+        "music_mood": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 200
+        },
+        "voiceover_style": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "music_mood",
+        "voiceover_style"
+      ],
+      "additionalProperties": false
+    },
+    "cta": {
+      "type": "object",
+      "properties": {
+        "spoken_text": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 300
+        },
+        "on_screen_text": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 200
+        },
+        "link_placeholder": {
+          "type": "string",
+          "const": "[LINK_MUA_VE]"
+        }
+      },
+      "required": [
+        "spoken_text",
+        "on_screen_text",
+        "link_placeholder"
+      ],
+      "additionalProperties": false
+    },
+    "safety": {
+      "type": "object",
+      "properties": {
+        "uses_only_verified_facts": {
+          "type": "boolean",
+          "const": true
+        },
+        "unsupported_claims": {
+          "minItems": 0,
+          "maxItems": 0,
+          "type": "array",
+          "items": {
+            "not": {}
+          }
+        }
+      },
+      "required": [
+        "uses_only_verified_facts",
+        "unsupported_claims"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "format",
+    "duration_seconds",
+    "style_summary",
+    "hook",
+    "scenes",
+    "audio_plan",
+    "cta",
+    "safety"
+  ],
+  "additionalProperties": false
+}

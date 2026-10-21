@@ -44,6 +44,12 @@ const UNVERIFIED_CLAIM_PATTERNS = [
   /không mua[^.!?\n]{0,80}bị phạt/iu,
   /duy nhất hôm nay/iu,
   /sắp hết vé/iu,
+  /không (?:phải|cần) xếp hàng/iu,
+  /không phát sinh(?: chi phí)?(?: ẩn)?/iu,
+  /(?:vé|giá)[^.!?\n]{0,50}(?:chính hãng|ưu đãi|mới nhất)/iu,
+  /nhận ưu đãi/iu,
+  /hot nhất/iu,
+  /không gian (?:siêu )?rộng lớn/iu,
 ];
 
 function normalizeMoney(rawAmount: string, rawUnit: string): number {

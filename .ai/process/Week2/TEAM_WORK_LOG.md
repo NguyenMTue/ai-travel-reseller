@@ -197,6 +197,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 
 #### BE2 — Review nhánh tích hợp BE3
 
+- Pull `origin/dev@309d1d7` fast-forward sạch; commit mới chỉ merge PR #23 Tester2. Recheck BE2 **17/17 PASS**, Tester2 **13/13 PASS**. Không có workflow export/live execution mới; BE2-W2-04/05/06 giữ `IN_REVIEW/PARTIAL/IN_REVIEW`.
 - Hoàn thành phần Tester2 có thể chạy trong repo: **13/13 PASS**, tạo đủ rubric/reports/benchmark; mở rộng guardrail policy và fake urgency ở TypeScript/Python. Sửa giá fixture VinWonders về **510.000đ** theo seed. Persona/groundedness live vẫn chờ workflow export + execution evidence BE3.
 - Recheck sau pull `origin/dev@9d3eff6`: fast-forward sạch; commit mới chỉ merge PR #22 của BE2, không thêm workflow export, live E2E hoặc kết quả Tester 2. BE2 test **17/17 PASS** sau pull.
 - Pull `origin/dev@fba688a` (đã merge `Feature_BE3_n8n_Campaign_Content@6ae494e`) vào nhánh BE2 bằng fast-forward, không xung đột; các thay đổi review cục bộ được bảo toàn.
@@ -208,9 +209,9 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của 9 thành viê
 
 #### Tester 2 — AI Safety QA
 
-- **Done:** Hoàn thiện rubric và sáu tài liệu Tester2; thêm `tests/content-safety.test.ts` đạt **13/13 PASS**; hồi quy BE2 đạt **17/17 PASS**; bổ sung guardrail cho giá/mã ưu đãi, chính sách trẻ em, hoàn hủy, bảo hiểm, xe đẩy/xe lăn, người cao tuổi, prompt injection và khan hiếm giả.
-- **In Progress:** T2-W2-02/03/04/06 ở trạng thái `PARTIAL/IN_REVIEW`; contract, parser và deterministic guardrails đã PASS nhưng chưa có mẫu n8n live để chấm persona và groundedness đầu-cuối.
-- **Blocker:** BE3 chưa cung cấp workflow export, execution ID và tám mẫu live (hai sản phẩm × bốn persona). Python unit suite chưa chạy tại máy hiện tại do thiếu `fastapi`; Python syntax compile PASS.
+- **Done:** Hoàn thiện rubric và báo cáo Tester2; deterministic Tester2 **17/17 PASS**, BE2 **19/19 PASS**, Python API/guardrail **9/9 PASS**; direct Gemini adversarial **1/1 PASS**; ma trận 2 sản phẩm × 4 persona đã chấm xong (**5 APPROVED, 3 NEEDS_REVIEW**).
+- **In Progress:** T2-W2-02/03/06 ở trạng thái `PARTIAL/IN_REVIEW`; T2-W2-04 đã `DONE`. Contract, parser và guardrails đã PASS nhưng chưa có execution n8n live đầu-cuối.
+- **Blocker:** BE3 chưa cung cấp workflow export, execution ID và bản ghi Supabase từ cùng một execution cho tám mẫu (hai sản phẩm × bốn persona).
 - **Next:** Nhận bằng chứng live từ BE3, quét bản ghi `contents`, chấm rubric tối thiểu 80/100 và ký nghiệm thu benchmark.
 
 ### 15/10/2026 (Thứ Năm)

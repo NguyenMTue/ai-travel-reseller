@@ -71,6 +71,10 @@ const unsafeClaims = [
   "Hoàn hủy miễn phí trong mọi trường hợp.",
   "Chỉ còn đúng 2 vé, không mua sẽ bị phạt tiền.",
   "Ưu đãi duy nhất hôm nay, sắp hết vé.",
+  "Mua vé chính hãng với giá ưu đãi mới nhất.",
+  "Đặt trước để không phải xếp hàng mua vé.",
+  "Giá công khai, cam kết không phát sinh chi phí ẩn.",
+  "Đây là điểm đến hot nhất với không gian siêu rộng lớn.",
 ] as const;
 
 for (const claim of unsafeClaims) {

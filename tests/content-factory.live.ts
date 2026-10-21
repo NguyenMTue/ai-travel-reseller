@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 import { GoogleGenAI } from "@google/genai";
 
 import {
   buildContentFactoryPrompt,
-  CONTENT_PERSONAS,
 } from "../src/lib/ai/prompts/content-factory.ts";
 import {
   campaignContentOutputSchema,
@@ -23,8 +24,15 @@ const requestedRuns = Number(process.env.BE2_LIVE_RUNS ?? "4");
 const runCount = Number.isInteger(requestedRuns)
   ? Math.min(Math.max(requestedRuns, 1), 10)
   : 4;
-const personas = Object.keys(CONTENT_PERSONAS) as ContentPersona[];
 const client = new GoogleGenAI({ apiKey });
+const capturedRuns: Array<{
+  run: number;
+  product: string;
+  persona: ContentPersona;
+  guardrail_status: "APPROVED" | "NEEDS_REVIEW";
+  guardrail_flags: string[];
+  output: unknown;
+}> = [];
 
 const products = [
   {
@@ -63,9 +71,23 @@ const products = [
   },
 ];
 
+// Keep the first four runs backward-compatible while eight runs cover the
+// complete 2-products x 4-personas acceptance matrix without duplicates.
+const acceptanceMatrix = [
+  { productIndex: 0, persona: "local_guide" },
+  { productIndex: 1, persona: "family" },
+  { productIndex: 0, persona: "foodie" },
+  { productIndex: 1, persona: "budget_traveler" },
+  { productIndex: 0, persona: "family" },
+  { productIndex: 1, persona: "local_guide" },
+  { productIndex: 0, persona: "budget_traveler" },
+  { productIndex: 1, persona: "foodie" },
+] satisfies Array<{ productIndex: number; persona: ContentPersona }>;
+
 for (let index = 0; index < runCount; index += 1) {
-  const persona = personas[index % personas.length];
-  const product = products[index % products.length];
+  const matrixEntry = acceptanceMatrix[index % acceptanceMatrix.length];
+  const persona = matrixEntry.persona;
+  const product = products[matrixEntry.productIndex];
   const prompt = buildContentFactoryPrompt(persona, product);
   const interaction = await client.interactions.create({
     model,
@@ -95,13 +117,43 @@ for (let index = 0; index < runCount; index += 1) {
     confirmed_promo_codes: [],
     verified_facts: product.verified_facts,
   });
-  assert.equal(
-    guardrailResult.isValid,
-    true,
-    `Run ${index + 1} failed guardrails: ${guardrailResult.flags.join(", ")}`,
-  );
+  capturedRuns.push({
+    run: index + 1,
+    product: product.testId,
+    persona,
+    guardrail_status: guardrailResult.recommended_status,
+    guardrail_flags: guardrailResult.flags,
+    output,
+  });
 
   process.stdout.write(
-    `run=${index + 1} product=${product.testId} persona=${persona} status=PASS\n`,
+    `run=${index + 1} product=${product.testId} persona=${persona} status=${guardrailResult.recommended_status}${guardrailResult.flags.length > 0 ? ` flags=${guardrailResult.flags.join(",")}` : ""}\n`,
   );
 }
+
+const reportPath = process.env.BE2_LIVE_REPORT_PATH?.trim();
+if (reportPath) {
+  const resolvedReportPath = path.resolve(reportPath);
+  await fs.mkdir(path.dirname(resolvedReportPath), { recursive: true });
+  await fs.writeFile(
+    resolvedReportPath,
+    `${JSON.stringify({
+      generated_at: new Date().toISOString(),
+      model,
+      run_count: capturedRuns.length,
+      note: "Direct Gemini validation only; this is not n8n or Supabase execution evidence.",
+      runs: capturedRuns,
+    }, null, 2)}\n`,
+    "utf8",
+  );
+  process.stdout.write(`report=${resolvedReportPath}\n`);
+}
+
+const reviewRuns = capturedRuns.filter(
+  (run) => run.guardrail_status !== "APPROVED",
+);
+assert.equal(
+  reviewRuns.length,
+  0,
+  `${reviewRuns.length}/${capturedRuns.length} live outputs require review: ${reviewRuns.map((run) => `${run.product}/${run.persona}[${run.guardrail_flags.join(",")}]`).join("; ")}`,
+);

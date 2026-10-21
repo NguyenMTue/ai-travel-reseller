@@ -38,11 +38,11 @@ Trong Tuần 2, Tester 2 là "Người gác cổng an toàn nội dung AI":
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|---|---|---|---|---|---|
 | T2-W2-01 | Xây dựng Bảng tiêu chí đánh giá chất lượng AI Content (Rubric) | P0 | DONE | BE2 Personas | Tester 2 | `docs/tester2/AI_CONTENT_RUBRIC.md` | 12/10 17:00 |
-| T2-W2-02 | Kiểm thử văn phong và độ hấp dẫn của 4 Personas du lịch | P1 | PARTIAL — contract PASS, chờ mẫu n8n để chấm thủ công | BE3 bài mẫu | Tester 2 | `docs/tester2/PERSONA_REVIEW_NOTES.md` | 13/10 17:00 |
-| T2-W2-03 | Kiểm thử chống ảo giác thông tin giá và chính sách ưu đãi | P0 | PARTIAL — deterministic PASS, chưa quét contents live | Dữ liệu n8n sinh ra | Tester 2 | `docs/tester2/GROUNDEDNESS_REPORT.md` | 14/10 17:00 |
-| T2-W2-04 | Kiểm thử cực đoan Adversarial & Prompt Injection | P0 | PARTIAL — boundary/parser PASS, chờ model live | BE2 Guardrails | Tester 2 | `docs/tester2/SECURITY_TEST_LOG.md` | 15/10 12:00 |
+| T2-W2-02 | Kiểm thử văn phong và độ hấp dẫn của 4 Personas du lịch | P1 | PARTIAL — đã chấm 8 mẫu Gemini trực tiếp; chờ mẫu n8n | BE3 bài mẫu | Tester 2 | `docs/tester2/PERSONA_REVIEW_NOTES.md` | 13/10 17:00 |
+| T2-W2-03 | Kiểm thử chống ảo giác thông tin giá và chính sách ưu đãi | P0 | PARTIAL — 5/8 APPROVED, 3/8 NEEDS_REVIEW; chưa quét contents n8n | Dữ liệu n8n sinh ra | Tester 2 | `docs/tester2/GROUNDEDNESS_REPORT.md` | 14/10 17:00 |
+| T2-W2-04 | Kiểm thử cực đoan Adversarial & Prompt Injection | P0 | DONE — 17/17 deterministic và 1/1 Gemini adversarial PASS | BE2 Guardrails | Tester 2 | `docs/tester2/SECURITY_TEST_LOG.md` | 15/10 12:00 |
 | T2-W2-05 | Kiểm thử chính sách hoàn hủy và thông tin trẻ em/người cao tuổi | P1 | DONE — deterministic | T2-W2-03 | Tester 2 | `docs/tester2/POLICY_COMPLIANCE_CHECK.md` | 15/10 17:00 |
-| T2-W2-06 | Lập Báo cáo tổng kết chất lượng AI (AI Content Benchmark Report) | P0 | IN_REVIEW — báo cáo có, live acceptance còn chờ | T2-W2-01 -> 05 | Tester 2 | `docs/tester2/AI_BENCHMARK_W2.md` | 16/10 12:00 |
+| T2-W2-06 | Lập Báo cáo tổng kết chất lượng AI (AI Content Benchmark Report) | P0 | IN_REVIEW — báo cáo có direct-live evidence; n8n acceptance còn chờ | T2-W2-01 -> 05 | Tester 2 | `docs/tester2/AI_BENCHMARK_W2.md` | 16/10 12:00 |
 
 ---
 
@@ -154,5 +154,5 @@ NEXT:
 - Hồi quy BE2: **17/17 PASS**; TypeScript và ESLint PASS.
 - Bổ sung guardrail cho chính sách trẻ em, hoàn/hủy, bảo hiểm, xe đẩy/xe lăn, người cao tuổi và khan hiếm giả; đồng bộ TypeScript/Python.
 - Sửa fixture VinWonders từ 550.000đ về 510.000đ theo seed.
-- Python syntax compile PASS; Python unit suite chưa chạy do môi trường hiện tại thiếu `fastapi`.
-- Chưa đóng T2-W2-02/03/04/06 vì thiếu workflow export và execution live từ BE3.
+- Python syntax compile PASS; Python API/guardrail unit suite **9/9 PASS** trong môi trường ảo tách biệt.
+- T2-W2-04 đã `DONE`; T2-W2-02/03/06 vẫn chờ workflow export và execution live từ BE3.

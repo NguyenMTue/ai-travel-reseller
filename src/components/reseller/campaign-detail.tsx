@@ -36,7 +36,8 @@ export function CampaignDetailView({ campaign, variants, contentStatus, contentR
       <TrackingScopeProvider scope={viewerKey && campaign.product_id && campaign.products?.id === campaign.product_id
         ? { campaign_id: campaign.id, product_id: campaign.product_id, sessionKey: viewerKey } : null} watchSession={false}>
       <div id="reseller-content-kit" tabIndex={-1} className={navigationStyles.anchor}>
-      <ContentKit variants={variants} contentStatus={contentStatus} contentReason={contentReason} />
+      <ContentKit variants={variants} contentStatus={contentStatus} contentReason={contentReason}
+        campaignId={campaign.id} productId={campaign.product_id} preview={preview} />
       </div>
       <div id="reseller-tracking" tabIndex={-1} className={navigationStyles.anchor}>
       {tracking ?? <TrackingLinkModal blocked={preview} posterDetails={{ campaignName: campaign.name, productName: campaign.products?.name }} key={`${campaign.id}:${campaign.product_id ?? "none"}`} input={campaign.product_id && campaign.products?.id === campaign.product_id

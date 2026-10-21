@@ -1,0 +1,87 @@
+{
+  "generated_at": "2026-10-16T04:49:35.430Z",
+  "model": "gemini-3.5-flash-lite",
+  "persona": "family",
+  "schema_status": "PASS",
+  "injection_status": "PASS",
+  "guardrail_status": "APPROVED",
+  "guardrail_flags": [],
+  "note": "Direct Gemini validation only; this is not n8n or Supabase execution evidence.",
+  "output": {
+    "persona": "family",
+    "hooks": [
+      "Cả nhà mình đang tìm kiếm chuyến đi Đà Nẵng trọn vẹn?",
+      "Lên kế hoạch du lịch Đà Nẵng cùng gia đình đa thế hệ thế nào?",
+      "Khám phá Bà Nà Hills cùng người thân và gia đình ngay hôm nay.",
+      "Trải nghiệm cáp treo khứ hồi tại Bà Nà Hills cho cả nhà.",
+      "Cùng gia đình ghé thăm Cầu Vàng và Làng Pháp nổi tiếng.",
+      "Tìm kiếm trải nghiệm tham quan Đà Nẵng phù hợp cho mọi lứa tuổi.",
+      "Lên lịch trình tham quan Bà Nà Hills nhẹ nhàng cho người lớn tuổi.",
+      "Chuyến đi Đà Nẵng cùng gia đình có gì thú vị đang chờ đón?",
+      "Chia sẻ cách chuẩn bị cho chuyến đi Bà Nà Hills cùng gia đình.",
+      "Tận hưởng trọn vẹn thời gian bên gia đình tại Đà Nẵng."
+    ],
+    "scripts": [
+      {
+        "title": "Hành trình Bà Nà Hills cùng gia đình",
+        "duration": 40,
+        "scenes": [
+          "Cảnh gia đình cùng nhau di chuyển tại Đà Nẵng.",
+          "Cận cảnh cáp treo khứ hồi đưa gia đình lên cao.",
+          "Hình ảnh cả nhà ghi lại kỷ niệm tại Cầu Vàng.",
+          "Thành viên gia đình thong thả dạo bước tại Làng Pháp."
+        ]
+      },
+      {
+        "title": "Khám phá Cầu Vàng và Làng Pháp",
+        "duration": 35,
+        "scenes": [
+          "Toàn cảnh khu vực Bà Nà Hills từ trên cao.",
+          "Gia đình cùng nhau ngắm cảnh tại Cầu Vàng.",
+          "Khoảnh khắc thư thái của người thân tại Làng Pháp."
+        ]
+      },
+      {
+        "title": "Trải nghiệm cáp treo khứ hồi",
+        "duration": 45,
+        "scenes": [
+          "Chuẩn bị lên chuyến cáp treo khứ hồi tại nhà ga.",
+          "Góc quay bên trong cabin ngắm nhìn núi rừng Đà Nẵng.",
+          "Gia đình bước xuống ga đến và bắt đầu tham quan."
+        ]
+      },
+      {
+        "title": "Kỷ niệm chuyến đi Đà Nẵng",
+        "duration": 35,
+        "scenes": [
+          "Khoảng thời gian quây quần của gia đình tại điểm đến.",
+          "Tham quan các khu vực trong danh mục vé vào cổng.",
+          "Nụ cười vui vẻ của các thành viên trong gia đình."
+        ]
+      },
+      {
+        "title": "Lên kế hoạch đến Bà Nà Hills",
+        "duration": 40,
+        "scenes": [
+          "Hình ảnh các thành viên trong gia đình trò chuyện cùng nhau.",
+          "Trải nghiệm tham quan Cầu Vàng và Làng Pháp rõ nét.",
+          "Tổng kết những khoảnh khắc đẹp của gia đình tại Đà Nẵng."
+        ]
+      }
+    ],
+    "captions": [
+      "Chuyến đi Đà Nẵng cùng gia đình thêm phần trọn vẹn khi cùng nhau trải nghiệm cáp treo khứ hồi lên Bà Nà Hills, ghé thăm Cầu Vàng và Làng Pháp. #DaNang #BaNaHills #DuLichGiaDinh",
+      "Lên kế hoạch đưa người thân và gia đình khám phá các điểm đến nổi tiếng tại Đà Nẵng với vé vào cổng và cáp treo khứ hồi. #CauVang #LangPhap #Travel",
+      "Khoảnh khắc gia đình quây quần bên nhau trong chuyến tham quan Bà Nà Hills tại Đà Nẵng. #GiaDinh #DaNangTrip #KhamPha",
+      "Tận hưởng không gian thư thái và các điểm tham quan quen thuộc cùng gia đình tại Đà Nẵng. #BaNaHills #DuLichDaNang #FamilyTime",
+      "Lưu giữ những kỷ niệm đẹp cùng gia đình trong chuyến hành trình khám phá Đà Nẵng năm 2026. #TravelLinkAI #DaNangTourism #NghiDien"
+    ],
+    "ctas": [
+      "Đặt vé tham quan Bà Nà Hills cho cả nhà tại [LINK_MUA_VE].",
+      "Khám phá chi tiết vé vào cổng và cáp treo khứ hồi qua [LINK_MUA_VE].",
+      "Nhận thông tin vé trải nghiệm Cầu Vàng và Làng Pháp tại [LINK_MUA_VE].",
+      "Xem thêm thông tin chuyến đi Đà Nẵng cho gia đình tại [LINK_MUA_VE].",
+      "Chuẩn bị cho chuyến hành trình sắp tới của gia đình tại [LINK_MUA_VE]."
+    ]
+  }
+}
