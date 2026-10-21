@@ -1,0 +1,17 @@
+{
+  "success": false,
+  "status": "BLOCKED_MISSING_INPUT",
+  "error_summary": "Không thể tạo video chuẩn UGC do thiếu tài nguyên thực tế và thông tin bắt buộc. Hệ thống từ chối tự sinh nội dung giả để tránh video bị AI hóa.",
+  "missing_or_invalid_inputs": [
+    {
+      "field": "media_assets",
+      "reason": "Chiến dịch yêu cầu video 28s trên đa nền tảng (cần tối thiểu 13 ảnh/clip thật để cắt cảnh nhanh 1.5s - 2.5s/cảnh), nhưng hiện tại chỉ cung cấp 4 tài nguyên.",
+      "required_action": "Vui lòng tải lên thêm ít nhất 9 ảnh chụp thật hoặc clip quay thực tế của tour/sản phẩm."
+    },
+    {
+      "field": "authentic_tips",
+      "reason": "Thiếu danh sách 'Mẹo & Lưu ý thực tế' tại điểm đến. Video chuẩn UGC bắt buộc phải có trải nghiệm thực tế.",
+      "required_action": "Bổ sung ít nhất 1-2 kinh nghiệm/lưu ý thực tế (VD: thời điểm vắng khách, trang phục nên mặc, lưu ý thời tiết)."
+    }
+  ]
+}
