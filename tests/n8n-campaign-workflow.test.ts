@@ -29,6 +29,10 @@ const workflowPath = new URL(
 const rawWorkflow = readFileSync(workflowPath, "utf8");
 const workflow = JSON.parse(rawWorkflow) as Workflow;
 const nodes = new Map(workflow.nodes.map((node) => [node.name, node]));
+const compose = readFileSync(
+  new URL("../docker-compose.n8n.yml", import.meta.url),
+  "utf8",
+);
 
 test("campaign workflow contains no embedded secrets", () => {
   assert.doesNotMatch(rawWorkflow, /AIza[0-9A-Za-z_-]{20,}/);
@@ -169,6 +173,11 @@ test("repository export remains inactive until an approved live smoke test", () 
     String(nodes.get("Rate Limit Safety Note")?.parameters.content),
     /N8N_CONCURRENCY_PRODUCTION_LIMIT=1/,
   );
+});
+
+test("self-hosted n8n queues overlapping production executions", () => {
+  assert.match(compose, /N8N_CONCURRENCY_PRODUCTION_LIMIT:\s*["']?1["']?/);
+  assert.match(compose, /docker\.n8n\.io\/n8nio\/n8n:2\.43\.7/);
 });
 
 test("webhook uses an explicit response node and both APIs use credentials", () => {

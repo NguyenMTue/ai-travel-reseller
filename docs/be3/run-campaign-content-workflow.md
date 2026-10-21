@@ -28,7 +28,7 @@ Workflow Campaign Content đã được export tại [workflow_campaign_content.
 - Auto-fix parser bị tắt vì fixer cũng là một lượt Gemini. Model chain không retry để lỗi 429 không nhân số request.
 - Enrich/Persist là HTTP nội bộ, retry tối đa 3 lần với khoảng nghỉ 5 giây.
 - Khi Gemini trả `429`, `RESOURCE_EXHAUSTED`, quota hoặc rate-limit, webhook trả sanitized HTTP `503`, `retryable: true`, `retry_after_seconds: 60`.
-- Loop chỉ giới hạn request trong một execution. Trước khi publish trên n8n self-hosted, bắt buộc đặt `N8N_CONCURRENCY_PRODUCTION_LIMIT=1` để các campaign đồng thời được xếp hàng FIFO thay vì cùng gọi Gemini.
+- Loop chỉ giới hạn request trong một execution. File `docker-compose.n8n.yml` đặt `N8N_CONCURRENCY_PRODUCTION_LIMIT=1` để các campaign đồng thời được xếp hàng FIFO thay vì cùng gọi Gemini; phải restart container sau khi thay đổi biến môi trường.
 
 Lệnh kiểm tra offline:
 
