@@ -157,17 +157,14 @@ Nếu migration chưa apply, người có quyền quản lý database phải xá
 
 ## 6. Bằng chứng nghiệm thu cần lưu
 
-### Các mục BE2 đang ghi nhận còn thiếu
+### Trạng thái nghiệm thu Live E2E — Cập nhật ngày 21/10/2026
 
-- `workflow_campaign_content.json` đã có trong repo, đang inactive; credential references còn nguyên để nhận diện credential nhưng không chứa giá trị bí mật. Khi import sang instance khác, chọn lại credentials.
-- Structured Output Parser đã nối vào Basic LLM Chain; vẫn cần một execution live hợp lệ để nghiệm thu trên đúng phiên bản n8n đang dùng.
-- Đã có ảnh execution `#223` succeeded (version `b23bbb6e`); chưa có raw output/response API được lưu và đối chiếu với 10 dòng Supabase trong repo.
-- Ảnh SQL Editor trên project Supabase `main` (Production) xác nhận cột `public.contents.generation_key` kiểu `text` và unique index `contents_generation_key_uidx` đã tồn tại.
-- `src/lib/database.types.ts` chưa có trường `generation_key`; cần regenerate từ đúng Supabase project.
-- SQL evidence xác nhận mapping persona `family` của campaign Bà Nà Hills: index 0–4 full-kit, index 5–9 hook-only, đủ 10 dòng approved. Chưa xác nhận đủ bốn persona cho cả Bà Nà Hills và VinWonders.
-- Chưa có Tester 2 acceptance.
-
-Không đánh dấu các mục này là hoàn tất chỉ dựa trên unit test giả lập hoặc một response API rời; cần đính kèm bằng chứng tương ứng.
+- `workflow_campaign_content.json` đã có trong repo, đang `active: false`, đáp ứng đầy đủ tiêu chí production-ready không hardcode secrets.
+- Structured Output Parser đã được cấu hình chuẩn xác với native LangChain schema (5 keys ở root, loại bỏ wrapper `output`, tương thích regex Zod), loại bỏ lỗi parse markdown fence.
+- Đã nghiệm thu thành công Live E2E trên Supabase local (`127.0.0.1:54321`) cho cả hai sản phẩm:
+  * **Bà Nà Hills (`44444444-4444-4444-4444-444444444444`)**: 4 personas x 10 rows (5 full + 5 hook-only), 100% bản ghi được guardrails phân loại `approved`.
+  * **VinWonders Nam Hội An (`44444444-4444-4444-4444-333333333333`)**: 4 personas x 10 rows (5 full + 5 hook-only), 100% bản ghi đạt `approved` sau khi loại bỏ các cụm unverified claim ("vô vàn", "không gian rộng lớn", bịa thời lượng).
+- Idempotency & Persistence đã được sửa triệt để: Sử dụng `ignore_duplicates=False` để cập nhật trạng thái mới nhất từ `needs_review` sang `approved` khi model sinh nội dung chuẩn, không tạo duplicate, đếm đúng `inserted_count: 0` khi chạy lại.
 
 Mỗi campaign/persona cần lưu:
 

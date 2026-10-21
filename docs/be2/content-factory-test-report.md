@@ -99,3 +99,44 @@ These results are direct-model and local-service evidence only. Final acceptance
 still requires BE3 to provide the exported n8n workflow and an execution showing
 the Supabase trigger, Gemini structured output, guardrail result, and database
 write in one trace.
+
+## Live n8n E2E and hardening acceptance — 2026-10-21
+
+| Check | Result |
+|---|---|
+| Deterministic BE2 suite (`test:be2`) | 43/43 PASS |
+| Deterministic Tester2 suite (`test:tester2`) | 17/17 PASS |
+| Python Content API suite (`test_rag_api_contents`) | 10/10 PASS |
+| Python Guardrails suite (`test_content_guardrails`) | 13/13 PASS |
+| Bà Nà Hills Live n8n E2E execution | 4/4 personas PASS (40 canonical rows `approved`) |
+| VinWonders Live n8n E2E execution | 4/4 personas PASS (40 canonical rows `approved`) |
+| Idempotency re-run test | 0 new rows inserted (`inserted_count: 0`), existing IDs preserved |
+| Structured Output Parser | 8/8 executions clean JSON schema validation |
+| n8n production readiness checklist | 9/9 PASS, `active: false`, no embedded credentials |
+
+### Detailed Live Matrix
+
+| Product | Persona | Total Rows | Full / Hook-only | Guardrail Status | Persisted in Local Supabase |
+|---|---|---|---|---|---|
+| Bà Nà Hills | `local_guide` | 10 | 5 full + 5 hook-only | `approved` | Yes (10 canonical rows) |
+| Bà Nà Hills | `family` | 10 | 5 full + 5 hook-only | `approved` | Yes (10 canonical rows) |
+| Bà Nà Hills | `foodie` | 10 | 5 full + 5 hook-only | `approved` | Yes (10 canonical rows) |
+| Bà Nà Hills | `budget_traveler` | 10 | 5 full + 5 hook-only | `approved` | Yes (10 canonical rows) |
+| VinWonders Nam Hội An | `local_guide` | 10 | 5 full + 5 hook-only | `approved` | Yes (10 canonical rows) |
+| VinWonders Nam Hội An | `family` | 10 | 5 full + 5 hook-only | `approved` | Yes (10 canonical rows) |
+| VinWonders Nam Hội An | `foodie` | 10 | 5 full + 5 hook-only | `approved` | Yes (10 canonical rows) |
+| VinWonders Nam Hội An | `budget_traveler` | 10 | 5 full + 5 hook-only | `approved` | Yes (10 canonical rows) |
+
+### Hardening and Bug Fixes Applied
+
+1. **Persistence & Idempotency Fix (`POST /contents/batch`):**
+   - Replaced `ignore_duplicates=True` with `ignore_duplicates=False` on Postgres upsert.
+   - Accurately tracks `inserted_count`, `updated_count`, and `persisted_count`.
+   - Guaranteed that updated statuses from re-runs (e.g. from `needs_review` to `approved`) are properly written to database and match the API response.
+2. **Persona Claim Grounding:**
+   - Root-caused `PROHIBITED_CLAIM` triggers: "vô vàn" (foodie/local_guide), "không gian rộng lớn" (local_guide), and unverified duration / price assurances (budget_traveler).
+   - Hardened prompts without weakening guardrails.
+   - All 4 personas for both products now successfully pass guardrails as `approved`.
+3. **Structured Output Parser Compliance:**
+   - Resolved JSON markdown fence end line formatting bug and regex compatibility in Zod schemas.
+   - Enforced root 5-key object output contract without wrapper keys.

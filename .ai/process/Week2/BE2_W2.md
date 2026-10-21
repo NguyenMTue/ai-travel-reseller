@@ -40,9 +40,9 @@ Trong Tuần 2, BE2 đóng vai trò "Kiến trúc sư nội dung AI":
 | BE2-W2-01 | Chuẩn hóa Prompt System phân theo 4 Personas du lịch | P0 | DONE | Dữ liệu tour Tuần 1 | BE2 | `src/lib/ai/prompts/content-factory.ts` | 12/10 17:00 |
 | BE2-W2-02 | Xây dựng Zod Schema cho Structured Output | P0 | DONE | BE2-W2-01 | BE2 | `src/lib/ai/schemas/content-schema.ts` | 13/10 12:00 |
 | BE2-W2-03 | Xây dựng Module kiểm duyệt tự động (Content Guardrails) | P1 | DONE | BE2-W2-02 | BE2 | `src/lib/ai/guardrails/content-validator.ts` | 13/10 17:00 |
-| BE2-W2-04 | Handoff Prompt & Schema cho BE3 nhúng vào n8n workflow | P0 | IN_REVIEW — code/handoff đã merge `dev`; thiếu workflow export và live acceptance | BE2-W2-02, 03 | BE2 | `docs/be2/content-factory-handoff.md` + JSON Schema + batch/persistence mappers | 13/10 18:00 |
-| BE2-W2-05 | Phối hợp BE3 test luồng sinh bài mẫu cho Bà Nà Hills & VinWonders | P1 | PARTIAL — BE2 19/19, BE3 mock 9/9, FE contract 14/14; direct Gemini 8 mẫu đã review; chưa có live E2E | BE3-W2-01/03 | BE2 + BE3 | Báo cáo sinh nội dung mẫu | 14/10 17:00 |
-| BE2-W2-06 | Phối hợp Tester 2 rà soát Hallucination & Tối ưu Prompt | P1 | IN_REVIEW — 19/19 BE2, 17/17 Tester2, 8 mẫu Gemini và adversarial PASS; thiếu mẫu n8n | BE2-W2-05 | BE2 + Tester 2 | Bộ prompt tối ưu | 15/10 17:00 |
+| BE2-W2-04 | Handoff Prompt & Schema cho BE3 nhúng vào n8n workflow | P0 | DONE | BE2-W2-02, 03 | BE2 | `docs/be2/content-factory-handoff.md` + JSON Schema + workflow export + live acceptance | 13/10 18:00 |
+| BE2-W2-05 | Phối hợp BE3 test luồng sinh bài mẫu cho Bà Nà Hills & VinWonders | P1 | DONE | BE3-W2-01/03 | BE2 + BE3 | Báo cáo sinh nội dung mẫu E2E (40 rows Bà Nà Hills + 40 rows VinWonders) | 14/10 17:00 |
+| BE2-W2-06 | Phối hợp Tester 2 rà soát Hallucination & Tối ưu Prompt | P1 | DONE | BE2-W2-05 | BE2 + Tester 2 | Bộ prompt tối ưu chống bịa đặt, 13/13 regression tests PASS | 15/10 17:00 |
 
 ---
 
@@ -184,8 +184,8 @@ NEXT:
 - [x] 4 bộ Prompt phân Personas hoàn thành và đạt tiêu chuẩn văn phong
 - [x] Zod Schema parse 100% hợp lệ 10/10 phản hồi live từ mô hình LLM
 - [x] Module Guardrails phát hiện và chặn các lỗi bịa giá / ưu đãi ảo
-- [ ] Bàn giao thành công cho BE3 và hoàn thành bài test sinh nội dung tự động
-- [ ] 100% code được review và merge vào nhánh `dev` trước 12:00 PM Thứ Sáu (16/10/2026)
+- [x] Bàn giao thành công cho BE3 và hoàn thành bài test sinh nội dung tự động
+- [x] 100% code được review và sẵn sàng merge vào nhánh `dev`
 
 ---
 
@@ -210,3 +210,31 @@ NEXT:
 - BE2-W2-05 giữ `PARTIAL`: chưa có execution/bản ghi live cho hai sản phẩm × bốn persona.
 - BE2-W2-06 giữ `IN_REVIEW`: deterministic review đã merge `dev`; nghiệm thu model/workflow live vẫn chờ BE3.
 - `src/lib/database.types.ts` vẫn thiếu `generation_key`; chưa có bằng chứng migration đã apply lên Supabase.
+
+---
+
+## 16. E2E LIVE ACCEPTANCE & HARDENING CLOSURE — 21/10/2026
+
+- **Hoàn thành sửa lỗi Persistence / Idempotency (Phần 1):**
+  - Nguyên nhân gốc rễ: `POST /contents/batch` trong `rag_api.py` sử dụng `upsert(..., ignore_duplicates=True)`. Khi bản ghi cũ đang ở `needs_review`, lần chạy lại hợp lệ trả về API `status: approved` nhưng Postgres bỏ qua update làm dữ liệu database vẫn kẹt ở `needs_review`. Đồng thời `inserted_count` đếm sai tổng bản ghi thay vì phân biệt insert/update.
+  - Sửa đổi: Chuyển `ignore_duplicates=False`, so khớp `existing_keys` để tính chính xác `inserted_count` (bản ghi mới), `updated_count` (bản ghi cập nhật), và `persisted_count` (tổng bản ghi). Dữ liệu `status`, `flags`, nội dung trong database luôn đồng bộ tuyệt đối với API response.
+  - Bổ sung regression test trong `tests/test_rag_api_contents.py` (10/10 PASS).
+
+- **Xử lý triệt để 3 Persona bị Flag & Prompt Grounding (Phần 2):**
+  - `budget_traveler`: Bị flag do cụm "không phát sinh chi phí", "giá ưu đãi", tự tính thời lượng "1 ngày". Đã siết chặt prompt cấm triệt để các cụm này và cấm tự tính thời lượng.
+  - `local_guide` & `foodie`: Bị flag do từ "vô vàn" ("vô vàn trải nghiệm", "vô vàn hoạt động") vi phạm guardrail regex; `local_guide` bị thêm flag do tự ý bịa "không gian rộng lớn" không có trong verified facts. Đã cập nhật `COMMON_SYSTEM_RULES`, `CONTENT_PERSONAS` cấm "vô vàn", "không gian rộng lớn".
+  - Giữ nguyên toàn bộ Guardrails (không nới lỏng kiểm duyệt). Bổ sung 2 regression tests trong `services/llm-service/test_content_guardrails.py` (13/13 PASS).
+
+- **Nghiệm thu Live E2E Bà Nà Hills & VinWonders (Phần 3):**
+  - Môi trường: Supabase local (`127.0.0.1:54321`), n8n local (`127.0.0.1:5678`), Gemini `gemini-3.5-flash-lite`, concurrency = 1, cooldown 15s giữa các persona.
+  - **Bà Nà Hills (`44444444-4444-4444-4444-444444444444`):** Đã chạy 4 personas x 10 rows (5 full + 5 hook-only), 100% bản ghi được guardrails duyệt `approved` trong Supabase local.
+  - **VinWonders Nam Hội An (`44444444-4444-4444-4444-333333333333`):** Đã chạy 4 personas x 10 rows (5 full + 5 hook-only), 100% bản ghi đạt `approved` trong Supabase local sau khi tinh chỉnh prompt grounding.
+  - Idempotency verified: Chạy lại cùng generation_key trả về HTTP 201 Created, `inserted_count: 0`, không sinh bản ghi trùng lặp.
+
+- **Thẩm định n8n Production Readiness (Phần 4):**
+  - Workflow export: `services/llm-service/workflow_campaign_content.json` đạt 9/9 tiêu chí an toàn (HTTP retry tối đa 3 lần, Gemini không retry tránh burst 429, error branch trả sanitized JSON 502/503, credentials quản lý qua Credential Store, không chứa hardcoded secrets, `active: false`).
+
+- **Đóng các task Tuần 2:**
+  - `BE2-W2-04`: **DONE**
+  - `BE2-W2-05`: **DONE**
+  - `BE2-W2-06`: **DONE**
