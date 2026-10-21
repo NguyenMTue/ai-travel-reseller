@@ -10,7 +10,7 @@
 ---
 
 ## 1. Context
-- Kế thừa thành quả Sprint 2: Hệ thống Prompt 4 Personas, Zod structured output, guardrails kiểm duyệt nội dung văn bản đã hoàn thiện và tích hợp thành công vào bảng `contents`.
+- Kế thừa thành quả Sprint 2: Hệ thống Prompt 4 Personas, Zod structured output và guardrails đã được merge vào `dev`; kiểm thử live Gemini/n8n vẫn theo dõi riêng do rate limit.
 - Trọng tâm Tuần 3:
   1. Nâng cấp AI Sales Agent: Phát hiện ý định mua hàng (Buying Intent) và chốt sale tự động kèm ref link.
   2. Xây dựng năng lực AI Multimodal: Phân tích video mẫu của Merchant (bóc tách visual scenes, tone, pacing, hook) qua Gemini 1.5/2.0 Flash.
@@ -40,11 +40,18 @@ Trong Sprint 3, BE2 mở rộng AI từ văn bản sang đa phương tiện (Mul
 ## 4. THIS WEEK — MY TASKS
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|---|---|---|---|---|---|
-| BE2-W3-01 | System Prompt AI Sales Agent nhận diện Buying Intent | P0 | READY | Tuần 2 RAG code | BE2 | Code cập nhật `sales-agent.ts` + 5/5 test intent PASS | 20/10 17:00 |
-| BE2-W3-02 | Prompt Multimodal Gemini phân tích kịch bản video mẫu | P0 | READY | Gemini API | BE2 | Module `video-analyzer.ts` + schema JSON trích xuất | 21/10 12:00 |
-| BE2-W3-03 | Prompt sinh kịch bản video áp dụng thông tin chiến dịch | P0 | READY | BE2-W3-02 | BE2 | Module `video-generator.ts` + Zod schema kịch bản 9:16 | 22/10 12:00 |
-| BE2-W3-04 | Handoff prompt, JSON schema kịch bản video cho **BE1 (Core Video Engine)** & Tester 2 | P1 | READY | BE2-W3-02, 03 | BE2 | Tài liệu Handoff + Test samples | 22/10 17:00 |
-| BE2-W3-05 | Phối hợp Tester 2 chạy benchmark độ an toàn kịch bản video | P1 | READY | Tester 2 | BE2 | Báo cáo benchmark an toàn video | 23/10 17:00 |
+| BE2-W3-01 | System Prompt AI Sales Agent nhận diện Buying Intent | P0 | DONE | Tuần 2 RAG code | BE2 | Code cập nhật `sales-agent.ts` + 5/5 test intent PASS | 20/10 17:00 |
+| BE2-W3-02 | Prompt Multimodal Gemini phân tích kịch bản video mẫu | P0 | OFFLINE DONE — LIVE PENDING | Gemini API | BE2 | Module `video-analyzer.ts` + schema JSON trích xuất | 21/10 12:00 |
+| BE2-W3-03 | Prompt sinh kịch bản video áp dụng thông tin chiến dịch | P0 | OFFLINE DONE — LIVE PENDING | BE2-W3-02 | BE2 | Module `video-generator.ts` + Zod schema kịch bản 9:16 | 22/10 12:00 |
+| BE2-W3-04 | Handoff prompt, JSON schema kịch bản video cho **BE1 (Core Video Engine)** & Tester 2 | P1 | DONE | BE2-W3-02, 03 | BE2 | Tài liệu Handoff + Test samples | 22/10 17:00 |
+| BE2-W3-05 | Phối hợp Tester 2 chạy benchmark độ an toàn kịch bản video | P1 | OFFLINE PASS — LIVE PENDING | Tester 2 | BE2 | Báo cáo benchmark an toàn video | 23/10 17:00 |
+
+### Cập nhật thực thi 20/10/2026
+
+- Offline suite: 38/38 test BE2 PASS; 17/17 regression test Tester 2 PASS.
+- TypeScript typecheck và ESLint cho toàn bộ file thay đổi: PASS.
+- Chưa gọi Gemini, chưa chạy n8n và chưa ghi Supabase trong giai đoạn offline.
+- Handoff: `docs/be2/week3-sales-video-handoff.md` cùng hai JSON Schema và hai sample output.
 
 ---
 

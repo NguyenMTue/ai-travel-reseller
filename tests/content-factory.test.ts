@@ -289,6 +289,16 @@ const invalidCases = [
     text: "Gói đặc biệt bao ăn trọn đời.",
     flag: CONTENT_GUARDRAIL_FLAGS.PROHIBITED_CLAIM,
   },
+  {
+    name: "unverified official discount claim",
+    text: "Nhận vé chính hãng với giá ưu đãi mới nhất.",
+    flag: CONTENT_GUARDRAIL_FLAGS.PROHIBITED_CLAIM,
+  },
+  {
+    name: "unverified queue claim",
+    text: "Đặt vé trước để không phải xếp hàng mua vé.",
+    flag: CONTENT_GUARDRAIL_FLAGS.PROHIBITED_CLAIM,
+  },
 ] as const;
 
 for (const invalidCase of invalidCases) {

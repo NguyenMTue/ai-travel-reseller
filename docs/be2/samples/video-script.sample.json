@@ -1,0 +1,59 @@
+{
+  "format": "9:16",
+  "duration_seconds": 30,
+  "style_summary": "Nhịp nhanh, sáng tự nhiên và chuyển cảnh gọn.",
+  "hook": {
+    "duration_seconds": 3,
+    "text": "Chạm mây trên hành trình Bà Nà Hills"
+  },
+  "scenes": [
+    {
+      "index": 1,
+      "start_seconds": 0,
+      "end_seconds": 3,
+      "visual_prompt": "Toàn cảnh núi trong ánh sáng sớm, bố cục video dọc.",
+      "shot_instruction": "Bay tiến nhẹ rồi cắt nhanh.",
+      "narration": null,
+      "on_screen_text": "Chạm mây Bà Nà",
+      "verified_fact_refs": []
+    },
+    {
+      "index": 2,
+      "start_seconds": 3,
+      "end_seconds": 20,
+      "visual_prompt": "Cận cảnh cabin cáp treo và khung cảnh núi rừng.",
+      "shot_instruction": "Xen kẽ toàn cảnh và cận cảnh ổn định.",
+      "narration": "Vé bao gồm cáp treo hai chiều và tham quan Cầu Vàng.",
+      "on_screen_text": "Cáp treo hai chiều",
+      "verified_fact_refs": [
+        "fact_inclusion",
+        "fact_landmark"
+      ]
+    },
+    {
+      "index": 3,
+      "start_seconds": 20,
+      "end_seconds": 30,
+      "visual_prompt": "Khung hình kết thúc tối giản với tên sản phẩm.",
+      "shot_instruction": "Giữ khung hình ổn định cho CTA.",
+      "narration": "Giá bán chính thức 900.000 VNĐ. Xem thông tin để đặt dịch vụ.",
+      "on_screen_text": "Đặt dịch vụ tại [LINK_MUA_VE]",
+      "verified_fact_refs": [
+        "fact_price"
+      ]
+    }
+  ],
+  "audio_plan": {
+    "music_mood": "Năng động, tích cực",
+    "voiceover_style": "Thân thiện và rõ ràng"
+  },
+  "cta": {
+    "spoken_text": "Xem thông tin chính thức và đặt dịch vụ ngay.",
+    "on_screen_text": "Đặt dịch vụ tại [LINK_MUA_VE]",
+    "link_placeholder": "[LINK_MUA_VE]"
+  },
+  "safety": {
+    "uses_only_verified_facts": true,
+    "unsupported_claims": []
+  }
+}

@@ -7,10 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "build:be2:w3-schemas": "node --experimental-strip-types scripts/build-be2-week3-schemas.mjs",
     "test:ui": "playwright test",
-    "test:be2": "node --experimental-strip-types --test tests/content-factory.test.ts",
+    "test:be2": "node --experimental-strip-types --test tests/content-factory.test.ts tests/n8n-campaign-workflow.test.ts tests/sales-agent.test.ts tests/video-pipeline.test.ts",
     "test:tester2": "node --experimental-strip-types --test tests/content-safety.test.ts",
-    "test:be2:live": "node --env-file=.env.local --experimental-strip-types tests/content-factory.live.ts"
+    "test:tester2:live": "node --env-file=.env.local --experimental-strip-types tests/content-adversarial.live.ts",
+    "test:be2:live": "node --env-file=.env.local --experimental-strip-types tests/content-factory.live.ts",
+    "test:video-engine": "node --experimental-strip-types --test tests/video-engine.test.ts"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "^5.3.0",

@@ -5,14 +5,15 @@ import {
 import {
   generateSalesReply,
   type SalesConversationMessage,
+  type SalesIntent,
 } from "@/src/lib/ai/sales-agent";
+import {
+  buildCheckoutUrl,
+  type AttributionContext,
+} from "@/src/lib/ai/checkout-url";
 import { createAdminClient } from "@/src/lib/supabase/admin";
 
-export type AttributionContext = {
-  reseller_id: string;
-  campaign_id: string;
-  product_id: string;
-};
+export type { AttributionContext } from "@/src/lib/ai/checkout-url";
 
 type AnswerProductChatInput = {
   message: string;
@@ -22,6 +23,7 @@ type AnswerProductChatInput = {
 
 export type ProductChatAnswer = {
   reply: string;
+  intent_detected: SalesIntent;
   suggested_checkout_url: string | null;
 };
 
@@ -29,29 +31,6 @@ export class InvalidAttributionError extends Error {
   constructor() {
     super("Attribution context does not match an available product");
     this.name = "InvalidAttributionError";
-  }
-}
-
-function buildCheckoutUrl(
-  paymentUrl: string | null,
-  attribution: AttributionContext,
-): string | null {
-  if (!paymentUrl) {
-    return null;
-  }
-
-  try {
-    const checkoutUrl = new URL(paymentUrl);
-
-    if (!["http:", "https:"].includes(checkoutUrl.protocol)) {
-      return null;
-    }
-
-    checkoutUrl.searchParams.set("ref", attribution.reseller_id);
-    checkoutUrl.searchParams.set("campaign", attribution.campaign_id);
-    return checkoutUrl.toString();
-  } catch {
-    return null;
   }
 }
 
@@ -110,6 +89,7 @@ export async function answerProductChat({
 
   return {
     reply: result.reply,
+    intent_detected: result.intentDetected,
     suggested_checkout_url: result.purchaseIntent ? checkoutUrl : null,
   };
 }

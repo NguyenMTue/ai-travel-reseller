@@ -1,0 +1,730 @@
+{
+  "generated_at": "2026-10-16T04:48:13.436Z",
+  "model": "gemini-3.5-flash-lite",
+  "run_count": 8,
+  "note": "Direct Gemini validation only; this is not n8n or Supabase execution evidence.",
+  "runs": [
+    {
+      "run": 1,
+      "product": "ba-na-hills",
+      "persona": "local_guide",
+      "guardrail_status": "APPROVED",
+      "guardrail_flags": [],
+      "output": {
+        "persona": "local_guide",
+        "hooks": [
+          "Chia sẻ kinh nghiệm đi Bà Nà Hills trọn gói cáp treo và buffet từ người bản địa.",
+          "Khám phá Cầu Vàng và Làng Pháp với vé trọn gói tiện lợi.",
+          "Mẹo chọn nhà hàng buffet trưa hơn 100 món tại Bà Nà Hills cho chuyến đi của bạn.",
+          "Bạn đã biết vé cáp treo Bà Nà Hills bao gồm những gì chưa? Cùng tôi tìm hiểu nhé.",
+          "Gợi ý lịch trình tham quan Bà Nà Hills kết hợp thưởng thức ẩm thực đa dạng.",
+          "Tất tần tật thông tin về vé cáp treo khứ hồi và tham quan Bà Nà Hills.",
+          "Trải nghiệm không gian Làng Pháp và Cầu Vàng cùng người dân bản địa.",
+          "Thưởng thức buffet trưa tại nhà hàng Arapang hoặc Beer Plaza có gì hấp dẫn?",
+          "Cẩm nang du lịch Bà Nà Hills: Cáp treo, Cầu Vàng và buffet trưa hơn 100 món.",
+          "Lên kế hoạch khám phá Bà Nà Hills với vé vào cổng và cáp treo khứ hồi."
+        ],
+        "scripts": [
+          {
+            "title": "Trải nghiệm cáp treo và Cầu Vàng Bà Nà Hills",
+            "duration": 35,
+            "scenes": [
+              "Cảnh quay toàn cảnh tuyến cáp treo khứ hồi lên đỉnh Bà Nà Hills.",
+              "Hình ảnh khách du lịch tham quan và chụp ảnh tại Cầu Vàng nổi tiếng.",
+              "Cảnh khám phá kiến trúc Làng Pháp mang đậm phong cách châu Âu.",
+              "Chia sẻ thông tin vé đã bao gồm vào cổng, cáp treo và các điểm tham quan."
+            ]
+          },
+          {
+            "title": "Khám phá ẩm thực buffet trưa Bà Nà Hills",
+            "duration": 40,
+            "scenes": [
+              "Cảnh bước vào nhà hàng phục vụ buffet trưa tại khu du lịch.",
+              "Quay cận cảnh khu vực trưng bày hơn 100 món ăn quốc tế đa dạng.",
+              "Gợi ý hai địa điểm dùng bữa là nhà hàng Arapang hoặc Beer Plaza.",
+              "Nhấn mạnh trải nghiệm ẩm thực tiện lợi đã bao gồm trong gói vé."
+            ]
+          },
+          {
+            "title": "Lịch trình một ngày tại Bà Nà Hills cùng Local Guide",
+            "duration": 45,
+            "scenes": [
+              "Bắt đầu hành trình với vé cáp treo khứ hồi lên đỉnh núi.",
+              "Dừng chân chụp ảnh tại Cầu Vàng và dạo quanh Làng Pháp.",
+              "Thưởng thức bữa trưa với thực đơn hơn 100 món phong phú.",
+              "Tổng kết các dịch vụ trọn gói giúp chuyến đi thêm phần thuận tiện."
+            ]
+          },
+          {
+            "title": "Thông tin chi tiết vé trọn gói Bà Nà Hills",
+            "duration": 30,
+            "scenes": [
+              "Giới thiệu vé trọn gói bao gồm vé vào cổng và cáp treo khứ hồi.",
+              "Điểm qua các khu vực tham quan chính như Cầu Vàng và Làng Pháp.",
+              "Giới thiệu lựa chọn buffet trưa hơn 100 món đi kèm.",
+              "Lời khuyên chuẩn bị cho chuyến đi từ người am hiểu địa phương."
+            ]
+          },
+          {
+            "title": "Gợi ý điểm đến không thể bỏ qua tại Đà Nẵng",
+            "duration": 35,
+            "scenes": [
+              "Cảnh quan thiên nhiên từ trên cáp treo nhìn xuống Bà Nà Hills.",
+              "Hình ảnh đoàn khách check-in tại Làng Pháp và Cầu Vàng.",
+              "Trải nghiệm không gian ẩm thực tại nhà hàng Arapang hoặc Beer Plaza.",
+              "Thông tin về mức giá chính thức 1.150.000 VND cho toàn bộ dịch vụ."
+            ]
+          }
+        ],
+        "captions": [
+          "Khám phá trọn vẹn Cầu Vàng, Làng Pháp và thưởng thức buffet trưa hơn 100 món với vé cáp treo Bà Nà Hills. #BaNaHills #DuLichDaNang",
+          "Trải nghiệm tuyến cáp treo khứ hồi và tham quan các điểm nổi tiếng cùng dịch vụ buffet trưa tiện lợi. #CauVang #TravelLinkAI",
+          "Lên kế hoạch cho chuyến đi Bà Nà Hills với vé trọn gói vào cổng, cáp treo và ẩm thực phong phú. #LangPhap #DaNang",
+          "Thưởng thức buffet trưa hơn 100 món tại nhà hàng Arapang hoặc Beer Plaza trong chuyến tham quan của bạn. #BuffetBaNaHills #KhamPhaDaNang",
+          "Chia sẻ kinh nghiệm tham quan Bà Nà Hills với đầy đủ thông tin vé cáp treo và các điểm đến đặc sắc. #ReviewDaNang #TraiNghiemDuLich"
+        ],
+        "ctas": [
+          "Đặt vé cáp treo Bà Nà Hills và buffet trưa tại [LINK_MUA_VE].",
+          "Khám phá ngay gói vé tham quan Cầu Vàng và Làng Pháp tại [LINK_MUA_VE].",
+          "Nhận thông tin chi tiết và đặt dịch vụ trọn gói qua [LINK_MUA_VE].",
+          "Lên lịch trình khám phá Bà Nà Hills và đặt vé ngay tại [LINK_MUA_VE].",
+          "Trải nghiệm kỳ nghỉ thú vị với vé trọn gói tại [LINK_MUA_VE]."
+        ]
+      }
+    },
+    {
+      "run": 2,
+      "product": "vinwonders-nam-hoi-an",
+      "persona": "family",
+      "guardrail_status": "APPROVED",
+      "guardrail_flags": [],
+      "output": {
+        "persona": "family",
+        "hooks": [
+          "Cả nhà đã sẵn sàng cho chuyến đi VinWonders Nam Hội An chưa?",
+          "Lên kế hoạch vui chơi cuối tuần cho gia đình tại Quảng Nam",
+          "Trải nghiệm không gian giải trí tại VinWonders Nam Hội An",
+          "Tìm kiếm địa điểm vui chơi cho cả nhà tại Quảng Nam",
+          "Chia sẻ thông tin vé vào cửa VinWonders Nam Hội An",
+          "Gợi ý điểm đến cho gia đình trong chuyến đi Đà Nẵng",
+          "Cùng gia đình khám phá khu vui chơi VinWonders Nam Hội An",
+          "Thông tin về giá vé vào cửa VinWonders Nam Hội An hiện nay",
+          "Điểm dừng chân thú vị cho gia đình và nhóm bạn",
+          "Lựa chọn phù hợp cho chuyến du lịch gia đình sắp tới"
+        ],
+        "scripts": [
+          {
+            "title": "Khám phá VinWonders Nam Hội An cùng gia đình",
+            "duration": 35,
+            "scenes": [
+              "Cảnh quay tổng quan khu vực VinWonders Nam Hội An.",
+              "Hình ảnh gia đình cùng nhau tham quan khu vui chơi.",
+              "Thông tin về vé vào cửa đã bao gồm trong sản phẩm.",
+              "Lưu ý chi phí ăn uống tự túc cho cả nhà.",
+              "Mời gia đình đặt vé để chuẩn bị cho chuyến đi."
+            ]
+          },
+          {
+            "title": "Chuyến đi Quảng Nam cho cả nhà",
+            "duration": 40,
+            "scenes": [
+              "Gia đình chuẩn bị cho hành trình tại Quảng Nam và Đà Nẵng.",
+              "Giới thiệu vé vào cửa VinWonders Nam Hội An.",
+              "Cảnh quay không gian rộng rãi tại khu vui chơi.",
+              "Nhắc nhở về các chi phí cá nhân và ăn uống ngoài vé.",
+              "Thông tin hướng dẫn đặt vé cho chuyến đi."
+            ]
+          },
+          {
+            "title": "Điểm đến cuối tuần cho gia đình",
+            "duration": 30,
+            "scenes": [
+              "Hình ảnh các thành viên trong gia đình vui cười.",
+              "Cận cảnh vé vào cửa VinWonders Nam Hội An.",
+              "Giới thiệu mức giá bán chính thức 510.000 VND.",
+              "Lưu ý dịch vụ ăn uống không bao gồm trong giá vé.",
+              "Lời kết mời gọi trải nghiệm dịch vụ."
+            ]
+          },
+          {
+            "title": "Hành trình trải nghiệm VinWonders Nam Hội An",
+            "duration": 45,
+            "scenes": [
+              "Bắt đầu hành trình khám phá khu vui chơi tại Quảng Nam.",
+              "Chi tiết về vé vào cửa VinWonders Nam Hội An.",
+              "Gia đình tham quan các khu vực trong khuôn viên.",
+              "Xác nhận thông tin không bao gồm chi phí ăn uống.",
+              "Kêu gọi hành động đặt vé qua liên kết."
+            ]
+          },
+          {
+            "title": "Lựa chọn vui chơi cho gia đình đa thế hệ",
+            "duration": 35,
+            "scenes": [
+              "Không gian sinh hoạt chung của gia đình trong chuyến đi.",
+              "Giới thiệu thông tin vé vào cửa VinWonders Nam Hội An.",
+              "Cảnh quay các khu vực tham quan phù hợp cho mọi người.",
+              "Lưu ý chuẩn bị thêm chi phí cho việc ăn uống.",
+              "Hướng dẫn cách thức sở hữu vé tham quan."
+            ]
+          }
+        ],
+        "captions": [
+          "Khám phá ngay vé vào cửa VinWonders Nam Hội An cho chuyến đi của gia đình. #VinWondersNamHộiAn #DuLịchGiaĐình #QuảngNam",
+          "Chuyến đi Đà Nẵng và Quảng Nam sẽ thêm trọn vẹn với trải nghiệm tại VinWonders Nam Hội An. #ĐàNẵng #DuLịchQuảngNam #GiaĐình",
+          "Thông tin vé vào cửa VinWonders Nam Hội An với giá bán chính thức 510.000 VND cho cả nhà. #VéVuiChơi #VinWonders #DuLịch",
+          "Lên lịch trình cho gia đình đến với VinWonders Nam Hội An ngay hôm nay. #KhámPháNamHộiAn #CuốiTuần #GiaĐình",
+          "Trải nghiệm không gian giải trí tại VinWonders Nam Hội An cùng những người thân yêu. #VinWonders #QuảngNam #DuLịchViệtNam"
+        ],
+        "ctas": [
+          "Đặt vé vào cửa VinWonders Nam Hội An ngay tại [LINK_MUA_VE]",
+          "Nhận thông tin chi tiết và đặt vé tại [LINK_MUA_VE]",
+          "Khám phá giá vé chính thức và đặt mua tại [LINK_MUA_VE]",
+          "Chuẩn bị cho chuyến đi gia đình với [LINK_MUA_VE]",
+          "Truy cập để đặt vé tham quan tại [LINK_MUA_VE]"
+        ]
+      }
+    },
+    {
+      "run": 3,
+      "product": "ba-na-hills",
+      "persona": "foodie",
+      "guardrail_status": "NEEDS_REVIEW",
+      "guardrail_flags": [
+        "PROHIBITED_CLAIM"
+      ],
+      "output": {
+        "persona": "foodie",
+        "hooks": [
+          "Cùng khám phá buffet trưa hơn 100 món tại Bà Nà Hills ngay hôm nay!",
+          "Điểm hẹn Cầu Vàng và Làng Pháp có gì hấp dẫn cho tín đồ check-in?",
+          "Trải nghiệm cáp treo khứ hồi Bà Nà Hills và nạp năng lượng với buffet.",
+          "Khám phá ngay ẩm thực đa dạng tại nhà hàng Arapang và Beer Plaza.",
+          "Chuyến đi Đà Nẵng trọn gói cáp treo và buffet đang chờ bạn.",
+          "Lên đồ check-in Cầu Vàng và thưởng thức buffet hơn 100 món thôi!",
+          "Tìm kiếm góc sống ảo cực chất tại Làng Pháp Bà Nà Hills.",
+          "Thưởng thức không gian ẩm thực phong phú ngay trên đỉnh Bà Nà.",
+          "Trải nghiệm trọn vẹn vé vào cổng và cáp treo khứ hồi Bà Nà Hills.",
+          "Lên kế hoạch du lịch Bà Nà Hills cùng bạn bè và gia đình ngay."
+        ],
+        "scripts": [
+          {
+            "title": "Check-in Cầu Vàng và Thưởng Thức Buffet Trưa",
+            "duration": 35,
+            "scenes": [
+              "Cảnh quay toàn cảnh Cầu Vàng lúc sáng sớm.",
+              "Cận cảnh hành trình di chuyển trên cáp treo khứ hồi.",
+              "Hình ảnh check-in tại khu vực Làng Pháp.",
+              "Cảnh trưng bày buffet trưa hơn 100 món tại nhà hàng Arapang."
+            ]
+          },
+          {
+            "title": "Khám Phá Làng Pháp và Ẩm Thực Bà Nà",
+            "duration": 40,
+            "scenes": [
+              "Góc quay kiến trúc Làng Pháp mang phong cách châu Âu.",
+              "Trải nghiệm tham quan các điểm nổi bật tại Bà Nà Hills.",
+              "Cảnh lựa chọn các món ăn tại khu vực buffet Beer Plaza.",
+              "Cận cảnh các món ăn phong phú trong thực đơn."
+            ]
+          },
+          {
+            "title": "Trọn Gói Cáp Treo và Buffet Hơn 100 Món",
+            "duration": 30,
+            "scenes": [
+              "Cảnh bước qua cổng vào Bà Nà Hills.",
+              "Góc máy từ cabin cáp treo nhìn xuống núi rừng.",
+              "Cảnh thưởng thức ẩm thực tại nhà hàng trong khu du lịch.",
+              "Tổng kết các điểm tham quan Cầu Vàng và Làng Pháp."
+            ]
+          },
+          {
+            "title": "Hành Trình Ẩm Thực và Sống Áo Tại Bà Nà Hills",
+            "duration": 45,
+            "scenes": [
+              "Check-in với background Cầu Vàng nổi tiếng.",
+              "Dạo bước trên những con đường cổ kính tại Làng Pháp.",
+              "Cảnh không gian rộng rãi bên trong nhà hàng Arapang.",
+              "Thưởng thức các món ăn đa dạng từ buffet quốc tế."
+            ]
+          },
+          {
+            "title": "Trải Nghiệm Đỉnh Cao Tại Bà Nà Hills",
+            "duration": 35,
+            "scenes": [
+              "Khởi đầu hành trình với vé cáp treo khứ hồi.",
+              "Ghi lại những khoảnh khắc đẹp tại Cầu Vàng.",
+              "Tham quan kiến trúc độc đáo của Làng Pháp.",
+              "Khép lại chuyến đi bằng bữa trưa buffet hơn 100 món."
+            ]
+          }
+        ],
+        "captions": [
+          "Trải nghiệm trọn gói cáp treo khứ hồi, tham quan Cầu Vàng, Làng Pháp và thưởng thức buffet trưa hơn 100 món tại Arapang hoặc Beer Plaza. #BaNaHills #CauVang #LangPhap #DuLichDaNang",
+          "Lên kế hoạch khám phá Cầu Vàng và check-in Làng Pháp ngay hôm nay cùng vé trọn gói vào cổng và cáp treo. #CheckInBaNaHills #DaNang #BuffetBaNaHills #TravelLinkAI",
+          "Khám phá không gian ẩm thực đa dạng với hơn 100 món tại nhà hàng Beer Plaza sau khi tham quan Bà Nà Hills. #AmThucBaNaHills #BeerPlaza #DuLichVietNam #CheckIn",
+          "Tận hưởng chuyến tham quan Cầu Vàng, Làng Pháp và nạp năng lượng với buffet trưa phong phú. #BaNaHills2026 #CauVangDaNang #LangPhapBaNa #Foodie",
+          "Trải nghiệm đầy đủ cáp treo khứ hồi và thưởng thức buffet trưa tại nhà hàng Arapang trên đỉnh Bà Nà. #ArapangBaNaHills #DuLichDaNang #TraiNghiemBaNa #CheckIn"
+        ],
+        "ctas": [
+          "Đặt ngay vé cáp treo và buffet trưa tại [LINK_MUA_VE].",
+          "Khám phá chi tiết và mua vé tại [LINK_MUA_VE].",
+          "Nhận ưu đãi tham quan Bà Nà Hills tại [LINK_MUA_VE].",
+          "Trải nghiệm trọn gói dịch vụ qua [LINK_MUA_VE].",
+          "Bắt đầu hành trình của bạn ngay tại [LINK_MUA_VE]."
+        ]
+      }
+    },
+    {
+      "run": 4,
+      "product": "vinwonders-nam-hoi-an",
+      "persona": "budget_traveler",
+      "guardrail_status": "APPROVED",
+      "guardrail_flags": [],
+      "output": {
+        "persona": "budget_traveler",
+        "hooks": [
+          "Cùng xem lại chi phí vé VinWonders Nam Hội An cho chuyến đi sắp tới nhé.",
+          "Thông tin giá vé vào cửa VinWonders Nam Hội An mà bạn có thể tham khảo.",
+          "Tìm hiểu mức giá bán chính thức của vé VinWonders Nam Hội An.",
+          "Mua vé VinWonders Nam Hội An với mức giá niêm yết rõ ràng.",
+          "Chi tiết giá vé vào cửa VinWonders Nam Hội An hiện nay.",
+          "Cân đối ngân sách du lịch với vé VinWonders Nam Hội An.",
+          "Thông tin cơ bản về giá vé VinWonders Nam Hội An cho người đi tự túc.",
+          "So sánh giá gốc và giá bán vé VinWonders Nam Hội An.",
+          "Xem ngay mức giá bán vé VinWonders Nam Hội An để lên kế hoạch.",
+          "Tổng hợp thông tin giá vé vào cửa VinWonders Nam Hội An."
+        ],
+        "scripts": [
+          {
+            "title": "Thông tin giá vé VinWonders Nam Hội An",
+            "duration": 35,
+            "scenes": [
+              "Cảnh quay tổng quan khu vực VinWonders Nam Hội An.",
+              "Hiển thị thông tin giá gốc 600.000 VND và giá bán chính thức 510.000 VND trên màn hình.",
+              "Nhắc đến việc vé bao gồm quyền vào cửa khu vui chơi.",
+              "Lưu ý chi phí ăn uống không bao gồm trong giá vé.",
+              "Mời xem thêm thông tin chi tiết qua liên kết."
+            ]
+          },
+          {
+            "title": "Cân đối chi phí với vé VinWonders Nam Hội An",
+            "duration": 30,
+            "scenes": [
+              "Cảnh khách tham quan tại Quảng Nam, Đà Nẵng.",
+              "Cung cấp thông tin giá bán chính thức là 510.000 VND.",
+              "Xác nhận các dịch vụ bao gồm trong vé vào cửa.",
+              "Hướng dẫn kiểm tra thông tin chi tiết trước khi đặt vé."
+            ]
+          },
+          {
+            "title": "Chi tiết giá vé vào cửa VinWonders Nam Hội An",
+            "duration": 40,
+            "scenes": [
+              "Cảnh cổng chào VinWonders Nam Hội An.",
+              "Trình bày rõ ràng giá gốc và giá bán 510.000 VND.",
+              "Làm rõ điểm cần lưu ý về chi phí ăn uống tự túc.",
+              "Cung cấp thông tin tham khảo cho nhóm bạn và gia đình."
+            ]
+          },
+          {
+            "title": "Lên kế hoạch đi VinWonders Nam Hội An",
+            "duration": 35,
+            "scenes": [
+              "Cảnh không gian bên trong khu vui chơi.",
+              "Nhắc lại mức giá bán chính thức 510.000 VND đã được xác nhận.",
+              "Xác nhận nội dung vé bao gồm quyền vào cửa.",
+              "Kêu gọi người xem kiểm tra thông tin và đặt vé."
+            ]
+          },
+          {
+            "title": "Thông tin tham khảo vé VinWonders Nam Hội An",
+            "duration": 30,
+            "scenes": [
+              "Cảnh biển hiệu VinWonders Nam Hội An.",
+              "Tóm tắt mức giá bán 510.000 VND so với giá gốc.",
+              "Nhắc nhở về các khoản chi phí ăn uống không bao gồm.",
+              "Kết thúc video với hướng dẫn xem thêm thông tin."
+            ]
+          }
+        ],
+        "captions": [
+          "Thông tin chi tiết về giá bán vé VinWonders Nam Hội An dành cho bạn đọc tham khảo lên kế hoạch cho chuyến đi. #VinWondersNamHộiAn #DuLịchQuảngNam #ChiPhíDuLịch",
+          "Cập nhật mức giá bán chính thức 510.000 VND cho vé vào cửa VinWonders Nam Hội An. #ReviewDuLịch #NamHộiAn #ĐiChơi",
+          "Tìm hiểu thông tin giá gốc và giá bán vé VinWonders Nam Hội An để chuẩn bị ngân sách phù hợp. #KinhNghiệmDuLịch #QuảngNam #ĐàNẵng",
+          "Chia sẻ thông tin cơ bản về vé vào cửa khu vui chơi VinWonders Nam Hội An. #CheckInQuảngNam #VinWonders #DuLịchTựTúc",
+          "Xem ngay mức giá niêm yết và các thông tin cần biết trước khi đến VinWonders Nam Hội An. #KhámPháNamHộiAn #DuLịchViệtNam #Review"
+        ],
+        "ctas": [
+          "Tham khảo thông tin và đặt vé tại [LINK_MUA_VE]",
+          "Xem chi tiết giá vé và đặt mua tại [LINK_MUA_VE]",
+          "Truy cập để xem thêm thông tin vé tại [LINK_MUA_VE]",
+          "Kiểm tra thông tin chi tiết tại [LINK_MUA_VE]",
+          "Xem thêm thông tin và đặt vé tại [LINK_MUA_VE]"
+        ]
+      }
+    },
+    {
+      "run": 5,
+      "product": "ba-na-hills",
+      "persona": "family",
+      "guardrail_status": "APPROVED",
+      "guardrail_flags": [],
+      "output": {
+        "persona": "family",
+        "hooks": [
+          "Cả nhà đã sẵn sàng cho chuyến đi Đà Nẵng mùa hè này chưa?",
+          "Lên kế hoạch du lịch cho gia đình đa thế hệ thật dễ dàng",
+          "Trải nghiệm trọn gói cáp treo và buffet trưa cho cả nhà",
+          "Cùng gia đình khám phá Cầu Vàng và Làng Pháp nổi tiếng",
+          "Thưởng thức buffet trưa hơn 100 món cùng người thân",
+          "Điểm đến hoàn hảo cho kỳ nghỉ của gia đình có trẻ nhỏ",
+          "Tạo kỷ niệm đẹp bên ông bà và con trẻ tại Bà Nà Hills",
+          "Lựa chọn phù hợp cho cả người lớn tuổi và trẻ em",
+          "Khám phá không gian Làng Pháp cùng gia đình thân yêu",
+          "Trọn vẹn chuyến đi Đà Nẵng với vé cáp treo và ăn trưa"
+        ],
+        "scripts": [
+          {
+            "title": "Chuyến đi gia đình tại Bà Nà Hills",
+            "duration": 40,
+            "scenes": [
+              "Cảnh gia đình cùng nhau đi cáp treo khứ hồi lên Bà Nà Hills.",
+              "Hình ảnh cả nhà tham quan Cầu Vàng nổi tiếng tại Đà Nẵng.",
+              "Gia đình dạo bước và ghi lại khoảnh khắc tại Làng Pháp.",
+              "Mọi người cùng thưởng thức buffet trưa hơn 100 món tại nhà hàng."
+            ]
+          },
+          {
+            "title": "Khám phá Làng Pháp cùng người thân",
+            "duration": 35,
+            "scenes": [
+              "Toàn cảnh khu vực Làng Pháp với kiến trúc đẹp mắt.",
+              "Các thành viên trong gia đình cùng nhau chụp ảnh lưu niệm.",
+              "Không gian nghỉ ngơi thoải mái cho cả người lớn tuổi và trẻ nhỏ."
+            ]
+          },
+          {
+            "title": "Thưởng thức ẩm thực đa dạng",
+            "duration": 45,
+            "scenes": [
+              "Cảnh bước vào nhà hàng Arapang hoặc Beer Plaza.",
+              "Quầy buffet với hơn 100 món ăn phong phú để lựa chọn.",
+              "Cả nhà quây quần bên bàn ăn ấm cúng và thưởng thức bữa trưa."
+            ]
+          },
+          {
+            "title": "Hành trình trọn gói cho cả nhà",
+            "duration": 35,
+            "scenes": [
+              "Bắt đầu ngày mới với vé vào cổng và cáp treo trọn gói.",
+              "Gia đình thong thả tham quan các điểm đến theo lịch trình riêng.",
+              "Kết thúc ngày tham quan với bữa trưa tiện lợi."
+            ]
+          },
+          {
+            "title": "Kỷ niệm đáng nhớ tại Đà Nẵng",
+            "duration": 40,
+            "scenes": [
+              "Khoảnh khắc vui vẻ của các bé khi đi cáp treo cùng ba mẹ.",
+              "Ông bà và con cháu cùng ngắm nhìn cảnh quan từ trên cao.",
+              "Tạo thêm những ký ức tuyệt vời cho chuyến du lịch gia đình."
+            ]
+          }
+        ],
+        "captions": [
+          "Cùng gia đình tận hưởng chuyến đi Đà Nẵng trọn vẹn với vé cáp treo và buffet trưa hơn 100 món. #BaNaHills #DuLichGiaDinh #DaNang",
+          "Khám phá Cầu Vàng và Làng Pháp cùng những người thân yêu trong gia đình. #CauVang #LangPhap #TravelLinkAI",
+          "Bữa trưa ấm cúng tại nhà hàng Arapang hoặc Beer Plaza cho cả nhà sau khi tham quan. #BuffetBaNaHills #NhaHangArapang #GiaDinh",
+          "Lựa chọn phù hợp cho kỳ nghỉ của gia đình đa thế hệ tại Bà Nà Hills. #DaNangTrip #KhuNghiduong #TraiNghiem",
+          "Tạo nên những kỷ niệm đẹp và đáng nhớ cùng gia đình trong mùa hè này. #MuaHe2026 #DuLichDaNang #TourGiaDinh"
+        ],
+        "ctas": [
+          "Đặt ngay vé cáp treo và buffet trưa cho gia đình tại [LINK_MUA_VE].",
+          "Khám phá chi tiết dịch vụ trọn gói cho cả nhà tại [LINK_MUA_VE].",
+          "Lên kế hoạch cho chuyến đi sắp tới của gia đình qua [LINK_MUA_VE].",
+          "Xem thông tin chi tiết và đặt vé nhanh chóng tại [LINK_MUA_VE].",
+          "Trải nghiệm kỳ nghỉ trọn vẹn cùng người thân tại [LINK_MUA_VE]."
+        ]
+      }
+    },
+    {
+      "run": 6,
+      "product": "vinwonders-nam-hoi-an",
+      "persona": "local_guide",
+      "guardrail_status": "NEEDS_REVIEW",
+      "guardrail_flags": [
+        "PROHIBITED_CLAIM"
+      ],
+      "output": {
+        "persona": "local_guide",
+        "hooks": [
+          "Chia sẻ kinh nghiệm đi VinWonders Nam Hội An từ người bản địa.",
+          "Bạn đã biết thông tin gì về vé VinWonders Nam Hội An chưa?",
+          "Cùng mình khám phá khu vui chơi VinWonders Nam Hội An nhé.",
+          "Gợi ý điểm đến Quảng Nam cho gia đình và nhóm bạn.",
+          "Thông tin về vé vào cửa VinWonders Nam Hội An bạn cần biết.",
+          "Khám phá ngay điểm đến hấp dẫn tại Quảng Nam và Đà Nẵng.",
+          "Tìm hiểu chi tiết vé vào cửa VinWonders Nam Hội An cùng mình.",
+          "Điểm vui chơi nào phù hợp cho gia đình tại Quảng Nam?",
+          "Cùng xem vé VinWonders Nam Hội An bao gồm những gì nhé.",
+          "Lên kế hoạch ghé thăm VinWonders Nam Hội An ngay hôm nay."
+        ],
+        "scripts": [
+          {
+            "title": "Giới thiệu vé VinWonders Nam Hội An",
+            "duration": 35,
+            "scenes": [
+              "Cảnh quay toàn cảnh khu vực VinWonders Nam Hội An tại Quảng Nam.",
+              "Voice-over: Chào mọi người, mình là hướng dẫn viên bản địa đây. Hôm nay mình sẽ giới thiệu về vé vào cửa VinWonders Nam Hội An.",
+              "Cảnh quay cận cảnh cổng vào khu vui chơi.",
+              "Voice-over: Vé vào cửa này sẽ giúp bạn tiếp cận toàn bộ khu vui chơi, rất phù hợp cho gia đình và nhóm bạn.",
+              "Cảnh quay phong cảnh xung quanh khu du lịch.",
+              "Voice-over: Lưu ý là vé chưa bao gồm chi phí ăn uống nhé."
+            ]
+          },
+          {
+            "title": "Trải nghiệm khu vui chơi Nam Hội An",
+            "duration": 40,
+            "scenes": [
+              "Cảnh quay không gian rộng lớn tại VinWonders Nam Hội An.",
+              "Voice-over: Nếu bạn đang tìm điểm đến tại Quảng Nam hay Đà Nẵng, đây là một gợi ý thực tế.",
+              "Cảnh quay biển chỉ dẫn bên trong khu vui chơi.",
+              "Voice-over: Vé vào cửa VinWonders Nam Hội An hiện có mức giá bán chính thức là 510.000 VND.",
+              "Cảnh quay lối đi dạo tại điểm tham quan.",
+              "Voice-over: Hãy chuẩn bị kỹ lưỡng cho chuyến đi của mình và gia đình."
+            ]
+          },
+          {
+            "title": "Thông tin vé và lưu ý",
+            "duration": 30,
+            "scenes": [
+              "Cảnh quay lối vào chính của khu vui chơi.",
+              "Voice-over: Cùng mình điểm qua các thông tin cơ bản về vé VinWonders Nam Hội An.",
+              "Cảnh quay khu vực khuôn viên.",
+              "Voice-over: Sản phẩm bao gồm vé vào cửa VinWonders Nam Hội An, điểm đến quen thuộc của nhiều du khách.",
+              "Cảnh quay góc nhìn từ bên trong khu du lịch.",
+              "Voice-over: Nhớ rằng chi phí ăn uống sẽ tự túc ngoài giá vé nhé."
+            ]
+          },
+          {
+            "title": "Gợi ý cho gia đình và nhóm bạn",
+            "duration": 45,
+            "scenes": [
+              "Cảnh quay không gian thoáng đãng tại Quảng Nam.",
+              "Voice-over: Với các gia đình có trẻ nhỏ và nhóm bạn, VinWonders Nam Hội An là một điểm dừng chân thú vị.",
+              "Cảnh quay biển hiệu khu vui chơi.",
+              "Voice-over: Vé vào cửa bao gồm quyền tham quan khu vui chơi theo quy định.",
+              "Cảnh quay phong cảnh thiên nhiên xung quanh.",
+              "Voice-over: Hãy lên kế hoạch khám phá Nam Hội An trong chuyến đi sắp tới."
+            ]
+          },
+          {
+            "title": "Tổng kết chuyến đi Nam Hội An",
+            "duration": 35,
+            "scenes": [
+              "Cảnh quay tổng quan khu vui chơi từ xa.",
+              "Voice-over: Vậy là chúng ta đã tìm hiểu xong về vé vào cửa VinWonders Nam Hội An.",
+              "Cảnh quay lối đi trong khu du lịch.",
+              "Voice-over: Giá bán chính thức hiện tại là 510.000 VND cho vé vào cửa.",
+              "Cảnh quay kết thúc với khung cảnh đẹp tại Quảng Nam.",
+              "Voice-over: Đặt vé ngay qua đường link bên dưới để chuẩn bị cho hành trình."
+            ]
+          }
+        ],
+        "captions": [
+          "Khám phá ngay vé vào cửa VinWonders Nam Hội An cho chuyến đi của bạn và gia đình. #VinWondersNamHộiAn #QuảngNam",
+          "Thông tin chi tiết về vé VinWonders Nam Hội An từ góc nhìn bản địa. #DuLịchQuảngNam #ĐàNẵng",
+          "Gợi ý điểm đến vui chơi tại Quảng Nam dành cho nhóm bạn và gia đình. #VinWonders #KhámPháNamHộiAn",
+          "Trải nghiệm không gian tại VinWonders Nam Hội An với mức giá vé chính thức. #NamHộiAn #DuLịch",
+          "Lên kế hoạch ghé thăm khu vui chơi VinWonders Nam Hội An ngay hôm nay. #QuảngNamĐàNẵng #Travel"
+        ],
+        "ctas": [
+          "Xem chi tiết và nhận ngay vé tại [LINK_MUA_VE]",
+          "Đặt ngay vé vào cửa tại [LINK_MUA_VE]",
+          "Tham khảo thông tin và mua vé qua [LINK_MUA_VE]",
+          "Khám phá ngay hôm nay với [LINK_MUA_VE]",
+          "Nhanh tay nhận vé tại [LINK_MUA_VE]"
+        ]
+      }
+    },
+    {
+      "run": 7,
+      "product": "ba-na-hills",
+      "persona": "budget_traveler",
+      "guardrail_status": "APPROVED",
+      "guardrail_flags": [],
+      "output": {
+        "persona": "budget_traveler",
+        "hooks": [
+          "Chia sẻ chi phí thực tế khi đi cáp treo Bà Nà Hills kết hợp ăn buffet trưa.",
+          "Khám phá mức giá chính thức của vé trọn gói Bà Nà Hills có buffet trưa.",
+          "Thông tin chi tiết về vé cáp treo Bà Nà Hills và buffet trưa hơn 100 món.",
+          "Đi Bà Nà Hills trọn gói cáp treo và ăn trưa: Chi phí bao nhiêu?",
+          "Cập nhật giá vé cáp treo khứ hồi Bà Nà Hills kèm buffet trưa quốc tế.",
+          "Tổng hợp các dịch vụ bao gồm trong vé trọn gói Bà Nà Hills giá 1.150.000 VND.",
+          "Review chi tiết gói vé tham quan Cầu Vàng, Làng Pháp và buffet trưa.",
+          "Tìm hiểu giá vé chính thức cho chuyến đi Bà Nà Hills của bạn.",
+          "So sánh giá gốc và giá bán vé cáp treo Bà Nà Hills kèm buffet trưa.",
+          "Lên kế hoạch đi Bà Nà Hills với gói vé cáp treo và ăn trưa tiện lợi."
+        ],
+        "scripts": [
+          {
+            "title": "Review vé trọn gói cáp treo và buffet Bà Nà Hills",
+            "duration": 35,
+            "scenes": [
+              "Cảnh quay tổng quan khu vực cổng vào Bà Nà Hills.",
+              "Voice-over giới thiệu mức giá bán 1.150.000 VND so với giá gốc 1.250.000 VND.",
+              "Cảnh quay cabin cáp treo khứ hồi.",
+              "Hình ảnh khu vực Cầu Vàng và Làng Pháp.",
+              "Cảnh quay khu vực nhà hàng buffet với hơn 100 món ăn."
+            ]
+          },
+          {
+            "title": "Chi tiết các dịch vụ trong vé Bà Nà Hills",
+            "duration": 40,
+            "scenes": [
+              "Cảnh quay du khách check-in tại Bà Nà Hills.",
+              "Voice-over liệt kê vé đã bao gồm vào cổng và cáp treo khứ hồi.",
+              "Cảnh quay khách tham quan Cầu Vàng.",
+              "Cảnh quay khu vực Làng Pháp.",
+              "Voice-over xác nhận buffet trưa diễn ra tại nhà hàng Arapang hoặc Beer Plaza."
+            ]
+          },
+          {
+            "title": "Thông tin giá vé cáp treo Bà Nà Hills kèm buffet",
+            "duration": 30,
+            "scenes": [
+              "Cảnh quay ngoại cảnh Bà Nà Hills từ trên cao.",
+              "Hiển thị thông tin giá bán chính thức 1.150.000 VND trên màn hình.",
+              "Voice-over tóm tắt các điểm tham quan chính trong gói vé.",
+              "Cảnh quay quầy phục vụ buffet trưa hơn 100 món."
+            ]
+          },
+          {
+            "title": "Gợi ý lịch trình tham quan Bà Nà Hills",
+            "duration": 45,
+            "scenes": [
+              "Cảnh quay bước lên cabin cáp treo.",
+              "Voice-over hướng dẫn hành trình di chuyển và ngắm cảnh.",
+              "Cảnh quay khách dạo bước tại Làng Pháp.",
+              "Cảnh quay thưởng thức buffet trưa quốc tế.",
+              "Lời kết tóm tắt giá vé và dịch vụ."
+            ]
+          },
+          {
+            "title": "Tổng quan chi phí đi Bà Nà Hills trọn gói",
+            "duration": 35,
+            "scenes": [
+              "Cảnh quay biển chỉ dẫn tại khu du lịch Bà Nà Hills.",
+              "Voice-over thông báo mức giá 1.150.000 VND cho vé trọn gói.",
+              "Cảnh quay Cầu Vàng trong điều kiện thời tiết thực tế.",
+              "Cảnh quay không gian nhà hàng phục vụ hơn 100 món.",
+              "Voice-over hướng dẫn cách đặt vé qua liên kết cung cấp."
+            ]
+          }
+        ],
+        "captions": [
+          "Thông tin chi tiết về vé cáp treo Bà Nà Hills kèm buffet trưa quốc tế với giá bán 1.150.000 VND. #BaNaHills #DaNang #DuLich",
+          "Trải nghiệm trọn gói cáp treo khứ hồi, tham quan Cầu Vàng, Làng Pháp và buffet trưa hơn 100 món. #CauVang #LangPhap #Travel",
+          "Cập nhật mức giá chính thức cho gói vé tham quan và ẩm thực tại Bà Nà Hills. #ReviewDuLich #BaNaHillsBuffet #TravelLink",
+          "Khám phá các điểm đến nổi bật như Cầu Vàng và Làng Pháp với vé trọn gói tiện lợi. #DaNangTrip #CheckInBaNaHills #KhamPha",
+          "Thông tin minh bạch về giá vé và các dịch vụ bao gồm trong chuyến đi Bà Nà Hills. #KinhNghiemDuLich #BaNaHills #Booking"
+        ],
+        "ctas": [
+          "Xem chi tiết và đặt vé cáp treo Bà Nà Hills kèm buffet trưa tại [LINK_MUA_VE].",
+          "Tham khảo thông tin giá vé và đặt dịch vụ trọn gói tại [LINK_MUA_VE].",
+          "Nhận thông tin đầy đủ về gói vé tham quan Bà Nà Hills tại [LINK_MUA_VE].",
+          "Kiểm tra chi tiết dịch vụ cáp treo và buffet trưa tại [LINK_MUA_VE].",
+          "Truy cập để xem thêm thông tin chi tiết về vé Bà Nà Hills tại [LINK_MUA_VE]."
+        ]
+      }
+    },
+    {
+      "run": 8,
+      "product": "vinwonders-nam-hoi-an",
+      "persona": "foodie",
+      "guardrail_status": "NEEDS_REVIEW",
+      "guardrail_flags": [
+        "PROHIBITED_CLAIM"
+      ],
+      "output": {
+        "persona": "foodie",
+        "hooks": [
+          "Cùng hội bạn thân check-in ngay VinWonders Nam Hội An thôi!",
+          "Đi tìm background sống ảo cực chất tại Quảng Nam cùng tớ nhé.",
+          "Khám phá ngay điểm đến hot cho nhóm bạn vào cuối tuần này.",
+          "Cuối tuần rồi, lên đồ cùng hội cạ cứng đến Nam Hội An thôi.",
+          "Lên kế hoạch vui chơi tại Quảng Nam Đà Nẵng ngay hôm nay.",
+          "Bạn đã biết điểm check-in mới nào ở Quảng Nam chưa?",
+          "Cùng người thân yêu khám phá VinWonders Nam Hội An nào.",
+          "Trải nghiệm ngay không gian vui chơi rộng lớn tại Quảng Nam.",
+          "Thêm ngay địa điểm này vào sổ tay du lịch của bạn nhé.",
+          "Điểm hẹn lý tưởng cho gia đình và nhóm bạn tại Quảng Nam."
+        ],
+        "scripts": [
+          {
+            "title": "Check-in VinWonders Nam Hội An cùng hội bạn",
+            "duration": 35,
+            "scenes": [
+              "Cảnh quay toàn cảnh khu vực cổng vào VinWonders Nam Hội An.",
+              "Nhóm bạn cùng bước vào khu vui chơi với trang phục năng động.",
+              "Góc quay cận cảnh các điểm check-in nổi bật trong khu vực.",
+              "Cảnh mọi người cười nói vui vẻ trải nghiệm các hoạt động."
+            ]
+          },
+          {
+            "title": "Góc sống ảo cực chill tại Quảng Nam",
+            "duration": 40,
+            "scenes": [
+              "Bắt trọn khung cảnh kiến trúc ấn tượng tại Nam Hội An.",
+              "Cận cảnh những góc chụp ảnh đẹp dành cho tín đồ check-in.",
+              "Cảnh bạn trẻ tạo dáng bên các tiểu cảnh độc đáo."
+            ]
+          },
+          {
+            "title": "Điểm đến cuối tuần cho gia đình và nhóm bạn",
+            "duration": 30,
+            "scenes": [
+              "Hình ảnh gia đình và nhóm bạn cùng nhau dạo bước.",
+              "Cảnh vui chơi tấp nập tại khu vực chung của khu giải trí.",
+              "Khoảnh khắc tận hưởng không gian thư giãn ngoài trời."
+            ]
+          },
+          {
+            "title": "Khám phá Nam Hội An mùa này có gì",
+            "duration": 45,
+            "scenes": [
+              "Toàn cảnh không gian rộng lớn của VinWonders Nam Hội An dưới nắng vàng.",
+              "Cận cảnh các kiến trúc độc đáo mang đậm dấu ấn văn hóa.",
+              "Góc quay rộng bắt trọn khoảnh khắc vui tươi của du khách."
+            ]
+          },
+          {
+            "title": "Lên đồ đến VinWonders Nam Hội An ngay",
+            "duration": 35,
+            "scenes": [
+              "Mở đầu với outfit năng động của các bạn trẻ tại Quảng Nam.",
+              "Cảnh di chuyển vào khu vực tham quan chính.",
+              "Tổng kết bằng nụ cười rạng rỡ của nhóm bạn tại điểm đến."
+            ]
+          }
+        ],
+        "captions": [
+          "Cuối tuần này cùng hội bạn thân ghé ngay VinWonders Nam Hội An để lưu lại những khoảnh khắc tuyệt đẹp nhé! #VinWondersNamHoiAn #QuangNam",
+          "Không gian check-in cực đỉnh tại Quảng Nam Đà Nẵng đang chờ đón bạn khám phá. Lên đồ ngay thôi! #CheckInQuangNam #DuLich",
+          "Trải nghiệm ngày nghỉ trọn vẹn bên gia đình và bạn bè tại khu vui chơi hấp dẫn này. #NamHoiAn #Travel",
+          "Điểm hẹn quen mà lạ cho những ai yêu thích khám phá và chụp ảnh sống ảo. #DiemDenHot #Review",
+          "Lên kế hoạch vi vu Quảng Nam ngay hôm nay để không bỏ lỡ những trải nghiệm tuyệt vời. #VinWonders #KhámPhá"
+        ],
+        "ctas": [
+          "Nhanh tay đặt vé ngay tại [LINK_MUA_VE] để bắt đầu hành trình khám phá.",
+          "Click vào [LINK_MUA_VE] để nhận thông tin chi tiết về vé vào cửa.",
+          "Chuẩn bị cho chuyến đi của bạn bằng cách truy cập [LINK_MUA_VE].",
+          "Khám phá ngay mức giá vé chính thức tại [LINK_MUA_VE].",
+          "Sẵn sàng cho chuyến du lịch Quảng Nam bằng cách nhấn vào [LINK_MUA_VE]."
+        ]
+      }
+    }
+  ]
+}

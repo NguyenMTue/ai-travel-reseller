@@ -195,6 +195,12 @@ _UNVERIFIED_CLAIM_PATTERNS = (
     re.compile(r"\bkhông\s+(?:lo\s+)?(?:có\s+)?chi phí ẩn\b", re.IGNORECASE),
     re.compile(r"\bkhông phát sinh(?: thêm)? chi phí\b", re.IGNORECASE),
     re.compile(r"\bgiá (?:đã\s+)?(?:được\s+)?xác thực\b", re.IGNORECASE),
+    re.compile(r"không (?:phải|cần) xếp hàng", re.IGNORECASE),
+    re.compile(r"không phát sinh(?: chi phí)?(?: ẩn)?", re.IGNORECASE),
+    re.compile(r"(?:vé|giá)[^.!?\n]{0,50}(?:chính hãng|ưu đãi|mới nhất)", re.IGNORECASE),
+    re.compile(r"nhận ưu đãi", re.IGNORECASE),
+    re.compile(r"hot nhất", re.IGNORECASE),
+    re.compile(r"không gian (?:siêu )?rộng lớn", re.IGNORECASE),
 )
 _DURATION_PATTERN = re.compile(
     r"\b\d+\s*(?:ngày(?:\s*\d+\s*đêm)?|đêm)\b",
