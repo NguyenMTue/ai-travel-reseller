@@ -33,6 +33,8 @@ ALTER TABLE public.orders
   ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now());
 
 -- Đảm bảo trạng thái đơn hàng tuân thủ state machine
+UPDATE public.orders SET status = 'paid' WHERE status = 'completed';
+
 DO $$
 BEGIN
   IF NOT EXISTS (

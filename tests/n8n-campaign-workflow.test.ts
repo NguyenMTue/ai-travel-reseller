@@ -29,6 +29,10 @@ const workflowPath = new URL(
 const rawWorkflow = readFileSync(workflowPath, "utf8");
 const workflow = JSON.parse(rawWorkflow) as Workflow;
 const nodes = new Map(workflow.nodes.map((node) => [node.name, node]));
+const compose = readFileSync(
+  new URL("../docker-compose.n8n.yml", import.meta.url),
+  "utf8",
+);
 
 test("campaign workflow contains no embedded secrets", () => {
   assert.doesNotMatch(rawWorkflow, /AIza[0-9A-Za-z_-]{20,}/);
@@ -60,7 +64,7 @@ test("workflow fans out all personas and keeps the canonical ten/five mapping", 
   assert.doesNotMatch(mapperCode, /index\s*%\s*5/);
 });
 
-test("native structured parser and auto-fix model are wired to the chain", () => {
+test("native structured parser is wired without an extra fixer-model call", () => {
   assert.equal(
     nodes.get("Generate Structured Content")?.parameters.hasOutputParser,
     true,
@@ -73,23 +77,16 @@ test("native structured parser and auto-fix model are wired to the chain", () =>
       index: 0,
     },
   );
-  assert.deepEqual(
-    workflow.connections["Gemini Schema Fixer"]?.ai_languageModel?.[0]?.[0],
-    {
-      node: "Validate Content Schema",
-      type: "ai_languageModel",
-      index: 0,
-    },
-  );
+  assert.equal(nodes.get("Validate Content Schema")?.parameters.autoFix, false);
+  assert.equal(nodes.has("Gemini Schema Fixer"), false);
 
   const parserSchema = JSON.parse(
     String(nodes.get("Validate Content Schema")?.parameters.inputSchema),
   ) as {
     required: string[];
-    properties: { output: { required: string[] } };
+    properties: Record<string, unknown>;
   };
-  assert.deepEqual(parserSchema.required, ["output"]);
-  assert.deepEqual(parserSchema.properties.output.required.sort(), [
+  assert.deepEqual(parserSchema.required.sort(), [
     "captions",
     "ctas",
     "hooks",
@@ -98,19 +95,49 @@ test("native structured parser and auto-fix model are wired to the chain", () =>
   ]);
 });
 
-test("every fallible main-path node retries or has a wired error output", () => {
+test("personas are serialized with a cooldown and a valid loop feedback edge", () => {
+  assert.equal(nodes.get("Loop Over Personas")?.type, "n8n-nodes-base.splitInBatches");
+  assert.equal(nodes.get("Loop Over Personas")?.parameters.batchSize, 1);
+  assert.deepEqual(nodes.get("Loop Over Personas")?.parameters.options, {
+    reset: false,
+  });
+  assert.equal(nodes.get("Wait Between Gemini Calls")?.type, "n8n-nodes-base.wait");
+  assert.equal(nodes.get("Wait Between Gemini Calls")?.parameters.amount, 15);
+  assert.equal(nodes.get("Wait Between Gemini Calls")?.parameters.unit, "seconds");
+
+  assert.equal(
+    workflow.connections["Loop Over Personas"]?.main?.[0]?.[0]?.node,
+    "Collect Persona Results",
+    "output 0 must be the done branch",
+  );
+  assert.equal(
+    workflow.connections["Loop Over Personas"]?.main?.[1]?.[0]?.node,
+    "Generate Structured Content",
+    "output 1 must be the loop branch",
+  );
+  assert.equal(
+    workflow.connections["Wait Between Gemini Calls"]?.main?.[0]?.[0]?.node,
+    "Loop Over Personas",
+    "the cooldown must feed back into the loop",
+  );
+});
+
+test("HTTP calls retry conservatively while Gemini never multiplies calls", () => {
   const retryNodes = [
     "Enrich Verified Campaign",
-    "Generate Structured Content",
     "Persist Guarded Content Batch",
   ];
   for (const name of retryNodes) {
     const node = nodes.get(name);
     assert.equal(node?.retryOnFail, true, `${name} must retry`);
-    assert.equal(node?.maxTries, 5, `${name} must use five tries`);
+    assert.equal(node?.maxTries, 3, `${name} must use three tries`);
     assert.equal(node?.waitBetweenTries, 5000, `${name} retry delay`);
   }
+  assert.notEqual(nodes.get("Generate Structured Content")?.retryOnFail, true);
+  assert.equal(nodes.get("Generate Structured Content")?.maxTries, undefined);
+});
 
+test("every fallible main-path node has a wired error output", () => {
   for (const name of [
     "Enrich Verified Campaign",
     "Expand Four Personas",
@@ -125,6 +152,31 @@ test("every fallible main-path node retries or has a wired error output", () => 
       `${name} must wire main[1]`,
     );
   }
+});
+
+test("rate-limit failures return a sanitized retryable 503", () => {
+  const errorNode = nodes.get("Respond Sanitized Error");
+  assert.match(String(errorNode?.parameters.responseBody), /upstream_rate_limited/);
+  assert.match(String(errorNode?.parameters.responseBody), /retry_after_seconds/);
+  assert.match(
+    String((errorNode?.parameters.options as { responseCode?: unknown })?.responseCode),
+    /503\s*:\s*502/,
+  );
+  assert.doesNotMatch(String(errorNode?.parameters.responseBody), /detail\s*:/);
+});
+
+test("repository export remains inactive until an approved live smoke test", () => {
+  assert.equal(workflow.active, false);
+  assert.equal(nodes.get("Rate Limit Safety Note")?.type, "n8n-nodes-base.stickyNote");
+  assert.match(
+    String(nodes.get("Rate Limit Safety Note")?.parameters.content),
+    /N8N_CONCURRENCY_PRODUCTION_LIMIT=1/,
+  );
+});
+
+test("self-hosted n8n queues overlapping production executions", () => {
+  assert.match(compose, /N8N_CONCURRENCY_PRODUCTION_LIMIT:\s*["']?1["']?/);
+  assert.match(compose, /docker\.n8n\.io\/n8nio\/n8n:2\.43\.7/);
 });
 
 test("webhook uses an explicit response node and both APIs use credentials", () => {

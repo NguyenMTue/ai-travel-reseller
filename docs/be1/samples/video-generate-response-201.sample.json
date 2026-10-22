@@ -1,0 +1,19 @@
+{
+  "success": true,
+  "message": "Khởi tạo và tổng hợp video chiến dịch thành công.",
+  "data": {
+    "content_id": "33333333-3333-4333-8333-333333333333",
+    "campaign_id": "22222222-2222-4222-8222-222222222222",
+    "product_id": "11111111-1111-4111-8111-111111111111",
+    "video_url": "https://storage.travellink.vn/campaign-videos/ve-combo-cuoi-tuan-1792552508.mp4",
+    "status": "ready",
+    "aspect_ratio": "9:16",
+    "duration_sec": 28.0,
+    "hook": "⚠️ LƯU Ý SỐNG CÒN KHI ĐI VÉ COMBO CUỐI TUẦN!",
+    "script": "Đi Vé Combo Cuối Tuần cuối tuần mà không biết lưu ý này [pause 0.3s] là xác định đứng xếp hàng dưới nắng cả tiếng đồng hồ! [breath] Thứ nhất là mọi người nhớ đi trước 8 rưỡi sáng và rẽ qua cổng phụ số 2 nha...",
+    "caption": "Kinh nghiệm đi Vé Combo Cuối Tuần cực hữu ích! Lưu ngay lại để đi cùng bạn bè nhé! #DaNang #VeComboCuoiTuan",
+    "cta": "Comment ABC để nhận link đặt vé chính thức",
+    "scenes_count": 14,
+    "created_at": "2026-10-21T10:30:00.000Z"
+  }
+}

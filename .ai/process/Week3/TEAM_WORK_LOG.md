@@ -1,7 +1,7 @@
 # TEAM WORK LOG
 Project: AI Travel Reseller MVP (TravelLink AI)  
 Week: Tuần 3 — 19/10/2026 – 24/10/2026 (Sprint 3)  
-Last Updated: 21/10/2026 10:45 AM
+Last Updated: 22/10/2026 01:30 PM
 
 ---
 
@@ -26,7 +26,8 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | BE1-W3-04 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Attribution Engine & RPC `get_reseller_wallet_summary` | DONE | 19/10 | 21/10 17:00 |
 | BE1-W3-05 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Gỡ bỏ nợ kỹ thuật trigger hòa giải tạm thời Tuần 2 | DONE | 19/10 | 19/10 12:00 |
 | BE1-W3-06 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Core AI Video Generation Engine (`generator.ts`) từ kịch bản BE2 & asset tour | DONE | 21/10 | 22/10 17:00 |
-| BE1-W3-07 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Video API `POST /api/merchant/video/generate` & Storage pipeline `campaign-videos` | READY | 22/10 | 23/10 12:00 |
+| BE1-W3-07 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Video API `POST /api/merchant/video/generate` & Storage pipeline `campaign-videos` | DONE (MERGED DEV) | 21/10 | 23/10 12:00 |
+| BE1-W3-08 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Phối hợp E2E Integration & Demo kịch bản C3 (Cloudflared Tunnel) | IN PROGRESS | 22/10 | 23/10 17:00 |
 | BE2-W3-01 | Nguyễn Huỳnh | BE2 | System Prompt AI Sales Agent nhận diện Buying Intent | DONE | 20/10 | 20/10 17:00 |
 | BE2-W3-02 | Nguyễn Huỳnh | BE2 | Prompt Multimodal Gemini phân tích kịch bản video mẫu | OFFLINE DONE — LIVE PENDING | 20/10 | 21/10 12:00 |
 | BE2-W3-03 | Nguyễn Huỳnh | BE2 | Prompt sinh kịch bản video áp dụng thông tin chiến dịch (bàn giao BE1) | OFFLINE DONE — LIVE PENDING | 20/10 | 22/10 12:00 |
@@ -39,8 +40,8 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | FE-W3-04 | Diệu | FE Lead | Giao diện Chat AI Sales Agent Mobile (Bottom Sheet widget) | IN PROGRESS — mock, chờ UIUX review | 21/10 | 22/10 17:00 |
 | FE-W3-05 | Diệu | FE Lead | Giao diện Màn hình Ví hoa hồng Reseller (`/reseller/wallet`) | IN PROGRESS — chờ UIUX/QA dữ liệu thật | 22/10 | 23/10 12:00 |
 | FE-W3-06 | Diệu | FE Lead | Tích hợp Media Library & Nút kích hoạt tạo Video qua API BE1 | IN PROGRESS — shell/fixture; chờ production/API scope | 22/10 | 23/10 17:00 |
-| T3-FE-W3-01 | Tester 3 | FE Phụ | Cắt Component tĩnh `MediaCard` (`src/components/merchant/media-card.tsx`) | READY | 20/10 | 21/10 12:00 |
-| T3-FE-W3-02 | Tester 3 | FE Phụ | Modal hướng dẫn quy chuẩn video 9:16 (`video-guidelines-modal.tsx`) | READY | 21/10 | 21/10 17:00 |
+| T3-FE-W3-01 | Tester 3 | FE Phụ | Cắt Component tĩnh `MediaCard` (`src/components/merchant/media-card.tsx`) | DONE (REVIEWED) | 20/10 | 21/10 12:00 |
+| T3-FE-W3-02 | Tester 3 | FE Phụ | Modal hướng dẫn quy chuẩn video 9:16 (`video-guidelines-modal.tsx`) | DONE (REVIEWED) | 21/10 | 21/10 17:00 |
 | UX-W3-01 | UI/UX Designer | UI/UX | Figma Hi-fi Reseller Mobile (Bottom Nav, Thẻ chạm, Ví) | READY | 19/10 | 20/10 12:00 |
 | UX-W3-02 | UI/UX Designer | UI/UX | Figma Hi-fi Customer Chat Widget di động | READY | 19/10 | 20/10 17:00 |
 | UX-W3-03 | UI/UX Designer | UI/UX | Figma Hi-fi Merchant Media Library & Video Template Grid | READY | 20/10 | 21/10 12:00 |
@@ -48,11 +49,17 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | T1-W3-02 | Tester 1 | QA Lead | Kiểm thử chức năng Media Library & Luồng tải video mẫu | READY | 22/10 | 23/10 17:00 |
 | T2-W3-01 | Tester 2 | AI Safety QA | Test chống Hallucination & Buying Intent của AI Sales Agent | READY | 21/10 | 23/10 17:00 |
 | T2-W3-02 | Tester 2 | AI Safety QA | Đánh giá chất lượng kịch bản video AI bóc tách từ video mẫu | READY | 22/10 | 23/10 17:00 |
-| PM-W3-01/06 | Nguyễn Minh Tuệ | BE1 Kiêm PM | Điều phối Sprint 3, Code Review 2 cấp, Diễn tập Demo nghiệm thu | READY | 19/10 | 24/10 17:30 |
+| PM-W3-01/06 | Nguyễn Minh Tuệ | BE1 Kiêm PM | Điều phối Sprint 3, Code Review 2 cấp (Đã duyệt PR Tester 3), Diễn tập Demo nghiệm thu | IN PROGRESS | 19/10 | 24/10 17:30 |
 
 ---
 
 ## 2. COMPLETED WORK
+- `PR #43 (dev)` (22/10): Merge thành công nhánh `feature/be1-w3-video-api-storage` vào `dev` (Commit `d3dfb9e`). Toàn bộ 17/17 tests backend đạt 100% PASS, hoàn tất trọn bộ video remediation 7 lỗi (`VID-01` -> `VID-07`), sẵn sàng API `POST /api/merchant/video/generate` và storage bucket `campaign-videos`.
+- `PM-W3-03` / `T3-FE-W3-01/02` (22/10): Hoàn thành Review cấp 2 (PM Approval) cho 2 component tĩnh của Tester 3 (`src/components/merchant/media-card.tsx` và `src/components/merchant/video-guidelines-modal.tsx`) trên nhánh `Feature/tester_week3_media_card_video_guide`. Đạt 100% tuân thủ Guardrail (Dumb UI, props-based, không chạm forbidden zones). Bàn giao cho FE Lead tích hợp.
+- `BE1-W3-08 (Sync BE3)` (22/10): Bàn giao tài liệu giải đáp kỹ thuật cho BE3 về Event Taxonomy phễu PostHog (`affiliate_link_clicked` từ router `clicks` DB và `purchase_confirmed` từ `orders` DB).
+- `BE1-W3-07` (22/10 - QA Remediation): Hoàn thành khắc phục toàn diện 7 lỗi VID-01 đến VID-07 theo đặc tả `ai_video_pipeline_qa_remediation_spec.md`. Áp dụng kiến trúc Audio-Driven Dynamic Timing đồng bộ 1:1:1 giữa Voiceover - Subtitle - Visual Asset; lọc bỏ ảnh menu chữ & xe du lịch; tuân thủ Brand Compliance (đổi sang Đối tác phân phối chính thức); tối ưu khung 16:9 sắc nét trên nền mờ 9:16 và vượt qua 100% 6 Gates QA Checklist.
+- `BE1-W3-07` (22/10): Nạp bộ tư liệu ảnh thực tế tour Bà Nà Hills (`docs/be1/samples/media-references-banahills.sample.json`) gồm 11 ảnh chuẩn hóa phân loại shot_type vào bảng `media_references`. Thực thi live test tạo video cho Chiến dịch Bà Nà Hills (`44444444-4444-4444-4444-444444444444`) thành công với 11 phân cảnh (24s), hook 3s, text safe zone và lưu vào bảng `contents`.
+- `BE1-W3-07` (21/10): Hoàn thành Video API `POST /api/merchant/video/generate` & Storage pipeline `campaign-videos` (RLS 4 policies, 100MB limit), tích hợp Core Video Engine, lưu trữ `contents.video_url`, GET status polling, webhook trigger non-blocking n8n (`video.generation.completed` cho BE3-W3-03), tài liệu `docs/be1/` và bộ test 8/8 pass.
 - `BE1-W3-06` (21/10): Hoàn thành Core AI Video Generation Engine (`src/lib/video-engine/generator.ts`), Data Contract Zod (`types.ts`), Pre-flight Gate chống pixel giả & Fail-Fast, storyboard CapCut UGC 9:16 và bộ test đạt 9/9 pass.
 - `BE1-W3-05` (19/10): Gỡ bỏ trigger hòa giải tạm thời `fn_temp_contents_reconcile` (xóa nợ kỹ thuật Tuần 2).
 - `BE1-W3-01` (19/10): Hoàn thành migration mở rộng bảng `orders`, tạo bảng `commissions` kèm RLS policies và indexes.
@@ -84,9 +91,9 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | BE1 | FE Lead | Database migration `orders`, `commissions` & Types gen | READY | 20/10 |
 | BE1 | Tester 3 (FE phụ) | Mock schema interface props cho `MediaCard` | READY | 20/10 |
 | BE2 | BE1 | Prompt Multimodal & JSON schema kịch bản video nạp Core Engine | READY | 21/10 |
-| Tester 3 (FE phụ) | FE Lead / PM | PR nhánh `feature/fe-t3-static-components` (Dumb UI components) | READY | 21/10 |
-| BE1 | FE Lead | Endpoint API `POST /api/merchant/video/generate` & status polling | READY | 22/10 |
-| BE1 | BE3 | Webhook event báo video hoàn tất để kích hoạt n8n notification | READY | 23/10 |
+| Tester 3 (FE phụ) | FE Lead / PM | PR nhánh `Feature/tester_week3_media_card_video_guide` (MediaCard & VideoGuidelinesModal) | DONE (PM APPROVED) | 22/10 |
+| BE1 | FE Lead | Endpoint API `POST /api/merchant/video/generate` & storage bucket (Đã merge `dev`) | DONE | 22/10 |
+| BE1 | BE3 | Hướng dẫn Event Taxonomy phễu PostHog (clicks & orders DB) & Webhook video xong | DONE | 22/10 |
 | FE Lead | Tester 1 | Bản build PWA Mobile Suite trên dev server | READY | 22/10 |
 
 ---

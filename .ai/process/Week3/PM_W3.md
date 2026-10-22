@@ -30,10 +30,10 @@ PM chịu trách nhiệm dẫn dắt toàn đội ngũ 9 thành viên giữ vữ
 ## 3. THIS WEEK — MY TASKS
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|---|---|---|---|---|---|
-| PM-W3-01 | Tổ chức họp Kick-off Sprint 3 & Phổ biến Quy chế an toàn Tester 3 | P0 | READY | Kế hoạch Tuần 3 | PM | Biên bản họp Kick-off | 19/10 10:30 |
-| PM-W3-02 | Điều phối giao diện dữ liệu (Contract Alignment) BE1 - BE2 - BE3 - FE | P0 | READY | PM-W3-01 | PM | Bảng Interfaces trong TEAM_WORK_LOG | 20/10 17:00 |
-| PM-W3-03 | Giám sát & Review cấp 2 (Second-level Approval) cho PR của Tester 3 | P0 | READY | T3-FE-W3-03, FE-W3-07 | PM | Approval trên GitHub | 22/10 17:00 |
-| PM-W3-04 | Điều phối phiên Integration Test E2E toàn chuỗi hệ sinh thái | P0 | READY | Toàn team | PM | E2E Integration Test Run | 23/10 17:00 |
+| PM-W3-01 | Tổ chức họp Kick-off Sprint 3 & Phổ biến Quy chế an toàn Tester 3 | P0 | DONE | Kế hoạch Tuần 3 | PM | Biên bản họp Kick-off | 19/10 10:30 |
+| PM-W3-02 | Điều phối giao diện dữ liệu (Contract Alignment) BE1 - BE2 - BE3 - FE | P0 | DONE | PM-W3-01 | PM | Bảng Interfaces trong TEAM_WORK_LOG | 20/10 17:00 |
+| PM-W3-03 | Giám sát & Review cấp 2 (Second-level Approval) cho PR của Tester 3 | P0 | DONE (APPROVED) | T3-FE-W3-03, FE-W3-07 | PM | Approval trên GitHub | 22/10 17:00 |
+| PM-W3-04 | Điều phối phiên Integration Test E2E toàn chuỗi hệ sinh thái | P0 | IN PROGRESS | Toàn team | PM | E2E Integration Test Run | 23/10 17:00 |
 | PM-W3-05 | Tổ chức Diễn tập Demo kịch bản C3 (Cloudflared) & C1 (Chrome Frame) | P0 | READY | FE, QA | PM | Buổi diễn tập demo đạt yêu cầu | 24/10 11:30 |
 | PM-W3-06 | Họp Đánh giá Sprint 3, Nghiệm thu mã nguồn `dev` & Lập kế hoạch Tuần 4 | P0 | READY | Toàn team | PM | Báo cáo Tổng kết Sprint 3 | 24/10 17:30 |
 
