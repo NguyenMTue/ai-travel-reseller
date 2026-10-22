@@ -14,6 +14,7 @@
     "test:tester2:live": "node --env-file=.env.local --experimental-strip-types tests/content-adversarial.live.ts",
     "test:be2:live": "node --env-file=.env.local --experimental-strip-types tests/content-factory.live.ts",
     "test:video-engine": "node --experimental-strip-types --test tests/video-engine.test.ts",
+    "test:merchant-video": "node --experimental-strip-types --test tests/merchant-video-generate-api.test.ts",
     "test:tester2:hallucination": "node --experimental-strip-types tests/hallucination/run_hallucination_suite.mjs",
     "test:tester2:hallucination:live": "node --env-file=.env.local --experimental-strip-types tests/hallucination/run_hallucination_suite.mjs",
     "test:tester2:hallucination:node": "node --experimental-strip-types --test tests/hallucination/test_sales_agent_hallucination.ts"
@@ -49,6 +50,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
+    "ffmpeg-static": "^5.3.0",
     "jsqr": "1.4.0",
     "supabase": "^2.121.0",
     "tailwindcss": "^4",

@@ -233,7 +233,7 @@ export function ChatPanel({
                     rel="noopener noreferrer"
                     onClick={() =>
                       captureChatFunnelEvent("checkout_clicked", attribution, {
-                        checkout_domain: new URL(m.checkout).hostname,
+                        checkout_domain: new URL(m.checkout!).hostname,
                       })
                     }
                   >

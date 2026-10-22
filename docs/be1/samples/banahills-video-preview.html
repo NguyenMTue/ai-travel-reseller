@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TravelLink AI - Preview Video Chiến Dịch Bà Nà Hills</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-gold: #ffd700;
+      --accent-green: #22c55e;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px;
+    }
+    header {
+      max-width: 1200px;
+      margin: 0 auto 24px auto;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    h1 { font-size: 20px; font-weight: 700; color: #38bdf8; }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #0284c7;
+      color: #fff;
+    }
+    .grid-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 28px;
+    }
+    @media (max-width: 860px) {
+      .grid-container { grid-template-columns: 1fr; }
+    }
+    /* Phone Mockup */
+    .phone-mockup {
+      width: 100%;
+      height: 640px;
+      background: #000;
+      border: 8px solid #334155;
+      border-radius: 36px;
+      position: sticky;
+      top: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+    }
+    .phone-screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: #000;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .video-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 20px 16px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 25%, transparent 65%, rgba(0,0,0,0.85) 100%);
+    }
+    .hook-badge {
+      align-self: center;
+      background: rgba(0,0,0,0.75);
+      border: 2px solid var(--accent-gold);
+      color: var(--accent-gold);
+      font-weight: 800;
+      font-size: 13px;
+      text-align: center;
+      padding: 8px 12px;
+      border-radius: 8px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      max-width: 90%;
+    }
+    .video-footer {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .price-tag {
+      background: var(--accent-gold);
+      color: #000;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      align-self: flex-start;
+    }
+    .cta-banner {
+      background: #ef4444;
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      text-align: center;
+    }
+    /* Timeline & Storyboard */
+    .storyboard-panel {
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 20px;
+    }
+    .meta-box {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .meta-item strong { color: #38bdf8; display: block; font-size: 11px; text-transform: uppercase; }
+    .scene-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .scene-card {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 16px;
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      padding: 10px;
+      transition: border-color 0.2s;
+    }
+    .scene-card:hover { border-color: #38bdf8; }
+    .scene-thumb {
+      width: 120px;
+      height: 90px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #334155;
+    }
+    .scene-info { display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+    .scene-header { display: flex; justify-content: space-between; align-items: center; }
+    .scene-idx { font-weight: 700; font-size: 13px; color: #38bdf8; }
+    .scene-shot { font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; background: #334155; }
+    .scene-title { font-size: 12px; color: var(--text); line-height: 1.4; }
+    .scene-tech { font-size: 11px; color: var(--accent-green); }
+    .links-bar {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block;
+      text-decoration: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      background: var(--primary);
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #1d4ed8; }
+    .btn-secondary {
+      background: #334155;
+    }
+    .btn-secondary:hover { background: #475569; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>🎬 TravelLink AI — Phân Cảnh & Video Dọc 9:16 (Bà Nà Hills)</h1>
+      <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+        Chiến dịch: <strong>Hè 2026 - Kích cầu du lịch Bà Nà Hills</strong> | Merchant: <strong>Sun World Đà Nẵng</strong>
+      </p>
+    </div>
+    <span class="badge">Trạng thái: READY (9:16)</span>
+  </header>
+
+  <div class="grid-container">
+    <!-- Cột trái: Trình phát video dọc -->
+    <div>
+      <div class="phone-mockup">
+        <div class="phone-screen">
+          <video src="http://127.0.0.1:54321/storage/v1/object/public/campaign-videos/banahills-remediated-1792641971328.mp4" controls autoplay loop playsinline></video>
+          <div class="video-overlay">
+            <div class="hook-badge">⚠️ LƯU Ý SỐNG CÒN KHI ĐI BÀ NÀ HILLS!</div>
+            <div class="video-footer">
+              <span class="price-tag">VÉ CHÍNH HÃNG 1.150.000đ</span>
+              <div class="cta-banner">👇 Comment để nhận link đặt vé chính thức!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="links-bar">
+        <a class="btn" href="http://127.0.0.1:54321/storage/v1/object/public/campaign-videos/banahills-remediated-1792641971328.mp4" target="_blank">🔗 Mở File Master Video Đã Khắc Phục (MP4)</a>
+        <a class="btn btn-secondary" href="http://127.0.0.1:54323/project/default/editor/contents" target="_blank">🗄️ Mở Supabase Studio</a>
+      </div>
+    </div>
+
+    <!-- Cột phải: Storyboard 11 phân cảnh từ ảnh thật Traveloka -->
+    <div class="storyboard-panel">
+      <h2 style="font-size: 16px; margin-bottom: 12px; color: #f1f5f9;">📋 Thông số Kỹ thuật Kịch bản</h2>
+      <div class="meta-box">
+        <div class="meta-item">
+          <strong>Thời lượng & Tỷ lệ</strong>
+          24 giây | Tỷ lệ chuẩn dọc 9:16
+        </div>
+        <div class="meta-item">
+          <strong>Số phân cảnh</strong>
+          11 cảnh (cắt nhịp 2.18s / cảnh)
+        </div>
+        <div class="meta-item">
+          <strong>Giọng đọc (Voiceover)</strong>
+          vn_danang_youth_female_energetic
+        </div>
+        <div class="meta-item">
+          <strong>Chống AI ảo</strong>
+          100% Ảnh thực tế từ Traveloka
+        </div>
+      </div>
+
+      <h3 style="font-size: 14px; margin-bottom: 12px; color: #94a3b8; text-transform: uppercase;">Chi tiết 11 Phân Cảnh (Storyboard CapCut UGC)</h3>
+      <div class="scene-list">
+        
+        <div class="scene-card">
+          <img class="scene-thumb" src="https://img.cnt.traveloka.com/tvlk/xpe-asset/GZtqLuOqb-33qvDmG1FcMeN1eFEH7PVvlsdFr2AUBT39jzSxIGG5kZNhhHY-p7nw/2001357730516/Sunworld-Banahills-and-Golden-Bridge-Day-Tour-from-Danang-f2fae0eb-aafa-440f-af66-fee8f86f5c48.png" alt="Cảnh 1">
+          <div class="scene-info">
+            <div class="scene-header">
+              <span class="scene-idx">Cảnh 1 (0.0s - 2.2s)</span>
+              <span class="scene-shot">AERIAL_WIDE</span>
+            </div>
+            <div class="scene-title">Toàn cảnh Cầu Vàng bình minh rực rỡ từ flycam góc cao.</div>
+            <div class="scene-tech">✨ 2.5D Aerial Parallax + Drone Truck Left</div>
+          </div>
+        </div>
+
+        <div class="scene-card">
+          <img class="scene-thumb" src="https://img.cnt.traveloka.com/tvlk/xpe-asset/GZtqLuOqb-33qvDmG1FcMeN1eFEH7PVvlsdFr2AUBT39jzSxIGG5kZNhhHY-p7nw/2001357730516/Sunworld-Banahills-and-Golden-Bridge-Day-Tour-from-Danang-509c36a4-1f94-45de-bd5c-bed23fbfb815.png" alt="Cảnh 2">
+          <div class="scene-info">
+            <div class="scene-header">
+              <span class="scene-idx">Cảnh 2 (2.2s - 4.4s)</span>
+              <span class="scene-shot">SCENIC_MEDIUM</span>
+            </div>
+            <div class="scene-title">Cổng chào Thời Gian với kiến trúc giao thoa độc đáo.</div>
+            <div class="scene-tech">✨ 3D Depth Ken Burns (Push In)</div>
+          </div>
+        </div>
+
+        <div class="scene-card">
+          <img class="scene-thumb" src="https://img.cnt.traveloka.com/tvlk/xpe-asset/GZtqLuOqb-33qvDmG1FcMeN1eFEH7PVvlsdFr2AUBT39jzSxIGG5kZNhhHY-p7nw/2001357730516/Sunworld-Banahills-and-Golden-Bridge-Day-Tour-from-Danang-d4745ae1-f677-423d-93ef-c0cb26ded627.png" alt="Cảnh 3">
+          <div class="scene-info">
+            <div class="scene-header">
+              <span class="scene-idx">Cảnh 3 (4.4s - 6.5s)</span>
+              <span class="scene-shot">CLOSEUP_FOOD</span>
+            </div>
+            <div class="scene-title">Thực đơn buffet trưa Four Seasons 380.000đ Á - Âu phong phú.</div>
+            <div class="scene-tech">✨ Ken Burns Push In + Âm thanh hiện trường đồ nướng</div>
+          </div>
+        </div>
+
+        <div class="scene-card">
+          <img class="scene-thumb" src="https://img.cnt.traveloka.com/tvlk/xpe-asset/GZtqLuOqb-33qvDmG1FcMeN1eFEH7PVvlsdFr2AUBT39jzSxIGG5kZNhhHY-p7nw/2001357730516/Sunworld-Banahills-and-Golden-Bridge-Day-Tour-from-Danang-de629278-305d-4648-9d3f-84e6bcba5b21.png" alt="Cảnh 4">
+          <div class="scene-info">
+            <div class="scene-header">
+              <span class="scene-idx">Cảnh 4 (6.5s - 8.7s)</span>
+              <span class="scene-shot">CLOSEUP_FOOD</span>
+            </div>
+            <div class="scene-title">Buffet Bharata chuẩn Halal kết hợp cà ri Ấn Độ đặc sắc.</div>
+            <div class="scene-tech">✨ Tách lớp chiều sâu 3 layers</div>
+          </div>
+        </div>
+
+        <div class="scene-card">
+          <img class="scene-thumb" src="https://img.cnt.traveloka.com/tvlk/xpe-asset/GZtqLuOqb-33qvDmG1FcMeN1eFEH7PVvlsdFr2AUBT39jzSxIGG5kZNhhHY-p7nw/2001357730516/Sunworld-Banahills-and-Golden-Bridge-Day-Tour-from-Danang-0f27dd8a-6f15-4405-b4b8-fe9fd4851808.png" alt="Cảnh 5">
+          <div class="scene-info">
+            <div class="scene-header">
+              <span class="scene-idx">Cảnh 5 (8.7s - 10.9s)</span>
+              <span class="scene-shot">SCENIC_MEDIUM</span>
+            </div>
+            <div class="scene-title">Quảng trường Nhật Thực với tháp kính chóp và điêu khắc châu Âu.</div>
+            <div class="scene-tech">✨ Ken Burns Smooth</div>
+          </div>
+        </div>
+
+        <div class="scene-card">
+          <img class="scene-thumb" src="https://img.cnt.traveloka.com/tvlk/xpe-asset/GZtqLuOqb-33qvDmG1FcMeN1eFEH7PVvlsdFr2AUBT39jzSxIGG5kZNhhHY-p7nw/2001357730516/Sunworld-Banahills-and-Golden-Bridge-Day-Tour-from-Danang-e239f82f-a17f-4310-862c-d7742be67ab5.png" alt="Cảnh 6">
+          <div class="scene-info">
+            <div class="scene-header">
+              <span class="scene-idx">Cảnh 6 (10.9s - 13.1s)</span>
+              <span class="scene-shot">SCENIC_MEDIUM</span>
+            </div>
+            <div class="scene-title">Lâu đài đá cổ kính sừng sững giữa nền trời xanh.</div>
+            <div class="scene-tech">✨ Góc rộng vòng cung</div>
+          </div>
+        </div>
+
+        <div class="scene-card">
+          <img class="scene-thumb" src="https://img.cnt.traveloka.com/tvlk/xpe-asset/GZtqLuOqb-33qvDmG1FcMeN1eFEH7PVvlsdFr2AUBT39jzSxIGG5kZNhhHY-p7nw/2001357730516/Sunworld-Banahills-and-Golden-Bridge-Day-Tour-from-Danang-e48d9fb0-8637-403a-88e3-2a49806cfae3.jpeg" alt="Cảnh 7">
+          <div class="scene-info">
+            <div class="scene-header">
+              <span class="scene-idx">Cảnh 7 (13.1s - 15.3s)</span>
+              <span class="scene-shot">SCENIC_MEDIUM</span>
+            </div>
+            <div class="scene-title">Quảng trường Làng Pháp nhộn nhịp quanh quả địa cầu Sun World.</div>
+            <div class="scene-tech">✨ Không khí sống động</div>
+          </div>
+        </div>
+
+        <div class="scene-card">
+          <img class="scene-thumb" src="https://img.cnt.traveloka.com/tvlk/xpe-asset/dsIfD0QxFcgaDmB6sQchobk5CmBu9PzsWhwFXGFxJ179jzSxIGG5kZNhhHY-p7nw/xxt/experience/image/travelmart-danang-banahills-3-png-1080x720-FIT-3eaf45651b9b66e6f6aaa048e334ea13.png" alt="Cảnh 8">
+          <div class="scene-info">
+            <div class="scene-header">
+              <span class="scene-idx">Cảnh 8 (15.3s - 17.5s)</span>
+              <span class="scene-shot">AERIAL_WIDE</span>
+            </div>
+            <div class="scene-title">Cabin cáp treo màu vàng lướt qua rừng cây nguyên sinh trong sương.</div>
+            <div class="scene-tech">✨ Drone Motion lia mây</div>
+          </div>
+        </div>
+
+        <div class="scene-card">
+          <img class="scene-thumb" src="https://img.cnt.traveloka.com/tvlk/xpe-asset/dsIfD0QxFcgaDmB6sQchobk5CmBu9PzsWhwFXGFxJ179jzSxIGG5kZNhhHY-p7nw/xxt/experience/image/travelmart-danang-banahills-8-jpg-1080x720-FIT-6a64f03843740352d4da2f5433049818.jpeg" alt="Cảnh 9">
+          <div class="scene-info">
+            <div class="scene-header">
+              <span class="scene-idx">Cảnh 9 (17.5s - 19.6s)</span>
+              <span class="scene-shot">HUMAN_POV</span>
+            </div>
+            <div class="scene-title">Trải nghiệm máng trượt tốc độ uốn lượn quanh sườn núi.</div>
+            <div class="scene-tech">✨ Natural Handheld POV</div>
+          </div>
+        </div>
+
+        <div class="scene-card">
+          <img class="scene-thumb" src="https://img.cnt.traveloka.com/tvlk/xpe-asset/GZtqLuOqb-33qvDmG1FcMeN1eFEH7PVvlsdFr2AUBT39jzSxIGG5kZNhhHY-p7nw/2001357730516/Sunworld-Banahills-and-Golden-Bridge-Day-Tour-from-Danang-ba35dd9d-7504-466c-90c3-100c86aa8972.png" alt="Cảnh 10">
+          <div class="scene-info">
+            <div class="scene-header">
+              <span class="scene-idx">Cảnh 10 (19.6s - 21.8s)</span>
+              <span class="scene-shot">SCENIC_MEDIUM</span>
+            </div>
+            <div class="scene-title">Dịch vụ xe du lịch đời mới đưa đón khách tận nơi.</div>
+            <div class="scene-tech">✨ Offer Callout Giá Vé</div>
+          </div>
+        </div>
+
+        <div class="scene-card">
+          <img class="scene-thumb" src="https://img.cnt.traveloka.com/tvlk/xpe-asset/GZtqLuOqb-33qvDmG1FcMeN1eFEH7PVvlsdFr2AUBT39jzSxIGG5kZNhhHY-p7nw/2001357730516/Sunworld-Banahills-and-Golden-Bridge-Day-Tour-from-Danang-97cdd80e-74c0-4c92-bad7-a8785fea9d99.png" alt="Cảnh 11">
+          <div class="scene-info">
+            <div class="scene-header">
+              <span class="scene-idx">Cảnh 11 (21.8s - 24.0s)</span>
+              <span class="scene-shot">SCENIC_MEDIUM</span>
+            </div>
+            <div class="scene-title">Đa dạng các dòng xe đưa đón theo tour riêng cho gia đình.</div>
+            <div class="scene-tech">✨ Official Call-to-Action</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
