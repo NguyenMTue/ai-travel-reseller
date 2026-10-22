@@ -14,6 +14,11 @@ import {
   type VideoEngineInput,
   type VideoEngineOutput,
 } from "./types.ts";
+import {
+  generateImageToVideo,
+  type I2VConfig,
+  type I2VResult,
+} from "../ai/i2v.ts";
 
 // ============================================================================
 // 1. DANH SÁCH TỪ NGỮ CẤM & QUY CHUẨN (Theo RuleAIAgentsGenVideo.md)
@@ -421,17 +426,20 @@ export type VideoRenderResult = {
   resolution: string;
   storage_bucket: string;
   rendered_at: string;
+  i2v_clips?: I2VResult[];
 };
 
 /**
  * Adapter kết nối với Renderer Pipeline (phục vụ BE1-W3-07):
- * Tiếp nhận thông số READY_FOR_RENDER và trả về đường dẫn video thành phẩm
- * sẵn sàng đẩy lên Supabase Storage bucket `campaign-videos`.
+ * Tiếp nhận thông số READY_FOR_RENDER và điều phối tiến trình render.
+ * - Selective routing & I2V cho các phân cảnh toàn cảnh (AERIAL_WIDE / SCENIC_MEDIUM)
+ * - Tự động fallback sang pre-rendered clips hoặc Ken Burns
+ * - Trả về đường dẫn video thành phẩm sẵn sàng đẩy lên Supabase Storage bucket `campaign-videos`.
  */
 export async function synthesizeVideoDraft(
-  renderSpec: ReadyForRenderResult
+  renderSpec: ReadyForRenderResult,
+  i2vOverrides?: Partial<I2VConfig>
 ): Promise<VideoRenderResult> {
-  // Giả lập tiến trình render tổng hợp video chuẩn 9:16 (1080x1920)
   const timestamp = Date.now();
   const slug = renderSpec.campaign_metadata.product_name
     .toLowerCase()
@@ -439,6 +447,22 @@ export async function synthesizeVideoDraft(
     .replace(/-+/g, "-");
 
   const mockVideoUrl = `https://storage.travellink.vn/campaign-videos/${slug}-${timestamp}.mp4`;
+
+  // Xử lý song song I2V selective routing cho các cảnh nếu có hình ảnh
+  const i2vPromises = (renderSpec.timeline_scenes || []).map(async (scene) => {
+    return generateImageToVideo(
+      {
+        imageUrl: `https://storage.travellink.vn/media/${scene.source_asset_id}.jpg`,
+        shotType: scene.shot_type,
+        prompt: scene.voiceover_segment,
+        durationSec: scene.duration_sec,
+        motion: scene.camera_motion.effect,
+      },
+      i2vOverrides
+    );
+  });
+
+  const i2vClips = await Promise.all(i2vPromises);
 
   return {
     success: true,
@@ -448,5 +472,6 @@ export async function synthesizeVideoDraft(
     resolution: "1080x1920",
     storage_bucket: "campaign-videos",
     rendered_at: new Date().toISOString(),
+    i2v_clips: i2vClips,
   };
 }

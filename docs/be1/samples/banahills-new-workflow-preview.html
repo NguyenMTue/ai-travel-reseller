@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TravelLink AI - True Hybrid Video Preview (I2V + Ken Burns)</title>
+  <style>
+    body {
+      background: #0b0f19;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 15px;
+      margin: 0;
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+    h1 {
+      font-size: 20px;
+      color: #ffd700;
+      margin-bottom: 8px;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+    .video-wrap {
+      width: 100%;
+      aspect-ratio: 9/16;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+      margin-bottom: 20px;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .badge-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .badge {
+      background: #0f172a;
+      border: 1px solid #3b82f6;
+      color: #60a5fa;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+    .badge-success {
+      border-color: #22c55e;
+      color: #4ade80;
+    }
+    .link-btn {
+      display: block;
+      text-align: center;
+      background: #ffd700;
+      color: #0b0f19;
+      font-weight: 700;
+      padding: 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🎬 True Hybrid Video: I2V Reference Motion + Ken Burns Food Safeguard</h1>
+    <p>Cảnh 1 & Cảnh 2 sử dụng <b>clip video chuyển động AI thực tế (từ reference)</b>; Cảnh 4 món ăn áp dụng <b>Ken Burns Food Focus Zoom</b> trên ảnh thật 100%.</p>
+    
+    <div class="badge-list">
+      <span class="badge badge-success">✓ Cảnh 1-2: Real I2V Video Clip</span>
+      <span class="badge badge-success">✓ Cảnh 4: Real Food Image Zoom</span>
+      <span class="badge badge-success">✓ Tỷ lệ chuẩn dọc 9:16</span>
+      <span class="badge badge-success">✓ Phụ đề Safe Zone 280px</span>
+      <span class="badge badge-success">✓ Hoài My TTS + BGM Ducking</span>
+    </div>
+
+    <div class="video-wrap">
+      <video controls autoplay muted loop playsinline>
+        <source src="banahills-hybrid-new-workflow.mp4" type="video/mp4">
+        <source src="http://127.0.0.1:54321/storage/v1/object/public/campaign-videos/banahills-hybrid-new-workflow-1792680381482.mp4" type="video/mp4">
+        Trình duyệt của bạn không hỗ trợ thẻ video.
+      </video>
+    </div>
+
+    <a class="link-btn" href="http://127.0.0.1:54321/storage/v1/object/public/campaign-videos/banahills-hybrid-new-workflow-1792680381482.mp4" target="_blank">Mở Video Supabase Storage Public URL</a>
+  </div>
+</body>
+</html>
