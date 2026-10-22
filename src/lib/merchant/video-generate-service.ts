@@ -34,7 +34,16 @@ export type GenerateVideoServiceResult =
 /**
  * Suy đoán Shot Type thông minh từ style_tags và title của media
  */
-function inferShotType(styleTags: string[], title: string, index: number): ShotType {
+function inferShotType(styleTags: string[], title: string, index: number, metadata?: unknown): ShotType {
+  if (metadata && typeof metadata === "object" && !Array.isArray(metadata)) {
+    const raw = (metadata as Record<string, unknown>).shot_type;
+    if (
+      typeof raw === "string" &&
+      ["AERIAL_WIDE", "SCENIC_MEDIUM", "CLOSEUP_FOOD", "HUMAN_POV"].includes(raw)
+    ) {
+      return raw as ShotType;
+    }
+  }
   const combined = (styleTags.join(" ") + " " + title).toLowerCase();
 
   if (
@@ -175,7 +184,7 @@ export async function generateMerchantCampaignVideo(
       asset_id: row.id,
       url: row.video_url,
       type: isVideo ? "VIDEO" : "IMAGE",
-      shot_type: inferShotType(row.style_tags || [], row.title, index),
+      shot_type: inferShotType(row.style_tags || [], row.title, index, row.analysis_metadata),
       resolution: "1080x1920",
       description: row.title,
     };
