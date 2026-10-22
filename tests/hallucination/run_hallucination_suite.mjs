@@ -12,8 +12,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function runTestSuite() {
-  const isLive = Boolean(process.env.GEMINI_API_KEY?.trim());
-  const executionMode = isLive ? "LIVE_GEMINI_API" : "OFFLINE_STUB_MOCK (Thời điểm B - Thiếu API Key)";
+  const isLive =
+    Boolean(process.env.GEMINI_API_KEY?.trim()) &&
+    process.env.BE2_HALLUCINATION_LIVE === "1";
+  const executionMode = isLive
+    ? "LIVE_GEMINI_API"
+    : "OFFLINE_STUB_MOCK (Thời điểm B - Offline deterministic)";
   const timestamp = new Date().toISOString();
 
   console.log(`\n======================================================================`);
@@ -33,7 +37,8 @@ async function runTestSuite() {
   logBuffer += `========================================================================================\n`;
   logBuffer += `Thời gian thực thi   : ${timestamp}\n`;
   logBuffer += `Chế độ chạy          : ${executionMode}\n`;
-  logBuffer += `API Key Status       : ${isLive ? "Configured (Live)" : "MISSING (GEMINI_API_KEY chưa cấu hình)"}\n`;
+  logBuffer += `API Key Status       : ${Boolean(process.env.GEMINI_API_KEY?.trim()) ? "Configured" : "MISSING"}\n`;
+  logBuffer += `Live Flag (BE2_HALLUCINATION_LIVE) : ${process.env.BE2_HALLUCINATION_LIVE === "1" ? "1 (Active)" : "0/Unset (Offline Default)"}\n`;
   logBuffer += `Môi trường cô lập    : STRICT ISOLATION (Chỉ chạy và ghi log bên trong tests/)\n`;
   logBuffer += `Tổng số test case    : ${ADVERSARIAL_TEST_CASES.length}\n`;
   logBuffer += `----------------------------------------------------------------------------------------\n\n`;
