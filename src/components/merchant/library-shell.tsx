@@ -23,7 +23,7 @@ export function LibraryShell({children,preview=false}:{children:React.ReactNode;
 export function LibraryPending() {
   return <section className={styles.pending} aria-labelledby="library-pending-title"><span className={styles.icon}><Film size={28} aria-hidden="true" /></span>
     <p className="eyebrow">ĐANG CHUẨN BỊ</p><h2 id="library-pending-title">Thư viện đang được hoàn thiện</h2>
-    <p>Danh sách media thật chưa được bật. Nhóm phụ trách đang xác nhận phạm vi mẫu dùng chung và media riêng, cùng quyền đọc tương ứng.</p>
+    <p>Thư viện dành riêng cho từng Merchant. Danh sách media thật chưa được bật trong lúc nhóm phụ trách kiểm chứng quyền truy cập.</p>
     <p>Hiện chưa tải dữ liệu tài khoản. Bạn có thể tiếp tục quản lý chiến dịch trong lúc chờ thư viện sẵn sàng.</p>
     <Link prefetch={false} className="button button-outline" href="/merchant">Về tổng quan</Link>
   </section>;

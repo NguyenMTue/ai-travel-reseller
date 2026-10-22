@@ -16,7 +16,7 @@ const itemSchema = z.object({
 const count = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const paginationSchema = z.object({total: count, page: count.positive(), limit: count.positive().max(100), totalPages: count.positive()});
 export type LibraryItem = z.infer<typeof itemSchema>;
-export type LibraryQuery = { page: number; limit: number; search: string; platform: "" | typeof MEDIA_PLATFORMS[number] };
+export type LibraryQuery = { page: number; limit: number; search: string; platform: "" | typeof MEDIA_PLATFORMS[number]; tag?: string };
 export type LibraryPage = { items: LibraryItem[]; pagination: z.infer<typeof paginationSchema> };
 export type LibraryResult = {status: "ready"; data: LibraryPage} | {status: "session" | "forbidden"} | {status: "error"; reason: "network" | "service" | "schema"};
 export type LibraryRequest = (query: LibraryQuery, signal: AbortSignal) => Promise<LibraryResult>;
@@ -28,7 +28,8 @@ export function parseLibraryResponse(value: unknown, query: LibraryQuery): Libra
   const {data:items,pagination:p} = parsed.data;
   if (p.page!==query.page || p.limit!==query.limit || p.totalPages!==Math.max(1,Math.ceil(p.total/p.limit))
     || items.length!==Math.min(p.limit,Math.max(0,p.total-(p.page-1)*p.limit)) || new Set(items.map(item=>item.id)).size!==items.length) return {status:"error",reason:"schema"};
-  // Do not infer ownership from merchantId. Shared vs private scope needs BE/BA confirmation.
+  // Private Merchant media: enforce ownership through server session and RLS,
+  // never by hiding cross-account rows after they have reached this client.
   return {status:"ready",data:{items,pagination:p}};
 }
 
@@ -36,11 +37,12 @@ export function toMediaCardProps(item: LibraryItem) {
   return {id:item.id,title:item.title,thumbnailUrl:item.thumbnailUrl,durationSeconds:item.duration,styleTags:item.styleTags};
 }
 
-// Prepared transport only. The live page does not invoke it until scope/authorization is confirmed.
+// Prepared private-cookie transport only. Live reads stay blocked pending authorization checks.
 export async function readLibrary(query: LibraryQuery, signal: AbortSignal, send: typeof fetch): Promise<LibraryResult> {
   const params = new URLSearchParams({page:String(query.page),limit:String(query.limit)});
   if(query.search) params.set("search",query.search);
   if(query.platform) params.set("platform",query.platform);
+  if(query.tag?.trim()) params.set("tag",query.tag.trim());
   try {
     const response = await send(`/api/merchant/media?${params}`,{method:"GET",credentials:"same-origin",cache:"no-store",redirect:"error",signal});
     if(response.status===401) return {status:"session"};

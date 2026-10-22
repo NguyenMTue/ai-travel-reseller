@@ -39,6 +39,20 @@ test("prepared transport uses one private read, no merchant identity or retry an
   assert.deepEqual(await readLibrary(query,new AbortController().signal,async()=>new Response("not json")),{status:"error",reason:"schema"});
   assert.deepEqual(await readLibrary(query,new AbortController().signal,async()=>{throw new TypeError("offline");}),{status:"error",reason:"network"});
 });
+test("private-cookie request serializes only supported filters, never injected Merchant identity",async()=>{
+  const filtered={...initialLibraryQuery,limit:20,platform:"reels" as const,search:"Hội An",tag:" Gia đình ",merchant_id:"untrusted",merchantId:"untrusted",headers:{"x-merchant-id":"untrusted"}};
+  let calls=0;
+  const result=await readLibrary(filtered,new AbortController().signal,async(input,init)=>{
+    calls++;
+    const url=new URL(String(input),"https://fixture.invalid");
+    assert.equal(url.pathname,"/api/merchant/media");
+    assert.deepEqual(Object.fromEntries(url.searchParams),{page:"1",limit:"20",search:"Hội An",platform:"reels",tag:"Gia đình"});
+    assert.equal(init?.credentials,"same-origin");assert.equal(init?.cache,"no-store");assert.equal(init?.headers,undefined);assert.equal(init?.body,undefined);
+    return Response.json({success:true,data:[],pagination:{page:1,limit:20,total:0,totalPages:1}});
+  });
+  assert.equal(calls,1);assert.equal(result.status,"ready");
+});
+
 test("mock server applies search/platform to full collection and pages, not only current client page",async()=>{
   const read=mediaFixtureRequest("ready","A");
   const second=await read({...initialLibraryQuery,page:2},new AbortController().signal);

@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import { chromium, expect as baseExpect } from "@playwright/test";
 const expect = baseExpect.configure({ timeout: 60000 });
-const base = "http://127.0.0.1:3187";
-const output = "build/fe-w3-chat-evidence";
+const base = process.env.CHAT_BASE_URL ?? "http://127.0.0.1:3187";
+const output = process.env.CHAT_EVIDENCE_DIR ?? "build/fe-w3-chat-evidence";
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true, ...(process.env.PLAYWRIGHT_CHROMIUM_PATH ? {executablePath:process.env.PLAYWRIGHT_CHROMIUM_PATH}: {}) });
 try {

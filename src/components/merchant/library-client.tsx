@@ -1,19 +1,19 @@
 "use client";
-import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, CircleHelp, Search, X } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
+import { MediaCard as Card, MediaCardGrid as Grid } from "./media-card";
+import { VideoGuidelinesModal as Guidelines } from "./video-guidelines-modal";
 import { initialLibraryQuery, toMediaCardProps, type LibraryItem, type LibraryQuery, type LibraryRequest, type LibraryResult } from "@/src/lib/merchant/media-library";
 import styles from "./library.module.css";
 
-type MediaCardSlot = ReturnType<typeof toMediaCardProps> & {isSelected?:boolean;onSelect?:(id:string)=>void};
-export type LibraryComponents = {Card:ComponentType<MediaCardSlot>;Grid:ComponentType<{children:ReactNode}>;Guidelines:ComponentType<{isOpen:boolean;onClose:()=>void}>};
 type LibraryState = LibraryResult | {status:"loading"};
 
-// Slot injection keeps the reviewed snapshots exclusively in the preview fixture.
-export function LibraryClient({request,components,contextKey,observeInvalidation}:{request:LibraryRequest;components:LibraryComponents;contextKey:string;observeInvalidation?:(invalidate:()=>void)=>()=>void}) {
-  return <LibraryRead key={contextKey} request={request} components={components} observeInvalidation={observeInvalidation} />;
+// Preview and future live reads share canonical components; only transport is injected.
+export function LibraryClient({request,contextKey,observeInvalidation}:{request:LibraryRequest;contextKey:string;observeInvalidation?:(invalidate:()=>void)=>()=>void}) {
+  return <LibraryRead key={contextKey} request={request} observeInvalidation={observeInvalidation} />;
 }
-function LibraryRead({request,components:{Card,Grid,Guidelines},observeInvalidation}:{request:LibraryRequest;components:LibraryComponents;observeInvalidation?:(invalidate:()=>void)=>()=>void}) {
+function LibraryRead({request,observeInvalidation}:{request:LibraryRequest;observeInvalidation?:(invalidate:()=>void)=>()=>void}) {
   const [query,setQuery]=useState(initialLibraryQuery),[draft,setDraft]=useState(""),[result,setResult]=useState<LibraryState>({status:"loading"});
   const [attempt,setAttempt]=useState(0),[selected,setSelected]=useState<LibraryItem|null>(null),[guide,setGuide]=useState(false);
   const invalid=useRef(false),privateView=useRef<HTMLDivElement>(null);
