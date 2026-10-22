@@ -32,10 +32,12 @@ export function ResellerBottomNav({ preview = false }: { preview?: boolean }) {
   const title = useRef<HTMLHeadingElement>(null);
   const opener = useRef<HTMLButtonElement | null>(null);
   const feedPath = preview ? "/preview/reseller" : "/reseller/campaigns";
+  const walletPath = preview ? "/preview/reseller/wallet" : "/reseller/wallet";
   const inDetail = pathname.startsWith(`${preview ? "/preview/reseller" : "/reseller"}/campaigns/`);
   const contentReady = inDetail && hasContent === "true";
   const trackingReady = inDetail && hasTracking === "true";
-  const active = contentReady && hash === "#reseller-content-kit" ? "content"
+  const active = pathname === walletPath || pathname.startsWith(`${walletPath}/`) ? "wallet"
+    : contentReady && hash === "#reseller-content-kit" ? "content"
     : trackingReady && hash === "#reseller-tracking" ? "tracking" : "discover";
 
   useEffect(() => {
@@ -58,7 +60,7 @@ export function ResellerBottomNav({ preview = false }: { preview?: boolean }) {
     { key: "discover", label: "Khám phá", icon: Compass, href: feedPath, hint: "Chiến dịch" },
     { key: "content", label: "Nội dung AI", icon: Sparkles, href: contentReady ? "#reseller-content-kit" : undefined, hint: contentReady ? "Content Kit" : "Mở chiến dịch" },
     { key: "tracking", label: "Link & QR", icon: QrCode, href: trackingReady ? "#reseller-tracking" : undefined, hint: trackingReady ? "Theo chiến dịch" : "Mở chiến dịch" },
-    { key: "wallet", label: "Ví hoa hồng", icon: Wallet, href: undefined, hint: "Sắp có" },
+    { key: "wallet", label: "Ví hoa hồng", icon: Wallet, href: walletPath, hint: "Hoa hồng" },
   ];
 
   return <>
@@ -72,8 +74,8 @@ export function ResellerBottomNav({ preview = false }: { preview?: boolean }) {
             <span className={styles.hint}>{hint}</span>
           </>;
           const className = `${styles.item} ${selected ? styles.active : ""}`;
-          if (href) return key === "discover"
-            ? <Link key={key} href={href} className={className} aria-current={selected ? "page" : undefined}>{contents}</Link>
+          if (href) return key === "discover" || key === "wallet"
+            ? <Link key={key} href={href} prefetch={key === "wallet" ? false : undefined} className={className} aria-current={selected ? "page" : undefined}>{contents}</Link>
             : <a key={key} href={href} className={className} aria-current={selected ? "location" : undefined}
               onClick={(event) => {
                 const target = document.getElementById(href.slice(1));
@@ -97,12 +99,10 @@ export function ResellerBottomNav({ preview = false }: { preview?: boolean }) {
     <dialog ref={dialog} className={styles.dialog} aria-labelledby="reseller-nav-notice" aria-describedby="reseller-nav-help"
       onClose={() => opener.current?.focus()}>
       <div className={styles.dialogHeader}>
-        <h2 id="reseller-nav-notice" ref={title} tabIndex={-1}>{notice === "wallet" ? "Ví hoa hồng sắp có" : "Chọn chiến dịch trước"}</h2>
+        <h2 id="reseller-nav-notice" ref={title} tabIndex={-1}>Chọn chiến dịch trước</h2>
         <button type="button" className={styles.close} aria-label="Đóng hướng dẫn" onClick={() => dialog.current?.close()}><X size={20} aria-hidden="true" /></button>
       </div>
-      <p id="reseller-nav-help">{notice === "wallet"
-        ? "Màn hình Ví hoa hồng đang được chuẩn bị. Bạn sẽ có thể xem số dư và lịch sử hoa hồng tại đây khi tính năng sẵn sàng."
-        : `Mở chi tiết một chiến dịch trong mục Khám phá để ${notice === "tracking" ? "tạo link tiếp thị và xem QR đúng sản phẩm" : "xem Content Kit và nội dung AI của chiến dịch đó"}.`}</p>
+      <p id="reseller-nav-help">{`Mở chi tiết một chiến dịch trong mục Khám phá để ${notice === "tracking" ? "tạo link tiếp thị và xem QR đúng sản phẩm" : "xem Content Kit và nội dung AI của chiến dịch đó"}.`}</p>
       <button type="button" className={styles.confirm} onClick={() => dialog.current?.close()}>Đã hiểu</button>
     </dialog>
   </>;

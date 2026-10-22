@@ -10,15 +10,12 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
+import { requestChat, type ChatTransport, type Attribution } from "@/src/lib/chat/transport";
+export type { Attribution } from "@/src/lib/chat/transport";
 type Message = {
   role: "user" | "assistant";
   content: string;
   checkout?: string | null;
-};
-export type Attribution = {
-  reseller_id: string;
-  campaign_id: string;
-  product_id: string;
 };
 const prompts = [
   "Tôi muốn tìm hiểu về sản phẩm",
@@ -35,31 +32,42 @@ function safeCheckout(raw: unknown) {
 }
 export function ChatPanel({
   attribution,
+  transport = requestChat,
+  preview = false,
+  active = true,
 }: {
   attribution: Attribution | null;
+  transport?: ChatTransport;
+  preview?: boolean;
+  active?: boolean;
 }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const bottom = useRef<HTMLDivElement>(null);
+  const scroll = useRef<HTMLDivElement>(null);
+  const follow = useRef(true);
+  const mounted = useRef(false);
   const controller = useRef<AbortController | null>(null);
   const busy = useRef(false);
   const trackedChatOpen = useRef(false);
   useEffect(() => {
-    bottom.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (follow.current && scroll.current) scroll.current.scrollTo({ top: scroll.current.scrollHeight,
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
   }, [messages, pending]);
   useEffect(() => {
-    if (trackedChatOpen.current) return;
+    if (!active || preview || trackedChatOpen.current) return;
     trackedChatOpen.current = true;
     captureChatFunnelEvent("chat_opened", attribution, {
       page: "chat",
     });
-  }, [attribution]);
-  useEffect(() => () => controller.current?.abort(), []);
+  }, [attribution, preview, active]);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; controller.current?.abort(); }; }, []);
   async function send(text: string) {
     const question = text.trim();
     if (!question || busy.current) return;
+    if (!navigator.onLine) { setInput(question); setError("Bạn đang ngoại tuyến. Tin nhắn chưa gửi; hãy kết nối lại rồi tự gửi khi sẵn sàng."); return; }
     if (question.length > 2000) {
       setError("Câu hỏi tối đa 2.000 ký tự.");
       return;
@@ -71,11 +79,12 @@ export function ChatPanel({
     const history = messages
       .slice(-12)
       .map(({ role, content }) => ({ role, content }));
-    captureChatFunnelEvent("chat_message_sent", attribution, {
+    if (!preview) captureChatFunnelEvent("chat_message_sent", attribution, {
       message_length: question.length,
       message_number: messages.filter((message) => message.role === "user").length + 1,
     });
     setMessages((prev) => [...prev, { role: "user", content: question }]);
+    follow.current = true;
     if (!attribution) {
       setMessages((prev) => [
         ...prev,
@@ -93,23 +102,13 @@ export function ChatPanel({
     controller.current = abort;
     const timeout = setTimeout(() => abort.abort(), 45000);
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const data = await transport({
           message: question,
           conversation_history: history,
           attribution_context: attribution,
-        }),
-        signal: abort.signal,
-      });
-      if (!response.ok)
-        throw new Error(
-          response.status === 404
-            ? "Liên kết sản phẩm không còn hợp lệ. Vui lòng xin lại liên kết từ cộng tác viên."
-            : "Trợ lý chưa thể trả lời lúc này. Vui lòng thử lại.",
-        );
-      const data = await response.json();
+        }, abort.signal);
+      if (!mounted.current) return;
+      if (abort.signal.aborted) throw new DOMException("Timeout", "AbortError");
       if (typeof data.reply !== "string" || !data.reply.trim())
         throw new Error("Phản hồi chưa hợp lệ. Vui lòng thử lại.");
       setMessages((prev) => [
@@ -121,6 +120,7 @@ export function ChatPanel({
         },
       ]);
     } catch (e) {
+      if (!mounted.current) return;
       setError(
         e instanceof Error && e.name !== "AbortError"
           ? e.message
@@ -130,7 +130,7 @@ export function ChatPanel({
       setInput(question);
     } finally {
       clearTimeout(timeout);
-      setPending(false);
+      if (mounted.current) setPending(false);
       busy.current = false;
     }
   }
@@ -174,7 +174,7 @@ export function ChatPanel({
           <div>
             <strong>TravelLink Assistant</strong>
             <small>
-              {attribution ? "Tư vấn theo sản phẩm" : "Bản xem trước giao diện"}
+              {preview ? "Mô phỏng · Không kết nối AI" : attribution ? "Tư vấn theo sản phẩm" : "Bản xem trước giao diện"}
             </small>
           </div>
           <Button
@@ -192,6 +192,8 @@ export function ChatPanel({
           </Button>
         </header>
         <div
+          ref={scroll}
+          onScroll={() => { const el = scroll.current; if (el) follow.current = el.scrollHeight - el.scrollTop - el.clientHeight < 72; }}
           className="chat-messages"
           role="log"
           aria-live="polite"
@@ -232,7 +234,7 @@ export function ChatPanel({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() =>
-                      captureChatFunnelEvent("checkout_clicked", attribution, {
+                      !preview && m.checkout && captureChatFunnelEvent("checkout_clicked", attribution, {
                         checkout_domain: new URL(m.checkout).hostname,
                       })
                     }

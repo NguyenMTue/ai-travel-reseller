@@ -1,11 +1,9 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
-import { House, Layers3 } from "lucide-react";
 
 import { Brand } from "@/src/components/brand";
-import { Button } from "@/src/components/ui/button";
 import { ResellerSignout } from "./signout";
 import { ResellerBottomNav } from "./bottom-nav";
+import { ResellerDesktopNav } from "./desktop-nav";
 import styles from "./bottom-nav.module.css";
 
 export function ResellerShell({
@@ -27,28 +25,7 @@ export function ResellerShell({
           </p>
         </div>
         <div className={`${preview ? styles.previewToolbar : ""} mx-auto flex w-full max-w-[1320px] flex-wrap items-center justify-between gap-3 px-4 pb-4 sm:px-6 lg:px-10`}>
-          <nav
-            aria-label="Điều hướng Cộng tác viên"
-            className={`${mobileNavigation ? styles.desktopNav : "flex"} min-w-0 flex-wrap gap-2 text-xs`}
-          >
-            <Button asChild size="sm">
-              <Link
-                href={preview ? "/preview/reseller" : "/reseller/campaigns"}
-                aria-current="page"
-                className="min-h-11"
-              >
-                <Layers3 size={17} aria-hidden="true" />
-                Chiến dịch
-              </Link>
-            </Button>
-            <Link
-              href="/"
-              className="flex min-h-11 items-center gap-2 rounded-lg px-4 py-3 text-muted-foreground hover:bg-secondary hover:text-primary"
-            >
-              <House size={17} aria-hidden="true" />
-              Trang chủ
-            </Link>
-          </nav>
+          <ResellerDesktopNav preview={preview} className={mobileNavigation ? styles.desktopNav : "flex"} />
           {!preview && <ResellerSignout />}
         </div>
       </header>

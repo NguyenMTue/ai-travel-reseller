@@ -58,9 +58,7 @@ try {
       await expect(nav.getByRole("button", { name: /Nội dung AI/ })).toBeFocused();
       assert.equal(await nav.getByRole("button", { name: /Nội dung AI/ }).evaluate((element) => getComputedStyle(element).outlineStyle), "solid");
       assert.equal(await nav.getByRole("button", { name: /Nội dung AI/ }).evaluate((element) => getComputedStyle(element).transitionDuration), "0s");
-      await nav.getByRole("button", { name: /Ví hoa hồng/ }).click();
-      await expect(page.getByRole("heading", { name: "Ví hoa hồng sắp có" })).toBeVisible();
-      await page.getByRole("button", { name: "Đã hiểu", exact: true }).click();
+      await expect(nav.getByRole("link", { name: /Ví hoa hồng/ })).toHaveAttribute("href", "/preview/reseller/wallet");
       await page.getByLabel("Tìm kiếm chiến dịch", { exact: true }).fill("Hội An");
       await page.getByLabel("Tìm kiếm chiến dịch", { exact: true }).fill("");
       await page.locator("footer").scrollIntoViewIfNeeded();
