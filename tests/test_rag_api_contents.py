@@ -9,6 +9,8 @@ from unittest.mock import patch
 SERVICE_DIR = Path(__file__).resolve().parents[1] / "services" / "llm-service"
 sys.path.insert(0, str(SERVICE_DIR))
 
+from fastapi import HTTPException
+
 from rag_api import (  # noqa: E402
     CampaignScriptDraft,
     ContentDraft,
@@ -157,8 +159,9 @@ class ContentBatchContractTests(unittest.TestCase):
             def maybe_single(self):
                 return self
 
-            def upsert(self, rows, **_kwargs):
+            def upsert(self, rows, on_conflict=None, ignore_duplicates=False, **_kwargs):
                 self.pending = rows
+                self.ignore_duplicates = ignore_duplicates
                 return self
 
             def execute(self):
@@ -173,13 +176,27 @@ class ContentBatchContractTests(unittest.TestCase):
                         "verified_facts": [],
                     }})()
                 existing = self.db.rows
+                upserted = []
                 for row in self.pending:
-                    if not any(saved["generation_key"] == row["generation_key"] for saved in existing):
-                        existing.append({**row, "id": f"content-{len(existing)}"})
+                    match_idx = None
+                    for i, saved in enumerate(existing):
+                        if saved["generation_key"] == row["generation_key"]:
+                            match_idx = i
+                            break
+                    if match_idx is not None:
+                        if not getattr(self, "ignore_duplicates", False):
+                            existing[match_idx] = {**existing[match_idx], **row}
+                        upserted.append(existing[match_idx])
+                    else:
+                        new_row = {**row, "id": f"content-{len(existing)}"}
+                        existing.append(new_row)
+                        upserted.append(new_row)
                 selected = existing
                 if self.keys:
                     key, values = self.keys
                     selected = [row for row in selected if row.get(key) in values]
+                elif getattr(self, "pending", None):
+                    selected = upserted
                 return type("Result", (), {"data": selected})()
 
         class FakeSupabase:
@@ -200,9 +217,195 @@ class ContentBatchContractTests(unittest.TestCase):
             first = save_campaign_contents(request, x_api_key="k" * 40)
             retry = save_campaign_contents(request, x_api_key="k" * 40)
         self.assertEqual(first["inserted_count"], 10)
+        self.assertEqual(first["persisted_count"], 10)
+        self.assertEqual(first["updated_count"], 0)
+        self.assertEqual(retry["inserted_count"], 0)
+        self.assertEqual(retry["persisted_count"], 10)
+        self.assertEqual(retry["updated_count"], 10)
         self.assertEqual(first["content_ids"], retry["content_ids"])
         self.assertEqual(len(fake.rows), 10)
         self.assertEqual(first["status"], "approved")
+        self.assertEqual(retry["status"], "approved")
+
+    def test_reproduce_and_fix_status_change_from_needs_review_to_approved(self):
+        """Part 1: If first run persisted needs_review and second run has valid output (approved),
+        database rows must be updated to approved, no duplicates created, and API response matches DB."""
+        class FakeQuery:
+            def __init__(self, db, table):
+                self.db, self.table = db, table
+                self.filters = {}
+                self.keys = None
+                self.pending = []
+
+            def select(self, *_args):
+                return self
+
+            def eq(self, key, value):
+                self.filters[key] = value
+                return self
+
+            def in_(self, key, values):
+                self.keys = (key, set(values))
+                return self
+
+            def maybe_single(self):
+                return self
+
+            def upsert(self, rows, on_conflict=None, ignore_duplicates=False, **_kwargs):
+                self.pending = rows
+                self.ignore_duplicates = ignore_duplicates
+                return self
+
+            def execute(self):
+                if self.table == "campaigns":
+                    return type("Result", (), {"data": {"id": campaign_id, "product_id": product_id}})()
+                if self.table == "products":
+                    return type("Result", (), {"data": {
+                        "id": product_id,
+                        "original_price": 1_000_000,
+                        "sale_price": 800_000,
+                        "confirmed_promo_codes": [],
+                        "verified_facts": [],
+                    }})()
+                existing = self.db.rows
+                upserted = []
+                for row in self.pending:
+                    match_idx = None
+                    for i, saved in enumerate(existing):
+                        if saved["generation_key"] == row["generation_key"]:
+                            match_idx = i
+                            break
+                    if match_idx is not None:
+                        if not getattr(self, "ignore_duplicates", False):
+                            existing[match_idx] = {**existing[match_idx], **row}
+                        upserted.append(existing[match_idx])
+                    else:
+                        new_row = {**row, "id": f"content-{len(existing)}"}
+                        existing.append(new_row)
+                        upserted.append(new_row)
+                selected = existing
+                if self.keys:
+                    key, values = self.keys
+                    selected = [row for row in selected if row.get(key) in values]
+                elif getattr(self, "pending", None):
+                    selected = upserted
+                return type("Result", (), {"data": selected})()
+
+        class FakeSupabase:
+            def __init__(self):
+                self.rows = []
+
+            def table(self, table):
+                return FakeQuery(self, table)
+
+        campaign_id = "44444444-4444-4444-4444-111111111111"
+        product_id = "33333333-3333-3333-3333-444444444444"
+        fake = FakeSupabase()
+
+        # Step 1: First run with price mismatch (Giá 999.000đ != 800.000đ)
+        invalid_rows = make_rows(full_kit_for_all=True)
+        for r in invalid_rows:
+            r["caption"] = "Giá chỉ 999.000đ cực kỳ hấp dẫn dành cho mọi nhà! #DuLich"
+
+        payload_1 = {"campaign_id": campaign_id, "records": invalid_rows}
+        with patch.dict("os.environ", {"CONTENTS_API_KEY": "k" * 40}), patch(
+            "rag_api.get_supabase", return_value=fake
+        ):
+            req_1 = SaveCampaignContentsRequest.model_validate(payload_1)
+            resp_1 = save_campaign_contents(req_1, x_api_key="k" * 40)
+
+        self.assertEqual(resp_1["status"], "needs_review")
+        self.assertIn("PRICE_MISMATCH", resp_1["flags"])
+        self.assertEqual(resp_1["inserted_count"], 10)
+        self.assertEqual(resp_1["persisted_count"], 10)
+        self.assertEqual(len(fake.rows), 10)
+        # Verify all rows in DB initially have status needs_review
+        self.assertTrue(all(r["status"] == "needs_review" for r in fake.rows))
+
+        # Step 2: Second run with corrected, valid content (Giá 800.000đ matches sale_price)
+        valid_rows = make_rows(full_kit_for_all=True)
+        for r in valid_rows:
+            r["caption"] = "Giá vé chỉ 800.000đ cực kỳ hấp dẫn dành cho mọi nhà! #DuLich"
+
+        payload_2 = {"campaign_id": campaign_id, "records": valid_rows}
+        with patch.dict("os.environ", {"CONTENTS_API_KEY": "k" * 40}), patch(
+            "rag_api.get_supabase", return_value=fake
+        ):
+            req_2 = SaveCampaignContentsRequest.model_validate(payload_2)
+            resp_2 = save_campaign_contents(req_2, x_api_key="k" * 40)
+
+        # Database and API response must both be approved
+        self.assertEqual(resp_2["status"], "approved")
+        self.assertEqual(resp_2["flags"], [])
+        self.assertEqual(resp_2["inserted_count"], 0)
+        self.assertEqual(resp_2["updated_count"], 10)
+        self.assertEqual(resp_2["persisted_count"], 10)
+        # Exactly 10 rows in DB, no duplicates created
+        self.assertEqual(len(fake.rows), 10)
+        # Crucial check: DB rows must be updated to approved, NOT left as needs_review
+        self.assertTrue(all(r["status"] == "approved" for r in fake.rows))
+        # Content in DB must be updated
+        self.assertTrue(all("800.000đ" in r["caption"] for r in fake.rows))
+
+    def test_preflight_select_failure_raises_502_and_aborts_upsert(self):
+        """Preflight SELECT failure must fail-closed: raise HTTP 502 and never call upsert."""
+        campaign_id = "44444444-4444-4444-4444-111111111111"
+        product_id = "33333333-3333-3333-3333-444444444444"
+
+        upsert_called = False
+
+        class FailingFakeQuery:
+            def __init__(self, table):
+                self.table = table
+
+            def select(self, *_args):
+                return self
+
+            def eq(self, _key, _value):
+                return self
+
+            def in_(self, _key, _values):
+                return self
+
+            def maybe_single(self):
+                return self
+
+            def upsert(self, *_args, **_kwargs):
+                nonlocal upsert_called
+                upsert_called = True
+                return self
+
+            def execute(self):
+                if self.table == "campaigns":
+                    return type("Result", (), {"data": {"id": campaign_id, "product_id": product_id}})()
+                if self.table == "products":
+                    return type("Result", (), {"data": {
+                        "id": product_id,
+                        "original_price": 1_000_000,
+                        "sale_price": 800_000,
+                        "confirmed_promo_codes": [],
+                        "verified_facts": [],
+                    }})()
+                if self.table == "contents":
+                    raise RuntimeError("Simulated database failure during generation_key lookup")
+                return type("Result", (), {"data": []})()
+
+        class FailingFakeSupabase:
+            def table(self, table):
+                return FailingFakeQuery(table)
+
+        payload = {"campaign_id": campaign_id, "records": make_rows(full_kit_for_all=True)}
+        request = SaveCampaignContentsRequest.model_validate(payload)
+
+        with patch.dict("os.environ", {"CONTENTS_API_KEY": "k" * 40}), patch(
+            "rag_api.get_supabase", return_value=FailingFakeSupabase()
+        ):
+            with self.assertRaises(HTTPException) as ctx:
+                save_campaign_contents(request, x_api_key="k" * 40)
+
+        self.assertEqual(ctx.exception.status_code, 502)
+        self.assertIn("Could not verify existing contents in Supabase", ctx.exception.detail)
+        self.assertFalse(upsert_called)
 
 
 if __name__ == "__main__":

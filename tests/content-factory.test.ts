@@ -5,7 +5,9 @@ import test from "node:test";
 import {
   campaignContentJsonSchema,
   campaignContentOutputSchema,
+  captionSchema,
   geminiCampaignContentJsonSchema,
+  hasValidHashtag,
   parseCampaignContentOutput,
 } from "../src/lib/ai/schemas/content-schema.ts";
 import {
@@ -158,6 +160,46 @@ test("structured output rejects common n8n parser contract violations", () => {
     ...validOutput,
     variants: [],
   }));
+});
+
+test("hashtag validation accepts unicode letters and numbers in vietnamese and english", () => {
+  const validTags = ["#DaNang", "#VinWonders2026", "#ĐàNẵng", "#Du_Lịch_2026"];
+  for (const tag of validTags) {
+    assert.equal(hasValidHashtag(`Khám phá hành trình tuyệt vời cùng gia đình ${tag}`), true);
+    assert.doesNotThrow(() =>
+      captionSchema.parse(
+        `Khám phá hành trình trải nghiệm tuyệt vời cùng gia đình ngay hôm nay ${tag}`,
+      ),
+    );
+  }
+});
+
+test("hashtag validation rejects symbols-only, lone hash, or missing hashtag", () => {
+  const invalidCaptions = [
+    "Một caption đủ dài hơn bốn mươi ký tự nhưng chỉ chứa hashtag ký hiệu #!",
+    "Một caption đủ dài hơn bốn mươi ký tự nhưng chỉ chứa hashtag gạch nối #---",
+    "Một caption đủ dài hơn bốn mươi ký tự nhưng chỉ chứa hashtag emoji #💥",
+    "Một caption đủ dài hơn bốn mươi ký tự nhưng có dấu thăng đứng một mình # ở giữa",
+    "Một caption đủ dài hơn bốn mươi ký tự nhưng kết thúc bằng dấu thăng #",
+    "Một caption đủ dài hơn bốn mươi ký tự nhưng hoàn toàn không có hashtag nào cả",
+  ];
+
+  for (const caption of invalidCaptions) {
+    assert.equal(hasValidHashtag(caption), false);
+    assert.throws(
+      () => captionSchema.parse(caption),
+      /Caption must include at least one relevant hashtag|Caption hashtag must contain at least one letter or number/,
+    );
+  }
+
+  assert.throws(() =>
+    campaignContentOutputSchema.parse({
+      ...validOutput,
+      captions: validOutput.captions.map(
+        () => "Khám phá hành trình trải nghiệm tuyệt vời cùng gia đình ngay hôm nay #---",
+      ),
+    }),
+  );
 });
 
 test("parser removes JSON markdown fences", () => {
