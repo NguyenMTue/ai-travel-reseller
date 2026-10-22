@@ -225,22 +225,33 @@ export function ChatPanel({
                   {m.role === "user" ? "Bạn" : "TravelLink Assistant"}
                 </span>
                 <p>{m.content}</p>
-                {m.checkout && (
-                  <a
-                    className="checkout-link"
-                    href={m.checkout}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() =>
-                      captureChatFunnelEvent("checkout_clicked", attribution, {
-                        checkout_domain: new URL(m.checkout!).hostname,
-                      })
+                {m.checkout ? (
+                  (() => {
+                    const checkout = m.checkout;
+                    let hostname = "";
+                    try {
+                      hostname = new URL(checkout).hostname;
+                    } catch {
+                      return null;
                     }
-                  >
-                    Đến trang thanh toán của doanh nghiệp ↗
-                    <small>{new URL(m.checkout).hostname}</small>
-                  </a>
-                )}
+                    return (
+                      <a
+                        className="checkout-link"
+                        href={checkout}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() =>
+                          captureChatFunnelEvent("checkout_clicked", attribution, {
+                            checkout_domain: hostname,
+                          })
+                        }
+                      >
+                        Đến trang thanh toán của doanh nghiệp ↗
+                        <small>{hostname}</small>
+                      </a>
+                    );
+                  })()
+                ) : null}
               </div>
             ))
           )}

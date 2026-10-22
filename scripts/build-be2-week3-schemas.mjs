@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -20,9 +20,12 @@ for (const [filename, schema] of [
   ["video-analysis.schema.json", videoAnalysisJsonSchema],
   ["video-script.schema.json", campaignVideoScriptJsonSchema],
 ]) {
-  writeFileSync(
-    resolve(outputDirectory, filename),
-    `${JSON.stringify(schema, null, 2)}\n`,
-    "utf8",
-  );
+  const targetPath = resolve(outputDirectory, filename);
+  const existing = existsSync(targetPath) ? readFileSync(targetPath, "utf8") : "";
+  const eol = existing.includes("\r\n") ? "\r\n" : "\n";
+  const serialized = JSON.stringify(schema, null, 2).replace(/\r?\n/g, eol) + eol;
+
+  if (existing !== serialized) {
+    writeFileSync(targetPath, serialized, "utf8");
+  }
 }
