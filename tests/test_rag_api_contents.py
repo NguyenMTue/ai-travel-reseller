@@ -9,6 +9,8 @@ from unittest.mock import patch
 SERVICE_DIR = Path(__file__).resolve().parents[1] / "services" / "llm-service"
 sys.path.insert(0, str(SERVICE_DIR))
 
+from fastapi import HTTPException
+
 from rag_api import (  # noqa: E402
     CampaignScriptDraft,
     ContentDraft,
@@ -344,6 +346,66 @@ class ContentBatchContractTests(unittest.TestCase):
         self.assertTrue(all(r["status"] == "approved" for r in fake.rows))
         # Content in DB must be updated
         self.assertTrue(all("800.000đ" in r["caption"] for r in fake.rows))
+
+    def test_preflight_select_failure_raises_502_and_aborts_upsert(self):
+        """Preflight SELECT failure must fail-closed: raise HTTP 502 and never call upsert."""
+        campaign_id = "44444444-4444-4444-4444-111111111111"
+        product_id = "33333333-3333-3333-3333-444444444444"
+
+        upsert_called = False
+
+        class FailingFakeQuery:
+            def __init__(self, table):
+                self.table = table
+
+            def select(self, *_args):
+                return self
+
+            def eq(self, _key, _value):
+                return self
+
+            def in_(self, _key, _values):
+                return self
+
+            def maybe_single(self):
+                return self
+
+            def upsert(self, *_args, **_kwargs):
+                nonlocal upsert_called
+                upsert_called = True
+                return self
+
+            def execute(self):
+                if self.table == "campaigns":
+                    return type("Result", (), {"data": {"id": campaign_id, "product_id": product_id}})()
+                if self.table == "products":
+                    return type("Result", (), {"data": {
+                        "id": product_id,
+                        "original_price": 1_000_000,
+                        "sale_price": 800_000,
+                        "confirmed_promo_codes": [],
+                        "verified_facts": [],
+                    }})()
+                if self.table == "contents":
+                    raise RuntimeError("Simulated database failure during generation_key lookup")
+                return type("Result", (), {"data": []})()
+
+        class FailingFakeSupabase:
+            def table(self, table):
+                return FailingFakeQuery(table)
+
+        payload = {"campaign_id": campaign_id, "records": make_rows(full_kit_for_all=True)}
+        request = SaveCampaignContentsRequest.model_validate(payload)
+
+        with patch.dict("os.environ", {"CONTENTS_API_KEY": "k" * 40}), patch(
+            "rag_api.get_supabase", return_value=FailingFakeSupabase()
+        ):
+            with self.assertRaises(HTTPException) as ctx:
+                save_campaign_contents(request, x_api_key="k" * 40)
+
+        self.assertEqual(ctx.exception.status_code, 502)
+        self.assertIn("Could not verify existing contents in Supabase", ctx.exception.detail)
+        self.assertFalse(upsert_called)
 
 
 if __name__ == "__main__":

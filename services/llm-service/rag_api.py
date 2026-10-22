@@ -533,8 +533,12 @@ def save_campaign_contents(
             for r in (existing_res.data or [])
             if r.get("generation_key")
         }
-    except Exception:
-        existing_keys = set()
+    except Exception as exc:
+        logger.exception("Could not determine existing generation keys before upsert")
+        raise HTTPException(
+            status_code=502,
+            detail="Could not verify existing contents in Supabase. Check Python service logs.",
+        ) from exc
 
     try:
         upsert_response = (
