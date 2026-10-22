@@ -157,14 +157,21 @@ Nếu migration chưa apply, người có quyền quản lý database phải xá
 
 ## 6. Bằng chứng nghiệm thu cần lưu
 
-### Trạng thái nghiệm thu Live E2E — Cập nhật ngày 21/10/2026
+### Trạng thái nghiệm thu Live E2E — Cập nhật ngày 22/10/2026
 
 - `workflow_campaign_content.json` đã có trong repo, đang `active: false`, đáp ứng đầy đủ tiêu chí production-ready không hardcode secrets.
-- Structured Output Parser đã được cấu hình chuẩn xác với native LangChain schema (5 keys ở root, loại bỏ wrapper `output`, tương thích regex Zod), loại bỏ lỗi parse markdown fence.
-- Đã nghiệm thu thành công Live E2E trên Supabase local (`127.0.0.1:54321`) cho cả hai sản phẩm:
-  * **Bà Nà Hills (`44444444-4444-4444-4444-444444444444`)**: 4 personas x 10 rows (5 full + 5 hook-only), 100% bản ghi được guardrails phân loại `approved`.
-  * **VinWonders Nam Hội An (`44444444-4444-4444-4444-333333333333`)**: 4 personas x 10 rows (5 full + 5 hook-only), 100% bản ghi đạt `approved` sau khi loại bỏ các cụm unverified claim ("vô vàn", "không gian rộng lớn", bịa thời lượng).
-- Idempotency & Persistence đã được sửa triệt để: Sử dụng `ignore_duplicates=False` để cập nhật trạng thái mới nhất từ `needs_review` sang `approved` khi model sinh nội dung chuẩn, không tạo duplicate, đếm đúng `inserted_count: 0` khi chạy lại.
+- Structured Output Parser đã được cấu hình chuẩn xác với native LangChain schema (5 keys ở root, loại bỏ wrapper `output`, tương thích regex Zod và đã siết validation hashtag chứa Unicode letter/number), loại bỏ lỗi parse markdown fence.
+- Đã nghiệm thu thành công dữ liệu trên Supabase local (`127.0.0.1:54321`) cho cả hai sản phẩm:
+  * **Bà Nà Hills (`44444444-4444-4444-4444-444444444444`)**: 4 personas x 10 rows (5 full + 5 hook-only) = 40 canonical rows, 100% bản ghi được guardrails phân loại `approved`.
+  * **VinWonders Nam Hội An (`44444444-4444-4444-4444-333333333333`)**: 4 personas x 10 rows (5 full + 5 hook-only) = 40 canonical rows, 100% bản ghi đạt `approved` sau khi loại bỏ các cụm unverified claim ("vô vàn", "không gian rộng lớn", bịa thời lượng).
+  * **Tổng cộng**: 80 canonical database rows verified trong `public.contents`.
+- **Trạng thái n8n Execution Audit:**
+  * Các execution ban đầu của workflow `Ai0P062z71tFhRCy` (CODEX SMOKE) có lưu vết trong SQLite container (Executions #1–#6).
+  * Đối với workflow production `cItQU87e5JU10gA5` ("Generate campaign content for four personas", `active: false`), các lần chạy kiểm thử được kích hoạt mà không bật chế độ lưu execution history vào SQLite container (`execution_entity` không có bản ghi cho workflow ID này).
+  * Để đảm bảo tính trung thực theo hợp đồng audit: không bịa execution ID, không tuyên bố "8/8 execution verified". Xác nhận chính xác: **"80 canonical database rows verified; n8n execution IDs unavailable"** và formal execution audit log cho workflow này được ghi nhận là pending cho lần chạy logging tiếp theo.
+- Idempotency & Persistence đã được sửa triệt để:
+  * Preflight SELECT xác định existing keys chuyển sang fail-closed: lỗi truy vấn trả về HTTP 502 đã sanitize, không gọi upsert, tránh báo sai `inserted_count`.
+  * Sử dụng `ignore_duplicates=False` để cập nhật trạng thái mới nhất từ `needs_review` sang `approved` khi model sinh nội dung chuẩn, không tạo duplicate, đếm đúng `inserted_count: 0` và `updated_count: 10` khi chạy lại.
 
 Mỗi campaign/persona cần lưu:
 

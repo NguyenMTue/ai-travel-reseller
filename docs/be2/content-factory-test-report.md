@@ -100,21 +100,21 @@ still requires BE3 to provide the exported n8n workflow and an execution showing
 the Supabase trigger, Gemini structured output, guardrail result, and database
 write in one trace.
 
-## Live n8n E2E and hardening acceptance — 2026-10-21
+## Live n8n E2E and hardening acceptance — 2026-10-21 (Updated 2026-10-22)
 
 | Check | Result |
 |---|---|
-| Deterministic BE2 suite (`test:be2`) | 43/43 PASS |
+| Deterministic BE2 suite (`test:be2`) | 45/45 PASS |
 | Deterministic Tester2 suite (`test:tester2`) | 17/17 PASS |
-| Python Content API suite (`test_rag_api_contents`) | 10/10 PASS |
+| Python Content API suite (`test_rag_api_contents`) | 11/11 PASS |
 | Python Guardrails suite (`test_content_guardrails`) | 13/13 PASS |
-| Bà Nà Hills Live n8n E2E execution | 4/4 personas PASS (40 canonical rows `approved`) |
-| VinWonders Live n8n E2E execution | 4/4 personas PASS (40 canonical rows `approved`) |
+| Local Supabase verification (Bà Nà & VinWonders) | 80 canonical database rows verified (40 Bà Nà + 40 VinWonders, 100% `approved`) |
 | Idempotency re-run test | 0 new rows inserted (`inserted_count: 0`), existing IDs preserved |
-| Structured Output Parser | 8/8 executions clean JSON schema validation |
+| Structured Output Parser | Zod runtime schema validation PASS with tightened hashtag validation |
 | n8n production readiness checklist | 9/9 PASS, `active: false`, no embedded credentials |
+| n8n execution audit status | 80 canonical database rows verified; n8n execution IDs unavailable for workflow `cItQU87e5JU10gA5` (formal execution audit pending) |
 
-### Detailed Live Matrix
+### Detailed Database Evidence (Local Supabase Postgres)
 
 | Product | Persona | Total Rows | Full / Hook-only | Guardrail Status | Persisted in Local Supabase |
 |---|---|---|---|---|---|
@@ -127,16 +127,28 @@ write in one trace.
 | VinWonders Nam Hội An | `foodie` | 10 | 5 full + 5 hook-only | `approved` | Yes (10 canonical rows) |
 | VinWonders Nam Hội An | `budget_traveler` | 10 | 5 full + 5 hook-only | `approved` | Yes (10 canonical rows) |
 
+### n8n Execution History & Audit Details
+
+- **Retrieved SQLite Executions (Workflow `Ai0P062z71tFhRCy` - CODEX SMOKE):**
+  * Executions #1 to #6 (2026-10-21 10:52:24 to 12:11:54 UTC) captured iterative development runs.
+  * Execution #6 completed all 4 personas for Bà Nà Hills, persisting 40 canonical rows into Supabase.
+- **Workflow `cItQU87e5JU10gA5` ("Generate campaign content for four personas"):**
+  * Configured with `active: false` and credential store references.
+  * Executions for VinWonders and subsequent runs were triggered without persistent execution history logging enabled in n8n container SQLite (`execution_entity` contains 0 records for `cItQU87e5JU10gA5`).
+  * Per strict audit guidelines, execution IDs are not fabricated. Formal execution audit remains pending until logged execution is performed.
+
 ### Hardening and Bug Fixes Applied
 
-1. **Persistence & Idempotency Fix (`POST /contents/batch`):**
-   - Replaced `ignore_duplicates=True` with `ignore_duplicates=False` on Postgres upsert.
-   - Accurately tracks `inserted_count`, `updated_count`, and `persisted_count`.
-   - Guaranteed that updated statuses from re-runs (e.g. from `needs_review` to `approved`) are properly written to database and match the API response.
-2. **Persona Claim Grounding:**
+1. **Persistence Counting & Fail-Closed Preflight (`POST /contents/batch`):**
+   - Eliminated swallowed exception in preflight `existing_keys` query (`except Exception: existing_keys = set()`).
+   - If preflight SELECT fails, API immediately logs context and fails-closed with sanitized HTTP 502, never proceeding to upsert.
+   - Accurately tracks `inserted_count` (0 on retry), `updated_count` (10 on retry), and `persisted_count` (10).
+2. **Hashtag Validation Tightening (`src/lib/ai/schemas/content-schema.ts`):**
+   - Enforced that captions must contain at least one hashtag with at least one Unicode letter or number via runtime `hasValidHashtag` refinement.
+   - Accepts Vietnamese and English hashtags (`#DaNang`, `#VinWonders2026`, `#ĐàNẵng`, `#Du_Lịch_2026`).
+   - Rejects symbol-only hashtags (`#!`, `#---`, `#💥`), lone `#` signs, and captions with no hashtags.
+   - Preserves provider schema compatibility without illegal regex flags in Gemini schema.
+3. **Persona Claim Grounding:**
    - Root-caused `PROHIBITED_CLAIM` triggers: "vô vàn" (foodie/local_guide), "không gian rộng lớn" (local_guide), and unverified duration / price assurances (budget_traveler).
    - Hardened prompts without weakening guardrails.
-   - All 4 personas for both products now successfully pass guardrails as `approved`.
-3. **Structured Output Parser Compliance:**
-   - Resolved JSON markdown fence end line formatting bug and regex compatibility in Zod schemas.
-   - Enforced root 5-key object output contract without wrapper keys.
+   - All 4 personas for both products successfully pass guardrails as `approved`.

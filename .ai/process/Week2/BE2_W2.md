@@ -227,9 +227,11 @@ NEXT:
 
 - **Nghiệm thu Live E2E Bà Nà Hills & VinWonders (Phần 3):**
   - Môi trường: Supabase local (`127.0.0.1:54321`), n8n local (`127.0.0.1:5678`), Gemini `gemini-3.5-flash-lite`, concurrency = 1, cooldown 15s giữa các persona.
-  - **Bà Nà Hills (`44444444-4444-4444-4444-444444444444`):** Đã chạy 4 personas x 10 rows (5 full + 5 hook-only), 100% bản ghi được guardrails duyệt `approved` trong Supabase local.
-  - **VinWonders Nam Hội An (`44444444-4444-4444-4444-333333333333`):** Đã chạy 4 personas x 10 rows (5 full + 5 hook-only), 100% bản ghi đạt `approved` trong Supabase local sau khi tinh chỉnh prompt grounding.
-  - Idempotency verified: Chạy lại cùng generation_key trả về HTTP 201 Created, `inserted_count: 0`, không sinh bản ghi trùng lặp.
+  - **Bà Nà Hills (`44444444-4444-4444-4444-444444444444`):** Đã kiểm chứng 4 personas x 10 rows (5 full + 5 hook-only) = 40 canonical rows, 100% bản ghi được guardrails duyệt `approved` trong Supabase local.
+  - **VinWonders Nam Hội An (`44444444-4444-4444-4444-333333333333`):** Đã kiểm chứng 4 personas x 10 rows (5 full + 5 hook-only) = 40 canonical rows, 100% bản ghi đạt `approved` trong Supabase local sau khi tinh chỉnh prompt grounding.
+  - Tổng cộng: **80 canonical database rows verified** trong `public.contents`. Đối với workflow `cItQU87e5JU10gA5`, do execution chạy ở chế độ không lưu lịch sử SQLite container, execution IDs không khả dụng; tuân thủ nguyên tắc trung thực không bịa ID và ghi nhận formal execution audit pending.
+  - Idempotency & Persistence fail-closed: Preflight SELECT thất bại trả 502 và hủy upsert; retry cùng generation_key trả về HTTP 201 Created, `inserted_count: 0`, `updated_count: 10`, không sinh bản ghi trùng lặp.
+  - Hashtag validation: Siết chặt kiểm tra hashtag chứa Unicode letter/number, từ chối các chuỗi chỉ có ký hiệu (`#!`, `#---`, `#💥`) hoặc hashtag trơ trọi.
 
 - **Thẩm định n8n Production Readiness (Phần 4):**
   - Workflow export: `services/llm-service/workflow_campaign_content.json` đạt 9/9 tiêu chí an toàn (HTTP retry tối đa 3 lần, Gemini không retry tránh burst 429, error branch trả sanitized JSON 502/503, credentials quản lý qua Credential Store, không chứa hardcoded secrets, `active: false`).
