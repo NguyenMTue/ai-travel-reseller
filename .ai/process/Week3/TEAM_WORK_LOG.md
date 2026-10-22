@@ -53,6 +53,8 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 ---
 
 ## 2. COMPLETED WORK
+- `BE1-W3-07` (22/10 - QA Remediation): Hoàn thành khắc phục toàn diện 7 lỗi VID-01 đến VID-07 theo đặc tả `ai_video_pipeline_qa_remediation_spec.md`. Áp dụng kiến trúc Audio-Driven Dynamic Timing đồng bộ 1:1:1 giữa Voiceover - Subtitle - Visual Asset; lọc bỏ ảnh menu chữ & xe du lịch; tuân thủ Brand Compliance (đổi sang Đối tác phân phối chính thức); tối ưu khung 16:9 sắc nét trên nền mờ 9:16 và vượt qua 100% 6 Gates QA Checklist.
+- `BE1-W3-07` (22/10): Nạp bộ tư liệu ảnh thực tế tour Bà Nà Hills (`docs/be1/samples/media-references-banahills.sample.json`) gồm 11 ảnh chuẩn hóa phân loại shot_type vào bảng `media_references`. Thực thi live test tạo video cho Chiến dịch Bà Nà Hills (`44444444-4444-4444-4444-444444444444`) thành công với 11 phân cảnh (24s), hook 3s, text safe zone và lưu vào bảng `contents`.
 - `BE1-W3-07` (21/10): Hoàn thành Video API `POST /api/merchant/video/generate` & Storage pipeline `campaign-videos` (RLS 4 policies, 100MB limit), tích hợp Core Video Engine, lưu trữ `contents.video_url`, GET status polling, webhook trigger non-blocking n8n (`video.generation.completed` cho BE3-W3-03), tài liệu `docs/be1/` và bộ test 8/8 pass.
 - `BE1-W3-06` (21/10): Hoàn thành Core AI Video Generation Engine (`src/lib/video-engine/generator.ts`), Data Contract Zod (`types.ts`), Pre-flight Gate chống pixel giả & Fail-Fast, storyboard CapCut UGC 9:16 và bộ test đạt 9/9 pass.
 - `BE1-W3-05` (19/10): Gỡ bỏ trigger hòa giải tạm thời `fn_temp_contents_reconcile` (xóa nợ kỹ thuật Tuần 2).
