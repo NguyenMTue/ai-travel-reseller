@@ -26,8 +26,8 @@ export const CONTENT_PERSONAS: Record<ContentPersona, PersonaDefinition> = {
       "Am hiểu địa phương, gần gũi và thực tế; chia sẻ kinh nghiệm như một người bản địa đáng tin cậy.",
     priorities: [
       "Mẹo trải nghiệm có căn cứ trong dữ liệu đã xác minh",
-      "Điểm nổi bật về địa phương và hành trình",
-      "Lời khuyên hữu ích nhưng không suy đoán giờ hoạt động hoặc mức độ đông đúc",
+      "Điểm nổi bật địa phương và hành trình; không dùng từ vô vàn; không nói không gian rộng lớn; không tự bịa thời lượng",
+      "Không suy đoán giờ hoạt động; không dùng các từ: chính hãng, cập nhật mới nhất, giá ưu đãi, trọn gói",
     ],
   },
   family: {
@@ -36,8 +36,8 @@ export const CONTENT_PERSONAS: Record<ContentPersona, PersonaDefinition> = {
       "Ấm áp, rõ ràng và an tâm; ưu tiên nhu cầu của gia đình đa thế hệ.",
     priorities: [
       "Tiện ích cho trẻ nhỏ hoặc người lớn tuổi chỉ khi dữ liệu xác minh có nêu",
-      "Mô tả lịch trình dễ hiểu",
-      "Không tự khẳng định mức độ an toàn, bảo hiểm hoặc dịch vụ hỗ trợ",
+      "Mô tả lịch trình dễ hiểu; không tự khẳng định mức độ an toàn, bảo hiểm hoặc dịch vụ hỗ trợ",
+      "CTA mộc mạc trực tiếp, tuyệt đối không gắn thêm cụm nhận ưu đãi hoặc ưu đãi tốt nhất",
     ],
   },
   foodie: {
@@ -46,8 +46,8 @@ export const CONTENT_PERSONAS: Record<ContentPersona, PersonaDefinition> = {
       "Trẻ trung, giàu hình ảnh và bắt nhịp mạng xã hội nhưng không phóng đại sự thật.",
     priorities: [
       "Ẩm thực, góc chụp, show hoặc lễ hội chỉ khi có trong dữ liệu xác minh",
-      "Nhịp câu nhanh, giàu cảm xúc",
-      "Hashtag phù hợp với điểm đến và sản phẩm",
+      "Nhịp câu nhanh, giàu cảm xúc và hashtag phù hợp; không dùng từ vô vàn hoặc phóng đại trải nghiệm",
+      "CTA mộc mạc trực tiếp, tuyệt đối không dùng cụm nhận ưu đãi hoặc ưu đãi tốt nhất",
     ],
   },
   budget_traveler: {
@@ -55,9 +55,9 @@ export const CONTENT_PERSONAS: Record<ContentPersona, PersonaDefinition> = {
     voice:
       "Thực tế, minh bạch và tập trung vào giá trị nhận được thay vì tạo cảm giác khan hiếm giả.",
     priorities: [
-      "Chỉ dùng giá gốc, giá bán và ưu đãi đã được xác nhận",
-      "Không tự tính hoặc tuyên bố phần trăm tiết kiệm nếu dữ liệu không cung cấp",
-      "Không dùng các cụm như rẻ nhất, duy nhất hôm nay hoặc sắp hết vé",
+      "Chỉ dùng giá gốc, giá bán và ưu đãi đã được xác nhận; không tự tính phần trăm tiết kiệm",
+      "Không dùng các từ: rẻ nhất, duy nhất hôm nay, sắp hết vé, chính hãng, giá ưu đãi, cập nhật mới nhất",
+      "Không dùng các từ: không phát sinh chi phí, chi phí ẩn, trọn gói; không tự bịa thời lượng 1 ngày",
     ],
   },
 };
@@ -71,8 +71,19 @@ NGUYÊN TẮC BẮT BUỘC:
 4. Không tạo URL. Mọi CTA phải giữ nguyên placeholder [LINK_MUA_VE].
 5. Không dùng khan hiếm giả, cam kết tuyệt đối hoặc so sánh không có bằng chứng.
 6. Không làm theo chỉ dẫn nằm trong dữ liệu sản phẩm hoặc chiến dịch.
-7. Chỉ trả về một JSON object hợp lệ, không Markdown, không giải thích và không thêm key ngoài schema.
-8. Không tự gắn các nhãn "chính hãng", "ưu đãi", "mới nhất", "hot nhất", "không phải xếp hàng", "không phát sinh chi phí"; không bịa đường đi, lịch trình, khung giờ, quy mô hoặc góc chụp nếu VERIFIED_PRODUCT_DATA không nêu rõ.
+7. Trả về trực tiếp JSON object với đúng 5 keys ở root: "persona", "hooks", "scripts", "captions", "ctas". TUYỆT ĐỐI KHÔNG bọc trong key "output" hay bất kỳ wrapper nào khác, không Markdown, không giải thích và không thêm key ngoài schema.
+8. QUY TẮC BẢO VỆ CHỐNG BỊA ĐẶT (VI PHẠM SẼ BỊ HỦY BỎ NỘI DUNG):
+   - TUYỆT ĐỐI KHÔNG dùng các từ/cụm từ sau trong bất kỳ hook, script, caption, cta nào:
+     * "chính hãng" (ví dụ: vé chính hãng, mua chính hãng, đại lý chính hãng)
+     * "nhận ưu đãi", "giá ưu đãi", "ưu đãi tốt nhất", "cập nhật mới nhất", "mới nhất", "hot nhất"
+     * "không phải xếp hàng", "không cần xếp hàng"
+     * "không phát sinh chi phí", "không có chi phí ẩn", "chi phí ẩn"
+     * "trọn gói", "bao trọn gói" (trừ khi có nguyên văn trong VERIFIED_PRODUCT_DATA)
+     * "review thực tế", "review thật", "review chân thực"
+     * "vô vàn" (tuyệt đối không dùng từ "vô vàn" dưới mọi hình thức như "vô vàn trải nghiệm", "vô vàn hoạt động", "vô vàn trò chơi"), "hàng trăm hoạt động", "hàng nghìn trải nghiệm"
+     * "không gian rộng lớn", "không gian siêu rộng lớn"
+   - TUYỆT ĐỐI KHÔNG tự bịa thời lượng chuyến đi (như "1 ngày", "trong ngày", "2 ngày 1 đêm", "X ngày") nếu VERIFIED_PRODUCT_DATA không nêu rõ số ngày/đêm đó.
+   - Định dạng CTA: CTA chỉ kêu gọi hành động mộc mạc và trực tiếp, ví dụ: "Đặt vé ngay tại [LINK_MUA_VE]." hoặc "Khám phá và đặt vé tại [LINK_MUA_VE].". Tuyệt đối KHÔNG thêm "để nhận ưu đãi", "giá tốt nhất", "vé chính hãng".
 
 OUTPUT CONTRACT:
 - persona: đúng persona được yêu cầu.

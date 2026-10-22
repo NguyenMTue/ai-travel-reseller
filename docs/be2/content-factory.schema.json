@@ -49,7 +49,11 @@
             }
           }
         },
-        "required": ["title", "duration", "scenes"],
+        "required": [
+          "title",
+          "duration",
+          "scenes"
+        ],
         "additionalProperties": false
       }
     },
@@ -61,7 +65,7 @@
         "type": "string",
         "minLength": 40,
         "maxLength": 2200,
-        "pattern": "#[\\p{L}\\p{N}_]+"
+        "pattern": "#[^\\s#]+"
       }
     },
     "ctas": {
@@ -76,6 +80,12 @@
       }
     }
   },
-  "required": ["persona", "hooks", "scripts", "captions", "ctas"],
+  "required": [
+    "persona",
+    "hooks",
+    "scripts",
+    "captions",
+    "ctas"
+  ],
   "additionalProperties": false
 }

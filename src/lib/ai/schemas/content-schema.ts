@@ -17,14 +17,25 @@ export const campaignScriptSchema = z.object({
 
 export type CampaignScript = z.infer<typeof campaignScriptSchema>;
 
-const captionSchema = z
+export function hasValidHashtag(value: string): boolean {
+  const hashtags = value.match(/#[^\s#]+/g);
+  return Boolean(hashtags && hashtags.some((tag) => /[\p{L}\p{N}]/u.test(tag)));
+}
+
+export const captionSchema = z
   .string()
   .trim()
   .min(40)
   .max(2_200)
-  .regex(/#[\p{L}\p{N}_]+/u, {
+  .regex(/#[^\s#]+/, {
     message: "Caption must include at least one relevant hashtag",
-  });
+  })
+  .refine(
+    (value) => hasValidHashtag(value),
+    {
+      message: "Caption hashtag must contain at least one letter or number",
+    },
+  );
 
 const ctaSchema = z
   .string()
