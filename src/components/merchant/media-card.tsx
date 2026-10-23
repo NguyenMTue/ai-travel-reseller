@@ -118,7 +118,7 @@ export function MediaCard({
               : "border-border text-foreground hover:bg-secondary"
           }`}
         >
-          {isSelected ? "Đã chọn" : "Chọn mẫu"}
+          {isSelected ? "Đã chọn tư liệu" : "Chọn tư liệu"}
         </button>
       </div>
     </article>

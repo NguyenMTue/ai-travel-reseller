@@ -62,6 +62,51 @@
   margin: 0;
 }
 
+.campaignSummaryCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.campaignSummaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.campaignDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+.campaignSummaryDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+.campaignSummaryDetails strong {
+  color: var(--foreground);
+}
+
+.focalAssetNotice {
+  font-size: 12px;
+  color: #0c7272;
+  background: rgba(12, 114, 114, 0.08);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid #0c7272;
+}
+
 .referenceBadge {
   display: flex;
   align-items: center;

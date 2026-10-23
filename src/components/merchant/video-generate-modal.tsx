@@ -15,20 +15,24 @@ import { Button } from "@/src/components/ui/button";
 import type { LibraryItem } from "@/src/lib/merchant/media-library";
 import styles from "./video-generate-modal.module.css";
 
-export interface VideoGenerateModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  selectedItem: LibraryItem | null;
-  merchantId?: string;
-  autoStart?: boolean;
-}
-
-interface CampaignOption {
+export interface CampaignOption {
   id: string;
   name: string;
   productId: string;
   productName: string;
   productSalePrice: number | null;
+  targetLocation?: string | null;
+  status?: string;
+}
+
+export interface VideoGenerateModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedItem?: LibraryItem | null;
+  selectedCampaign?: CampaignOption | null;
+  totalAssetsCount?: number;
+  merchantId?: string;
+  autoStart?: boolean;
 }
 
 interface GeneratedVideoData {
@@ -56,13 +60,17 @@ export function VideoGenerateModal({
   isOpen,
   onClose,
   selectedItem,
+  selectedCampaign,
+  totalAssetsCount,
   autoStart = false,
 }: VideoGenerateModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
 
   const [campaigns, setCampaigns] = useState<CampaignOption[]>([]);
-  const [selectedCampaignId, setSelectedCampaignId] = useState<string>("");
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string>(
+    selectedCampaign?.id || ""
+  );
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
 
   // Form parameters
@@ -83,6 +91,12 @@ export function VideoGenerateModal({
   const [blockedErrors, setBlockedErrors] = useState<BlockedItem[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
+
+  const activeCampaign =
+    campaigns.find((c) => c.id === selectedCampaignId) ||
+    selectedCampaign ||
+    campaigns[0] ||
+    null;
 
   // 1. Quản lý Dialog & Focus
   useEffect(() => {
@@ -127,7 +141,12 @@ export function VideoGenerateModal({
         if (!alive) return;
         if (res.success && Array.isArray(res.data) && res.data.length > 0) {
           setCampaigns(res.data);
-          setSelectedCampaignId(res.data[0].id);
+          const initialId =
+            selectedCampaign?.id &&
+            res.data.some((c: CampaignOption) => c.id === selectedCampaign.id)
+              ? selectedCampaign.id
+              : res.data[0].id;
+          setSelectedCampaignId(initialId);
         } else {
           setCampaigns([]);
         }
@@ -305,8 +324,6 @@ export function VideoGenerateModal({
     }
   }
 
-  const selectedCampaign = campaigns.find((c) => c.id === selectedCampaignId);
-
   return (
     <dialog
       ref={dialogRef}
@@ -341,31 +358,50 @@ export function VideoGenerateModal({
               ? "Video AI của bạn đã sẵn sàng!"
               : mode === "generating" || mode === "polling"
               ? "Đang tổng hợp video AI..."
-              : "Tạo video AI từ mẫu tham khảo"}
+              : activeCampaign
+              ? `Tạo Video AI cho ${activeCampaign.name}`
+              : "Tạo Video AI từ Chiến dịch"}
           </h2>
           <p id="video-generate-desc">
             {mode === "ready"
               ? "Kịch bản và các phân cảnh 9:16 đã được biên tập tối ưu cho TikTok & Instagram Reels."
               : mode === "generating" || mode === "polling"
               ? "Đạo diễn AI đang xử lý tư liệu thực tế và kịch bản chuyển đổi cao."
-              : "Tự động trích xuất phong cách từ mẫu đã chọn để sản xuất video tiếp thị bán tour."}
+              : "Hệ thống AI tự động tổng hợp toàn bộ hình ảnh/clip thật của chiến dịch thành video quảng bá 9:16 chuẩn UGC."}
           </p>
         </div>
 
-        {/* Mẫu tham khảo đã chọn */}
-        {selectedItem && (
-          <div className={styles.referenceBadge}>
-            <Film size={20} className="text-primary shrink-0" aria-hidden="true" />
-            <div className="min-w-0 flex-1">
-              <strong>{selectedItem.title}</strong>
-              <span className="text-xs text-muted-foreground">
-                Nền tảng: {selectedItem.platform.toUpperCase()}
-                {selectedItem.duration ? ` · ${selectedItem.duration}s` : ""}
-                {selectedItem.styleTags.length > 0
-                  ? ` · ${selectedItem.styleTags.join(", ")}`
-                  : ""}
+        {/* Thông tin chiến dịch & tư liệu đầu vào */}
+        {activeCampaign && (
+          <div className={styles.campaignSummaryCard}>
+            <div className={styles.campaignSummaryHeader}>
+              <div className="flex items-center gap-2">
+                <span className={styles.campaignDot} />
+                <span className="font-semibold text-sm text-foreground">
+                  Chiến dịch: {activeCampaign.name}
+                </span>
+              </div>
+            </div>
+            <div className={styles.campaignSummaryDetails}>
+              <span>
+                🎟️ <strong>Sản phẩm:</strong> {activeCampaign.productName}
+              </span>
+              {activeCampaign.productSalePrice && (
+                <span>
+                  💰 <strong>Giá bán:</strong>{" "}
+                  {Number(activeCampaign.productSalePrice).toLocaleString("vi-VN")}đ
+                </span>
+              )}
+              <span>
+                📸 <strong>Tài nguyên đầu vào:</strong>{" "}
+                {totalAssetsCount || 16} ảnh/clip thật
               </span>
             </div>
+            {selectedItem && (
+              <div className={styles.focalAssetNotice}>
+                ⭐ <em>Ưu tiên tư liệu mở màn:</em> {selectedItem.title}
+              </div>
+            )}
           </div>
         )}
 
@@ -522,8 +558,8 @@ export function VideoGenerateModal({
             <div className={styles.stepsList}>
               {[
                 {
-                  title: "Phân tích kịch bản & Hook viral từ mẫu đã chọn",
-                  desc: "Trích xuất góc quay, nhịp điệu và thông điệp nổi bật",
+                  title: "Phân tích kịch bản & Hook viral cho chiến dịch",
+                  desc: "Trích xuất góc quay, nhịp điệu và thông điệp nổi bật từ tư liệu thực tế",
                 },
                 {
                   title: "Ghép nối phân cảnh & Hiệu ứng chuyển động Spatial AI",
