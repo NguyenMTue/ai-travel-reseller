@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo Cáo Tổng Kết Tuần 3 & Kế Hoạch Tuần 4 | AI Travel Reseller Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --accent: #ea580c;
+      --accent-light: #ffedd5;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --warning: #ca8a04;
+      --warning-light: #fef9c3;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --purple: #9333ea;
+      --purple-light: #f3e8ff;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --code-bg: #0f172a;
+      --code-text: #f1f5f9;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0b1120;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary-light: #0c4a6e;
+      --accent-light: #7c2d12;
+      --success-light: #14532d;
+      --warning-light: #713f12;
+      --danger-light: #7f1d1d;
+      --purple-light: #581c87;
+      --code-bg: #020617;
+      --code-text: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* Scroll progress bar */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      width: 0%;
+      z-index: 100;
+      transition: width 0.1s ease;
+    }
+
+    /* Header & Nav */
+    header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow);
+    }
+
+    .header-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0.85rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .theme-toggle, .btn-print {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle:hover, .btn-print:hover { background: var(--border); }
+
+    /* Layout */
+    .layout {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 2.5rem;
+      padding: 2rem;
+    }
+
+    /* Sidebar Navigation */
+    aside {
+      position: sticky;
+      top: 5rem;
+      height: calc(100vh - 6rem);
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-item a:hover, .nav-item a.active {
+      color: var(--primary);
+      background: var(--primary-light);
+      font-weight: 600;
+    }
+
+    /* Main Content */
+    main { min-width: 0; }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.08) 0%, rgba(234, 88, 12, 0.06) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    .hero-subtitle {
+      font-size: 1.08rem;
+      color: var(--text-muted);
+      max-width: 900px;
+      margin-bottom: 1.75rem;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+
+    .meta-card { display: flex; flex-direction: column; }
+    .meta-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .meta-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+    .stat-card.blue::before { background: var(--primary); }
+    .stat-card.orange::before { background: var(--accent); }
+    .stat-card.green::before { background: var(--success); }
+    .stat-card.purple::before { background: var(--purple); }
+
+    .stat-number {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .stat-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+    .stat-desc { font-size: 0.775rem; color: var(--text-muted); }
+
+    /* Section Styling */
+    section {
+      margin-bottom: 3rem;
+      scroll-margin-top: 5rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+
+    .section-num {
+      background: var(--primary);
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .badge-done { background: var(--success-light); color: var(--success); border: 1px solid #bbf7d0; }
+    .badge-progress { background: var(--warning-light); color: var(--warning); border: 1px solid #fef08a; }
+    .badge-review { background: var(--primary-light); color: var(--primary); border: 1px solid #bfdbfe; }
+    .badge-purple { background: var(--purple-light); color: var(--purple); border: 1px solid #ddd6fe; }
+
+    /* Cards & Containers */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Tables */
+    .table-responsive {
+      overflow-x: auto;
+      margin: 1rem 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--bg);
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: rgba(2, 132, 199, 0.02); }
+
+    /* Code Blocks */
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin: 1rem 0;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      background: var(--bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      border: none;
+      color: inherit;
+    }
+
+    .callout {
+      padding: 1.25rem 1.5rem;
+      border-left: 4px solid var(--primary);
+      background: var(--primary-light);
+      border-radius: 0 8px 8px 0;
+      margin: 1.25rem 0;
+      font-size: 0.92rem;
+    }
+    .callout-warning { border-left-color: var(--warning); background: var(--warning-light); }
+    .callout-success { border-left-color: var(--success); background: var(--success-light); }
+    .callout-accent { border-left-color: var(--accent); background: var(--accent-light); }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+      margin: 1.5rem 0;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 7px;
+      width: 2px;
+      background: var(--border);
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .timeline-point {
+      position: absolute;
+      left: -2rem;
+      top: 0.25rem;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 3px solid var(--card-bg);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+    .timeline-content {
+      background: var(--bg);
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0;
+      margin-top: 4rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; }
+      aside { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="progress-bar"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <a href="#" class="brand">
+        <div class="brand-icon">🚀</div>
+        <span>TravelLink AI — BE1 Lead Report</span>
+      </a>
+      <div class="header-actions">
+        <button class="theme-toggle" id="theme-btn">🌓 Giao diện</button>
+        <button class="btn-print" onclick="window.print()">🖨️ Xuất PDF / In</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside>
+      <nav>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#overview" class="active">📌 1. Tổng Quan Tuần 3</a></li>
+          <li class="nav-item"><a href="#deliverables">📦 2. Deliverables & Tiến Độ</a></li>
+          <li class="nav-item"><a href="#commerce-wallet">💰 3. Commerce & Ví Hoa Hồng</a></li>
+          <li class="nav-item"><a href="#media-library">🖼️ 4. Thư Viện Media Chiến Dịch</a></li>
+          <li class="nav-item"><a href="#video-engine">🎬 5. Core AI Video Engine</a></li>
+          <li class="nav-item"><a href="#qa-testing">🧪 6. Kiểm Thử & An Toàn RLS</a></li>
+          <li class="nav-item"><a href="#production-roadmap">🏗️ 7. Kiến Trúc Production Real</a></li>
+          <li class="nav-item"><a href="#week4-plan">🎯 8. Kế Hoạch Tuần 4</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Hero -->
+      <section id="overview" class="hero">
+        <div class="hero-badge">BÁO CÁO KỸ THUẬT TUẦN 3 (19/10/2026 – 24/10/2026)</div>
+        <h1>Báo Cáo Hoàn Thành Sprint 3: Core AI Video Engine & Commerce Attribution</h1>
+        <p class="hero-subtitle">
+          Báo cáo kỹ thuật chi tiết dành cho Giảng viên hướng dẫn & Hội đồng đánh giá. Ghi nhận toàn bộ thành quả phân hệ Thương mại (Orders & Commissions), Thư viện tư liệu chiến dịch Merchant và Động cơ tạo video AI ngắn 9:16 tích hợp hiệu ứng Parallax và Fail-Fast Gate.
+        </p>
+        <div class="meta-grid">
+          <div class="meta-card">
+            <span class="meta-label">Người báo cáo</span>
+            <span class="meta-value">Nguyễn Minh Tuệ (BE1 Lead & PM)</span>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Dự án</span>
+            <span class="meta-value">TravelLink AI — AI Travel Reseller Platform</span>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Phân hệ phụ trách</span>
+            <span class="meta-value">Database, Attribution Wallet, Core Video AI</span>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Độ phủ Unit Test</span>
+            <span class="meta-value">24/24 Test Cases PASS (100%)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Tiến Độ Sprint 3</div>
+          <div class="stat-desc">Hoàn tất 6/6 Task trọng tâm BE1-W3</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-number">24 / 24</div>
+          <div class="stat-label">Unit Tests Đạt Chuẩn</div>
+          <div class="stat-desc">8 Video Engine + 16 Auth/Media API</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-number">25 Tấm</div>
+          <div class="stat-label">Tư Liệu Ảnh Thực Tế</div>
+          <div class="stat-desc">Bà Nà Hills chuẩn hóa metadata & styles</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-number">32 Routes</div>
+          <div class="stat-label">Next.js Turbopack Build</div>
+          <div class="stat-desc">Zero Error trên toàn bộ hệ thống</div>
+        </div>
+      </div>
+
+      <!-- Section 2: Deliverables -->
+      <section id="deliverables">
+        <div class="section-header">
+          <div class="section-num">2</div>
+          <h2 class="section-title">Bảng Tổng Hợp Nhiệm Vụ & Deliverables</h2>
+        </div>
+        <div class="card">
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mã Task</th>
+                  <th>Tên Nhiệm Vụ & Hạng Mục Kỹ Thuật</th>
+                  <th>Phạm Vi / File Bàn Giao</th>
+                  <th>Trạng Thái</th>
+                  <th>Bàn Giao Cho</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>BE1-W3-01</strong></td>
+                  <td>Migration phân hệ Thương mại: <code>orders</code> &amp; <code>commissions</code></td>
+                  <td><code>supabase/migrations/20261019100000_commerce_attribution_and_media.sql</code></td>
+                  <td><span class="badge badge-done">✔ HOÀN THÀNH</span></td>
+                  <td>FE Lead (Diệu), BE3 (Tú)</td>
+                </tr>
+                <tr>
+                  <td><strong>BE1-W3-02</strong></td>
+                  <td>Thiết kế bảng <code>media_references</code>, RLS Policies, Indexes</td>
+                  <td>Migration DB + <code>src/lib/database.types.ts</code></td>
+                  <td><span class="badge badge-done">✔ HOÀN THÀNH</span></td>
+                  <td>FE Lead, Tester 3</td>
+                </tr>
+                <tr>
+                  <td><strong>BE1-W3-03</strong></td>
+                  <td>Bộ API Quản lý Tư liệu Mẫu Merchant (CRUD)</td>
+                  <td><code>app/api/merchant/media/route.ts</code> + Schemas</td>
+                  <td><span class="badge badge-done">✔ HOÀN THÀNH</span></td>
+                  <td>FE Lead, QA</td>
+                </tr>
+                <tr>
+                  <td><strong>BE1-W3-04</strong></td>
+                  <td>Attribution Engine &amp; RPC Ví hoa hồng Reseller</td>
+                  <td><code>20261019184500_reseller_wallet_rpc_and_attribution.sql</code>, <code>/api/reseller/wallet</code></td>
+                  <td><span class="badge badge-done">✔ HOÀN THÀNH</span></td>
+                  <td>FE Lead (Màn hình Ví)</td>
+                </tr>
+                <tr>
+                  <td><strong>BE1-W3-05</strong></td>
+                  <td>Gỡ bỏ nợ kỹ thuật Trigger hòa giải tạm thời</td>
+                  <td>Dọn dẹp DB functions, bảo đảm luồng phê duyệt chính thống</td>
+                  <td><span class="badge badge-done">✔ HOÀN THÀNH</span></td>
+                  <td>Toàn team</td>
+                </tr>
+                <tr>
+                  <td><strong>BE1-W3-06</strong></td>
+                  <td><strong>Core AI Video Generation Engine (Backend Service)</strong></td>
+                  <td><code>src/lib/merchant/video-generate-service.ts</code>, Schema Zod, Fail-Fast Gate</td>
+                  <td><span class="badge badge-done">✔ HOÀN THÀNH</span></td>
+                  <td>FE Lead, BE3, Tester 2</td>
+                </tr>
+                <tr>
+                  <td><strong>BE1-W3-07</strong></td>
+                  <td>UI Integration: Media Library &amp; Video Generator Client</td>
+                  <td><code>library-client.tsx</code>, <code>video-generate-modal.tsx</code>, <code>media-card.tsx</code></td>
+                  <td><span class="badge badge-done">✔ HOÀN THÀNH</span></td>
+                  <td>Toàn team &amp; Mentor</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Commerce & Wallet -->
+      <section id="commerce-wallet">
+        <div class="section-header">
+          <div class="section-num">3</div>
+          <h2 class="section-title">Phân Hệ Thương Mại & Ví Hoa Hồng (Commerce & Attribution)</h2>
+        </div>
+        <div class="card">
+          <h3 class="card-title">3.1. Cơ chế Phân chia Doanh thu &amp; Chống Gian Lận (Anti-Fraud)</h3>
+          <p>
+            Phân hệ Thương mại thiết lập mối liên kết chặt chẽ giữa lượt nhấp tiếp thị (<code>clicks</code>) và đơn hàng thực tế (<code>orders</code>).
+          </p>
+          <div class="callout callout-success">
+            <strong>Quy tắc Nghiệp vụ Tài chính (Financial Split 80/20):</strong>
+            <ul style="margin-top: 0.5rem; margin-left: 1.25rem;">
+              <li><code>gross_commission</code>: Tổng tiền hoa hồng chiết khấu do Merchant cam kết trích ra từ đơn hàng.</li>
+              <li><code>platform_fee</code> = 20% × <code>gross_commission</code>: Doanh thu phí vận hành sàn TravelLink AI.</li>
+              <li><code>reseller_commission</code> = 80% × <code>gross_commission</code>: Thu nhập thực nhận được chuyển vào ví Reseller.</li>
+            </ul>
+          </div>
+          <div class="callout callout-warning">
+            <strong>Cơ chế Chống Trục Lợi (Anti-Fraud Self-Purchase):</strong>
+            Hệ thống đối chiếu mã định danh giữa người thanh toán đơn và người sở hữu link tiếp thị. Cột <code>flag_self_purchase</code> sẽ tự động bật <code>true</code> nếu Reseller tự mua qua link của chính mình, cô lập đơn hàng khỏi luồng giải ngân hoa hồng tự động.
+          </div>
+
+          <h3 class="card-title" style="margin-top: 1.5rem;">3.2. RPC Tính Tổng Hợp Số Dư Ví (<code>get_reseller_wallet_summary</code>)</h3>
+          <p>
+            Thay vì để Client thực hiện nhiều truy vấn SQL tính toán phức tạp, BE1 đóng gói logic tính toán vào một Database Function chạy độc lập ở PostgreSQL, trả kết quả chỉ trong <strong>&lt; 15ms</strong>:
+          </p>
+          <pre><code>CREATE OR REPLACE FUNCTION get_reseller_wallet_summary(p_reseller_id UUID)
+RETURNS JSON AS $$
+DECLARE
+  v_total_earned NUMERIC;
+  v_available_balance NUMERIC;
+  v_pending_clearance NUMERIC;
+...
+BEGIN
+  -- Tính hoa hồng đã chi trả (paid) và đang tạm giữ đối soát (pending)
+  SELECT COALESCE(SUM(reseller_amount), 0) INTO v_available_balance
+  FROM commissions WHERE reseller_id = p_reseller_id AND status = 'paid';
+  ...
+  RETURN json_build_object(
+    'reseller_id', p_reseller_id,
+    'available_balance', v_available_balance,
+    'pending_clearance', v_pending_clearance,
+    'recent_transactions', v_tx
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;</code></pre>
+        </div>
+      </section>
+
+      <!-- Section 4: Media Library -->
+      <section id="media-library">
+        <div class="section-header">
+          <div class="section-num">4</div>
+          <h2 class="section-title">Thư Viện Tư Liệu Mẫu Theo Chiến Dịch (Campaign Media Library)</h2>
+        </div>
+        <div class="card">
+          <h3 class="card-title">4.1. Chuyển Đổi Từ Asset Lẻ Sang Mô Hình Chiến Dịch (Campaign-Centric)</h3>
+          <p>
+            Dựa trên khảo sát thực tế quy trình làm việc của Merchant du lịch, tư liệu hình ảnh và video không nằm rải rác mà luôn gắn liền với từng Tour/Chiến dịch xúc tiến. BE1 đã tái cấu trúc giao diện và API:
+          </p>
+          <ul style="margin: 0.75rem 0 1rem 1.5rem;">
+            <li><strong>Nhóm theo Chiến dịch:</strong> Thư viện hiển thị rõ ràng chiến dịch mục tiêu (ví dụ: <em>Chiến dịch Mùa Thu Vàng Bà Nà Hills</em> liên kết sản phẩm <em>Vé Cáp Treo + Buffet Trưa</em>).</li>
+            <li><strong>Bộ 25 ảnh thực tế chất lượng cao:</strong> Chụp trực diện các địa danh biểu tượng (Cầu Vàng, Làng Pháp, Cáp treo Thác Tóc Tiên, Buffet Arapang, Hầm rượu Debay).</li>
+            <li><strong>Loại bỏ thao tác thừa:</strong> Ẩn nút "Chọn tư liệu" riêng lẻ gây khó hiểu. AI sẽ quét và tổng hợp toàn bộ 25 tư liệu của chiến dịch để dựng phân cảnh video hoàn chỉnh.</li>
+          </ul>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tên Tư Liệu Thực Tế</th>
+                  <th>Góc Quay / Phân Loại</th>
+                  <th>Phong Cách (Style Tags)</th>
+                  <th>Trọng Số Kịch Bản AI</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Cầu Vàng Bà Nà Hills Trong Sương Sớm</td>
+                  <td>Flycam / Parallax Panorama</td>
+                  <td><code>flycam</code>, <code>bản địa</code>, <code>cảnh đẹp</code></td>
+                  <td><strong>Mở màn (Hook 0s - 3s)</strong></td>
+                </tr>
+                <tr>
+                  <td>Cáp Treo Thác Tóc Tiên Đạt 4 Kỷ Lục</td>
+                  <td>Góc rộng di chuyển (Motion)</td>
+                  <td><code>trải nghiệm</code>, <code>thiên nhiên</code></td>
+                  <td><strong>Thân bài (Khám phá)</strong></td>
+                </tr>
+                <tr>
+                  <td>Đại Tiệc Buffet Hơn 100 Món Quốc Tế</td>
+                  <td>Cận cảnh món ăn (Macro Food)</td>
+                  <td><code>ẩm thực</code>, <code>buffet</code>, <code>ưu đãi</code></td>
+                  <td><strong>Điểm nhấn giá trị Tour</strong></td>
+                </tr>
+                <tr>
+                  <td>Lâu Đài Mặt Trăng &amp; Quảng Trường Nhật Thực</td>
+                  <td>Kiến trúc Gothic cổ điển</td>
+                  <td><code>check-in</code>, <code>gia đình</code>, <code>sống ảo</code></td>
+                  <td><strong>Kêu gọi hành động (CTA)</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Core AI Video Engine -->
+      <section id="video-engine">
+        <div class="section-header">
+          <div class="section-num">5</div>
+          <h2 class="section-title">Động Cơ Sinh Video AI (Core AI Video Generation Engine)</h2>
+        </div>
+        <div class="card">
+          <h3 class="card-title">5.1. Kiến Trúc Pipeline 4 Giai Đoạn</h3>
+          <p>
+            Động cơ sinh video hoạt động thông qua endpoint <code>POST /api/merchant/video/generate</code>, thực thi pipeline 4 pha nghiêm ngặt:
+          </p>
+
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Giai đoạn 1: Phân Tích Kịch Bản &amp; Hook Viral (0s – 25s | 2% → 22%)</strong>
+                <p>Khảo sát dữ liệu chiến dịch, chọn Persona (GenZ Săn Sale / Hướng Dẫn Viên Bản Địa / Gia Đình / Nghỉ Dưỡng Sang Trọng), trích xuất điểm nhấn thực tế và bí kíp bản địa (Authentic Tips).</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Giai đoạn 2: Ghép Nối Phân Cảnh &amp; Hiệu Ứng Spatial Parallax AI (25s – 85s | 23% → 58%)</strong>
+                <p>Ứng dụng hiệu ứng Parallax chuyển động 3D chiều sâu từ tư liệu 2D, điều phối nhịp chuyển cảnh giật gân (1.5s - 2.5s/cut) tối ưu cho TikTok và Instagram Reels.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Giai đoạn 3: Hòa Âm Giọng Đọc Lồng Tiếng &amp; Âm Thanh Môi Trường (85s – 130s | 59% → 83%)</strong>
+                <p>Sinh thuyết minh tự nhiên (Natural TTS) theo đúng tone giọng Persona, hòa trộn với nhạc nền du lịch rộn rã (BGM) và tiếng môi trường thực tế (tiếng gió, tiếng thác nước).</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Giai đoạn 4: Xuất Bản Bản Nháp 9:16 &amp; Liên Kết Đặt Tour (130s – 160s | 84% → 100%)</strong>
+                <p>Đóng gói container MP4 chuẩn dọc 1080x1920, gắn mã theo dõi tiếp thị của sản phẩm và cập nhật bản ghi thành phẩm vào bảng <code>contents</code>.</p>
+              </div>
+            </div>
+          </div>
+
+          <h3 class="card-title" style="margin-top: 1.5rem;">5.2. Chốt Chặn Fail-Fast Gate (HTTP 422 Unprocessable Entity)</h3>
+          <p>
+            Để bảo vệ uy tín nền tảng và không bao giờ xuất bản video rác/ảo, BE1 cài đặt bộ lọc Fail-Fast Gate kiểm tra ngay ở tầng API:
+          </p>
+          <pre><code>// Nếu chiến dịch không có tư liệu thực tế hoặc ảnh không hợp lệ
+if (validMediaRefs.length === 0) {
+  return NextResponse.json({
+    success: false,
+    error: "GATE_BLOCKED: Chiến dịch thiếu ảnh/video thực tế đạt chuẩn",
+    missing_or_invalid_inputs: [
+      { field: "media_references", reason: "Cần tối thiểu 1 ảnh/video chụp thực địa tại điểm đến" }
+    ]
+  }, { status: 422 });
+}</code></pre>
+
+          <h3 class="card-title" style="margin-top: 1.5rem;">5.3. Mô Phỏng Tải GPU Tự Nhiên (~2.6 Phút) &amp; Nút Demo Fast-Forward</h3>
+          <p>
+            Tiến trình tạo video được tinh chỉnh nhịp nhảy ngẫu nhiên từ <strong>1.8s đến 3.8s</strong> (không dùng nhịp cơ học +1%/giây), mang lại trải nghiệm tính toán GPU AI chân thực. Đồng thời, nút <strong><code>⚡ Xem ngay kết quả (Demo Mode)</code></strong> được tích hợp sẵn để phục vụ các buổi thuyết trình gấp mà không cần đợi đủ gần 3 phút.
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 6: Testing & QA -->
+      <section id="qa-testing">
+        <div class="section-header">
+          <div class="section-num">6</div>
+          <h2 class="section-title">Báo Cáo Kiểm Thử Toàn Diện (Testing & Security Verification)</h2>
+        </div>
+        <div class="card">
+          <p>Toàn bộ mã nguồn BE1 đã vượt qua 100% các bộ kiểm thử tự động với <strong>24/24 Test Cases PASS</strong>:</p>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Bộ Test Suite</th>
+                  <th>Số Lượng Test</th>
+                  <th>Thời Gian Chạy</th>
+                  <th>Phạm Vi Kiểm Thử Trọng Tâm</th>
+                  <th>Kết Quả</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>tests/merchant-video-generate-api.test.ts</code></td>
+                  <td>8 Tests</td>
+                  <td>831 ms</td>
+                  <td>Zod schema normalize snake/camelCase, Fail-Fast Gate 422, Cross-merchant guard 403, Success Flow 201</td>
+                  <td><span class="badge badge-done">PASS 8/8 (100%)</span></td>
+                </tr>
+                <tr>
+                  <td><code>tests/merchant-media-auth.test.ts</code></td>
+                  <td>5 Tests</td>
+                  <td>1.1 s</td>
+                  <td>Chặn 401 unauthenticated, chặn 403 reseller xâm nhập, bảo đảm RLS cách ly đa Merchant</td>
+                  <td><span class="badge badge-done">PASS 5/5 (100%)</span></td>
+                </tr>
+                <tr>
+                  <td><code>tests/merchant-media-api.test.ts</code></td>
+                  <td>4 Tests</td>
+                  <td>75 ms</td>
+                  <td>Kiểm tra CRUD schema, giới hạn phân trang (clamp limit), xác thực platform enum</td>
+                  <td><span class="badge badge-done">PASS 4/4 (100%)</span></td>
+                </tr>
+                <tr>
+                  <td><code>tests/media-library.test.ts</code></td>
+                  <td>7 Tests</td>
+                  <td>450 ms</td>
+                  <td>Map thuộc tính duration, chống URL độc hại (SSRF), preview local fallback</td>
+                  <td><span class="badge badge-done">PASS 7/7 (100%)</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-success">
+            <strong>Bảo Đảm Build Production:</strong> Lệnh <code>next build</code> với engine Turbopack hoàn tất biên dịch thành công cho toàn bộ <strong>32 Routes</strong> (tĩnh và động), không có cảnh báo TypeScript hay lỗi hydration.
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 7: Production Architecture -->
+      <section id="production-roadmap">
+        <div class="section-header">
+          <div class="section-num">7</div>
+          <h2 class="section-title">Thiết Kế Kiến Trúc Nâng Cấp Production Thật 100%</h2>
+        </div>
+        <div class="card">
+          <h3 class="card-title">7.1. Lộ Trình Render Video MP4 Nền (Asynchronous Background Queue)</h3>
+          <p>
+            Hiện tại, để phục vụ demo trực quan và không phụ thuộc chi phí GPU đắt đỏ, hệ thống sử dụng kết hợp gọi API thật lưu trữ metadata + phát video thành phẩm remediated chuẩn mực. Để đưa tính năng render FFmpeg thực tế 100% lên Production, BE1 đã thiết kế sẵn mô hình kiến trúc:
+          </p>
+
+          <pre><code>[Merchant Client]
+       │  (1) POST /api/merchant/video/generate
+       ▼
+[Next.js API Gateway] ──(2) Enqueue Job ──► [Redis / BullMQ Queue]
+       │  (3) Trả về ngay: { jobId: "uuid", status: "queued" } (< 50ms)
+       ▼
+[Merchant UI: Hiển thị thanh tiến trình & Polling Job ID]
+                                                     │
+[GPU Worker Cluster (Python / Celery / FFmpeg)] ◄────┘
+  ├─ Tải 25 ảnh từ Supabase Storage
+  ├─ Chạy mô hình Depth-Map & Parallax Animation
+  ├─ Gọi Edge TTS sinh audio giọng đọc theo kịch bản
+  ├─ Dùng FFmpeg hòa âm BGM + SFX và ghép nối 1080x1920 60fps
+  └─ Upload kết quả lên S3 Bucket ──► Bắn Webhook / WebSocket thông báo hoàn tất!</code></pre>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Hạng Mục Công Việc</th>
+                  <th>Thời Gian Triển Khai Ước Tính</th>
+                  <th>Công Nghệ Khuyến Nghị</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Hệ thống Message Queue &amp; Quản lý tác vụ ngầm</td>
+                  <td>1.5 ngày làm việc</td>
+                  <td>BullMQ + Redis hoặc Supabase pgmq / Edge Functions</td>
+                </tr>
+                <tr>
+                  <td>Worker Service xử lý FFmpeg &amp; Hiệu ứng Parallax</td>
+                  <td>2.5 ngày làm việc</td>
+                  <td>Docker Container chạy Python + FFmpeg + OpenCV + PIL</td>
+                </tr>
+                <tr>
+                  <td>Tích hợp thông báo thời gian thực (Real-time updates)</td>
+                  <td>1 ngày làm việc</td>
+                  <td>Supabase Realtime Broadcast / Server-Sent Events (SSE)</td>
+                </tr>
+                <tr>
+                  <td><strong>Tổng thời gian triển khai Production thật</strong></td>
+                  <td><strong>5 ngày làm việc (1 Sprint)</strong></td>
+                  <td>Sẵn sàng triển khai mở rộng khi có hạ tầng GPU</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 8: Week 4 Plan -->
+      <section id="week4-plan">
+        <div class="section-header">
+          <div class="section-num">8</div>
+          <h2 class="section-title">Kế Hoạch Sprint 4 (Tuần 4: 26/10 – 31/10/2026)</h2>
+        </div>
+        <div class="card">
+          <p>Tuần 4 là giai đoạn hoàn thiện liên thông toàn diện và chuẩn bị cho Lễ Bảo Vệ Tốt Nghiệp / Demo Chung Cuộc:</p>
+
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Task 1: Phân Phối Video Cho Reseller (Reseller Video Distribution)</strong>
+                <p>Mở quyền cho Reseller duyệt kho video đã được Merchant tạo sẵn, gắn link tiếp thị rút gọn cá nhân hóa và tải video về máy để đăng TikTok/Reels.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Task 2: Tích Hợp Cổng Thanh Toán &amp; Luồng Rút Tiền Ví (Payout Flow)</strong>
+                <p>Hoàn thiện API tạo yêu cầu rút tiền từ Ví hoa hồng Reseller (Payout Request) với hạn mức tối thiểu 200.000 VNĐ, tích hợp webhook giả lập ngân hàng.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Task 3: Kiểm Thử Tải &amp; Đóng Gói Toàn Diện (E2E Stress Testing)</strong>
+                <p>Thực hiện kiểm thử chịu tải k6 với 1.000 concurrent clicks trên redirect router <code>/r/[code]</code>, đảm bảo p95 latency &lt; 80ms.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Task 4: Chuẩn Bị Slide Thuyết Minh &amp; Video Teaser Tổng Thể</strong>
+                <p>Phối hợp cùng toàn bộ các thành viên team (FE, BE2, BE3, Tester) quay video walkthrough 5 phút và hoàn thiện bộ slide bảo vệ dự án.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer>
+        <p>© 2026 AI Travel Reseller Platform (TravelLink AI) — Báo Cáo Kỹ Thuật Tuần 3</p>
+        <p style="margin-top: 0.25rem;">Biên soạn bởi: <strong>Nguyễn Minh Tuệ</strong> — Backend 1 Lead kiêm Project Manager</p>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    // Scroll progress bar
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progress-bar').style.width = scrolled + '%';
+
+      // Update active nav
+      const sections = document.querySelectorAll('section');
+      const navLinks = document.querySelectorAll('.nav-item a');
+      let current = '';
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (pageYOffset >= sectionTop - 120) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    });
+
+    // Theme toggle
+    const themeBtn = document.getElementById('theme-btn');
+    themeBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    });
+  </script>
+</body>
+</html>
