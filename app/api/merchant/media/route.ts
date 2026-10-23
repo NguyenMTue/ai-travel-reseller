@@ -12,7 +12,7 @@ import {
   deleteMediaReference,
 } from "@/src/lib/merchant/media-service";
 
-export type MerchantAccessResult =
+type MerchantAccessResult =
   | { status: "allowed"; merchantId: string; supabase: ReturnType<typeof createClient>; isSession: boolean }
   | { status: "unauthenticated"; supabase: ReturnType<typeof createClient> }
   | { status: "forbidden"; supabase: ReturnType<typeof createClient> };
@@ -20,7 +20,7 @@ export type MerchantAccessResult =
 /**
  * Hàm trợ giúp xác thực phiên Merchant an toàn
  */
-export async function resolveMerchantAccess(request: Request): Promise<MerchantAccessResult> {
+async function resolveMerchantAccess(request: Request): Promise<MerchantAccessResult> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 

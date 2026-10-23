@@ -50,7 +50,7 @@ FE Lead chịu trách nhiệm đưa trải nghiệm di động của Reseller v�
 | FE-W3-03 | Tích hợp Web Share API 1 chạm & Canvas xuất ảnh QR | P0 | ĐÃ TRIỂN KHAI — fixture/PNG thủ công; chưa native Share/điện thoại thật | FE-W3-02 | Diệu | Module `share.ts` + `canvas-qr.ts` + UI modal | 21/10 17:00 |
 | FE-W3-04 | Giao diện Chat AI Sales Agent Mobile (Bottom Sheet widget) | P1 | ĐÃ TRIỂN KHAI — mock PASS; chờ UIUX/QA, chưa AI thật | UX-W3-02 | Diệu | Component `mobile-chat-sheet.tsx` | 22/10 17:00 |
 | FE-W3-05 | Giao diện Màn hình Ví hoa hồng Reseller (`/reseller/wallet`) | P0 | ĐÃ TRIỂN KHAI — fixture/quan sát UI thật; chờ QA dữ liệu/quyền | BE1-W3-04 | Diệu | Route `app/reseller/wallet/page.tsx` | 23/10 12:00 |
-| FE-W3-06 | Tích hợp Merchant Media Library (ghép `MediaCard` từ Tester 3) | P1 | DONE — Đã sửa quyền RLS & API, nối Live Media Library, E2E test PASS | T3-FE-W3-01, BE1-W3-03 | Diệu | Route `app/merchant/library/page.tsx` | 23/10 17:00 |
+| FE-W3-06 | Tích hợp Merchant Media Library & Nút kích hoạt tạo Video AI | P1 | DONE — Nối nút Tạo video AI, Modal đa bước, Polling status, Preview 9:16 & E2E PASS | T3-FE-W3-01, BE1-W3-03 | Diệu | Route `app/merchant/library/page.tsx` | 23/10 17:00 |
 | FE-W3-07 | Code Review & Kiểm duyệt an toàn nhánh của Tester 3 | P0 | IN PROGRESS — component f9a5509 không đổi, đã ghép từ dev; PR33 đã merge bởi PM, chưa có bằng chứng BE review riêng service | T3-FE-W3-01, 02 | Diệu | PR review comments & Approval | 21/10 - 22/10 |
 | FE-W3-08 | Phối hợp QA diễn tập kịch bản Demo C3 (Cloudflared Tunnel) | P0 | CHƯA KIỂM realme C21Y/Chrome; chưa diễn tập QA | FE-W3-01, Tester 1 | Diệu | Buổi diễn tập demo PWA thành công | 23/10 17:00 |
 

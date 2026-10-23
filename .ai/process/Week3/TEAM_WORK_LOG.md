@@ -1,7 +1,7 @@
 # TEAM WORK LOG
 Project: AI Travel Reseller MVP (TravelLink AI)  
 Week: Tuần 3 — 19/10/2026 – 24/10/2026 (Sprint 3)  
-Last Updated: 23/10/2026 09:20 AM
+Last Updated: 23/10/2026 10:15 AM
 
 ---
 
@@ -39,7 +39,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | FE-W3-03 | Diệu | FE Lead | Tích hợp Web Share API 1 chạm & Canvas xuất ảnh QR | ĐÃ TRIỂN KHAI — fixture/PNG thủ công; chưa native Share/điện thoại thật | 21/10 | 21/10 17:00 |
 | FE-W3-04 | Diệu | FE Lead | Giao diện Chat AI Sales Agent Mobile (Bottom Sheet widget) | ĐÃ TRIỂN KHAI — mock PASS; chờ UIUX/QA, chưa AI thật | 21/10 | 22/10 17:00 |
 | FE-W3-05 | Diệu | FE Lead | Giao diện Màn hình Ví hoa hồng Reseller (`/reseller/wallet`) | ĐÃ TRIỂN KHAI — fixture/quan sát UI thật; chờ QA dữ liệu/quyền | 22/10 | 23/10 12:00 |
-| FE-W3-06 | Diệu | FE Lead | Tích hợp Media Library & Nút kích hoạt tạo Video qua API BE1 | DONE — Đã sửa quyền RLS & API, nối Live Media Library, E2E test PASS | 22/10 | 23/10 17:00 |
+| FE-W3-06 | Diệu | FE Lead | Tích hợp Media Library & Nối nút kích hoạt tạo Video qua API BE1 | DONE — Nối nút Tạo video AI, Modal đa bước, Polling status, Preview 9:16 & E2E PASS | 22/10 | 23/10 17:00 |
 | T3-FE-W3-01 | Tester 3 | FE Phụ | Cắt Component tĩnh `MediaCard` (`src/components/merchant/media-card.tsx`) | DONE (REVIEWED) | 20/10 | 21/10 12:00 |
 | T3-FE-W3-02 | Tester 3 | FE Phụ | Modal hướng dẫn quy chuẩn video 9:16 (`video-guidelines-modal.tsx`) | DONE (REVIEWED) | 21/10 | 21/10 17:00 |
 | UX-W3-01 | UI/UX Designer | UI/UX | Figma Hi-fi Reseller Mobile (Bottom Nav, Thẻ chạm, Ví) | READY | 19/10 | 20/10 12:00 |
@@ -54,6 +54,15 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 ---
 
 ## 2. COMPLETED WORK
+- `FE-W3-06 (AI Video Generation Flow)` (23/10): Hoàn tất tích hợp toàn diện luồng tạo Video AI từ mẫu tham khảo trong Media Library trên nhánh `feature/fe-merchant-ai-video-generation`:
+  1. Thêm nút "Tạo video từ mẫu đã chọn" cạnh banner lựa chọn mẫu, tích hợp icon Sparkles chuẩn Coastal Editorial.
+  2. Xây dựng API `GET /api/merchant/campaigns` tải danh sách chiến dịch & sản phẩm liên kết của Merchant theo phiên đăng nhập.
+  3. Xây dựng component `VideoGenerateModal` (`src/components/merchant/video-generate-modal.tsx`) hỗ trợ cấu hình chiến dịch, persona, thời lượng, authentic tips và Spatial AI 2.5D Parallax.
+  4. Thanh tiến trình động hiển thị 4 giai đoạn xử lý (Phân tích kịch bản -> Ghép phân cảnh Spatial AI -> Lồng tiếng & Âm thanh -> Xuất bản 9:16), kết hợp polling trạng thái qua `GET /api/merchant/video/generate?content_id=...`.
+  5. Màn hình kết quả hiển thị video player 9:16 trực quan, chi tiết Hook 3s đầu, Voiceover script, Social caption, nút sao chép link và tải video.
+  6. Migration database RLS `20261023101000_allow_merchant_insert_contents.sql` cấp quyền INSERT/UPDATE/DELETE bảng `contents` cho Merchant sở hữu chiến dịch.
+  7. Nâng cấp `video-generate-service.ts` đặt tư liệu đã chọn làm Hook Scene 1 và tự động bổ sung tư liệu từ thư viện Merchant thỏa mãn điều kiện Pre-flight Gate.
+  8. Kiểm thử: 24/24 unit tests PASS, `tsc --noEmit` 0 lỗi, Playwright live test (`tests/merchant-video-generate-live.mjs`) PASS 100% kèm 4 ảnh screenshot bằng chứng tại `build/fe-merchant-ai-video-evidence/`.
 - `FE-W3-06 & Resolve Conflict Dev` (23/10): Tích hợp dev (PR #44 @2559b87) vào nhánh FE, xử lý sạch conflict tại ChatPanel (giữ try/catch URL checkout và !preview guard). Hoàn tất gỡ bỏ rào cản phân quyền: migration RLS restrict SELECT media_references theo merchant_id, API GET/POST/DELETE /api/merchant/media trả 401/403 chuẩn và chặn cross-account. Nối live component MerchantLibraryLive vào /merchant/library. Bộ test unit + API auth 16/16 PASS, Playwright E2E live test với tài khoản Merchant thật (25 mẫu Bà Nà Hills) PASS 100% không lỗi giao diện/console.
 - `PR #43 (dev)` (22/10): Merge thành công nhánh `feature/be1-w3-video-api-storage` vào `dev` (Commit `d3dfb9e`). Toàn bộ 17/17 tests backend đạt 100% PASS, hoàn tất trọn bộ video remediation 7 lỗi (`VID-01` -> `VID-07`), sẵn sàng API `POST /api/merchant/video/generate` và storage bucket `campaign-videos`.
 - `PM-W3-03` / `T3-FE-W3-01/02` (22/10): Hoàn thành Review cấp 2 (PM Approval) cho 2 component tĩnh của Tester 3 (`src/components/merchant/media-card.tsx` và `src/components/merchant/video-guidelines-modal.tsx`) trên nhánh `Feature/tester_week3_media_card_video_guide`. Đạt 100% tuân thủ Guardrail (Dumb UI, props-based, không chạm forbidden zones). Bàn giao cho FE Lead tích hợp.

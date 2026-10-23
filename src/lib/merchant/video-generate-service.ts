@@ -148,28 +148,70 @@ export async function generateMerchantCampaignVideo(
   const merchantName = merchant?.name || "Đối tác du lịch";
 
   // 4. Lấy danh sách Media References từ DB
-  let mediaQuery = client
-    .from("media_references")
-    .select(
-      "id, title, video_url, thumbnail_url, platform, style_tags, duration, analysis_metadata"
-    )
-    .eq("merchant_id", merchantId);
+  let mediaRows: any[] = [];
 
   if (input.media_reference_ids && input.media_reference_ids.length > 0) {
-    mediaQuery = mediaQuery.in("id", input.media_reference_ids);
+    const { data: selectedRows, error: selectedError } = await client
+      .from("media_references")
+      .select(
+        "id, title, video_url, thumbnail_url, platform, style_tags, duration, analysis_metadata"
+      )
+      .eq("merchant_id", merchantId)
+      .in("id", input.media_reference_ids);
+
+    if (selectedError) {
+      return {
+        success: false,
+        errorType: "INVALID_INPUT",
+        error: "Lỗi truy vấn thư viện video mẫu: " + selectedError.message,
+      };
+    }
+
+    mediaRows = selectedRows ? [...selectedRows] : [];
+
+    // Nếu số lượng tư liệu được chọn ít hơn mức tối thiểu (ceil(duration / 2.2)),
+    // tự động bổ sung thêm các tư liệu khác của Merchant trong thư viện (đặt mẫu đã chọn lên đầu)
+    const minRequired = Math.ceil((input.target_duration_sec || 28) / 2.2);
+    if (mediaRows.length < minRequired) {
+      const selectedIds = new Set(mediaRows.map((r: any) => r.id));
+      const { data: extraRows } = await client
+        .from("media_references")
+        .select(
+          "id, title, video_url, thumbnail_url, platform, style_tags, duration, analysis_metadata"
+        )
+        .eq("merchant_id", merchantId)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (extraRows) {
+        for (const row of extraRows) {
+          if (!selectedIds.has(row.id)) {
+            mediaRows.push(row);
+            selectedIds.add(row.id);
+            if (mediaRows.length >= minRequired) break;
+          }
+        }
+      }
+    }
   } else {
     // Nếu Merchant không chọn cụ thể -> Lấy tối đa 20 tư liệu gần nhất
-    mediaQuery = mediaQuery.order("created_at", { ascending: false }).limit(20);
-  }
+    const { data: defaultRows, error: mediaError } = await client
+      .from("media_references")
+      .select(
+        "id, title, video_url, thumbnail_url, platform, style_tags, duration, analysis_metadata"
+      )
+      .eq("merchant_id", merchantId)
+      .order("created_at", { ascending: false })
+      .limit(20);
 
-  const { data: mediaRows, error: mediaError } = await mediaQuery;
-
-  if (mediaError) {
-    return {
-      success: false,
-      errorType: "INVALID_INPUT",
-      error: "Lỗi truy vấn thư viện video mẫu: " + mediaError.message,
-    };
+    if (mediaError) {
+      return {
+        success: false,
+        errorType: "INVALID_INPUT",
+        error: "Lỗi truy vấn thư viện video mẫu: " + mediaError.message,
+      };
+    }
+    mediaRows = defaultRows || [];
   }
 
   // Ánh xạ sang MediaAsset chuẩn của Video Engine
