@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   devIndicators: { position: "top-right" },
   // Optional isolated output when the default .next directory is in use.
   distDir: process.env.NEXT_BUILD_DIR || ".next",
+  // Cho phép origin 127.0.0.1 khi test tự động bằng Playwright / local browser
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   async headers() {
     return [
       {
