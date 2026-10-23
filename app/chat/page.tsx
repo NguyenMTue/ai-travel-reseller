@@ -1,5 +1,6 @@
 import { SiteHeader } from "@/src/components/site-header";
-import { ChatPanel, type Attribution } from "@/src/components/chat/chat-panel";
+import { MobileChatSheet } from "@/src/components/chat/mobile-chat-sheet";
+import type { Attribution } from "@/src/lib/chat/transport";
 export const metadata = { title: "Trợ lý AI" };
 export default async function ChatPage({
   searchParams,
@@ -23,7 +24,7 @@ export default async function ChatPage({
     <>
       <SiteHeader />
       <main id="main-content" className="container chat-page">
-        <ChatPanel attribution={attribution} />
+        <MobileChatSheet attribution={attribution} />
       </main>
     </>
   );

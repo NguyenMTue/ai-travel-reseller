@@ -50,7 +50,17 @@
     "build/fe-w2-access-test/dev/types/**/*.ts",
     "build/fe-w2-access/types/**/*.ts",
     "build/fe-w2-access/dev/types/**/*.ts",
-    "build/fe-w2-access-test/dev/dev/types/**/*.ts"
+    "build/fe-w2-access-test/dev/dev/types/**/*.ts",
+    "build/fe-w3-nav-local/types/**/*.ts",
+    "build/fe-w3-nav-local/dev/types/**/*.ts",
+    "build/fe-w3-share-manual/types/**/*.ts",
+    "build/fe-w3-share-manual/dev/types/**/*.ts",
+    "build/fe-w3-chat-manual-01/types/**/*.ts",
+    "build/fe-w3-chat-manual-01/dev/types/**/*.ts",
+    "build/fe-w3-wallet-manual-01/types/**/*.ts",
+    "build/fe-w3-wallet-manual-01/dev/types/**/*.ts",
+    "build/fe-w3-media-manual/types/**/*.ts",
+    "build/fe-w3-media-manual/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

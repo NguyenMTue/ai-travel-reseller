@@ -1,0 +1,30 @@
+import assert from "node:assert/strict";
+import { mkdir, writeFile } from "node:fs/promises";
+import { chromium, expect as baseExpect } from "@playwright/test";
+const expect=baseExpect.configure({timeout:60000}),base=process.env.MEDIA_LIBRARY_BASE_URL??"http://127.0.0.1:3192",out=process.env.MEDIA_LIBRARY_EVIDENCE_DIR??"build/fe-w3-media-grid-evidence";
+await mkdir(out,{recursive:true});
+const browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHROMIUM_PATH?{executablePath:process.env.PLAYWRIGHT_CHROMIUM_PATH}:{})});
+const report={responses:[],console:[],pageErrors:[],blocked:[],checks:[]};
+try{
+  const context=await browser.newContext({serviceWorkers:"block"});
+  await context.route("**/*",route=>{const r=route.request(),u=new URL(r.url());if(u.origin!==base||r.method()!=="GET"||/^\/(api|r)(\/|$)/.test(u.pathname)){report.blocked.push(r.method()+" "+u.origin+u.pathname);return route.abort();}return route.continue();});
+  const page=await context.newPage();page.setDefaultNavigationTimeout(180000);
+  page.on("pageerror",e=>report.pageErrors.push(e.message));
+  page.on("console",message=>{if(message.type()==="error"||message.type()==="warning")report.console.push({type:message.type(),text:message.text(),url:message.location().url});});
+  page.on("response",r=>{if(new URL(r.url()).pathname==="/fixture-missing-thumbnail.jpg")report.responses.push({status:r.status(),url:r.url()});});
+  await page.goto(`${base}/preview/merchant/library`);
+  await expect(page.getByRole("article")).toHaveCount(6);
+  await expect(page.getByRole("img",{name:"Không có ảnh xem trước"})).toHaveCount(2);
+  await expect.poll(()=>report.responses.length).toBe(1);assert.equal(report.responses[0].status,404);
+  await page.waitForTimeout(1000);assert.equal(report.responses.length,1,"no continuous image retry after fallback");report.checks.push("one real 404 per first card mount; stable idle");
+  await page.getByRole("article").nth(1).screenshot({path:`${out}/image-fallback.png`});
+  await page.getByRole("button",{name:"Chọn mẫu",exact:true}).first().click();await page.getByRole("button",{name:"Bỏ chọn mẫu"}).click();
+  await page.getByRole("button",{name:"Quy chuẩn video",exact:true}).click();await expect(page.getByRole("dialog")).toBeVisible();await page.keyboard.press("Escape");await expect(page.getByRole("dialog")).not.toBeVisible();
+  await page.waitForTimeout(600);assert.equal(report.responses.length,1,"selection/modal rerenders must not request the failed image again");report.checks.push("selection and modal rerenders do not reload failed image");
+  await page.getByRole("searchbox",{name:"Tìm theo tiêu đề"}).fill("Hội An");await page.getByRole("button",{name:"Tìm kiếm",exact:true}).click();await expect(page.getByRole("article")).toHaveCount(1);
+  await page.getByRole("button",{name:"Xóa bộ lọc"}).click();await expect(page.getByRole("article")).toHaveCount(6);await expect(page.getByRole("img",{name:"Không có ảnh xem trước"})).toHaveCount(2);
+  await expect.poll(()=>report.responses.length).toBe(2);await page.waitForTimeout(1000);assert.equal(report.responses.length,2,"one new request on a new card mount, then stable");report.checks.push("new list mount causes exactly one new 404, not a retry loop");
+  assert.deepEqual(report.pageErrors,[]);assert.deepEqual(report.blocked,[]);
+  assert(report.console.filter(m=>m.type==="error").every(m=>m.url===`${base}/fixture-missing-thumbnail.jpg`),"all Console errors must be explained by intentional local 404");
+  console.log("PASS real 404 fallback: idle, selection/modal, remount; no image retry loop or JS exception");
+}finally{await writeFile(`${out}/image-fallback-console.json`,JSON.stringify(report,null,2));await browser.close();}

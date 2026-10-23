@@ -10,3 +10,7 @@
 .url { display: block; width: 100%; min-width: 0; resize: vertical; padding: 12px; border: 1px solid var(--border); border-radius: 10px; background: white; font-size: 14px; overflow-wrap: anywhere; }
 .qr { display: block; margin: 20px auto 12px; width: 224px; max-width: 100%; height: auto; background: white; }
 .hint { font-size: 13px; line-height: 1.65; color: var(--muted-foreground); }
+.sharePanel { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+.shareTitle { font-family: var(--font-display); font-size: 21px; line-height: 1.35; margin-bottom: 10px; }
+.poster { margin-top: 16px; }
+.poster img { display: block; width: min(100%, 360px); height: auto; margin-inline: auto; border: 1px solid var(--border); border-radius: 12px; }

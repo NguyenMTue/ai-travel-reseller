@@ -12,14 +12,15 @@ import {
   deleteMediaReference,
 } from "@/src/lib/merchant/media-service";
 
+export type MerchantAccessResult =
+  | { status: "allowed"; merchantId: string; supabase: ReturnType<typeof createClient>; isSession: boolean }
+  | { status: "unauthenticated"; supabase: ReturnType<typeof createClient> }
+  | { status: "forbidden"; supabase: ReturnType<typeof createClient> };
+
 /**
  * Hàm trợ giúp xác thực phiên Merchant an toàn
  */
-async function resolveMerchantId(request: Request): Promise<{
-  merchantId: string | null;
-  supabase: ReturnType<typeof createClient>;
-  isSession: boolean;
-}> {
+export async function resolveMerchantAccess(request: Request): Promise<MerchantAccessResult> {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -38,8 +39,9 @@ async function resolveMerchantId(request: Request): Promise<{
         .maybeSingle();
 
       if (merchant?.id) {
-        return { merchantId: merchant.id, supabase, isSession: true };
+        return { status: "allowed", merchantId: merchant.id, supabase, isSession: true };
       }
+      return { status: "forbidden", supabase };
     }
   } catch {
     // Không có cookie session hợp lệ
@@ -49,31 +51,78 @@ async function resolveMerchantId(request: Request): Promise<{
   if (process.env.NODE_ENV !== "production") {
     const headerId = request.headers.get("x-merchant-id")?.trim();
     if (headerId && UUID_PATTERN.test(headerId)) {
-      return { merchantId: headerId, supabase, isSession: false };
-    }
-
-    const { searchParams } = new URL(request.url);
-    const queryId = searchParams.get("merchant_id")?.trim();
-    if (queryId && UUID_PATTERN.test(queryId)) {
-      return { merchantId: queryId, supabase, isSession: false };
+      return { status: "allowed", merchantId: headerId, supabase, isSession: false };
     }
   }
 
-  return { merchantId: null, supabase, isSession: false };
+  return { status: "unauthenticated", supabase };
 }
 
 /**
  * GET /api/merchant/media
  * Lấy danh sách video mẫu phục vụ Merchant Video Library & AI Video Engine
+ * Quyền: Bắt buộc tài khoản Merchant. Chỉ truy cập media thuộc sở hữu của Merchant đó.
  */
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const { merchantId, supabase } = await resolveMerchantId(request);
+    const access = await resolveMerchantAccess(request);
 
-    // Parse tham số lọc và phân trang
+    if (access.status === "unauthenticated") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Yêu cầu đăng nhập tài khoản Merchant để truy cập thư viện media",
+          code: "UNAUTHORIZED",
+        },
+        {
+          status: 401,
+          headers: {
+            "Cache-Control": "private, no-cache, no-store, must-revalidate",
+          },
+        },
+      );
+    }
+
+    if (access.status === "forbidden") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Tài khoản không có quyền truy cập thư viện media của Merchant",
+          code: "FORBIDDEN",
+        },
+        {
+          status: 403,
+          headers: {
+            "Cache-Control": "private, no-cache, no-store, must-revalidate",
+          },
+        },
+      );
+    }
+
+    const { merchantId, supabase } = access;
+    const { searchParams } = new URL(request.url);
+
+    // Chặn truy cập chéo / giả mạo Merchant: nếu client gửi merchant_id khác với phiên đang đăng nhập
+    const queryMerchantId = searchParams.get("merchant_id")?.trim();
+    if (queryMerchantId && queryMerchantId !== merchantId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Không được phép truy cập thư viện media của Merchant khác",
+          code: "FORBIDDEN",
+        },
+        {
+          status: 403,
+          headers: {
+            "Cache-Control": "private, no-cache, no-store, must-revalidate",
+          },
+        },
+      );
+    }
+
+    // Parse tham số lọc và phân trang (merchantId luôn cố định là merchantId đã xác thực)
     const queryParams = {
-      merchantId: searchParams.get("merchant_id") || merchantId || undefined,
+      merchantId,
       platform: searchParams.get("platform") || undefined,
       tag: searchParams.get("tag") || undefined,
       search: searchParams.get("search") || undefined,
@@ -89,7 +138,12 @@ export async function GET(request: Request) {
           error: "Tham số truy vấn không hợp lệ",
           details: parsedQuery.error.flatten().fieldErrors,
         },
-        { status: 400 },
+        {
+          status: 400,
+          headers: {
+            "Cache-Control": "private, no-cache, no-store, must-revalidate",
+          },
+        },
       );
     }
 
@@ -98,7 +152,12 @@ export async function GET(request: Request) {
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: result.error },
-        { status: 500 },
+        {
+          status: 500,
+          headers: {
+            "Cache-Control": "private, no-cache, no-store, must-revalidate",
+          },
+        },
       );
     }
 
@@ -121,7 +180,12 @@ export async function GET(request: Request) {
         success: false,
         error: err instanceof Error ? err.message : "Lỗi máy chủ nội bộ",
       },
-      { status: 500 },
+      {
+        status: 500,
+        headers: {
+          "Cache-Control": "private, no-cache, no-store, must-revalidate",
+        },
+      },
     );
   }
 }
@@ -132,9 +196,9 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   try {
-    const { merchantId, supabase } = await resolveMerchantId(request);
+    const access = await resolveMerchantAccess(request);
 
-    if (!merchantId) {
+    if (access.status === "unauthenticated") {
       return NextResponse.json(
         {
           success: false,
@@ -144,6 +208,19 @@ export async function POST(request: Request) {
         { status: 401 },
       );
     }
+
+    if (access.status === "forbidden") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Tài khoản không có quyền Merchant",
+          code: "FORBIDDEN",
+        },
+        { status: 403 },
+      );
+    }
+
+    const { merchantId, supabase } = access;
 
     let bodyJson: unknown;
     try {
@@ -205,9 +282,9 @@ export async function POST(request: Request) {
  */
 export async function DELETE(request: Request) {
   try {
-    const { merchantId, supabase } = await resolveMerchantId(request);
+    const access = await resolveMerchantAccess(request);
 
-    if (!merchantId) {
+    if (access.status === "unauthenticated") {
       return NextResponse.json(
         {
           success: false,
@@ -217,6 +294,19 @@ export async function DELETE(request: Request) {
         { status: 401 },
       );
     }
+
+    if (access.status === "forbidden") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Tài khoản không có quyền Merchant",
+          code: "FORBIDDEN",
+        },
+        { status: 403 },
+      );
+    }
+
+    const { merchantId, supabase } = access;
 
     const { searchParams } = new URL(request.url);
     const mediaId = searchParams.get("id")?.trim();

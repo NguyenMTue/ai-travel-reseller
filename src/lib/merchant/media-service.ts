@@ -5,8 +5,8 @@ import type {
   MediaQueryInput,
   MediaReferenceItem,
   MediaPlatform,
-} from "./media-schema";
-import { MEDIA_PLATFORMS } from "./media-schema";
+} from "./media-schema.ts";
+import { MEDIA_PLATFORMS } from "./media-schema.ts";
 
 export type MediaListResult = {
   items: MediaReferenceItem[];

@@ -7,12 +7,13 @@ import { requestTrackingFixture, type TrackingScenario } from "@/tests/fixtures/
 import { CampaignDetailView } from "@/src/components/reseller/campaign-detail";
 import type { CampaignDetail, ContentVariant } from "@/src/lib/reseller/content-kit";
 import { Button } from "@/src/components/ui/button";
+import type { PosterDetails } from "@/src/lib/reseller/canvas-qr";
 
-export function TrackingPreview({ input, scenario, onSettled }: { input: TrackingInput | null; scenario: TrackingScenario; onSettled?: () => void }) {
+export function TrackingPreview({ input, scenario, onSettled, posterDetails }: { input: TrackingInput | null; scenario: TrackingScenario; onSettled?: () => void; posterDetails?: PosterDetails }) {
   const [attempts, setAttempts] = useState(0);
   const [payload, setPayload] = useState("");
   return <>
-    <TrackingLinkModal input={scenario === "missing-product" ? null : input} preview={scenario !== "blocked"} blocked={scenario === "blocked"}
+    <TrackingLinkModal posterDetails={posterDetails} input={scenario === "missing-product" ? null : input} preview={scenario !== "blocked"} blocked={scenario === "blocked"}
       request={async value => {
         const result = await requestTrackingFixture(value, scenario, body => { setAttempts(n => n + 1); setPayload(body); });
         onSettled?.();
@@ -43,6 +44,7 @@ export function TrackingScopePreview({ campaign, variants }: { campaign: Campaig
       <p data-testid="tracking-settled">Số phản hồi fixture: {settled}</p>
     </aside>
     <CampaignDetailView campaign={selected} variants={variants} contentStatus="ready" preview viewerKey={sessionKey} feedPath="/preview/reseller"
-      tracking={<TrackingPreview key={`${selected.id}:${selected.product_id}:${sessionKey}`} input={selected.product_id ? { campaign_id: selected.id, product_id: selected.product_id } : null} scenario="scope" onSettled={() => setSettled(value => value + 1)} />} />
+      tracking={<TrackingPreview posterDetails={{ campaignName: selected.name, productName: selected.products?.name,
+        illustrationUrl: `/coast.svg?fixture-scope=${sessionKey}-${selected.id}-${selected.product_id}` }} key={`${selected.id}:${selected.product_id}:${sessionKey}`} input={selected.product_id ? { campaign_id: selected.id, product_id: selected.product_id } : null} scenario="scope" onSettled={() => setSettled(value => value + 1)} />} />
   </>;
 }

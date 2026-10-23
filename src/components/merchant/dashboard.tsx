@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   ShieldCheck,
+  Film,
 } from "lucide-react";
 import { Brand } from "@/src/components/brand";
 import { Button } from "@/src/components/ui/button";
@@ -80,6 +81,10 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
             <Package size={19} />
             Sản phẩm<span className="nav-count">{demoProducts.length}</span>
           </button>
+          <Link prefetch={false} href={preview ? "/preview/merchant/library" : "/merchant/library"}>
+            <Film size={19} />
+            Thư viện media
+          </Link>
           <Link href="/chat">
             <MessageSquare size={19} />
             Trợ lý AI

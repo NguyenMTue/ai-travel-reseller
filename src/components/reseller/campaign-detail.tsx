@@ -8,6 +8,7 @@ import type { DataFailureKind } from "@/src/lib/reseller/data-failure";
 import { TrackingLinkModal } from "./tracking-link";
 import type { ReactNode } from "react";
 import { TrackingScopeProvider } from "./tracking-scope";
+import navigationStyles from "./bottom-nav.module.css";
 
 export function CampaignDetailView({ campaign, variants, contentStatus, contentReason, feedPath = "/reseller/campaigns", tracking, viewerKey, preview = false }: {
   campaign: CampaignDetail; variants: ContentVariant[]; contentStatus: "blocked" | "ready" | "error"; contentReason?: DataFailureKind; feedPath?: string;
@@ -34,10 +35,14 @@ export function CampaignDetailView({ campaign, variants, contentStatus, contentR
           Kế hoạch Sprint 3: Hoàn thiện logic shouldInvalidateTrackingSession và bật lại {!preview}. */}
       <TrackingScopeProvider scope={viewerKey && campaign.product_id && campaign.products?.id === campaign.product_id
         ? { campaign_id: campaign.id, product_id: campaign.product_id, sessionKey: viewerKey } : null} watchSession={false}>
+      <div id="reseller-content-kit" tabIndex={-1} className={navigationStyles.anchor}>
       <ContentKit variants={variants} contentStatus={contentStatus} contentReason={contentReason}
         campaignId={campaign.id} productId={campaign.product_id} preview={preview} />
-      {tracking ?? <TrackingLinkModal key={`${campaign.id}:${campaign.product_id ?? "none"}`} input={campaign.product_id && campaign.products?.id === campaign.product_id
+      </div>
+      <div id="reseller-tracking" tabIndex={-1} className={navigationStyles.anchor}>
+      {tracking ?? <TrackingLinkModal blocked={preview} posterDetails={{ campaignName: campaign.name, productName: campaign.products?.name }} key={`${campaign.id}:${campaign.product_id ?? "none"}`} input={campaign.product_id && campaign.products?.id === campaign.product_id
         ? { campaign_id: campaign.id, product_id: campaign.product_id } : null} />}
+      </div>
       </TrackingScopeProvider>
     </div>
   );

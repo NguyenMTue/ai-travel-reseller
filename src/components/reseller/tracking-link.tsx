@@ -1,22 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/src/components/ui/button";
 import { requestLiveTrackingLink, trackingBlockedMessage, isLiveTrackingEnabled, type TrackingInput, type TrackingRequest, type TrackingResult } from "@/src/lib/reseller/tracking-link";
 import { TrackingQr } from "./tracking-qr";
 import styles from "./tracking-link.module.css";
 import { useTrackingScope } from "./tracking-scope";
 import { trackingUrlAudience } from "@/src/lib/reseller/tracking-cta";
+import { ShareActions } from "./share-actions";
+import type { PosterDetails } from "@/src/lib/reseller/canvas-qr";
 
 type ModalProps = {
   input: TrackingInput | null; request?: TrackingRequest; preview?: boolean; blocked?: boolean;
+  posterDetails?: PosterDetails;
 };
 export function TrackingLinkModal(props: ModalProps) {
-  const { invalidated } = useTrackingScope();
-  return <TrackingLinkDialog key={invalidated ? "invalidated" : "current"} {...props} input={invalidated ? null : props.input} />;
+  const { invalidated, scope } = useTrackingScope();
+  return <TrackingLinkDialog key={JSON.stringify([invalidated, props.input?.campaign_id, props.input?.product_id, scope?.sessionKey])} {...props} input={invalidated ? null : props.input} />;
 }
-function TrackingLinkDialog({ input, request = requestLiveTrackingLink, preview = false, blocked = false }: ModalProps) {
+function TrackingLinkDialog({ input, request = requestLiveTrackingLink, preview = false, blocked = false, posterDetails }: ModalProps) {
   const { acceptLink } = useTrackingScope();
   const dialog = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLButtonElement>(null);
@@ -27,6 +30,8 @@ function TrackingLinkDialog({ input, request = requestLiveTrackingLink, preview 
   const [copy, setCopy] = useState<"idle" | "pending" | "success" | "error">("idle");
   const inFlight = useRef(false);
   const copying = useRef(false);
+  const mounted = useRef(false);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const allowed = !blocked && (preview || isLiveTrackingEnabled());
   const locked = result?.status === "success" || result?.status === "uncertain" || result?.status === "session";
 
@@ -37,11 +42,12 @@ function TrackingLinkDialog({ input, request = requestLiveTrackingLink, preview 
     setResult(null);
     try {
       const received = await request(input);
+      if (!mounted.current) return;
       setResult(received);
       if (received.status === "success") acceptLink(input, received.shortUrl);
     }
-    catch { setResult({ status: "uncertain", message: "Chưa xác định được kết quả tạo link. Không gửi lại; vui lòng nhờ nhóm hỗ trợ kiểm tra." }); }
-    finally { inFlight.current = false; setPending(false); }
+    catch { if (mounted.current) setResult({ status: "uncertain", message: "Chưa xác định được kết quả tạo link. Không gửi lại; vui lòng nhờ nhóm hỗ trợ kiểm tra." }); }
+    finally { inFlight.current = false; if (mounted.current) setPending(false); }
   }
 
   async function copyLink() {
@@ -102,6 +108,7 @@ function TrackingLinkDialog({ input, request = requestLiveTrackingLink, preview 
             <p>Không thể sao chép link. Chọn nội dung rồi dùng Ctrl+C hoặc lệnh Sao chép của thiết bị.</p>
             <Button variant="outline" onClick={() => { manual.current?.focus(); manual.current?.select(); }}>Chọn link để sao chép thủ công</Button>
           </div>}
+          <ShareActions url={result.shortUrl} details={posterDetails} preview={preview} />
         </div>}
         <div className={styles.actions}>
           <Button onClick={create} disabled={!allowed || !input || pending || locked}>{pending ? "Đang tạo…" : "Tạo link tiếp thị"}</Button>
