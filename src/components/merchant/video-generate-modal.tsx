@@ -91,16 +91,15 @@ export function VideoGenerateModal({
   const [blockedErrors, setBlockedErrors] = useState<BlockedItem[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
-  const [remainingTimeText, setRemainingTimeText] = useState("");
 
-  const renderIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const renderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cachedResultRef = useRef<GeneratedVideoData | null>(null);
 
-  // Dọn dẹp interval khi component unmount
+  // Dọn dẹp timer khi component unmount
   useEffect(() => {
     return () => {
-      if (renderIntervalRef.current) {
-        clearInterval(renderIntervalRef.current);
+      if (renderTimerRef.current) {
+        clearTimeout(renderTimerRef.current);
       }
     };
   }, []);
@@ -179,9 +178,9 @@ export function VideoGenerateModal({
   // Reset form khi mở mới
   useEffect(() => {
     if (isOpen) {
-      if (renderIntervalRef.current) {
-        clearInterval(renderIntervalRef.current);
-        renderIntervalRef.current = null;
+      if (renderTimerRef.current) {
+        clearTimeout(renderTimerRef.current);
+        renderTimerRef.current = null;
       }
       cachedResultRef.current = null;
       setMode("config");
@@ -191,30 +190,31 @@ export function VideoGenerateModal({
       setBlockedErrors([]);
       setErrorMessage("");
       setCopied(false);
-      setRemainingTimeText("Dự kiến render: ~2 phút 35 giây...");
     }
   }, [isOpen, selectedItem]);
 
-  const TARGET_RENDER_SECONDS = 155; // ~2 phút 35 giây (gần 3 phút để cảm giác gen thật)
+  const TARGET_DURATION_MS = 160 * 1000; // ~2 phút 40 giây (gần 3 phút)
 
   function finishRenderSuccessfully(data: GeneratedVideoData) {
-    if (renderIntervalRef.current) {
-      clearInterval(renderIntervalRef.current);
-      renderIntervalRef.current = null;
+    if (renderTimerRef.current) {
+      clearTimeout(renderTimerRef.current);
+      renderTimerRef.current = null;
     }
     setVideoResult(data);
     setProgress(100);
     setCurrentStepIndex(3);
-    setRemainingTimeText("Hoàn tất!");
     setMode("ready");
   }
 
   function handleSkipWait() {
+    if (renderTimerRef.current) {
+      clearTimeout(renderTimerRef.current);
+      renderTimerRef.current = null;
+    }
     if (cachedResultRef.current) {
       finishRenderSuccessfully(cachedResultRef.current);
     } else {
       setProgress(98);
-      setRemainingTimeText("Đang đồng bộ frame cuối...");
       const checkTimer = setInterval(() => {
         if (cachedResultRef.current) {
           clearInterval(checkTimer);
@@ -240,51 +240,60 @@ export function VideoGenerateModal({
     }
 
     setMode("generating");
-    setProgress(1);
+    setProgress(2);
     setCurrentStepIndex(0);
     setErrorMessage("");
     cachedResultRef.current = null;
 
-    let elapsed = 0;
-    setRemainingTimeText("Dự kiến render: ~2 phút 35 giây...");
+    const startTime = Date.now();
 
-    const interval = setInterval(() => {
-      elapsed += 1;
-      const pct = Math.min(
-        99,
-        Math.max(1, Math.floor((elapsed / TARGET_RENDER_SECONDS) * 100))
-      );
-      setProgress(pct);
+    function scheduleTick() {
+      // Khoảng ngẫu nhiên 1.8s - 3.8s giữa các lần cập nhật (không đều 1s = 1% để tạo nhịp tính toán GPU tự nhiên)
+      const nextDelay = Math.floor(Math.random() * 2000) + 1800;
 
-      const remaining = Math.max(0, TARGET_RENDER_SECONDS - elapsed);
-      const mins = Math.floor(remaining / 60);
-      const secs = remaining % 60;
-      const formatted =
-        mins > 0
-          ? `${mins} phút ${secs < 10 ? "0" : ""}${secs} giây`
-          : `${secs} giây`;
-      setRemainingTimeText(`Dự kiến hoàn tất sau: ~${formatted}`);
+      const timer = setTimeout(() => {
+        const elapsedMs = Date.now() - startTime;
+        const elapsedSec = elapsedMs / 1000;
 
-      if (pct < 25) {
-        setCurrentStepIndex(0);
-      } else if (pct < 55) {
-        setCurrentStepIndex(1);
-      } else if (pct < 80) {
-        setCurrentStepIndex(2);
-      } else {
-        setCurrentStepIndex(3);
-      }
-
-      if (elapsed >= TARGET_RENDER_SECONDS) {
-        clearInterval(interval);
-        renderIntervalRef.current = null;
-        if (cachedResultRef.current) {
-          finishRenderSuccessfully(cachedResultRef.current);
+        let targetPct = 2;
+        if (elapsedSec < 25) {
+          // Giai đoạn 1 (0s - 25s): Phân tích kịch bản -> 2%..22%
+          targetPct = Math.min(22, 2 + Math.floor((elapsedSec / 25) * 20));
+          setCurrentStepIndex(0);
+        } else if (elapsedSec < 85) {
+          // Giai đoạn 2 (25s - 85s): Spatial Parallax & ghép cảnh -> 23%..58%
+          targetPct = Math.min(58, 23 + Math.floor(((elapsedSec - 25) / 60) * 35));
+          setCurrentStepIndex(1);
+        } else if (elapsedSec < 130) {
+          // Giai đoạn 3 (85s - 130s): Lồng tiếng & Âm thanh -> 59%..83%
+          targetPct = Math.min(83, 59 + Math.floor(((elapsedSec - 85) / 45) * 24));
+          setCurrentStepIndex(2);
+        } else if (elapsedMs < TARGET_DURATION_MS) {
+          // Giai đoạn 4 (130s - 160s): Xuất bản bản nháp -> 84%..98%
+          targetPct = Math.min(98, 84 + Math.floor(((elapsedSec - 130) / 30) * 14));
+          setCurrentStepIndex(3);
+        } else {
+          targetPct = 98;
+          setCurrentStepIndex(3);
         }
-      }
-    }, 1000);
 
-    renderIntervalRef.current = interval;
+        // Đảm bảo % tiến độ luôn tăng dần và giữ ở mức 98% trước khi hoàn tất
+        setProgress((prev) => Math.min(98, Math.max(prev, targetPct)));
+
+        if (elapsedMs >= TARGET_DURATION_MS) {
+          renderTimerRef.current = null;
+          if (cachedResultRef.current) {
+            finishRenderSuccessfully(cachedResultRef.current);
+          }
+        } else {
+          scheduleTick();
+        }
+      }, nextDelay);
+
+      renderTimerRef.current = timer;
+    }
+
+    scheduleTick();
 
     try {
       const payload = {
@@ -312,20 +321,20 @@ export function VideoGenerateModal({
 
       if (response.status === 201 && json.success) {
         cachedResultRef.current = json.data;
-        if (elapsed >= TARGET_RENDER_SECONDS) {
+        if (Date.now() - startTime >= TARGET_DURATION_MS) {
           finishRenderSuccessfully(json.data);
         }
       } else if (response.status === 422) {
-        if (renderIntervalRef.current) {
-          clearInterval(renderIntervalRef.current);
-          renderIntervalRef.current = null;
+        if (renderTimerRef.current) {
+          clearTimeout(renderTimerRef.current);
+          renderTimerRef.current = null;
         }
         setMode("blocked");
         setBlockedErrors(json.missing_or_invalid_inputs || []);
       } else {
-        if (renderIntervalRef.current) {
-          clearInterval(renderIntervalRef.current);
-          renderIntervalRef.current = null;
+        if (renderTimerRef.current) {
+          clearTimeout(renderTimerRef.current);
+          renderTimerRef.current = null;
         }
         setMode("error");
         setErrorMessage(
@@ -333,9 +342,9 @@ export function VideoGenerateModal({
         );
       }
     } catch (err: any) {
-      if (renderIntervalRef.current) {
-        clearInterval(renderIntervalRef.current);
-        renderIntervalRef.current = null;
+      if (renderTimerRef.current) {
+        clearTimeout(renderTimerRef.current);
+        renderTimerRef.current = null;
       }
       setMode("error");
       setErrorMessage("Lỗi kết nối mạng: " + (err?.message || "Không xác định"));
@@ -599,8 +608,10 @@ export function VideoGenerateModal({
         {(mode === "generating" || mode === "polling") && (
           <div className={styles.progressContainer}>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">{remainingTimeText || "Đang xử lý pipeline sinh video AI..."}</span>
-              <strong className="text-primary font-bold">{progress}%</strong>
+              <span className="font-medium text-foreground">
+                Đang xử lý pipeline sinh video AI...
+              </span>
+              <strong className="text-primary font-bold text-sm">{progress}%</strong>
             </div>
 
             <div className={styles.progressBarTrack}>
