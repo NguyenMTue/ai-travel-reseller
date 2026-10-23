@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sổ Tay Hướng Dẫn Live Demo Sprint 3 | BE1 Lead & Project Manager</title>
+  <title>Sổ Tay Hướng Dẫn Live Demo Sprint 3 | Toàn Đội Ngũ Dự Án TravelLink AI</title>
   <style>
     :root {
       --primary: #0284c7;
@@ -16,6 +16,8 @@
       --warning-light: #fef3c7;
       --danger: #e11d48;
       --danger-light: #ffe4e6;
+      --purple: #9333ea;
+      --purple-light: #f3e8ff;
       --bg: #f8fafc;
       --surface: #ffffff;
       --border: #e2e8f0;
@@ -35,7 +37,7 @@
     }
 
     .container {
-      max-width: 1100px;
+      max-width: 1120px;
       margin: 0 auto;
     }
 
@@ -84,6 +86,27 @@
     }
     .meta-item strong { color: white; }
 
+    .team-badge-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .team-badge-item {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+    }
+    .team-badge-item span {
+      display: block;
+      color: #93c5fd;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
     .nav-tabs {
       display: flex;
       gap: 12px;
@@ -93,6 +116,7 @@
       z-index: 100;
       background: var(--bg);
       padding: 8px 0;
+      overflow-x: auto;
     }
 
     .nav-btn {
@@ -107,6 +131,7 @@
       text-decoration: none;
       transition: all 0.2s ease;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      white-space: nowrap;
     }
     .nav-btn:hover, .nav-btn.active {
       background: var(--primary);
@@ -225,6 +250,20 @@
       letter-spacing: 0.05em;
     }
 
+    .speaker-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-right: 6px;
+    }
+    .speaker-pm { background: #0369a1; color: white; }
+    .speaker-fe { background: #059669; color: white; }
+    .speaker-be2 { background: #9333ea; color: white; }
+    .speaker-be3 { background: #d97706; color: white; }
+    .speaker-qa { background: #db2777; color: white; }
+
     .callout {
       padding: 16px 20px;
       border-left: 4px solid var(--primary);
@@ -271,14 +310,37 @@
 <body>
   <div class="container">
     <header>
-      <span class="badge-header">SPRINT 3 LIVE DEMO PLAYBOOK | TUẦN 3</span>
-      <h1>Sổ Tay Kịch Bản Live Demo Sprint 3</h1>
-      <p>Hướng dẫn từng bước trình diễn Động cơ Tạo Video AI Chiến Dịch &amp; Phân hệ Thương mại dành cho Mentor &amp; Hội đồng đánh giá.</p>
+      <span class="badge-header">ALL-TEAM SPRINT 3 PLAYBOOK • 19/10/2026 – 24/10/2026</span>
+      <h1>Sổ Tay Kịch Bản Live Demo Sprint 3 Toàn Team</h1>
+      <p>Cẩm nang phối hợp thuyết trình liên thông giữa FE, BE1, BE2, BE3 và QA dành cho Giảng viên hướng dẫn &amp; Hội đồng đánh giá.</p>
+      
       <div class="meta-bar">
-        <div class="meta-item">Người thuyết minh: <strong>Nguyễn Minh Tuệ (BE1 Lead &amp; PM)</strong></div>
-        <div class="meta-item">Đối tượng báo cáo: <strong>Mentor &amp; Giảng viên hướng dẫn</strong></div>
-        <div class="meta-item">Thời lượng khuyến nghị: <strong>7 - 10 phút</strong></div>
+        <div class="meta-item">Đội ngũ báo cáo: <strong>Toàn Team TravelLink AI</strong></div>
+        <div class="meta-item">Thời lượng: <strong>8 - 12 phút</strong></div>
         <div class="meta-item">Môi trường: <strong>Local Staging (Port 3000 &amp; Supabase Local)</strong></div>
+      </div>
+
+      <div class="team-badge-grid">
+        <div class="team-badge-item">
+          <span>Project Manager &amp; BE1</span>
+          Nguyễn Minh Tuệ
+        </div>
+        <div class="team-badge-item">
+          <span>Frontend Lead</span>
+          Diệu
+        </div>
+        <div class="team-badge-item">
+          <span>Backend 2 (AI Prompt)</span>
+          Nguyễn Huỳnh
+        </div>
+        <div class="team-badge-item">
+          <span>Backend 3 (Automation)</span>
+          Thái Thanh Tú
+        </div>
+        <div class="team-badge-item">
+          <span>QA &amp; Testing Lead</span>
+          Tester 1, 2, 3
+        </div>
       </div>
     </header>
 
@@ -286,31 +348,37 @@
     <div class="nav-tabs">
       <a href="#pre-checklist" class="nav-btn active">📋 1. Checklist Trước Giờ G</a>
       <a href="#test-data" class="nav-btn">🔑 2. Môi Trường &amp; Dữ Liệu</a>
-      <a href="#step-by-step" class="nav-btn">🎬 3. Kịch Bản 4 Màn Live Demo</a>
-      <a href="#qa-defense" class="nav-btn">💡 4. Đối Đáp Phản Biện (Q&amp;A)</a>
+      <a href="#step-by-step" class="nav-btn">🎬 3. Kịch Bản 4 Màn Phối Hợp Toàn Team</a>
+      <a href="#qa-defense" class="nav-btn">💡 4. Đối Đáp Phản Biện Theo Chuyên Môn</a>
     </div>
 
     <!-- Section 1: Pre-checklist -->
     <section id="pre-checklist" class="card">
       <div class="card-title">
-        <span>1. Checklist Chuẩn Bị Môi Trường Kỹ Thuật Trước Giờ G</span>
+        <span>1. Checklist Chuẩn Bị Kỹ Thuật Trước Giờ G (Toàn Team Phối Hợp)</span>
       </div>
-      <p>Để buổi báo cáo diễn ra mượt mà không gặp sự cố gián đoạn, hãy kiểm tra danh sách sau trước 10 phút:</p>
+      <p>Trước khi bắt đầu buổi bảo vệ Sprint 3, từng phụ trách kỹ thuật thực hiện kiểm tra nhanh các hạng mục:</p>
       <ul class="checklist">
         <li>
-          <strong>Cơ sở dữ liệu Supabase Local:</strong> Đang chạy ổn định tại <code>127.0.0.1:54321</code>. Đã seed đầy đủ Chiến dịch Bà Nà Hills và 25 tư liệu ảnh thực tế.
+          <strong>BE1 (Tuệ):</strong> Đảm bảo Supabase Local đang chạy tại <code>127.0.0.1:54321</code>. Đã seed đủ bảng <code>campaigns</code>, <code>products</code>, 25 tư liệu <code>media_references</code> và RPC ví hoa hồng hoạt động tốt.
         </li>
         <li>
-          <strong>Máy chủ Next.js App:</strong> Đang chạy tại cổng 3000 (<code>http://localhost:3000</code>).
+          <strong>FE (Diệu):</strong> Đảm bảo server <code>npm run dev</code> đang phục vụ cổng 3000 không có lỗi build hay hydration warning.
         </li>
         <li>
-          <strong>Âm thanh máy tính:</strong> Bật âm lượng loa/tai nghe ở mức vừa đủ (khoảng 50-60%) để nghe rõ giọng đọc AI và nhạc nền du lịch khi phát video.
+          <strong>BE2 (Huỳnh):</strong> Kiểm tra cấu hình bộ 3 Persona (GenZ Săn Deal, Chuyên Gia Bản Địa, Nghỉ Dưỡng Sang Trọng) và kịch bản thuyết minh AI.
+        </li>
+        <li>
+          <strong>BE3 (Tú):</strong> Sẵn sàng tài liệu sơ đồ kiến trúc Background Queue (BullMQ / Redis / FFmpeg Worker) phục vụ phần phản biện Production.
+        </li>
+        <li>
+          <strong>QA Lead:</strong> Mở sẵn log kết quả <strong>24/24 Test Cases PASS</strong> trên terminal để đối chiếu bằng chứng kỹ thuật khi Hội đồng yêu cầu.
         </li>
         <li>
           <strong>Sẵn sàng 3 Tab Trình Duyệt:</strong>
-          <br>• <em>Tab 1:</em> Màn hình Thư viện Media Merchant: <span class="copyable">http://localhost:3000/merchant/library</span>
-          <br>• <em>Tab 2:</em> Supabase Studio quản lý DB: <span class="copyable">http://localhost:54323</span> (mở bảng <code>contents</code> và <code>media_references</code>).
-          <br>• <em>Tab 3 (Dự phòng):</em> Trực tiếp file video thành phẩm: <span class="copyable">http://localhost:3000/campaign-videos/banahills-remediated.mp4</span>
+          <br>• <em>Tab 1 (Trọng tâm):</em> Thư viện Media &amp; Video Generator: <span class="copyable">http://localhost:3000/merchant/library</span>
+          <br>• <em>Tab 2 (Kiểm chứng DB):</em> Supabase Studio: <span class="copyable">http://localhost:54323</span> (bảng <code>contents</code>, <code>orders</code>, <code>commissions</code>).
+          <br>• <em>Tab 3 (Dự phòng):</em> File video thành phẩm: <span class="copyable">http://localhost:3000/campaign-videos/banahills-remediated.mp4</span>
         </li>
       </ul>
     </section>
@@ -318,7 +386,7 @@
     <!-- Section 2: Test Data -->
     <section id="test-data" class="card">
       <div class="card-title">
-        <span>2. Thông Số Mẫu &amp; Dữ Liệu Chiến Dịch Trong Database</span>
+        <span>2. Thông Số Mẫu &amp; Chiến Dịch Demo Trong Database</span>
       </div>
 
       <table class="data-table">
@@ -342,8 +410,8 @@
           </tr>
           <tr>
             <td><strong>Kho Tư Liệu Thực Tế</strong></td>
-            <td>Ảnh thực địa chụp tại điểm đến (Authentic Assets)</td>
-            <td><strong>25 tư liệu ảnh chất lượng cao</strong> (Cầu Vàng, Làng Pháp, Cáp Treo, Buffet Arapang...)</td>
+            <td>Ảnh thực địa đạt chuẩn phân tích AI (25 tư liệu)</td>
+            <td>Cầu Vàng, Làng Pháp, Cáp Treo Thác Tóc Tiên, Buffet Arapang 100 món...</td>
           </tr>
           <tr>
             <td><strong>URL Demo Trọng Tâm</strong></td>
@@ -353,30 +421,30 @@
         </tbody>
       </table>
 
-      <h4 style="margin: 20px 0 10px 0;">Bộ 3 Persona Sinh Video AI Được Cấu Hình</h4>
+      <h4 style="margin: 20px 0 10px 0;">Bộ 3 Persona Sinh Video AI Do BE2 Thiết Kế</h4>
       <table class="data-table">
         <thead>
           <tr>
             <th>Persona Key</th>
             <th>Phong Cách Thuyết Minh</th>
-            <th>Đặc Điểm Video &amp; Âm Nhạc</th>
+            <th>Nhịp Chuyển Cảnh &amp; Trọng Tâm</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td><code>genz_deal_hunter</code></td>
             <td>GenZ Săn Deal Thông Minh (Khuyên dùng Demo)</td>
-            <td>Nhịp cắt cảnh cực nhanh (1.5s/cut), giọng đọc hào hứng, tập trung vào ưu đãi buffet và góc check-in sống ảo triệu view.</td>
+            <td>Nhịp cắt cảnh cực nhanh (1.5s/cut), bắt trend TikTok, nhấn mạnh giá vé combo buffet hời và góc check-in sống ảo.</td>
           </tr>
           <tr>
             <td><code>local_insider</code></td>
             <td>Chuyên Gia Bản Địa</td>
-            <td>Giọng đọc điềm đạm, am hiểu, chia sẻ kinh nghiệm đi cáp treo tránh đông và thời điểm săn mây đẹp nhất trên đỉnh Bà Nà.</td>
+            <td>Giọng đọc điềm đạm, am hiểu địa phương, mách mẹo đi sớm săn mây và tránh xếp hàng cáp treo.</td>
           </tr>
           <tr>
             <td><code>luxury_experience</code></td>
             <td>Nghỉ Dưỡng Sang Trọng</td>
-            <td>Nhịp chuyển cảnh Parallax êm ái, âm nhạc giao hưởng du dương, tôn vinh kiến trúc Châu Âu và dịch vụ ẩm thực cao cấp.</td>
+            <td>Chuyển động Parallax chậm rãi, êm ái, âm hưởng nhạc giao hưởng, tôn vinh kiến trúc Gothic và dịch vụ ẩm thực cao cấp.</td>
           </tr>
         </tbody>
       </table>
@@ -385,19 +453,21 @@
     <!-- Section 3: Step-by-Step Flow -->
     <section id="step-by-step" class="card">
       <div class="card-title">
-        <span>3. Kịch Bản 4 Màn Trình Diễn Live Demo (Step-by-Step)</span>
+        <span>3. Kịch Bản 4 Màn Phối Hợp Thuyết Trình Của Toàn Team (Step-by-Step)</span>
       </div>
 
       <!-- Màn 1 -->
       <div style="margin-bottom: 30px;">
         <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-          <span class="step-badge">1</span> Màn 1: Trưng Bày Thư Viện Tư Liệu Theo Chiến Dịch (Campaign Media Showcase)
+          <span class="step-badge">1</span> Màn 1: Trưng Bày Thư Viện Tư Liệu Chiến Dịch (Campaign Media Showcase)
         </h3>
-        <p><strong>Thao tác:</strong> Tại Tab 1, truy cập đường dẫn <code>http://localhost:3000/merchant/library</code>. Cuộn chuột lướt qua bộ sưu tập ảnh.</p>
+        <p><strong>Thao tác:</strong> Mở Tab 1 tại <code>http://localhost:3000/merchant/library</code>. Cuộn chuột qua bộ sưu tập 25 ảnh thực tế.</p>
         <div class="script-box">
-          <span class="speaker">Lời thoại thuyết minh của BE1 Lead:</span>
-          "Kính thưa Thầy Cô và Hội Đồng, trong tuần 3 này, nhóm phát triển phân hệ Backend &amp; Kiến trúc dữ liệu đã tiến hành một bước nâng cấp quan trọng: chuyển đổi toàn bộ thư viện Media từ việc quản lý các bức ảnh rời rạc sang mô hình quản trị theo Chiến dịch xúc tiến (Campaign-Centric).<br><br>
-          Như Thầy Cô thấy trên màn hình, toàn bộ 25 bức ảnh chụp thực tế tại Bà Nà Hills từ Cầu Vàng, Làng Pháp đến Buffet Arapang đều được gom cụm chặt chẽ dưới 'Chiến dịch Mùa Thu Vàng Bà Nà Hills'. Chúng em đã ẩn các nút chọn thủ công từng ảnh, vì toàn bộ 25 tư liệu đạt chuẩn này sẽ được AI tự động phân tích và chọn lọc góc máy tối ưu nhất khi dựng video."
+          <span class="speaker"><span class="speaker-tag speaker-pm">BE1 Lead / PM (Tuệ)</span> Mở đầu tổng thể:</span>
+          "Kính thưa Thầy Cô và Hội Đồng, trong Sprint 3 này, nhóm chúng em đã giải quyết trọn vẹn bài toán lớn nhất mà các nền tảng Affiliate du lịch hiện nay đang gặp phải: đó là sản xuất nội dung video chân thật, tự động hóa từ tư liệu thực tế và phân bổ hoa hồng minh bạch."
+          <br><br>
+          <span class="speaker"><span class="speaker-tag speaker-fe">FE Lead (Diệu)</span> Thuyết minh giao diện thư viện:</span>
+          "Như Thầy Cô thấy trên màn hình, thay vì để Merchant tải ảnh lên một cách rời rạc, giao diện mới đã gom toàn bộ 25 bức ảnh thực địa vào 'Chiến dịch Mùa Thu Vàng Bà Nà Hills'. Chúng em đã ẩn các nút bấm chọn lẻ tẻ, vì toàn bộ 25 tư liệu ảnh chất lượng cao này sẽ được AI tự động phân tích góc máy để tạo thành một video hoàn chỉnh."
         </div>
       </div>
 
@@ -406,111 +476,119 @@
         <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
           <span class="step-badge">2</span> Màn 2: Cấu Hình Sinh Video AI &amp; Chốt Chặn Fail-Fast Gate
         </h3>
-        <p><strong>Thao tác:</strong> Nhấn vào nút <strong>"Tạo video AI từ chiến dịch"</strong> màu xanh ở góc trên bên phải. Hộp thoại cấu hình xuất hiện.</p>
-        <p><strong>Giải thích tham số:</strong></p>
+        <p><strong>Thao tác:</strong> Bấm nút <strong>"Tạo video AI từ chiến dịch"</strong>. Hộp thoại modal cấu hình mở ra.</p>
+        <p><strong>Cấu hình thao tác:</strong></p>
         <ul style="padding-left: 20px; font-size: 0.93rem; margin: 8px 0;">
-          <li>Hệ thống tự động nhận diện Chiến dịch đang chọn: <em>Chiến dịch Mùa Thu Vàng Bà Nà Hills</em>.</li>
+          <li>Chiến dịch: Nhận diện tự động <em>Chiến dịch Mùa Thu Vàng Bà Nà Hills</em>.</li>
           <li>Chọn Persona: <strong>GenZ Săn Deal Thông Minh</strong>.</li>
-          <li>Thời lượng video mục tiêu: <strong>30 giây</strong> (chuẩn tỉ lệ vàng cho TikTok).</li>
-          <li>Bật switch: <strong>Hiệu ứng chuyển động 3D Spatial Parallax</strong>.</li>
-          <li>Nhập mẹo thực tế (Authentic Tip): <em>"Đi trước 8h30 sáng để trải nghiệm vắng khách, tận hưởng cảnh quan trọn vẹn nhất"</em>.</li>
+          <li>Thời lượng: <strong>30 giây</strong>. Bật switch: <strong>Hiệu ứng chuyển động 3D Spatial Parallax</strong>.</li>
+          <li>Nhập Mẹo thực tế (Authentic Tip): <em>"Đi trước 8h30 sáng để trải nghiệm vắng khách, tận hưởng cảnh quan trọn vẹn nhất"</em>.</li>
         </ul>
         <div class="script-box">
-          <span class="speaker">Lời thoại thuyết minh của BE1 Lead:</span>
-          "Trước khi kích hoạt render, Backend của chúng em đã cài đặt chốt chặn Fail-Fast Gate nghiêm ngặt tại API. Nếu Merchant cố tình bấm tạo video cho một chiến dịch không có bất kỳ tư liệu ảnh thật nào, hệ thống sẽ ngay lập tức trả về mã lỗi HTTP 422 Unprocessable Entity kèm thông báo chi tiết chứ không bao giờ để AI dựng hình ảnh ảo/sai sự thật làm mất uy tín tour du lịch."
+          <span class="speaker"><span class="speaker-tag speaker-be2">BE2 Lead (Huỳnh)</span> Thuyết minh Prompt &amp; Persona:</span>
+          "Dựa trên các nghiên cứu về thuật toán phân phối của TikTok, nhóm AI đã xây dựng 3 Persona đặc trưng. Hôm nay chúng em chọn Persona 'GenZ Săn Deal' với giọng điệu hào hứng, giật tít ưu đãi buffet trưa và hướng dẫn góc check-in Cầu Vàng triệu view."
+          <br><br>
+          <span class="speaker"><span class="speaker-tag speaker-pm">BE1 Lead (Tuệ)</span> Thuyết minh chốt chặn Fail-Fast Gate:</span>
+          "Trước khi kích hoạt render, Backend đã tích hợp chốt chặn bảo vệ Fail-Fast Gate (HTTP 422). Nếu chiến dịch thiếu tư liệu thực địa, hệ thống sẽ từ chối ngay lập tức ở tầng API để ngăn chặn hoàn toàn việc AI sinh video rác hoặc sai sự thật."
         </div>
       </div>
 
       <!-- Màn 3 -->
       <div style="margin-bottom: 30px;">
         <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-          <span class="step-badge">3</span> Màn 3: Tiến Trình Render GPU Mô Phỏng Tự Nhiên (~2.6 Phút) &amp; Nút Tua Nhanh Demo
+          <span class="step-badge">3</span> Màn 3: Tiến Trình Render GPU Mô Phỏng Tự Nhiên &amp; Nút Fast-Forward
         </h3>
         <p><strong>Thao tác:</strong> Bấm nút <strong>"Bắt đầu tạo video AI"</strong>.</p>
         <p><strong>Quan sát trực quan:</strong></p>
         <ul style="padding-left: 20px; font-size: 0.93rem; margin: 8px 0;">
-          <li>Modal chuyển sang trạng thái render với thanh tiến trình mượt mà.</li>
-          <li>Dòng trạng thái hiển thị tự nhiên: <code>Đang xử lý pipeline sinh video AI...</code> kèm con số <code>%</code> tăng dần.</li>
-          <li><strong>Điểm nhấn kỹ thuật:</strong> Tiến trình không tăng cơ học +1%/giây mà nhảy ngẫu nhiên từ 1.8s đến 3.8s qua 4 giai đoạn AI (Kịch bản ➔ Parallax ➔ Hòa âm TTS ➔ Đóng gói).</li>
-          <li><strong>Nút cứu cánh Demo:</strong> Ở chân modal có dòng ghi chú <em>"⚡ Hệ thống AI Cluster đang render khung hình và hòa âm đa kênh"</em> cùng nút <strong>"⚡ Xem ngay kết quả (Demo Mode)"</strong>.</li>
+          <li>Tiến trình chạy qua 4 giai đoạn AI: Phân tích kịch bản ➔ Parallax chuyển động ➔ Hòa âm TTS &amp; BGM ➔ Xuất bản 9:16.</li>
+          <li>Nhịp tăng tiến độ tự nhiên: Tăng ngẫu nhiên từ 1.8s đến 3.8s theo từng đợt xử lý, không bị đều đặn 1s = 1% cơ học.</li>
+          <li>Nút tua nhanh: <strong>`⚡ Xem ngay kết quả (Demo Mode)`</strong> ở góc dưới modal.</li>
         </ul>
         <div class="script-box">
-          <span class="speaker">Lời thoại thuyết minh của BE1 Lead:</span>
-          "Tiến trình sinh video thực tế trên môi trường GPU cluster cần khoảng 2.5 đến 3 phút để tính toán bản đồ chiều sâu 3D (Depth-map) và hòa âm đa kênh. Để tạo cảm giác chân thực nhất, thanh tiến trình của chúng em đã mô phỏng đúng nhịp độ xử lý GPU không đều đặn theo từng batch.<br><br>
-          Đồng thời, để tiết kiệm thời gian quý báu của Thầy Cô trong buổi báo cáo hôm nay, chúng em đã tích hợp sẵn nút 'Xem ngay kết quả' để tua nhanh trực tiếp đến video thành phẩm."
+          <span class="speaker"><span class="speaker-tag speaker-fe">FE Lead (Diệu)</span> Thuyết minh trải nghiệm tải:</span>
+          "Một video ngắn khi render qua GPU thực tế cần khoảng 2.5 đến 3 phút để tính toán chiều sâu Parallax. Nhóm Frontend đã thiết kế thanh tiến trình mô phỏng đúng nhịp độ xử lý GPU không đều đặn theo từng batch."
+          <br><br>
+          <span class="speaker"><span class="speaker-tag speaker-be3">BE3 Lead (Tú)</span> &amp; <span class="speaker-tag speaker-fe">FE Lead (Diệu)</span> Giới thiệu nút tua nhanh:</span>
+          "Và để tiết kiệm thời gian của Thầy Cô trong buổi báo cáo, nhóm đã trang bị thêm nút 'Xem ngay kết quả' để tua nhanh trực tiếp đến video hoàn chỉnh."
         </div>
-        <p><strong>Thao tác tiếp theo:</strong> Bấm nút <strong>"⚡ Xem ngay kết quả (Demo Mode)"</strong> để ngay lập tức hoàn tất 100%.</p>
+        <p><strong>Thao tác tiếp theo:</strong> Bấm nút <strong>"⚡ Xem ngay kết quả (Demo Mode)"</strong> để hoàn tất tiến trình ngay lập tức.</p>
       </div>
 
       <!-- Màn 4 -->
       <div>
         <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-          <span class="step-badge">4</span> Màn 4: Thưởng Thức Video 9:16 Hoàn Thiện &amp; Kiểm Chứng Dữ Liệu Backend
+          <span class="step-badge">4</span> Màn 4: Thưởng Thức Video 9:16 Hoàn Thiện, Kiểm Chứng DB &amp; Báo Cáo QA
         </h3>
-        <p><strong>Thao tác:</strong> Modal tự động chuyển sang trạng thái hoàn tất (`ready`). Trình phát video HTML5 chuẩn 9:16 xuất hiện. Nhấn nút <strong>Play</strong>.</p>
-        <p><strong>Điểm chứng minh thành phẩm:</strong></p>
+        <p><strong>Thao tác:</strong> Trình phát video xuất hiện. Nhấn <strong>Play</strong> để phát video có âm thanh.</p>
+        <p><strong>Quan sát &amp; Kiểm chứng:</strong></p>
         <ul style="padding-left: 20px; font-size: 0.93rem; margin: 8px 0;">
-          <li>Video định dạng dọc 9:16 tối ưu cho TikTok / Instagram Reels.</li>
-          <li>Hình ảnh Parallax chuyển động mượt mà từ ảnh chụp Cầu Vàng thực tế.</li>
-          <li>Giọng thuyết minh tiếng Việt tự nhiên, truyền cảm, khớp kịch bản Persona GenZ.</li>
-          <li>Nhạc nền du lịch rộn ràng được hòa trộn cân bằng âm lượng.</li>
+          <li>Video chuẩn dọc 9:16 với hiệu ứng Parallax chuyển động trên ảnh thật.</li>
+          <li>Thuyết minh giọng tiếng Việt truyền cảm, nhạc nền du lịch hòa trộn sống động.</li>
+          <li>Chuyển Tab 2 (Supabase Studio) mở bảng <code>contents</code> chứng minh bản ghi video đã được lưu trữ vĩnh viễn với trạng thái <code>approved</code>.</li>
         </ul>
         <div class="script-box">
-          <span class="speaker">Lời thoại thuyết minh của BE1 Lead:</span>
-          "Video mà Thầy Cô vừa theo dõi là bản render remediated chuẩn 1080x1920 đạt đầy đủ các tiêu chí: hình ảnh thật từ 25 tư liệu, hiệu ứng chuyển động chiều sâu Parallax và lồng tiếng ăn khớp. Khi bấm tạo, Backend của chúng em đã lưu trữ vĩnh viễn bản ghi video này vào bảng contents trong cơ sở dữ liệu Supabase, liên kết chặt chẽ với ID chiến dịch và sản phẩm Tour."
+          <span class="speaker"><span class="speaker-tag speaker-qa">QA Team Lead</span> Báo cáo kiểm thử:</span>
+          "Kính thưa Hội Đồng, toàn bộ tính năng này đã vượt qua 100% các bài kiểm thử tự động với 24/24 Unit Test cases PASS, bao gồm kiểm tra tính toàn vẹn của Zod Schema, chốt chặn Fail-Fast Gate và cô lập bảo mật RLS đa Merchant."
         </div>
-        <p><strong>Thao tác kiểm chứng DB (Nếu Mentor yêu cầu bằng chứng):</strong> Chuyển sang Tab 2 (Supabase Studio) ➔ Mở bảng <code>contents</code> ➔ Chỉ ra dòng video vừa được khởi tạo với trạng thái <code>approved</code> và URL video hoàn chỉnh.</p>
       </div>
     </section>
 
     <!-- Section 4: Q&A Defense -->
     <section id="qa-defense" class="card">
       <div class="card-title">
-        <span>4. Bộ Câu Hỏi Phản Biện &amp; Kịch Bản Đối Đáp Mentor (Q&amp;A Defense Guide)</span>
+        <span>4. Bộ Câu Hỏi Phản Biện &amp; Kịch Bản Đối Đáp Theo Chuyên Môn Của Team</span>
       </div>
 
       <div class="qa-box">
-        <div class="qa-question">❓ Câu hỏi 1: Video này có phải thật sự render MP4 trực tiếp từ GPU khi bấm nút không? Nếu đưa lên Production thật 100% thì mất bao lâu?</div>
+        <div class="qa-question">❓ Câu hỏi 1: Video này có phải render MP4 trực tiếp từ GPU server khi bấm nút không? Nếu đưa lên Production thật 100% thì mất bao lâu?</div>
         <div class="qa-answer">
-          <strong>Kịch bản đối đáp của BE1 Lead:</strong>
-          "Thưa Thầy Cô, trong buổi demo hôm nay, hệ thống đã thực thi <strong>100% logic backend nghiệp vụ thật</strong>: từ xác thực Merchant, kiểm tra Fail-Fast Gate, xử lý kịch bản theo Persona đến việc ghi nhận bản ghi video vào cơ sở dữ liệu PostgreSQL. Video phát ra là bản thành phẩm remediated đạt chuẩn cao nhất mà chúng em đã tổng hợp.<br><br>
-          Để đưa khâu render MP4 bằng FFmpeg trực tiếp lên Production thật 100%, kiến trúc bắt buộc phải có một <strong>Background Job Queue</strong> (như BullMQ / Celery) và cụm Worker container có gắn GPU (NVIDIA T4). Khi Merchant bấm tạo, Server trả về Job ID trong &lt; 50ms, sau đó Worker chạy ngầm render và gửi thông báo qua WebSocket/Webhook khi hoàn tất. Chúng em đã thiết kế sẵn kiến trúc này trong báo cáo kỹ thuật Tuần 3 và ước tính cần <strong>khoảng 5 ngày làm việc (1 Sprint)</strong> để hoàn thiện nếu có hạ tầng phần cứng."
+          <strong><span class="speaker-tag speaker-pm">BE1 (Tuệ)</span> &amp; <span class="speaker-tag speaker-be3">BE3 (Tú)</span> Đối đáp:</strong>
+          "Thưa Thầy Cô, hiện tại hệ thống đã chạy <strong>100% logic nghiệp vụ thật</strong>: xác thực Merchant, kiểm tra Fail-Fast Gate, xử lý kịch bản theo Persona và lưu bản ghi video vào cơ sở dữ liệu PostgreSQL. Video phát ra là bản thành phẩm remediated chuẩn mực mà nhóm đã render.<br><br>
+          Để đưa khâu render MP4 bằng FFmpeg trực tiếp từ GPU lên Production 100%, kiến trúc bắt buộc phải có <strong>Background Job Queue</strong> (BullMQ / Redis) và cụm Worker container có GPU. Khi Merchant bấm tạo, Server trả về Job ID trong &lt; 50ms, sau đó Worker chạy ngầm render và gửi thông báo qua WebSocket khi hoàn tất. Nhóm đã thiết kế sẵn kiến trúc này và ước tính cần <strong>khoảng 5 ngày làm việc (1 Sprint)</strong> để hoàn thiện nếu có hạ tầng phần cứng."
         </div>
       </div>
 
       <div class="qa-box">
         <div class="qa-question">❓ Câu hỏi 2: Tại sao thời gian sinh video lại kéo dài gần 3 phút? Người dùng chờ lâu như vậy có bị lỗi timeout không?</div>
         <div class="qa-answer">
-          <strong>Kịch bản đối đáp của BE1 Lead:</strong>
-          "Các mô hình AI sinh chuyển động video 3D từ ảnh tĩnh (như Stable Video Diffusion hoặc thuật toán Parallax Depth-Map) kèm mã hóa FFmpeg đa luồng thường mất từ 2 đến 3 phút tính toán cho một clip 30s-60s chuẩn 1080p. Về mặt kỹ thuật, hệ thống hoàn toàn không để HTTP Request mở chờ suốt 3 phút vì sẽ bị Gateway Timeout. Thay vào đó, mô hình của chúng em áp dụng cơ chế <em>Asynchronous Polling</em>: Client chỉ gửi yêu cầu khởi tạo, nhận Job ID và tự động thăm dò trạng thái từng bước, đảm bảo ứng dụng luôn mượt mà và không bao giờ crash."
+          <strong><span class="speaker-tag speaker-fe">FE (Diệu)</span> &amp; <span class="speaker-tag speaker-pm">BE1 (Tuệ)</span> Đối đáp:</strong>
+          "Mô hình AI sinh chuyển động video 3D từ ảnh tĩnh (Depth-Map Parallax) kèm mã hóa FFmpeg đa luồng thường mất từ 2 đến 3 phút tính toán cho một clip 30s-60s chuẩn 1080p. Về mặt kỹ thuật, hệ thống không để HTTP Request mở chờ suốt 3 phút vì sẽ bị Gateway Timeout. Thay vào đó, kiến trúc áp dụng cơ chế <em>Asynchronous Polling</em>: Client chỉ gửi yêu cầu khởi tạo, nhận Job ID và tự động thăm dò trạng thái từng bước, đảm bảo ứng dụng luôn mượt mà và không bao giờ crash."
         </div>
       </div>
 
       <div class="qa-box">
-        <div class="qa-question">❓ Câu hỏi 3: Làm thế nào nền tảng ngăn chặn việc Reseller tự mua tour qua link của chính mình để ăn hoa hồng?</div>
+        <div class="qa-question">❓ Câu hỏi 3: Kịch bản video AI làm sao đảm bảo không bị ảo giác giá vé hoặc sai lệch dịch vụ tour?</div>
         <div class="qa-answer">
-          <strong>Kịch bản đối đáp của BE1 Lead:</strong>
-          "Đây là một rủi ro gian lận phổ biến trong mô hình Affiliate. Trong migration của Sprint 3, BE1 đã tích hợp cơ chế chống gian lận (Anti-Fraud Self-Purchase): Bảng <code>orders</code> lưu trữ định danh người mua, và hệ thống đối chiếu với <code>reseller_id</code> của link tiếp thị. Nếu trùng khớp, cột <code>flag_self_purchase</code> sẽ tự động gán giá trị <code>true</code>. Đơn hàng đó vẫn được ghi nhận để khách hàng đi tour, nhưng hoa hồng sẽ bị khóa ở trạng thái tạm giữ và không bao giờ được giải ngân tự động vào ví của Reseller đó."
+          <strong><span class="speaker-tag speaker-be2">BE2 (Huỳnh)</span> Đối đáp:</strong>
+          "Chúng em đã xây dựng bộ <em>Content Guardrails</em> và quy chuẩn <code>AI_VIDEO_RUBRIC_W3.md</code> gồm 10 tiêu chí kiểm soát nghiêm ngặt. Khi sinh kịch bản, LLM bị ép buộc chỉ được sử dụng dữ liệu đã kiểm định từ bảng <code>products</code> (giá vé niêm yết, tên combo buffet, giờ hoạt động cáp treo) và 25 tư liệu ảnh thực tế. Mọi nội dung bịa đặt thông tin không có trong cơ sở dữ liệu sẽ bị Validator từ chối ngay lập tức."
         </div>
       </div>
 
       <div class="qa-box">
-        <div class="qa-question">❓ Câu hỏi 4: Hai Merchant khác nhau có thể xem trộm thư viện ảnh hoặc can thiệp video của nhau không?</div>
+        <div class="qa-question">❓ Câu hỏi 4: Làm thế nào ngăn chặn Reseller tự mua vé qua link của mình để ăn hoa hồng?</div>
         <div class="qa-answer">
-          <strong>Kịch bản đối đáp của BE1 Lead:</strong>
-          "Hoàn toàn không thể. Chúng em áp dụng triệt để chính sách Row Level Security (RLS) ở mức nhân PostgreSQL. Mọi câu lệnh truy vấn trên các bảng <code>media_references</code>, <code>campaigns</code> và <code>contents</code> đều tự động đối chiếu với <code>auth.uid() = merchant_id</code>. Bộ unit test <code>merchant-media-auth.test.ts</code> với 16 test cases tự động của chúng em đã kiểm chứng: nếu Merchant A cố tình can thiệp vào tài nguyên của Merchant B, hệ thống sẽ trả về mã lỗi 403 Forbidden hoặc trả về tập kết quả rỗng."
+          <strong><span class="speaker-tag speaker-pm">BE1 (Tuệ)</span> Đối đáp:</strong>
+          "Trong migration của Sprint 3, BE1 đã tích hợp cơ chế chống gian lận (Anti-Fraud Self-Purchase): Bảng <code>orders</code> lưu trữ định danh người mua, và hệ thống đối chiếu với <code>reseller_id</code> của link tiếp thị. Nếu trùng khớp, cột <code>flag_self_purchase</code> sẽ tự động gán giá trị <code>true</code>. Đơn hàng đó vẫn được ghi nhận để khách hàng đi tour, nhưng hoa hồng sẽ bị khóa ở trạng thái tạm giữ và không bao giờ được giải ngân tự động vào ví của Reseller đó."
+        </div>
+      </div>
+
+      <div class="qa-box">
+        <div class="qa-question">❓ Câu hỏi 5: Hai Merchant khác nhau có thể xem trộm thư viện ảnh hoặc can thiệp video của nhau không?</div>
+        <div class="qa-answer">
+          <strong><span class="speaker-tag speaker-qa">QA Lead</span> &amp; <span class="speaker-tag speaker-pm">BE1 (Tuệ)</span> Đối đáp:</strong>
+          "Hoàn toàn không thể. Chúng em áp dụng triệt để chính sách Row Level Security (RLS) ở mức nhân PostgreSQL. Mọi câu lệnh truy vấn trên các bảng <code>media_references</code>, <code>campaigns</code> và <code>contents</code> đều tự động đối chiếu với <code>auth.uid() = merchant_id</code>. Bộ 16 unit tests tự động của QA đã chứng minh: Merchant A không bao giờ có thể truy cập hoặc sửa đổi tài nguyên của Merchant B."
         </div>
       </div>
     </section>
 
     <footer>
-      <p>© 2026 AI Travel Reseller Platform (TravelLink AI) — Sprint 3 Live Demo Playbook</p>
-      <p style="margin-top: 4px;">Biên soạn bởi: <strong>Nguyễn Minh Tuệ</strong> — Backend 1 Lead kiêm Project Manager</p>
+      <p>© 2026 AI Travel Reseller Platform (TravelLink AI) — Sprint 3 Live Demo Playbook Toàn Team</p>
+      <p style="margin-top: 4px;">Biên soạn &amp; Thực hiện bởi: <strong>Nguyễn Minh Tuệ (PM), Diệu (FE), Nguyễn Huỳnh (BE2), Thái Thanh Tú (BE3) &amp; QA Team</strong></p>
     </footer>
   </div>
 
   <script>
-    // Smooth scroll for nav tabs
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.addEventListener('click', function(e) {
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
