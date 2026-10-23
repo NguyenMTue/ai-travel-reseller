@@ -70,7 +70,7 @@ test("browser preview uses local assets without an external image mock",async()=
     assert.equal(result.data.items[2].thumbnailUrl,null);
   }
 });
-test("real page repeats Merchant guard and never reads media while production integration is pending",async()=>{
+test("real page repeats Merchant guard and connects MerchantLibraryLive within shell when allowed",async()=>{
   const code=ts.transpileModule(readFileSync("app/merchant/library/page.tsx","utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
   for(const status of ["allowed","unauthenticated","forbidden","unavailable"]){
     let checks=0;const record={exports:{} as {default:()=>Promise<{type:unknown}>}};
@@ -78,9 +78,10 @@ test("real page repeats Merchant guard and never reads media while production in
     const requireMock=(name:string)=>{
       if(name==="react/jsx-runtime")return {jsx:(type:unknown,props:unknown)=>({type,props}),jsxs:(type:unknown,props:unknown)=>({type,props})};
       if(name==="next/navigation")return {redirect:(url:string)=>{throw Error(`REDIRECT:${url}`);}};
-      if(name.endsWith("portal-server"))return {getMerchantPortalAccess:async()=>{checks++;return {status};}};
+      if(name.endsWith("portal-server"))return {getMerchantPortalAccess:async()=>{checks++;return {status,userId:"test-user-id"};}};
       if(name.endsWith("portal-access-notice"))return {MerchantPortalAccessNotice:Notice};
       if(name.endsWith("library-shell"))return {LibraryShell:Shell,LibraryPending:Pending};
+      if(name.endsWith("library-client"))return {MerchantLibraryLive:()=>null};
       throw Error(`Unexpected live dependency: ${name}`);
     };
     new vm.Script(`(function(exports,require,module){${code}\n})`).runInThisContext()(record.exports,requireMock,record);

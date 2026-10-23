@@ -38,7 +38,7 @@ export function toMediaCardProps(item: LibraryItem) {
 }
 
 // Prepared private-cookie transport only. Live reads stay blocked pending authorization checks.
-export async function readLibrary(query: LibraryQuery, signal: AbortSignal, send: typeof fetch): Promise<LibraryResult> {
+export async function readLibrary(query: LibraryQuery, signal: AbortSignal, send: typeof fetch = fetch): Promise<LibraryResult> {
   const params = new URLSearchParams({page:String(query.page),limit:String(query.limit)});
   if(query.search) params.set("search",query.search);
   if(query.platform) params.set("platform",query.platform);

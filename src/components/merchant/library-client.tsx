@@ -4,12 +4,16 @@ import { ChevronLeft, ChevronRight, CircleHelp, Search, X } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { MediaCard as Card, MediaCardGrid as Grid } from "./media-card";
 import { VideoGuidelinesModal as Guidelines } from "./video-guidelines-modal";
-import { initialLibraryQuery, toMediaCardProps, type LibraryItem, type LibraryQuery, type LibraryRequest, type LibraryResult } from "@/src/lib/merchant/media-library";
+import { initialLibraryQuery, readLibrary, toMediaCardProps, type LibraryItem, type LibraryQuery, type LibraryRequest, type LibraryResult } from "@/src/lib/merchant/media-library";
 import styles from "./library.module.css";
 
 type LibraryState = LibraryResult | {status:"loading"};
 
 // Preview and future live reads share canonical components; only transport is injected.
+export function MerchantLibraryLive({ merchantId }: { merchantId: string }) {
+  return <LibraryClient contextKey={merchantId} request={readLibrary} />;
+}
+
 export function LibraryClient({request,contextKey,observeInvalidation}:{request:LibraryRequest;contextKey:string;observeInvalidation?:(invalidate:()=>void)=>()=>void}) {
   return <LibraryRead key={contextKey} request={request} observeInvalidation={observeInvalidation} />;
 }
