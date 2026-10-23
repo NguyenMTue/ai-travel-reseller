@@ -1,7 +1,7 @@
 # TEAM WORK LOG
 Project: AI Travel Reseller MVP (TravelLink AI)  
 Week: Tuần 3 — 19/10/2026 – 24/10/2026 (Sprint 3)  
-Last Updated: 22/10/2026 01:30 PM
+Last Updated: 23/10/2026 09:20 AM
 
 ---
 
@@ -39,7 +39,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | FE-W3-03 | Diệu | FE Lead | Tích hợp Web Share API 1 chạm & Canvas xuất ảnh QR | ĐÃ TRIỂN KHAI — fixture/PNG thủ công; chưa native Share/điện thoại thật | 21/10 | 21/10 17:00 |
 | FE-W3-04 | Diệu | FE Lead | Giao diện Chat AI Sales Agent Mobile (Bottom Sheet widget) | ĐÃ TRIỂN KHAI — mock PASS; chờ UIUX/QA, chưa AI thật | 21/10 | 22/10 17:00 |
 | FE-W3-05 | Diệu | FE Lead | Giao diện Màn hình Ví hoa hồng Reseller (`/reseller/wallet`) | ĐÃ TRIỂN KHAI — fixture/quan sát UI thật; chờ QA dữ liệu/quyền | 22/10 | 23/10 12:00 |
-| FE-W3-06 | Diệu | FE Lead | Tích hợp Media Library & Nút kích hoạt tạo Video qua API BE1 | IN PROGRESS — component chính thức đã ghép; mock, chờ quyền API thật | 22/10 | 23/10 17:00 |
+| FE-W3-06 | Diệu | FE Lead | Tích hợp Media Library & Nút kích hoạt tạo Video qua API BE1 | DONE — Đã sửa quyền RLS & API, nối Live Media Library, E2E test PASS | 22/10 | 23/10 17:00 |
 | T3-FE-W3-01 | Tester 3 | FE Phụ | Cắt Component tĩnh `MediaCard` (`src/components/merchant/media-card.tsx`) | DONE (REVIEWED) | 20/10 | 21/10 12:00 |
 | T3-FE-W3-02 | Tester 3 | FE Phụ | Modal hướng dẫn quy chuẩn video 9:16 (`video-guidelines-modal.tsx`) | DONE (REVIEWED) | 21/10 | 21/10 17:00 |
 | UX-W3-01 | UI/UX Designer | UI/UX | Figma Hi-fi Reseller Mobile (Bottom Nav, Thẻ chạm, Ví) | READY | 19/10 | 20/10 12:00 |
@@ -54,6 +54,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 ---
 
 ## 2. COMPLETED WORK
+- `FE-W3-06 & Resolve Conflict Dev` (23/10): Tích hợp dev (PR #44 @2559b87) vào nhánh FE, xử lý sạch conflict tại ChatPanel (giữ try/catch URL checkout và !preview guard). Hoàn tất gỡ bỏ rào cản phân quyền: migration RLS restrict SELECT media_references theo merchant_id, API GET/POST/DELETE /api/merchant/media trả 401/403 chuẩn và chặn cross-account. Nối live component MerchantLibraryLive vào /merchant/library. Bộ test unit + API auth 16/16 PASS, Playwright E2E live test với tài khoản Merchant thật (25 mẫu Bà Nà Hills) PASS 100% không lỗi giao diện/console.
 - `PR #43 (dev)` (22/10): Merge thành công nhánh `feature/be1-w3-video-api-storage` vào `dev` (Commit `d3dfb9e`). Toàn bộ 17/17 tests backend đạt 100% PASS, hoàn tất trọn bộ video remediation 7 lỗi (`VID-01` -> `VID-07`), sẵn sàng API `POST /api/merchant/video/generate` và storage bucket `campaign-videos`.
 - `PM-W3-03` / `T3-FE-W3-01/02` (22/10): Hoàn thành Review cấp 2 (PM Approval) cho 2 component tĩnh của Tester 3 (`src/components/merchant/media-card.tsx` và `src/components/merchant/video-guidelines-modal.tsx`) trên nhánh `Feature/tester_week3_media_card_video_guide`. Đạt 100% tuân thủ Guardrail (Dumb UI, props-based, không chạm forbidden zones). Bàn giao cho FE Lead tích hợp.
 - `BE1-W3-08 (Sync BE3)` (22/10): Bàn giao tài liệu giải đáp kỹ thuật cho BE3 về Event Taxonomy phễu PostHog (`affiliate_link_clicked` từ router `clicks` DB và `purchase_confirmed` từ `orders` DB).
@@ -95,6 +96,7 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | BE1 | FE Lead | Endpoint API `POST /api/merchant/video/generate` & storage bucket (Đã merge `dev`) | DONE | 22/10 |
 | BE1 | BE3 | Hướng dẫn Event Taxonomy phễu PostHog (clicks & orders DB) & Webhook video xong | DONE | 22/10 |
 | FE Lead | Tester 1 | Bản build PWA Mobile Suite trên dev server | READY | 22/10 |
+| BE1 / FE Lead | Tester 1 / PM | Live Merchant Media Library (`/merchant/library`) nối DB & RLS hoàn tất | DONE | 23/10 |
 
 ---
 
@@ -237,3 +239,31 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 - FE01–05 đã triển khai, giữ giới hạn mock/manual và chờ UIUX/QA/thiết bị thật; FE06 có canonical UI/adapter/mock nhưng Media API thật vẫn chặn, chưa nghiệm thu. Người dùng **dự định** bàn giao phần tích hợp Media thật cho BE, chưa có xác nhận BE nhận/hoàn thành; không ghi đã bàn giao thành công. FE07 đã review2component, PR33 do nhóm merge; không tự approval. FE08 chưa kiểm realme C21Y/Chrome và chưa diễn tập QA, không đánh dấu hoàn tất tuần.
 - Nội dung source/test giống lượt PASS mục19 nên tái sử dụng30unit, lint, browser4viewport, ảnh/fallback và Webpack build32/32/release guards; kiểm TypeScript lại cho tsconfig local có2include mới. Turbopack chưa PASS. Lock thêm87entry optional, không đổi phiên bản/dependencies gốc. Stage10file đã kiểm tra, để tsconfig local ngoài commit; giữ env/ignored/exclude/recovery, không stage artifacts/secret.
 - Dev GitHub đã tới2559b87 (PR44, có sửa ChatPanel) sau add4f07 đã tích hợp; không tự đồng bộ ở lượt push. Draft PR cần ghi rõ nền đã kiểm chứng, chờ đối chiếu dev mới/guard preview trước Ready. Lượt này chỉ commit/push nhánh FE và Draft PR vào dev theo ủy quyền; kết quả remote/PR phải xác minh sau thao tác, không merge/force/cloud.
+
+### FE — Tích hợp thành công API thật & Giải quyết Conflict dev — 23/10/2026
+
+- **Resolve Conflict với dev (PR #44 @2559b87):** Tích hợp dev vào nhánh `Feature_FE_W3_PWA_Mobile_Commerce`. Conflict duy nhất tại `src/components/chat/chat-panel.tsx` được giải quyết an toàn bằng cách giữ khối `try...catch` parse URL hostname từ dev và điều kiện `!preview` tránh ghi nhận analytics trong môi trường mock. Commit merge: `0a0058a`.
+- **Database RLS:** Tạo migration `supabase/migrations/20261023090000_restrict_media_references_to_merchant.sql` gỡ bỏ public SELECT policy (`USING (true)`), thay bằng policy bảo mật chỉ cho phép Merchant xem media của chính mình (`merchant_id = auth.uid()`). Đã áp dụng thành công vào DB local.
+- **API Authorization:** Cập nhật `app/api/merchant/media/route.ts` với hàm `resolveMerchantAccess`:
+  - Trả 401 Unauthorized nếu không có phiên đăng nhập.
+  - Trả 403 Forbidden nếu người dùng đăng nhập nhưng không có vai trò Merchant.
+  - Trả 403 Forbidden nếu client gửi `?merchant_id=` khác với Merchant đang đăng nhập (chống tấn công mạo danh / cross-account).
+  - Trả header `Cache-Control: private, no-cache, no-store, must-revalidate`.
+- **Kết nối UI Live:**
+  - `src/lib/merchant/media-library.ts`: Cập nhật `readLibrary(..., send = fetch)`.
+  - `src/components/merchant/library-client.tsx`: Xuất component `MerchantLibraryLive` kết nối `readLibrary`.
+  - `app/merchant/library/page.tsx`: Thay thế `LibraryPending` bằng `MerchantLibraryLive` bên trong `LibraryShell`.
+- **Bộ kiểm thử & Bằng chứng nghiệm thu:**
+  - Unit & API tests 16/16 PASS (`tests/media-library.test.ts`, `tests/merchant-media-api.test.ts`, `tests/merchant-media-auth.test.ts`).
+  - Playwright E2E live test (`tests/merchant-media-live.mjs`) với tài khoản Merchant thật `merchant@example.com` / `password123`:
+    1. Chưa đăng nhập: Redirect đúng `/login?next=%2Fmerchant%2Flibrary`.
+    2. Đăng nhập Merchant: Redirect về `/merchant/library`.
+    3. Tải 25 mẫu thực tế từ DB: Render 6 card/trang, thumbnail/title/tags đầy đủ.
+    4. Chọn mẫu / Bỏ chọn: State UI cập nhật "Đã chọn" và hiện banner xác nhận.
+    5. Modal Quy chuẩn video: Focus trap, mở/đóng bằng Escape mượt mà.
+    6. Phân trang: Điều hướng Trang 2 / Trang 1 dữ liệu cập nhật tức thì.
+    7. Tìm kiếm "Cầu Vàng": Lọc đúng 4 kết quả từ DB; nút Xóa bộ lọc khôi phục đủ 6 card.
+    8. Viewport 390px (mobile): 1 cột gọn gàng, tỷ lệ 9:16, không tràn ngang (`scrollWidth === innerWidth`).
+    9. Console browser: 0 pageerror, 0 console error.
+  - Ảnh bằng chứng đã lưu tại `build/fe-w3-live-media-evidence/`.
+- **Chốt bàn giao:** Commit `5aebb74`, TypeScript toàn repo PASS (`tsc --noEmit`), ESLint 0 errors / 0 warnings. Task `FE-W3-06` hoàn thành 100%.
