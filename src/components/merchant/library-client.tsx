@@ -400,36 +400,6 @@ function LibraryRead({
 
       {result.status === "ready" && (
         <div key="private-library" ref={privateView}>
-          {selected && (
-            <section role="status" className={styles.selection}>
-              <div>
-                <strong>Đã chọn tư liệu tiêu điểm</strong>
-                <p>{selected.title}</p>
-                <small>
-                  Tư liệu này sẽ được AI ưu tiên xuất hiện tại phân cảnh mở màn
-                  (Hook 0s - 3s) của video.
-                </small>
-              </div>
-              <div className={styles.selectionActions}>
-                <Button
-                  variant="default"
-                  onClick={() => setGenerateOpen(true)}
-                  className={styles.generateButton}
-                >
-                  <Sparkles size={16} aria-hidden="true" />
-                  Tạo video AI từ chiến dịch
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => setSelected(null)}
-                  aria-label="Bỏ chọn tư liệu"
-                >
-                  <X size={18} aria-hidden="true" />
-                </Button>
-              </div>
-            </section>
-          )}
-
           {result.data.items.length ? (
             <div className={styles.collection}>
               <Grid>
@@ -437,18 +407,6 @@ function LibraryRead({
                   <Card
                     key={item.id}
                     {...toMediaCardProps(item)}
-                    isSelected={selected?.id === item.id}
-                    onSelect={(id) => {
-                      if (!invalid.current) {
-                        setSelected((prev) =>
-                          prev?.id === id
-                            ? null
-                            : result.data.items.find(
-                                (value) => value.id === id
-                              ) ?? null
-                        );
-                      }
-                    }}
                   />
                 ))}
               </Grid>

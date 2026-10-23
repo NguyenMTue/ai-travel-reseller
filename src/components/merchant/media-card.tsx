@@ -108,18 +108,20 @@ export function MediaCard({
           )}
         </div>
 
-        <button
-          type="button"
-          aria-pressed={isSelected}
-          onClick={() => onSelect?.(id)}
-          className={`min-h-10 w-full min-w-0 whitespace-normal break-words rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
-            isSelected
-              ? "border-primary bg-primary text-primary-foreground"
-              : "border-border text-foreground hover:bg-secondary"
-          }`}
-        >
-          {isSelected ? "Đã chọn tư liệu" : "Chọn tư liệu"}
-        </button>
+        {onSelect && (
+          <button
+            type="button"
+            aria-pressed={isSelected}
+            onClick={() => onSelect?.(id)}
+            className={`min-h-10 w-full min-w-0 whitespace-normal break-words rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+              isSelected
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border text-foreground hover:bg-secondary"
+            }`}
+          >
+            {isSelected ? "Đã chọn tư liệu" : "Chọn tư liệu"}
+          </button>
+        )}
       </div>
     </article>
   );

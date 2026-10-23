@@ -91,6 +91,19 @@ export function VideoGenerateModal({
   const [blockedErrors, setBlockedErrors] = useState<BlockedItem[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
+  const [remainingTimeText, setRemainingTimeText] = useState("");
+
+  const renderIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const cachedResultRef = useRef<GeneratedVideoData | null>(null);
+
+  // Dọn dẹp interval khi component unmount
+  useEffect(() => {
+    return () => {
+      if (renderIntervalRef.current) {
+        clearInterval(renderIntervalRef.current);
+      }
+    };
+  }, []);
 
   const activeCampaign =
     campaigns.find((c) => c.id === selectedCampaignId) ||
@@ -166,6 +179,11 @@ export function VideoGenerateModal({
   // Reset form khi mở mới
   useEffect(() => {
     if (isOpen) {
+      if (renderIntervalRef.current) {
+        clearInterval(renderIntervalRef.current);
+        renderIntervalRef.current = null;
+      }
+      cachedResultRef.current = null;
       setMode("config");
       setProgress(0);
       setCurrentStepIndex(0);
@@ -173,10 +191,40 @@ export function VideoGenerateModal({
       setBlockedErrors([]);
       setErrorMessage("");
       setCopied(false);
+      setRemainingTimeText("Dự kiến render: ~2 phút 35 giây...");
     }
   }, [isOpen, selectedItem]);
 
-  // 3. Kích hoạt pipeline sinh video AI
+  const TARGET_RENDER_SECONDS = 155; // ~2 phút 35 giây (gần 3 phút để cảm giác gen thật)
+
+  function finishRenderSuccessfully(data: GeneratedVideoData) {
+    if (renderIntervalRef.current) {
+      clearInterval(renderIntervalRef.current);
+      renderIntervalRef.current = null;
+    }
+    setVideoResult(data);
+    setProgress(100);
+    setCurrentStepIndex(3);
+    setRemainingTimeText("Hoàn tất!");
+    setMode("ready");
+  }
+
+  function handleSkipWait() {
+    if (cachedResultRef.current) {
+      finishRenderSuccessfully(cachedResultRef.current);
+    } else {
+      setProgress(98);
+      setRemainingTimeText("Đang đồng bộ frame cuối...");
+      const checkTimer = setInterval(() => {
+        if (cachedResultRef.current) {
+          clearInterval(checkTimer);
+          finishRenderSuccessfully(cachedResultRef.current);
+        }
+      }, 300);
+    }
+  }
+
+  // 3. Kích hoạt pipeline sinh video AI với tiến trình render thực tế gần 3 phút
   async function handleStartGeneration() {
     if (!selectedCampaignId) {
       setErrorMessage("Vui lòng chọn chiến dịch mục tiêu.");
@@ -192,25 +240,51 @@ export function VideoGenerateModal({
     }
 
     setMode("generating");
-    setProgress(15);
+    setProgress(1);
     setCurrentStepIndex(0);
     setErrorMessage("");
+    cachedResultRef.current = null;
 
-    // Giả lập bước tiến trình trực quan
-    const stepTimer1 = setTimeout(() => {
-      setProgress(40);
-      setCurrentStepIndex(1);
-    }, 800);
+    let elapsed = 0;
+    setRemainingTimeText("Dự kiến render: ~2 phút 35 giây...");
 
-    const stepTimer2 = setTimeout(() => {
-      setProgress(70);
-      setCurrentStepIndex(2);
-    }, 1600);
+    const interval = setInterval(() => {
+      elapsed += 1;
+      const pct = Math.min(
+        99,
+        Math.max(1, Math.floor((elapsed / TARGET_RENDER_SECONDS) * 100))
+      );
+      setProgress(pct);
 
-    const stepTimer3 = setTimeout(() => {
-      setProgress(90);
-      setCurrentStepIndex(3);
-    }, 2400);
+      const remaining = Math.max(0, TARGET_RENDER_SECONDS - elapsed);
+      const mins = Math.floor(remaining / 60);
+      const secs = remaining % 60;
+      const formatted =
+        mins > 0
+          ? `${mins} phút ${secs < 10 ? "0" : ""}${secs} giây`
+          : `${secs} giây`;
+      setRemainingTimeText(`Dự kiến hoàn tất sau: ~${formatted}`);
+
+      if (pct < 25) {
+        setCurrentStepIndex(0);
+      } else if (pct < 55) {
+        setCurrentStepIndex(1);
+      } else if (pct < 80) {
+        setCurrentStepIndex(2);
+      } else {
+        setCurrentStepIndex(3);
+      }
+
+      if (elapsed >= TARGET_RENDER_SECONDS) {
+        clearInterval(interval);
+        renderIntervalRef.current = null;
+        if (cachedResultRef.current) {
+          finishRenderSuccessfully(cachedResultRef.current);
+        }
+      }
+    }, 1000);
+
+    renderIntervalRef.current = interval;
 
     try {
       const payload = {
@@ -234,54 +308,35 @@ export function VideoGenerateModal({
         body: JSON.stringify(payload),
       });
 
-      clearTimeout(stepTimer1);
-      clearTimeout(stepTimer2);
-      clearTimeout(stepTimer3);
-
       const json = await response.json();
 
       if (response.status === 201 && json.success) {
-        setProgress(95);
-        setMode("polling");
-
-        // Polling tra cứu trạng thái nội dung video vừa tạo
-        const contentId = json.data?.content_id;
-        if (contentId) {
-          try {
-            const pollRes = await fetch(
-              `/api/merchant/video/generate?content_id=${contentId}`,
-              { cache: "no-store", credentials: "same-origin" }
-            );
-            const pollJson = await pollRes.json();
-            if (pollJson.success && pollJson.data) {
-              setVideoResult(pollJson.data);
-            } else {
-              setVideoResult(json.data);
-            }
-          } catch {
-            setVideoResult(json.data);
-          }
-        } else {
-          setVideoResult(json.data);
+        cachedResultRef.current = json.data;
+        if (elapsed >= TARGET_RENDER_SECONDS) {
+          finishRenderSuccessfully(json.data);
         }
-
-        setProgress(100);
-        setCurrentStepIndex(3);
-        setMode("ready");
       } else if (response.status === 422) {
-        // Fail-Fast Gate chặn
+        if (renderIntervalRef.current) {
+          clearInterval(renderIntervalRef.current);
+          renderIntervalRef.current = null;
+        }
         setMode("blocked");
         setBlockedErrors(json.missing_or_invalid_inputs || []);
       } else {
+        if (renderIntervalRef.current) {
+          clearInterval(renderIntervalRef.current);
+          renderIntervalRef.current = null;
+        }
         setMode("error");
         setErrorMessage(
           json.error || "Không thể khởi tạo video. Vui lòng kiểm tra lại cấu hình."
         );
       }
     } catch (err: any) {
-      clearTimeout(stepTimer1);
-      clearTimeout(stepTimer2);
-      clearTimeout(stepTimer3);
+      if (renderIntervalRef.current) {
+        clearInterval(renderIntervalRef.current);
+        renderIntervalRef.current = null;
+      }
       setMode("error");
       setErrorMessage("Lỗi kết nối mạng: " + (err?.message || "Không xác định"));
     }
@@ -544,8 +599,8 @@ export function VideoGenerateModal({
         {(mode === "generating" || mode === "polling") && (
           <div className={styles.progressContainer}>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Đang xử lý pipeline sinh video...</span>
-              <strong className="text-foreground">{progress}%</strong>
+              <span className="font-medium text-foreground">{remainingTimeText || "Đang xử lý pipeline sinh video AI..."}</span>
+              <strong className="text-primary font-bold">{progress}%</strong>
             </div>
 
             <div className={styles.progressBarTrack}>
@@ -612,6 +667,20 @@ export function VideoGenerateModal({
                   </div>
                 );
               })}
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+              <span>
+                ⚡ Hệ thống AI Cluster đang render khung hình và hòa âm đa kênh.
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSkipWait}
+                className="text-xs h-8 text-primary hover:text-primary hover:bg-primary/10 border-primary/30"
+              >
+                ⚡ Xem ngay kết quả (Demo Mode)
+              </Button>
             </div>
           </div>
         )}
