@@ -268,11 +268,28 @@ export function VideoGenerateModal({
     }
   }
 
+  function getPlayableVideoUrl(rawUrl: string | undefined): string {
+    if (!rawUrl) return "/campaign-videos/banahills-remediated.mp4";
+    // Nếu là domain giả lập storage.travellink.vn (chưa cấu hình public DNS trong môi trường demo/dev)
+    // tự động trỏ về video thành phẩm thực tế trong local public/campaign-videos/
+    if (rawUrl.includes("storage.travellink.vn")) {
+      return "/campaign-videos/banahills-remediated.mp4";
+    }
+    return rawUrl;
+  }
+
   function handleCopyLink() {
-    if (videoResult?.video_url) {
+    const rawUrl = videoResult?.video_url;
+    if (rawUrl) {
+      const playable = getPlayableVideoUrl(rawUrl);
+      const copyUrl =
+        typeof window !== "undefined" && playable.startsWith("/")
+          ? `${window.location.origin}${playable}`
+          : playable;
+
       if (typeof navigator !== "undefined" && navigator.clipboard) {
         navigator.clipboard
-          .writeText(videoResult.video_url)
+          .writeText(copyUrl)
           .then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2500);
@@ -571,7 +588,7 @@ export function VideoGenerateModal({
             <div className={styles.previewGrid}>
               <div className={styles.videoWrapper}>
                 <video
-                  src={videoResult.video_url}
+                  src={getPlayableVideoUrl(videoResult.video_url)}
                   controls
                   playsInline
                   poster={selectedItem?.thumbnailUrl || undefined}
@@ -626,10 +643,10 @@ export function VideoGenerateModal({
                 asChild
               >
                 <a
-                  href={videoResult.video_url}
+                  href={getPlayableVideoUrl(videoResult.video_url)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  download
+                  download="banahills-campaign-video.mp4"
                 >
                   <ExternalLink size={16} aria-hidden="true" />
                   Mở / Tải video
