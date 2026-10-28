@@ -37,8 +37,8 @@
       "additionalProperties": false
     },
     "scenes": {
-      "minItems": 3,
-      "maxItems": 12,
+      "minItems": 14,
+      "maxItems": 14,
       "type": "array",
       "items": {
         "type": "object",

@@ -144,7 +144,9 @@ export const campaignVideoScriptSchema = z
         text: z.string().trim().min(5).max(150),
       })
       .strict(),
-    scenes: z.array(campaignVideoSceneSchema).min(3).max(12),
+    scenes: z
+      .array(campaignVideoSceneSchema)
+      .length(14, "Video script must contain exactly 14 scenes"),
     audio_plan: z
       .object({
         music_mood: z.string().trim().min(2).max(200),
@@ -167,6 +169,37 @@ export const campaignVideoScriptSchema = z
   })
   .strict()
   .superRefine((script, context) => {
+    // 1. CTA check
+    if (!script.cta.on_screen_text.includes("[LINK_MUA_VE]")) {
+      context.addIssue({
+        code: "custom",
+        path: ["cta", "on_screen_text"],
+        message: "CTA on_screen_text must preserve the placeholder [LINK_MUA_VE]",
+      });
+    }
+
+    const urlPattern = /https?:\/\/[^\s]+/i;
+    if (
+      urlPattern.test(script.cta.on_screen_text) ||
+      urlPattern.test(script.cta.spoken_text)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["cta"],
+        message:
+          "CTA must not contain foreign or generated URLs; only [LINK_MUA_VE] placeholder is allowed",
+      });
+    }
+
+    // 2. Scenes checks
+    if (script.scenes.length !== 14) {
+      context.addIssue({
+        code: "custom",
+        path: ["scenes"],
+        message: `Video script must contain exactly 14 scenes, but received ${script.scenes.length}`,
+      });
+    }
+
     script.scenes.forEach((scene, index) => {
       if (scene.index !== index + 1) {
         context.addIssue({
@@ -197,6 +230,16 @@ export const campaignVideoScriptSchema = z
           code: "custom",
           path: ["scenes", index, "start_seconds"],
           message: "Generated scenes must form a continuous timeline",
+        });
+      }
+      if (
+        (scene.narration && urlPattern.test(scene.narration)) ||
+        (scene.on_screen_text && urlPattern.test(scene.on_screen_text))
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["scenes", index],
+          message: "Scenes must not contain unauthorized foreign URLs",
         });
       }
     });
