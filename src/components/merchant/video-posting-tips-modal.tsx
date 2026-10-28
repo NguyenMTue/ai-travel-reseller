@@ -3,15 +3,15 @@
 import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
-export interface VideoGuidelinesModalProps {
+export interface VideoPostingTipsModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function VideoGuidelinesModal({
+export function VideoPostingTipsModal({
   isOpen,
   onClose,
-}: VideoGuidelinesModalProps) {
+}: VideoPostingTipsModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
@@ -48,8 +48,8 @@ export function VideoGuidelinesModal({
   return (
     <dialog
       ref={dialogRef}
-      aria-labelledby="video-guidelines-title"
-      aria-describedby="video-guidelines-description"
+      aria-labelledby="video-posting-tips-title"
+      aria-describedby="video-posting-tips-description"
       onCancel={(event) => {
         event.preventDefault();
         onClose();
@@ -71,13 +71,13 @@ export function VideoGuidelinesModal({
           Thư viện video mẫu
         </p>
         <h2
-          id="video-guidelines-title"
+          id="video-posting-tips-title"
           className="pr-10 font-[var(--font-display)] text-2xl font-medium leading-snug text-foreground sm:text-3xl"
         >
           Quy chuẩn video du lịch
         </h2>
         <p
-          id="video-guidelines-description"
+          id="video-posting-tips-description"
           className="mt-3 text-sm leading-relaxed text-muted-foreground"
         >
           Video rõ nét, ngắn gọn giúp khách dễ hình dung trải nghiệm và phù hợp

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, CircleHelp, Search, Sparkles, X } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { MediaCard as Card, MediaCardGrid as Grid } from "./media-card";
-import { VideoGuidelinesModal as Guidelines } from "./video-guidelines-modal";
+import { VideoPostingTipsModal as Guidelines } from "./video-posting-tips-modal";
 import { VideoGenerateModal } from "./video-generate-modal";
 import { initialLibraryQuery, readLibrary, toMediaCardProps, type LibraryItem, type LibraryQuery, type LibraryRequest, type LibraryResult } from "@/src/lib/merchant/media-library";
 import styles from "./library.module.css";
