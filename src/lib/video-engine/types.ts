@@ -110,12 +110,30 @@ export const mediaAssetItemSchema = z
   })
   .strict();
 
+export type MediaAssetItem = z.infer<typeof mediaAssetItemSchema>;
+
 export const audioConfigInputSchema = z
   .object({
     voice_persona_id: z.string().trim().min(1),
     ambient_sound_tags: z.array(z.string().trim().min(1)).min(1),
   })
   .strict();
+
+export const approvedSceneInputSchema = z
+  .object({
+    index: z.number().int().positive(),
+    start_seconds: z.number().min(0),
+    end_seconds: z.number().positive(),
+    visual_prompt: z.string().trim().min(5),
+    shot_instruction: z.string().trim().min(3),
+    narration: z.string().trim().min(3),
+    on_screen_text: z.string().trim().min(1),
+    verified_fact_refs: z.array(z.string().trim().min(1)).min(1),
+    suggested_asset_id: z.string().trim().optional(),
+  })
+  .strict();
+
+export type ApprovedSceneInput = z.infer<typeof approvedSceneInputSchema>;
 
 export const videoEngineInputSchema = z
   .object({
@@ -143,6 +161,22 @@ export const videoEngineInputSchema = z
 
     // Nhóm 6: Cấu hình âm thanh
     audio_config: audioConfigInputSchema,
+
+    // Nhóm 7: Phân cảnh kịch bản được phê duyệt (Direct Scene-level Ingestion từ BE2)
+    scenes: z.array(approvedSceneInputSchema).length(14).optional(),
+
+    // Nhóm 8: Dữ kiện xác minh từ chiến dịch (Verified Facts đối chiếu Fact Refs)
+    verified_facts: z
+      .array(
+        z
+          .object({
+            id: z.string().trim().min(1),
+            text: z.string().trim().min(1),
+            category: z.string().trim().optional(),
+          })
+          .strict(),
+      )
+      .optional(),
   })
   .strict();
 
@@ -259,6 +293,9 @@ export const timelineSceneSchema = z
     voiceover_segment: z.string().trim().min(1),
     ambient_sfx: ambientSfxSchema,
     on_screen_text: onScreenTextSchema,
+    visual_prompt: z.string().trim().min(5).optional(),
+    shot_instruction: z.string().trim().min(3).optional(),
+    verified_fact_refs: z.array(z.string().trim().min(1)).optional(),
   })
   .strict();
 
