@@ -1,0 +1,31 @@
+﻿Mã Test Case,Phân hệ / Luồng nghiệp vụ,Mục tiêu kiểm thử,Thiết bị & Cấu hình,Tiền điều kiện,Các bước thực hiện,Kết quả mong đợi,Kết quả thực tế,Trạng thái,Ảnh minh chứng
+TC-PWA-01,PWA & Viewport,Thẩm định thẻ meta viewport trên mobile,"iPhone 13 (390x844), Pixel 5 (393x851)",Trang chủ đang hoạt động,"1. Truy cập root /
+2. Đọc thẻ meta viewport","Có thẻ viewport chứa width=device-width, initial-scale=1","Thẻ viewport tồn tại đầy đủ, không gây zoom tự do",PASS,N/A
+TC-PWA-02,PWA & Theme Color,Kiểm tra màu nhận diện thương hiệu trình duyệt,"iPhone 13 (390x844), Pixel 5 (393x851)",Trang web hoạt động,1. Đọc meta theme-color,"Giá trị theme-color là #204e4c (màu xanh thương hiệu)","theme-color chính xác #204e4c trên cả iOS và Android",PASS,N/A
+TC-PWA-03,PWA Manifest,Thẩm định tính hợp lệ của Web App Manifest,"iPhone 13 (390x844), Pixel 5 (393x851)",Manifest route /manifest.webmanifest sẵn sàng,"1. Đọc link rel manifest
+2. GET manifest json","Status 200, name: TravelLink AI, display: standalone, start_url: /","Manifest trả về JSON chuẩn, đầy đủ thông tin standalone",PASS,N/A
+TC-PWA-04,PWA Icons,Kiểm tra tài nguyên icon PWA (192, 512, apple-touch),"iPhone 13 (390x844), Pixel 5 (393x851)",Tài nguyên tĩnh trong /public/pwa/,"1. Request icon-192.png, icon-512.png, apple-touch-icon.png",HTTP Status 200, đúng định dạng và kích thước,Tất cả icon phản hồi 200 OK sắc nét,PASS,N/A
+TC-RES-01,Reseller Feed & Nav,Kiểm tra hiển thị Campaign Feed và chống tràn ngang,iPhone 13 (390x844),Mở /preview/reseller,"1. Load trang Feed
+2. Đo scrollWidth vs clientWidth",Layout vừa vặn khung hình 390px, scrollWidth <= clientWidth,Hoàn toàn không tràn ngang (Horizontal Overflow = 0px),PASS,iphone-01-reseller-mobile-feed-and-nav.png
+TC-RES-02,Reseller Feed & Nav,Kiểm tra hiển thị Campaign Feed và chống tràn ngang,Pixel 5 (393x851),Mở /preview/reseller,"1. Load trang Feed
+2. Đo scrollWidth vs clientWidth",Layout vừa vặn khung hình 393px, scrollWidth <= clientWidth,Hoàn toàn không tràn ngang (Horizontal Overflow = 0px),PASS,android-01-reseller-mobile-feed-and-nav.png
+TC-NAV-01,Mobile Navigation,Kiểm tra Bottom Bar và kích thước Touch Target,"iPhone 13 (390x844), Pixel 5 (393x851)",Viewport < 768px,"1. Kiểm tra thanh Điều hướng nhanh CTV
+2. Đo kích thước nút bấm",Thanh Bottom Nav cố định đáy, touch target >= 44x44px,Thanh dock cố định, các tab Khám phá, Nội dung, Link & QR, Ví >= 44px,PASS,01-reseller-mobile-feed-and-nav.png
+TC-TRK-01,Tracking & Voucher,Mở Modal và sinh link tiếp thị cá nhân hóa C3,iPhone 13 (390x844),Trang chi tiết chiến dịch fixture,"1. Bấm Tạo link
+2. Bấm Tạo link tiếp thị",Modal mở dạng popup/bottom sheet, hiển thị link /r/ và QR,Link sinh thành công, mã QR hiển thị rõ ràng, touch copy nhạy,PASS,iphone-02-reseller-tracking-modal.png
+TC-TRK-02,Tracking & Voucher,Mở Modal và sinh link tiếp thị cá nhân hóa C3,Pixel 5 (393x851),Trang chi tiết chiến dịch fixture,"1. Bấm Tạo link
+2. Bấm Tạo link tiếp thị",Modal mở dạng popup/bottom sheet, hiển thị link /r/ và QR,Link sinh thành công, mã QR hiển thị rõ ràng, touch copy nhạy,PASS,android-02-reseller-tracking-modal.png
+TC-C3-01,Kịch bản C3 - Landing,Khách mở Landing Page trên trình duyệt di động,iPhone 13 (390x844),Truy cập /,"1. Mở trang chủ
+2. Kiểm tra thông điệp thanh toán trực tiếp",Hiển thị dòng: Khách hàng thanh toán trực tiếp với doanh nghiệp,Thông điệp C3 và huy hiệu Thanh toán chính thức hiển thị nổi bật,PASS,iphone-03-c3-landing-page-mobile.png
+TC-C3-02,Kịch bản C3 - Landing,Khách mở Landing Page trên trình duyệt di động,Pixel 5 (393x851),Truy cập /,"1. Mở trang chủ
+2. Kiểm tra thông điệp thanh toán trực tiếp",Hiển thị dòng: Khách hàng thanh toán trực tiếp với doanh nghiệp,Thông điệp C3 và huy hiệu Thanh toán chính thức hiển thị nổi bật,PASS,android-03-c3-landing-page-mobile.png
+TC-C3-03,Kịch bản C3 - AI Chat,Khung Chat AI Sales Agent và gửi Checkout link,iPhone 13 (390x844),Mở /preview/chat trên iOS,"1. Chạm nút launcher
+2. Nhập câu hỏi tư vấn
+3. Gửi tin",Mở Bottom Sheet, AI phản hồi thông tin và link Checkout chính thức,Chat mở mượt, không bị bàn phím ảo che khuất, gửi và nhận tin tốt,PASS,iphone-04-c3-ai-chat-and-checkout-mobile.png
+TC-C3-04,Kịch bản C3 - AI Chat,Khung Chat AI Sales Agent và gửi Checkout link,Pixel 5 (393x851),Mở /preview/chat trên Android,"1. Chạm nút launcher
+2. Nhập câu hỏi tư vấn
+3. Gửi tin",Mở Bottom Sheet, AI phản hồi thông tin và link Checkout chính thức,Chat mở mượt, không bị bàn phím ảo che khuất, gửi và nhận tin tốt,PASS,android-04-c3-ai-chat-and-checkout-mobile.png
+TC-C3-05,Kịch bản C3 - Wallet,Đối soát 4 trạng thái hoa hồng và Ví Reseller,iPhone 13 (390x844),Mở /preview/reseller/wallet,"1. Xem số dư hoa hồng
+2. Đối soát danh sách đơn hàng","Hiển thị 4 trạng thái: Chờ duyệt, Khả dụng, Đã chi trả; che PII",Render chuẩn xác, tiền tệ VNĐ, giờ UTC+7, không tràn ngang,PASS,iphone-05-c3-reseller-wallet-commission-mobile.png
+TC-C3-06,Kịch bản C3 - Wallet,Đối soát 4 trạng thái hoa hồng và Ví Reseller,Pixel 5 (393x851),Mở /preview/reseller/wallet,"1. Xem số dư hoa hồng
+2. Đối soát danh sách đơn hàng","Hiển thị 4 trạng thái: Chờ duyệt, Khả dụng, Đã chi trả; che PII",Render chuẩn xác, tiền tệ VNĐ, giờ UTC+7, không tràn ngang,PASS,android-05-c3-reseller-wallet-commission-mobile.png
