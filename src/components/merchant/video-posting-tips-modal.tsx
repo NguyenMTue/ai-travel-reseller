@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef, type KeyboardEvent } from "react";
 import { AudioLines, Clock3, Link2, MessageCircleQuestion, X } from "lucide-react";
 
 export interface VideoPostingTipsModalProps {
@@ -32,22 +35,71 @@ const postingTips = [
   },
 ];
 
+const focusableSelector =
+  'button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export function VideoPostingTipsModal({
   isOpen,
   onClose,
 }: VideoPostingTipsModalProps) {
+  const dialogRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousFocus =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    closeButtonRef.current?.focus();
+
+    return () => previousFocus?.focus();
+  }, [isOpen]);
+
+  function trapFocus(event: KeyboardEvent<HTMLElement>) {
+    if (event.key !== "Tab") return;
+
+    const focusableElements = Array.from(
+      dialogRef.current?.querySelectorAll<HTMLElement>(focusableSelector) ?? []
+    ).filter((element) => element.getClientRects().length > 0);
+
+    if (focusableElements.length === 0) {
+      event.preventDefault();
+      return;
+    }
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    const activeElement = document.activeElement;
+
+    if (event.shiftKey && (activeElement === firstElement || !dialogRef.current?.contains(activeElement))) {
+      event.preventDefault();
+      lastElement.focus();
+    } else if (
+      !event.shiftKey &&
+      (activeElement === lastElement || !dialogRef.current?.contains(activeElement))
+    ) {
+      event.preventDefault();
+      firstElement.focus();
+    }
+  }
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
       <section
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="video-posting-tips-title"
         aria-describedby="video-posting-tips-description"
+        onKeyDown={trapFocus}
         className="relative max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-background p-6 text-foreground shadow-xl sm:p-8"
       >
         <button
+          ref={closeButtonRef}
           type="button"
           onClick={onClose}
           aria-label="Đóng mẹo đăng video"
