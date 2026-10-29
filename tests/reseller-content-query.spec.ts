@@ -24,7 +24,7 @@ test("real SDK serializes campaign AND publication AND shared/own filters on eve
     expect(url.searchParams.get("campaign_id")).toBe(`eq.${context.campaignId}`);
     expect(url.searchParams.get("status")).toBe("in.(approved)");
     expect(url.searchParams.get("or")).toBe(`(reseller_id.is.null,reseller_id.eq.${context.resellerId})`);
-    expect(url.searchParams.get("select")).toBe("id,campaign_id,reseller_id,persona,status,hook,script,caption,cta");
+    expect(url.searchParams.get("select")).toBe("id,campaign_id,reseller_id,persona,status,hook,script,caption,cta,video_url");
     expect(url.searchParams.has("product_id")).toBe(false);
     expect(url.searchParams.get("limit")).toBe("500");
   }

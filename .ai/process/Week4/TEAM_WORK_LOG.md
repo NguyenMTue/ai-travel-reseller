@@ -22,8 +22,10 @@ Phạm vi nhật ký: Điều phối công việc Tuần 4 toàn team. Trọng t
 | BE2-W4-02 | Nguyễn Huỳnh | BE2 (AI Prompt) | Rà soát Anti-Hallucination khi Sales Agent tư vấn về video chiến dịch | READY | 28/10 08:30 | 30/10 17:00 |
 | BE3-W4-01 | Thái Thanh Tú | BE3 (Automation) | Cấu hình hàng đợi retry thông minh cho n8n workflow render video | READY | 27/10 08:30 | 29/10 17:00 |
 | BE3-W4-02 | Thái Thanh Tú | BE3 (Automation) | Tối ưu mẫu thông báo Telegram kèm preview video cho Reseller | READY | 28/10 08:30 | 30/10 17:00 |
-| FE-W4-01 | Diệu | FE Lead | Tối ưu Video Player 9:16 và cơ chế tải video trực tiếp trên Mobile PWA | READY | 27/10 08:30 | 30/10 17:00 |
-| FE-W4-02 | Diệu | FE Lead | Tinh chỉnh mượt mà thao tác vuốt chạm trên giao diện di động | READY | 28/10 08:30 | 30/10 17:00 |
+| FE-W4-01 | Diệu | FE Lead | Video Player 9:16 + MP4: code/fixture pass, chờ BE1 live và thiết bị thật | IN_PROGRESS | 28/10 | 29/10 17:00 |
+| FE-W4-02 | Diệu | FE Lead | Touch/safe-area: kế hoạch, chưa triển khai tuần 4 | READY | 28/10 | 30/10 12:00 |
+| FE-W4-03 | Diệu | FE Lead | Chuẩn bị review T3; truy vấn chưa thấy branch/PR bàn giao | WAITING_HANDOFF | 28/10 | 29/10 12:00 |
+| FE-W4-04 | Diệu | FE Lead | Tích hợp modal sau bàn giao T3 và 2 approvals | WAITING | 28/10 | 30/10 17:00 |
 | T3-FE-W4-01 | Tester 3 | FE Trainee (Cô lập) | Xây dựng Component tĩnh `video-posting-tips-modal.tsx` (Dumb UI) | READY | 27/10 08:30 | 29/10 17:00 |
 | QA-W4-01 | Tester 2 | AI Safety QA | Thẩm định chất lượng video mẫu của BE1 theo `AI_VIDEO_RUBRIC_W3.md` | READY | 28/10 08:30 | 30/10 17:00 |
 | QA-W4-02 | Tester 1 | QA Lead | Kiểm tra tương thích hiển thị Responsive / PWA trên thiết bị di động thật | READY | 29/10 08:30 | 31/10 12:00 |
@@ -124,9 +126,13 @@ Phạm vi nhật ký: Điều phối công việc Tuần 4 toàn team. Trọng t
 - **Next:** Xây dựng module hòa âm Auto-Ducking cho audio mixer.
 
 ### Diệu (FE Lead)
-- **Done:** Rà soát lại luồng PWA trên mobile sau khi merge Sprint 3.
-- **In Progress:** Chuẩn bị khung mock data cho Tester 3.
-- **Next:** Nâng cấp trình phát video 9:16 có nút tải video về máy.
+- **Cập nhật 29/10/2026:** Nhánh `feature/fe-w4-video-player-pwa-polish`, nền `d421516`, worktree `E:\THUCTAP\ai-travel-reseller\build\fe-w4-worktree`; giữ nguyên checkout W3/local/env/config và code chưa commit, không pull/fetch/merge/đổi nhánh/commit/push. Chỉ FE-W4-01/03; chưa triển khai FE-W4-02/04.
+- **Code/fixture đã kiểm chứng:** Shared player 9:16 contain, preload none, playback states/cleanup; fetch/blob MP4 kiểm HTTP/MIME/header/empty, chống click lặp/abort/đổi nguồn, tên file theo nội dung và thông báo chưa xác nhận lưu. Dùng modal/MediaCard hiện có; Reseller đặt tại Content Kit đã được phép xem, giữ `approved`/campaign/ownership. Bỏ fallback mẫu khỏi kết quả thật.
+- **Điều tra và sửa 29/10:** Đã đọc/bảo toàn báo cáo cũ, so SHA256 source/test với d421516 trước khi phân loại. Content note/heading/chat launcher/text selection là expectation lỗi thời đã xác minh; scope selector đúng ý nghĩa và giữ đầy đủ assertions. Phát hiện thêm bug selection mobile baseline ép text rộng 0px, sửa wrap/basis/nút trong đúng bước mở video. Modal dùng session mount mới + abort campaign read để giải quyết lint và lifecycle, không suppression. Fixture URL lỗi của W4 chuyển ngoài baseline rewrite, GET thật404. Evidence `build/fe-w4-audit-20261029/`.
+- **Tự động:** Content ca lỗi 1/1 rồi suite23/23; frontend targeted9/9 rồi production15/15, runner thoát bình thường; Media Library và player/modal 320/390/768/1440 pass (cả đóng khi đang tải/mở lại sạch); unit/fixture18/18; TypeScript/lint18files0errors0warnings/Webpack/diff-check pass. MP4 download SHA256 trùng sample540×960. Không chạy toàn bộ repo/live/UAT hoặc full FFmpeg decode (binary thiếu); không nhận 100% DoD.
+- **Quan sát thủ công của người dùng:** Đã mở preview3114 và thử thấy hoạt động; chỉ ghi nhận preview, chưa nghiệm thu video thật/tải MP4 trên điện thoại/Safari iOS. Tách khỏi kết quả tự động; chưa có kết quả thiết bị thật.
+- **Blocker live/device:** Baseline `next.config.ts:13` rewrite URL video local không tồn tại về Bà Nà; GET proof200/hash trùng sample, chưa gỡ vì giữ cấu hình. Cần FE/PM quyết định giới hạn/gỡ trước live. Backend mặc định mock renderer nhưng trả `ready`; cần BE1 MP4 thật + MIME/CORS/expiry và BA/BE1 quy trình approved/persona. Chưa test storage thật, realme C21Y/Chrome, Safari iOS hoặc W4 1080×1920. Không gọi AI/render/ghi DB hoặc mở tunnel.
+- **T3/Next:** GitHub API29/10 search_branches đúng repo/tên nhánh trả0branches, search_prs đúng head trả0PR; chưa PR/SHA/diff để review. Đã đọc TESTER3_W4 và soạn tin nhắn xin link/headSHA/1-file diff/lint/tsc/ảnh/keyboard để người dùng tự gửi; chưa reviewed/approved/tích hợp, không làm thay modal. Ưu tiên handoff/review FE-W4-03 và chốt blocker FE-W4-01; FE-W4-02/04 chưa làm. Chi tiết bằng chứng, phân loại, tin nhắn và DoD: [FE_W4.md, mục8](FE_W4.md). Preview3114 giữ chạy; chỉ dừng production3115 do lượt này tạo.
 
 ### Tester 3 (FE Trainee)
 - **Done:** Tiếp nhận tài liệu quy chuẩn an toàn Tuần 4.

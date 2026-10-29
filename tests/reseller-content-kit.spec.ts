@@ -120,7 +120,12 @@ test("confirmed contract fixture maps personas and variants, copies untouched pl
   await page.goto(`${url}?state=approved`);
   await expect(page.getByText("14/10/2026", { exact: true })).toBeVisible();
   await expect(page.getByText("21/10/2026", { exact: true })).toBeVisible();
-  await expect(page.getByRole("note")).toContainText("Bạn cần bổ sung link tiếp thị trước khi đăng.");
+  const placeholderNotice = page.getByRole("note").filter({ hasText: "Nội dung còn [LINK_MUA_VE]." });
+  await expect(placeholderNotice).toHaveCount(1);
+  await expect(placeholderNotice).toContainText("Bạn cần bổ sung link tiếp thị trước khi đăng.");
+  await expect(page.getByRole("region", { name: "Đăng lên Telegram" }).getByRole("note")).toHaveText([
+    "Tạo link tiếp thị trước khi đăng để ghi nhận hoa hồng.", "Bản xem trước không gửi bài thật.",
+  ]);
   await expect(page.getByTestId("content-script")).toHaveText(approvedFixtureVariants[0].script ?? "");
   await page.getByRole("button", { name: "Copy CTA", exact: true }).click();
   await expect(page.getByText("Đã sao chép CTA.", { exact: true })).toBeVisible();
@@ -136,7 +141,8 @@ test("confirmed contract fixture maps personas and variants, copies untouched pl
   await page.getByLabel("Biến thể", { exact: true }).selectOption(approvedFixtureVariants[1].id);
   await expect(page.getByRole("button", { name: "Copy Hook", exact: true })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Copy CTA", exact: true })).toBeDisabled();
-  await expect(page.getByRole("note")).toHaveCount(0);
+  await expect(placeholderNotice).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Đăng lên Telegram" }).getByRole("note")).toHaveCount(2);
   for (const [label, hook] of [["Family", "Hook contract fixture riêng Family"], ["Foodie", "Hook contract fixture Foodie"], ["Budget Traveler", "Hook contract fixture Budget Traveler"]]) {
     await page.getByRole("button", { name: label, exact: true }).click();
     await expect(page.getByTestId("content-hook")).toHaveText(hook);
