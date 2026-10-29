@@ -120,6 +120,21 @@ export const videoGenerateSuccessDataSchema = z
     cta: z.string(),
     scenes_count: z.number().int().positive(),
     created_at: z.string(),
+    cost_breakdown: z.object({
+      model_name: z.string(),
+      duration_seconds: z.number(),
+      input_tokens: z.number(),
+      output_tokens: z.number(),
+      cost_usd: z.number(),
+      cost_vnd: z.number(),
+      free_tier_components: z.object({
+        ffmpeg_compositor_cost: z.number(),
+        edge_tts_cost: z.number(),
+        total_free_savings_usd: z.number(),
+      }),
+      is_live_call: z.boolean(),
+      status_note: z.string().optional(),
+    }).optional(),
   })
   .strict();
 

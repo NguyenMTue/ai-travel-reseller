@@ -33,6 +33,8 @@ export interface VideoGenerateModalProps {
   totalAssetsCount?: number;
   merchantId?: string;
   autoStart?: boolean;
+  selectedItemIds?: string[];
+  selectedItems?: LibraryItem[];
 }
 
 interface GeneratedVideoData {
@@ -47,7 +49,22 @@ interface GeneratedVideoData {
   script: string;
   caption: string;
   cta: string;
-  scenes_count?: number;
+    scenes_count?: number;
+  cost_breakdown?: {
+    model_name: string;
+    duration_seconds: number;
+    input_tokens: number;
+    output_tokens: number;
+    cost_usd: number;
+    cost_vnd: number;
+    free_tier_components: {
+      ffmpeg_compositor_cost: number;
+      edge_tts_cost: number;
+      total_free_savings_usd: number;
+    };
+    is_live_call: boolean;
+    status_note?: string;
+  };
 }
 
 interface BlockedItem {
@@ -63,6 +80,8 @@ export function VideoGenerateModal({
   selectedCampaign,
   totalAssetsCount,
   autoStart = false,
+  selectedItemIds = [],
+  selectedItems = [],
 }: VideoGenerateModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
@@ -88,6 +107,7 @@ export function VideoGenerateModal({
   const [progress, setProgress] = useState(0);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [videoResult, setVideoResult] = useState<GeneratedVideoData | null>(null);
+  const [actualRenderTimeSec, setActualRenderTimeSec] = useState<number | null>(null);
   const [blockedErrors, setBlockedErrors] = useState<BlockedItem[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
@@ -193,12 +213,13 @@ export function VideoGenerateModal({
     }
   }, [isOpen, selectedItem]);
 
-  const TARGET_DURATION_MS = 160 * 1000; // ~2 phút 40 giây (gần 3 phút)
-
-  function finishRenderSuccessfully(data: GeneratedVideoData) {
+  function finishRenderSuccessfully(data: GeneratedVideoData, elapsedMs?: number) {
     if (renderTimerRef.current) {
       clearTimeout(renderTimerRef.current);
       renderTimerRef.current = null;
+    }
+    if (elapsedMs) {
+      setActualRenderTimeSec(Math.max(1, Math.round(elapsedMs / 1000)));
     }
     setVideoResult(data);
     setProgress(100);
@@ -213,14 +234,6 @@ export function VideoGenerateModal({
     }
     if (cachedResultRef.current) {
       finishRenderSuccessfully(cachedResultRef.current);
-    } else {
-      setProgress(98);
-      const checkTimer = setInterval(() => {
-        if (cachedResultRef.current) {
-          clearInterval(checkTimer);
-          finishRenderSuccessfully(cachedResultRef.current);
-        }
-      }, 300);
     }
   }
 
@@ -248,46 +261,33 @@ export function VideoGenerateModal({
     const startTime = Date.now();
 
     function scheduleTick() {
-      // Khoảng ngẫu nhiên 1.8s - 3.8s giữa các lần cập nhật (không đều 1s = 1% để tạo nhịp tính toán GPU tự nhiên)
-      const nextDelay = Math.floor(Math.random() * 2000) + 1800;
+      const nextDelay = 800;
 
       const timer = setTimeout(() => {
         const elapsedMs = Date.now() - startTime;
         const elapsedSec = elapsedMs / 1000;
 
-        let targetPct = 2;
-        if (elapsedSec < 25) {
-          // Giai đoạn 1 (0s - 25s): Phân tích kịch bản -> 2%..22%
-          targetPct = Math.min(22, 2 + Math.floor((elapsedSec / 25) * 20));
+        let targetPct = 8;
+        if (elapsedSec < 3) {
+          // Giai đoạn 1 (0s - 3s): Phân tích kịch bản & Hook -> 8%..32%
+          targetPct = Math.min(32, 8 + Math.floor((elapsedSec / 3) * 24));
           setCurrentStepIndex(0);
-        } else if (elapsedSec < 85) {
-          // Giai đoạn 2 (25s - 85s): Spatial Parallax & ghép cảnh -> 23%..58%
-          targetPct = Math.min(58, 23 + Math.floor(((elapsedSec - 25) / 60) * 35));
+        } else if (elapsedSec < 8) {
+          // Giai đoạn 2 (3s - 8s): Hero Gemini Omni / Interpolation -> 33%..68%
+          targetPct = Math.min(68, 33 + Math.floor(((elapsedSec - 3) / 5) * 35));
           setCurrentStepIndex(1);
-        } else if (elapsedSec < 130) {
-          // Giai đoạn 3 (85s - 130s): Lồng tiếng & Âm thanh -> 59%..83%
-          targetPct = Math.min(83, 59 + Math.floor(((elapsedSec - 85) / 45) * 24));
+        } else if (elapsedSec < 14) {
+          // Giai đoạn 3 (8s - 14s): Edge-TTS & Lồng tiếng -> 69%..88%
+          targetPct = Math.min(88, 69 + Math.floor(((elapsedSec - 8) / 6) * 19));
           setCurrentStepIndex(2);
-        } else if (elapsedMs < TARGET_DURATION_MS) {
-          // Giai đoạn 4 (130s - 160s): Xuất bản bản nháp -> 84%..98%
-          targetPct = Math.min(98, 84 + Math.floor(((elapsedSec - 130) / 30) * 14));
-          setCurrentStepIndex(3);
         } else {
-          targetPct = 98;
+          // Giai đoạn 4: Đóng gói & lưu trữ Supabase -> 89%..96%
+          targetPct = Math.min(96, 89 + Math.floor(Math.random() * 5));
           setCurrentStepIndex(3);
         }
 
-        // Đảm bảo % tiến độ luôn tăng dần và giữ ở mức 98% trước khi hoàn tất
-        setProgress((prev) => Math.min(98, Math.max(prev, targetPct)));
-
-        if (elapsedMs >= TARGET_DURATION_MS) {
-          renderTimerRef.current = null;
-          if (cachedResultRef.current) {
-            finishRenderSuccessfully(cachedResultRef.current);
-          }
-        } else {
-          scheduleTick();
-        }
+        setProgress((prev) => Math.min(96, Math.max(prev, targetPct)));
+        scheduleTick();
       }, nextDelay);
 
       renderTimerRef.current = timer;
@@ -299,7 +299,7 @@ export function VideoGenerateModal({
       const payload = {
         campaign_id: campaign.id,
         product_id: campaign.productId,
-        media_reference_ids: selectedItem ? [selectedItem.id] : [],
+        media_reference_ids: selectedItemIds && selectedItemIds.length > 0 ? selectedItemIds : (selectedItem ? [selectedItem.id] : []),
         target_platforms: ["TIKTOK", "INSTAGRAM_REELS"],
         persona,
         target_duration_sec: durationSec,
@@ -320,10 +320,8 @@ export function VideoGenerateModal({
       const json = await response.json();
 
       if (response.status === 201 && json.success) {
-        cachedResultRef.current = json.data;
-        if (Date.now() - startTime >= TARGET_DURATION_MS) {
-          finishRenderSuccessfully(json.data);
-        }
+        const elapsedMs = Date.now() - startTime;
+        finishRenderSuccessfully(json.data, elapsedMs);
       } else if (response.status === 422) {
         if (renderTimerRef.current) {
           clearTimeout(renderTimerRef.current);
@@ -352,12 +350,7 @@ export function VideoGenerateModal({
   }
 
   function getPlayableVideoUrl(rawUrl: string | undefined): string {
-    if (!rawUrl) return "/campaign-videos/banahills-remediated.mp4";
-    // Nếu là domain giả lập storage.travellink.vn (chưa cấu hình public DNS trong môi trường demo/dev)
-    // tự động trỏ về video thành phẩm thực tế trong local public/campaign-videos/
-    if (rawUrl.includes("storage.travellink.vn")) {
-      return "/campaign-videos/banahills-remediated.mp4";
-    }
+    if (!rawUrl) return "";
     return rawUrl;
   }
 
@@ -461,11 +454,43 @@ export function VideoGenerateModal({
                 {totalAssetsCount || 16} ảnh/clip thật
               </span>
             </div>
-            {selectedItem && (
+            {selectedItems && selectedItems.length > 0 ? (
+              <div className="mt-3 rounded-xl border border-purple-500/30 bg-purple-950/20 p-3 text-xs text-zinc-300 space-y-2">
+                <div className="font-semibold text-purple-300 flex items-center justify-between">
+                  <span>⭐ Phân bổ tư liệu thật theo đúng thứ tự bạn đã chọn:</span>
+                  <span className="text-[11px] text-emerald-400 font-normal">
+                    {selectedItems.length} ảnh đã chọn
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                  <div className="bg-zinc-900/80 p-2.5 rounded-lg border border-purple-500/20">
+                    <span className="text-emerald-400 font-semibold block mb-0.5">
+                      ⭐ Hero 1 (Omni Frame 1):
+                    </span>
+                    <span className="line-clamp-1 text-zinc-200">
+                      {selectedItems[0]?.title}
+                    </span>
+                  </div>
+                  <div className="bg-zinc-900/80 p-2.5 rounded-lg border border-purple-500/20">
+                    <span className="text-emerald-400 font-semibold block mb-0.5">
+                      ⭐ Hero 2 (Omni Frame 2):
+                    </span>
+                    <span className="line-clamp-1 text-zinc-200">
+                      {selectedItems[1]?.title || selectedItems[0]?.title}
+                    </span>
+                  </div>
+                </div>
+                {selectedItems.length > 2 && (
+                  <p className="text-[11px] text-muted-foreground pt-0.5">
+                    🎬 + {selectedItems.length - 2} ảnh tiếp theo làm Body Slideshow Ken Burns mượt mà 30fps.
+                  </p>
+                )}
+              </div>
+            ) : selectedItem ? (
               <div className={styles.focalAssetNotice}>
                 ⭐ <em>Ưu tiên tư liệu mở màn:</em> {selectedItem.title}
               </div>
-            )}
+            ) : null}
           </div>
         )}
 
@@ -735,6 +760,65 @@ export function VideoGenerateModal({
                   </p>
                 </div>
 
+                {videoResult.cost_breakdown && (
+                  <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3 space-y-2 text-xs">
+                    <div className="flex items-center justify-between border-b border-emerald-500/20 pb-1.5">
+                      <div className="flex items-center gap-1.5 font-semibold text-emerald-400">
+                        <Sparkles size={14} className="text-emerald-400" />
+                        <span>Báo cáo Chi phí Tạo Video AI</span>
+                        {actualRenderTimeSec && (
+                          <span className="text-[10px] font-normal text-emerald-300/90 ml-1.5 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                            (Thực tế {actualRenderTimeSec}s)
+                          </span>
+                        )}
+                      </div>
+                      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+                        {videoResult.cost_breakdown.is_live_call ? "Google Cloud AI" : "100% Ảnh thật · 0đ"}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground pt-0.5">
+                      <div>
+                        <span>Cơ chế Hero: </span>
+                        <strong className="text-foreground">{videoResult.cost_breakdown.model_name}</strong>
+                      </div>
+                      <div>
+                        <span>Thời lượng Hero: </span>
+                        <strong className="text-foreground">
+                          {videoResult.cost_breakdown.duration_seconds}s ({videoResult.cost_breakdown.output_tokens.toLocaleString()} tokens)
+                        </strong>
+                      </div>
+                    </div>
+
+                    {videoResult.cost_breakdown.status_note && (
+                      <div className="text-[10px] text-emerald-200/80 bg-emerald-950/40 p-1.5 rounded border border-emerald-500/20">
+                        💡 {videoResult.cost_breakdown.status_note}
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between border-t border-dashed border-emerald-500/20 pt-1.5 text-emerald-300">
+                      <div>
+                        <div className="font-medium">Tổng chi phí phát sinh:</div>
+                        <div className="text-[10px] text-muted-foreground">
+                          (FFmpeg Ken Burns + Edge-TTS: 0đ Miễn phí)
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-bold text-emerald-400">
+                          {videoResult.cost_breakdown.cost_vnd > 0
+                            ? `~${videoResult.cost_breakdown.cost_vnd.toLocaleString("vi-VN")} đ`
+                            : "0 đ (Miễn phí)"}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          {videoResult.cost_breakdown.cost_usd > 0
+                            ? `(${videoResult.cost_breakdown.cost_usd.toFixed(4)} USD)`
+                            : "Tiết kiệm 100%"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
                   <span>Tỷ lệ: 9:16</span>
                   <span>·</span>
@@ -762,7 +846,7 @@ export function VideoGenerateModal({
                   href={getPlayableVideoUrl(videoResult.video_url)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  download="banahills-campaign-video.mp4"
+                  download="campaign-video.mp4"
                 >
                   <ExternalLink size={16} aria-hidden="true" />
                   Mở / Tải video

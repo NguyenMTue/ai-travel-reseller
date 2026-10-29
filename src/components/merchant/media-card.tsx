@@ -16,6 +16,7 @@ export interface MediaCardProps {
   durationSeconds?: number | null;
   styleTags?: string[];
   isSelected?: boolean;
+  selectionBadge?: string;
   onSelect?: (id: string) => void;
 }
 
@@ -42,6 +43,7 @@ export function MediaCard({
   durationSeconds,
   styleTags = [],
   isSelected = false,
+  selectionBadge,
   onSelect,
 }: MediaCardProps) {
   const [failedThumbnailUrl, setFailedThumbnailUrl] = useState<string | null>(null);
@@ -57,10 +59,13 @@ export function MediaCard({
 
   return (
     <article
-      className={`min-w-0 w-full max-w-full rounded-xl border bg-white transition-colors ${
-        isSelected ? "border-primary ring-2 ring-primary/20" : "border-border"
+      className={`min-w-0 w-full max-w-full rounded-xl border bg-white transition-all cursor-pointer ${
+        isSelected
+          ? "border-emerald-500 ring-2 ring-emerald-500/30 shadow-md"
+          : "border-border hover:border-muted-foreground/40"
       }`}
       aria-label={title}
+      onClick={() => onSelect?.(id)}
     >
       <div className="relative aspect-[9/16] overflow-hidden rounded-t-xl bg-muted">
         {imageSrc ? (
@@ -70,7 +75,7 @@ export function MediaCard({
             fill
             unoptimized
             sizes="(max-width: 640px) 80vw, (max-width: 1024px) 40vw, 260px"
-            className="object-cover"
+            className="object-cover transition-transform hover:scale-105"
             onError={() => setFailedThumbnailUrl(imageSrc)}
           />
         ) : (
@@ -82,6 +87,14 @@ export function MediaCard({
             Không có ảnh xem trước
           </div>
         )}
+
+        {/* Badge thứ tự và vai trò trong luồng Hybrid */}
+        {isSelected && selectionBadge && (
+          <span className="absolute top-2.5 right-2.5 z-10 rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white shadow-lg flex items-center gap-1">
+            {selectionBadge}
+          </span>
+        )}
+
         {durationLabel && (
           <span className="absolute bottom-3 right-3 rounded bg-black/75 px-2 py-1 text-xs font-medium text-white">
             {durationLabel}
@@ -91,15 +104,15 @@ export function MediaCard({
 
       <div className="grid min-w-0 gap-3 p-4">
         <div className="grid min-w-0 gap-2">
-          <h3 className="min-w-0 break-words font-medium leading-snug text-foreground">
+          <h3 className="min-w-0 break-words font-medium leading-snug text-foreground text-sm line-clamp-2">
             {title}
           </h3>
           {tags.length > 0 && (
-            <ul className="flex min-w-0 flex-wrap gap-2" aria-label="Phong cách video">
-              {tags.map((tag, index) => (
+            <ul className="flex min-w-0 flex-wrap gap-1.5" aria-label="Phong cách video">
+              {tags.slice(0, 3).map((tag, index) => (
                 <li
                   key={`${tag}-${index}`}
-                  className="max-w-full whitespace-normal break-all rounded-full bg-secondary px-2.5 py-1 text-xs text-secondary-foreground"
+                  className="max-w-full whitespace-normal break-all rounded-full bg-secondary px-2 py-0.5 text-[11px] text-secondary-foreground"
                 >
                   {tag}
                 </li>
@@ -112,14 +125,17 @@ export function MediaCard({
           <button
             type="button"
             aria-pressed={isSelected}
-            onClick={() => onSelect?.(id)}
-            className={`min-h-10 w-full min-w-0 whitespace-normal break-words rounded-md border px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect?.(id);
+            }}
+            className={`min-h-9 w-full min-w-0 whitespace-normal break-words rounded-md border px-3 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
               isSelected
-                ? "border-primary bg-primary text-primary-foreground"
+                ? "border-emerald-600 bg-emerald-600 text-white"
                 : "border-border text-foreground hover:bg-secondary"
             }`}
           >
-            {isSelected ? "Đã chọn tư liệu" : "Chọn tư liệu"}
+            {isSelected ? `✓ ${selectionBadge || "Đã chọn"}` : "+ Chọn vào Video"}
           </button>
         )}
       </div>

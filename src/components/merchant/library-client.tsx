@@ -5,11 +5,13 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleHelp,
+  Layers,
   MapPin,
+  RefreshCw,
   Search,
   Sparkles,
   Tag,
-  X,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { MediaCard as Card, MediaCardGrid as Grid } from "./media-card";
@@ -28,7 +30,6 @@ import styles from "./library.module.css";
 
 type LibraryState = LibraryResult | { status: "loading" };
 
-// Preview and future live reads share canonical components; only transport is injected.
 export function MerchantLibraryLive({ merchantId }: { merchantId: string }) {
   return <LibraryClient contextKey={merchantId} request={readLibrary} />;
 }
@@ -68,6 +69,9 @@ function LibraryRead({
   const [selected, setSelected] = useState<LibraryItem | null>(null);
   const [guide, setGuide] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
+
+  // Danh sách ID các ảnh được Merchant chọn theo thứ tự ưu tiên
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Danh sách Chiến dịch của Merchant
   const [campaigns, setCampaigns] = useState<CampaignOption[]>([]);
@@ -116,6 +120,7 @@ function LibraryRead({
       if (privateView.current) privateView.current.hidden = true;
       if (alive) {
         setSelected(null);
+        setSelectedIds([]);
         setGuide(false);
         setResult({ status: "session" });
       }
@@ -183,6 +188,24 @@ function LibraryRead({
     setQuery(next);
   }
 
+  function handleToggleSelect(id: string) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  }
+
+  function handleSelectRecommended() {
+    if (result.status === "ready" && result.data.items.length > 0) {
+      // Chọn 5 ảnh đầu tiên (2 Hero + 3 Body)
+      const recommended = result.data.items.slice(0, 5).map((item) => item.id);
+      setSelectedIds(recommended);
+    }
+  }
+
+  function handleClearSelections() {
+    setSelectedIds([]);
+  }
+
   const failed = result.status === "session" || result.status === "forbidden";
   const selectedCampaign =
     campaigns.find((c) => c.id === selectedCampaignId) ||
@@ -193,7 +216,7 @@ function LibraryRead({
 
   return (
     <>
-      {/* THẺ TỔNG QUAN CHIẾN DỊCH & HÀNH ĐỘNG TẠO VIDEO AI */}
+      {/* THẺ TỔNG QUAN CHIẾN DỊCH & BẢNG ĐIỀU PHỐI HYBRID VIDEO */}
       {!failed && selectedCampaign && (
         <section
           className={styles.campaignHeroCard}
@@ -209,6 +232,7 @@ function LibraryRead({
                 onChange={(e) => {
                   setSelectedCampaignId(e.target.value);
                   setSelected(null);
+                  setSelectedIds([]);
                 }}
               >
                 {campaigns.map((c) => (
@@ -255,7 +279,7 @@ function LibraryRead({
                   </span>
                 )}
                 <span className={styles.campaignMetaItem}>
-                  📸 {totalAssets} tư liệu đạt chuẩn UGC
+                  📸 {totalAssets} tư liệu ảnh thật
                 </span>
               </div>
             </div>
@@ -267,27 +291,69 @@ function LibraryRead({
                 className={styles.generateCampaignBtn}
               >
                 <Sparkles size={18} aria-hidden="true" />
-                Tạo Video AI cho chiến dịch này
+                Tạo Video AI ({selectedIds.length > 0 ? `${selectedIds.length} ảnh đã chọn` : "Tự động chọn"})
               </Button>
+            </div>
+          </div>
+
+          {/* BANNER HƯỚNG DẪN QUY TRÌNH HYBRID VIDEO MỚI */}
+          <div className="mt-2 rounded-xl border border-emerald-500/30 bg-emerald-950/15 p-4 text-xs">
+            <div className="flex items-center gap-2 font-semibold text-emerald-400 text-sm pb-1.5">
+              <Zap size={16} />
+              <span>Quy trình Tạo Video Du lịch Hybrid AI (Gemini Omni 1.1 Flash + FFmpeg)</span>
+            </div>
+            <p className="text-muted-foreground leading-relaxed mb-3">
+              Tối ưu hóa chi phí bằng cách kết hợp AI thế hệ mới với hiệu ứng chuyển động ảnh thật:
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="rounded-lg border border-purple-500/20 bg-purple-950/20 p-2.5">
+                <span className="font-semibold text-purple-300 block mb-1">
+                  ⭐ Giai đoạn 1: Hero Hook (2 - 3 ảnh đầu)
+                </span>
+                <span className="text-muted-foreground text-[11px] leading-relaxed">
+                  Đưa vào mô hình <strong>gemini-omni-1.1-flash</strong> sinh video chuyển cảnh điện ảnh 5s - 10s mượt mà giữ chân người xem trong 3 giây vàng.
+                </span>
+              </div>
+              <div className="rounded-lg border border-blue-500/20 bg-blue-950/20 p-2.5">
+                <span className="font-semibold text-blue-300 block mb-1">
+                  🎬 Giai đoạn 2: Body Slideshow (Các ảnh còn lại)
+                </span>
+                <span className="text-muted-foreground text-[11px] leading-relaxed">
+                  Dùng hiệu ứng <strong>Ken Burns (Zoom/Pan 2s/ảnh)</strong> + <strong>giọng đọc tiếng Việt (Edge-TTS)</strong> hoàn toàn miễn phí (0đ).
+                </span>
+              </div>
             </div>
           </div>
         </section>
       )}
 
-      {/* HEADER KHU VỰC TÀI NGUYÊN MEDIA CỦA CHIẾN DỊCH */}
+      {/* HEADER KHU VỰC TÀI NGUYÊN MEDIA & TOOLBAR CHỌN ẢNH */}
       <div className={styles.sectionHeader}>
         <div>
-          <p className="eyebrow">TÀI NGUYÊN MEDIA CHIẾN DỊCH</p>
+          <p className="eyebrow">CHỌN ẢNH TƯ LIỆU CHO CHIẾN DỊCH</p>
           <h2>Kho ảnh & video thực tế ({totalAssets})</h2>
           <p>
-            Các hình ảnh góc cao flycam, trải nghiệm thực tế và phong cảnh của
-            chiến dịch. AI sẽ kết hợp toàn bộ tài nguyên này khi dựng video 9:16.
+            Click vào từng ảnh bên dưới để chọn thứ tự xuất hiện trong video (ảnh 1-2 làm Hero Omni, các ảnh sau làm Body).
           </p>
         </div>
-        <Button variant="outline" onClick={() => setGuide(true)}>
-          <CircleHelp size={18} aria-hidden="true" />
-          Quy chuẩn video
-        </Button>
+        <div className="flex items-center gap-2">
+          {result.status === "ready" && result.data.items.length > 0 && (
+            <Button variant="outline" size="sm" onClick={handleSelectRecommended}>
+              <Layers size={15} aria-hidden="true" />
+              Chọn nhanh 5 ảnh đề xuất
+            </Button>
+          )}
+          {selectedIds.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={handleClearSelections}>
+              <RefreshCw size={15} aria-hidden="true" />
+              Bỏ chọn ({selectedIds.length})
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={() => setGuide(true)}>
+            <CircleHelp size={16} aria-hidden="true" />
+            Quy chuẩn
+          </Button>
+        </div>
       </div>
 
       {!failed && (
@@ -352,9 +418,7 @@ function LibraryRead({
         {result.status === "loading"
           ? "Đang tải tư liệu chiến dịch…"
           : result.status === "ready"
-          ? `${result.data.pagination.total} tư liệu${
-              query.search ? ` · Kết quả cho “${query.search}”` : ""
-            }`
+          ? `${result.data.pagination.total} tư liệu · Đang chọn ${selectedIds.length} ảnh`
           : "Chưa có kết quả tư liệu."}
       </div>
 
@@ -403,12 +467,26 @@ function LibraryRead({
           {result.data.items.length ? (
             <div className={styles.collection}>
               <Grid>
-                {result.data.items.map((item) => (
-                  <Card
-                    key={item.id}
-                    {...toMediaCardProps(item)}
-                  />
-                ))}
+                {result.data.items.map((item) => {
+                  const selectedIndex = selectedIds.indexOf(item.id);
+                  const isSelected = selectedIndex !== -1;
+                  let badgeText = "";
+                  if (isSelected) {
+                    if (selectedIndex === 0) badgeText = "⭐ Hero 1 (Omni)";
+                    else if (selectedIndex === 1) badgeText = "⭐ Hero 2 (Omni)";
+                    else badgeText = `🎬 Body #${selectedIndex + 1}`;
+                  }
+
+                  return (
+                    <Card
+                      key={item.id}
+                      {...toMediaCardProps(item)}
+                      isSelected={isSelected}
+                      selectionBadge={badgeText}
+                      onSelect={() => handleToggleSelect(item.id)}
+                    />
+                  );
+                })}
               </Grid>
             </div>
           ) : (
@@ -453,11 +531,55 @@ function LibraryRead({
         </div>
       )}
 
+      {/* THANH TÁC VỤ NỔI CỐ ĐỊNH KHI CHỌN ẢNH (FLOATING ACTION BAR) */}
+      {selectedIds.length > 0 && (
+        <aside
+          aria-label="Thanh tác vụ chọn tư liệu"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-zinc-900/95 text-white px-5 py-3 rounded-full shadow-2xl border border-zinc-700 flex items-center gap-4 backdrop-blur-md transition-all animate-in fade-in slide-in-from-bottom-4"
+        >
+          <div className="text-xs">
+            <span className="font-semibold text-emerald-400">
+              Đã chọn {selectedIds.length} ảnh:
+            </span>{" "}
+            <span className="text-zinc-300">
+              {Math.min(2, selectedIds.length)} Hero (Omni) +{" "}
+              {Math.max(0, selectedIds.length - 2)} Body (Ken Burns)
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleClearSelections}
+              className="text-xs text-zinc-400 hover:text-white px-2 py-1 rounded transition-colors"
+            >
+              Bỏ chọn
+            </button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => setGenerateOpen(true)}
+              className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs h-8 px-4 rounded-full flex items-center gap-1.5 shadow-md"
+            >
+              <Sparkles size={14} />
+              Tạo Video AI ({selectedIds.length} ảnh)
+            </Button>
+          </div>
+        </aside>
+      )}
+
       <Guidelines isOpen={guide} onClose={() => setGuide(false)} />
       <VideoGenerateModal
         isOpen={generateOpen}
         onClose={() => setGenerateOpen(false)}
         selectedItem={selected}
+        selectedItemIds={selectedIds}
+        selectedItems={
+          result.status === "ready"
+            ? selectedIds
+                .map((id) => result.data.items.find((item) => item.id === id))
+                .filter(Boolean) as LibraryItem[]
+            : []
+        }
         selectedCampaign={selectedCampaign}
         totalAssetsCount={totalAssets}
         merchantId={merchantId}

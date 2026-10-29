@@ -1,3 +1,6 @@
+import { generateGeminiOmniHeroVideo, type OmniVideoCostBreakdown } from "../ai/gemini-omni-video.ts";
+import { composeHybridVideo } from "../video-engine/ffmpeg-compositor.ts";
+import { buildChainedPromptPlan } from "../video-engine/chained-prompt-generator.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/src/lib/database.types";
 import {
@@ -167,7 +170,12 @@ export async function generateMerchantCampaignVideo(
       };
     }
 
-    mediaRows = selectedRows ? [...selectedRows] : [];
+    // Bảo toàn chính xác 100% thứ tự các ảnh mà người dùng đã click chọn:
+    // mediaRows[0] = Hero 1, mediaRows[1] = Hero 2, mediaRows[2..N] = Body
+    const rowMap = new Map((selectedRows || []).map((r) => [r.id, r]));
+    mediaRows = input.media_reference_ids
+      .map((id) => rowMap.get(id))
+      .filter((r): r is NonNullable<typeof r> => Boolean(r));
 
     // Nếu số lượng tư liệu được chọn ít hơn mức tối thiểu (ceil(duration / 2.2)),
     // tự động bổ sung thêm các tư liệu khác của Merchant trong thư viện (đặt mẫu đã chọn lên đầu)
@@ -244,7 +252,7 @@ export async function generateMerchantCampaignVideo(
     official_cta: `Comment để nhận link đặt vé chính thức từ ${merchantName}`,
     booking_url: `https://travellink.vn/book/${product.id}`,
     target_platforms: input.target_platforms,
-    content_type: input.content_type,
+    content_type: input.content_type || "CONVERSION",
     persona: input.persona,
     target_duration_sec: input.target_duration_sec,
     media_assets: mediaAssets,
@@ -278,8 +286,132 @@ export async function generateMerchantCampaignVideo(
     };
   }
 
-  // 7. Tạo Video Draft chuẩn tỷ lệ 9:16 và định danh Supabase Storage
-  const renderDraft = await synthesizeVideoDraft(directorResult);
+  // 7. Tạo Video Hybrid: Gemini Omni Flash (Hero) + FFmpeg Ken Burns + Edge-TTS
+  let finalVideoUrl = "";
+  let totalDurationSec = directorResult.campaign_metadata.total_duration_sec;
+  let costBreakdown: OmniVideoCostBreakdown | undefined = undefined;
+
+  try {
+    // 7.1. Tải ảnh Hero (2 ảnh đầu) và ảnh Body (các ảnh sau) đảm bảo bảo toàn 100% thứ tự lựa chọn
+    async function fetchBufferWithFallback(url: string): Promise<Buffer | null> {
+      try {
+        const res = await fetch(url, {
+          headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" },
+          signal: AbortSignal.timeout(10000),
+        });
+        if (res.ok) {
+          return Buffer.from(await res.arrayBuffer());
+        }
+      } catch (err: any) {
+        console.warn("[Video Service] Không thể tải tư liệu:", url, err?.message);
+      }
+      return null;
+    }
+
+    const hero1Asset = mediaAssets[0];
+    const hero2Asset = mediaAssets[1] || mediaAssets[0];
+
+    const hero1Buffer = hero1Asset ? await fetchBufferWithFallback(hero1Asset.url) : null;
+    const hero2Buffer = hero2Asset ? await fetchBufferWithFallback(hero2Asset.url) : hero1Buffer;
+
+    const heroImages: Buffer[] = [];
+    if (hero1Buffer) heroImages.push(hero1Buffer);
+    if (hero2Buffer) heroImages.push(hero2Buffer);
+
+    const bodyImages: Buffer[] = [];
+    for (const asset of mediaAssets.slice(2, 6)) {
+      const buf = await fetchBufferWithFallback(asset.url);
+      if (buf) {
+        bodyImages.push(buf);
+      }
+    }
+
+    if (heroImages.length > 0) {
+      // 7.2. Xây dựng Kế hoạch Prompt & Phân cảnh Chained chuẩn 15s - 18s
+      // Theo đúng chuẩn docs/be2/system_prompt_travel_video_director_agent.md:
+      // Vector Momentum Matching + Terminal Stabilization + Unified Atmospheric Anchor
+      const location = (campaign as any).target_location || "Đà Nẵng";
+      const isShortFormat = !input.target_duration_sec || input.target_duration_sec <= 18;
+      const effectiveDuration = isShortFormat
+        ? (input.target_duration_sec || 16.5)
+        : input.target_duration_sec;
+
+      const promptPlan = buildChainedPromptPlan({
+        productName: product.name,
+        location,
+        salePrice: Number(product.sale_price) || 0,
+        officialCta: (campaign as any).official_cta || "Bình luận nhận ưu đãi vé chính hãng",
+        authenticTips: input.authentic_tips,
+        mediaAssets: mediaAssets.slice(0, 4).map((a) => ({
+          asset_id: a.asset_id,
+          url: a.url,
+          title: a.description || product.name,
+          description: a.description,
+          shot_type: a.shot_type,
+        })),
+        targetDurationSec: effectiveDuration,
+      });
+
+      const heroPrompt = promptPlan.segments[0]?.omniPrompt;
+      const heroDuration = promptPlan.segments[0]?.durationSeconds || 6;
+
+      const omniResult = await generateGeminiOmniHeroVideo({
+        prompt: heroPrompt,
+        startImageBuffer: heroImages[0],
+        endImageBuffer: heroImages[1] || heroImages[0],
+        durationSeconds: heroDuration,
+        aspectRatio: "9:16",
+      });
+
+      costBreakdown = omniResult.cost;
+
+      // 7.3. Gọi FFmpeg ghép nối Hero + Body Slideshow + Edge-TTS + Text Overlay
+      const finalBuffer = await composeHybridVideo({
+        heroVideoBuffer: omniResult.videoBuffer,
+        bodyImageBuffers: bodyImages,
+        voiceoverScript: isShortFormat
+          ? promptPlan.audioSpec.fullVoiceoverScript
+          : directorResult.audio_config.full_voiceover_script_with_pauses,
+        targetDurationSec: effectiveDuration,
+        textOverlay: isShortFormat
+          ? promptPlan.textOverlaySpec
+          : {
+              hookText: directorResult.timeline_scenes[0]?.on_screen_text?.text || `Khám phá ${product.name}`,
+              priceBadgeText: `Vé trọn gói chỉ: ${Number(product.sale_price).toLocaleString("vi-VN")}đ`,
+              ctaText: "Bình luận hoặc bấm link giỏ hàng nhận vé chính hãng",
+            },
+      });
+
+      // 7.4. Đẩy video thành phẩm lên Supabase Storage bucket 'campaign-videos'
+      const timestamp = Date.now();
+      const slug = product.name.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-");
+      const filename = `${slug}-${timestamp}.mp4`;
+
+      const { error: uploadError } = await client.storage
+        .from("campaign-videos")
+        .upload(filename, finalBuffer, {
+          contentType: "video/mp4",
+          upsert: true,
+        });
+
+      if (!uploadError) {
+        const { data: publicUrlData } = client.storage
+          .from("campaign-videos")
+          .getPublicUrl(filename);
+        finalVideoUrl = publicUrlData.publicUrl;
+      } else {
+        console.error("Supabase Storage upload error:", uploadError.message);
+      }
+    }
+  } catch (err: any) {
+    console.error("Hybrid video render error:", err?.message || err);
+  }
+
+  // Fallback an toàn nếu chưa có finalVideoUrl
+  if (!finalVideoUrl) {
+    const renderDraft = await synthesizeVideoDraft(directorResult);
+    finalVideoUrl = renderDraft.video_url;
+  }
 
   // 8. Lưu bản ghi kịch bản và URL video vào bảng `contents`
   const contentToInsert = {
@@ -289,7 +421,7 @@ export async function generateMerchantCampaignVideo(
     script: directorResult.audio_config.full_voiceover_script_with_pauses,
     caption: directorResult.social_publishing_package.caption,
     cta: directorResult.social_publishing_package.official_cta_text,
-    video_url: renderDraft.video_url,
+    video_url: finalVideoUrl,
     status: "ready",
     persona: input.persona,
     tracking_url: `https://travellink.vn/r/c_${input.campaign_id.slice(0, 8)}`,
@@ -320,8 +452,8 @@ export async function generateMerchantCampaignVideo(
         content_id: insertedContent.id,
         campaign_id: input.campaign_id,
         product_name: product.name,
-        video_url: renderDraft.video_url,
-        duration_sec: renderDraft.duration_sec,
+        video_url: finalVideoUrl,
+        duration_sec: totalDurationSec,
         status: "ready",
         hook_headline: directorResult.timeline_scenes[0]?.on_screen_text?.text,
         created_at: insertedContent.created_at,
@@ -338,16 +470,17 @@ export async function generateMerchantCampaignVideo(
       content_id: insertedContent.id,
       campaign_id: input.campaign_id,
       product_id: input.product_id,
-      video_url: renderDraft.video_url,
+      video_url: finalVideoUrl,
       status: "ready",
       aspect_ratio: "9:16",
-      duration_sec: renderDraft.duration_sec,
+      duration_sec: totalDurationSec,
       hook: directorResult.timeline_scenes[0]?.on_screen_text?.text || "",
       script: directorResult.audio_config.full_voiceover_script_with_pauses,
       caption: directorResult.social_publishing_package.caption,
       cta: directorResult.social_publishing_package.official_cta_text,
       scenes_count: directorResult.timeline_scenes.length,
       created_at: insertedContent.created_at || new Date().toISOString(),
+      cost_breakdown: costBreakdown,
     },
   };
 }

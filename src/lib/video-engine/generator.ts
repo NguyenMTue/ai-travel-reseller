@@ -118,6 +118,24 @@ function formatVnd(amount: number): string {
  * Xây dựng danh sách phân cảnh timeline 1.5s - 2.5s, phân bổ hiệu ứng Drone Truck Left,
  * chèn Text Hook Safe Zone và âm thanh 3 lớp.
  */
+const EXPERIENTIAL_VOICEOVERS = [
+  "chiêm ngưỡng kiến trúc tráng lệ giữa làn mây bồng bềnh,",
+  "thưởng thức không khí trong lành cùng những góc check-in tuyệt đẹp,",
+  "trải nghiệm ẩm thực phong phú với thực đơn hấp dẫn chuẩn vị,",
+  "tận hưởng những khoảnh khắc giải trí đỉnh cao vô cùng sôi động,",
+  "lưu giữ trọn vẹn từng kỷ niệm đáng nhớ cùng người thân,",
+  "dịch vụ chuyên nghiệp tận tâm luôn sẵn sàng đồng hành cùng bạn,",
+];
+
+const EXPERIENTIAL_CAPTIONS = [
+  "Kiến trúc tráng lệ giữa biển mây",
+  "Góc check-in tuyệt đẹp khó quên",
+  "Đại tiệc ẩm thực phong phú chuẩn vị",
+  "Giải trí đỉnh cao bất tận cảm xúc",
+  "Khoảnh khắc kỷ niệm trọn vẹn",
+  "Dịch vụ chuyên nghiệp tận tâm",
+];
+
 function composeTimelineScenes(input: VideoEngineInput): TimelineScene[] {
   const totalDuration = input.target_duration_sec;
   const assets = input.media_assets;
@@ -264,14 +282,15 @@ function composeTimelineScenes(input: VideoEngineInput): TimelineScene[] {
       };
       voiceoverSegment = `[breath] Lưu ý thực tế là ${tipText.toLowerCase()},`;
     } else {
+      const phraseIdx = (sceneIndex - 2) % EXPERIENTIAL_VOICEOVERS.length;
       onScreenText = {
         type: "DYNAMIC_CAPTION",
-        text: `Trải nghiệm ${input.product_name} tuyệt vời`,
+        text: EXPERIENTIAL_CAPTIONS[phraseIdx],
         font: "Montserrat Bold",
         position: "LOWER_MIDDLE_SAFE_ZONE",
         animation: "WORD_BY_WORD_HIGHLIGHT",
       };
-      voiceoverSegment = `cảnh đẹp mãn nhãn và dịch vụ cực kỳ chu đáo.`;
+      voiceoverSegment = EXPERIENTIAL_VOICEOVERS[phraseIdx];
     }
 
     // Âm thanh hiện trường (Ambient SFX)
