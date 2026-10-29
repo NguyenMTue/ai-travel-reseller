@@ -105,10 +105,10 @@ export async function createTwoImageHeroClip(
     const clip2 = path.join(tempDir, "clip2.mp4");
     const heroOut = path.join(tempDir, "hero_out.mp4");
 
-    // Clip 1: Butter-smooth zoom in (pre-scaled to 1080x1920 to eliminate shaking)
+    // Clip 1: Butter-smooth zoom in (pre-scaled to 2160x3840 4K to eliminate micro-jitter)
     await runFFmpeg([
       "-loop", "1", "-i", startPath,
-      "-vf", `scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,zoompan=z='min(zoom+0.0012,1.2)':d=${framesPerClip}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=${fps}`,
+      "-vf", `scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840,zoompan=z='min(zoom+0.0012,1.25)':d=${framesPerClip}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=2160x3840:fps=${fps},scale=1080:1920:flags=bicubic`,
       "-t", String(half),
       "-pix_fmt", "yuv420p",
       "-c:v", "libx264",
@@ -119,7 +119,7 @@ export async function createTwoImageHeroClip(
     // Clip 2: Butter-smooth zoom out with gentle easing (no frame 0 jumping)
     await runFFmpeg([
       "-loop", "1", "-i", endPath,
-      "-vf", `scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,zoompan=z='if(lte(zoom,1.0),1.2,max(1.2-0.0012*on,1.0))':d=${framesPerClip}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=${fps}`,
+      "-vf", `scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840,zoompan=z='if(lte(zoom,1.0),1.25,max(1.25-0.0012*on,1.0))':d=${framesPerClip}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=2160x3840:fps=${fps},scale=1080:1920:flags=bicubic`,
       "-t", String(half),
       "-pix_fmt", "yuv420p",
       "-c:v", "libx264",
@@ -184,17 +184,17 @@ async function createKenBurnsClip(
   let vfFilter = "";
   switch (motionType) {
     case "ZOOM_OUT":
-      vfFilter = `scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,zoompan=z='if(lte(zoom,1.0),1.2,max(1.2-0.0012*on,1.0))':d=${totalFrames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=${fps}`;
+      vfFilter = `scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840,zoompan=z='if(lte(zoom,1.0),1.25,max(1.25-0.0012*on,1.0))':d=${totalFrames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=2160x3840:fps=${fps},scale=1080:1920:flags=bicubic`;
       break;
     case "PAN_LEFT":
-      vfFilter = `scale=1242:1920:force_original_aspect_ratio=increase,crop=1242:1920,zoompan=z=1.0:d=${totalFrames}:x='(1-on/${totalFrames})*(iw-1080)':y='ih/2-960':s=1080x1920:fps=${fps}`;
+      vfFilter = `scale=2484:3840:force_original_aspect_ratio=increase,crop=2484:3840,zoompan=z=1.0:d=${totalFrames}:x='(1-on/${totalFrames})*(iw-2160)':y='ih/2-1920':s=2160x3840:fps=${fps},scale=1080:1920:flags=bicubic`;
       break;
     case "PAN_RIGHT":
-      vfFilter = `scale=1242:1920:force_original_aspect_ratio=increase,crop=1242:1920,zoompan=z=1.0:d=${totalFrames}:x='(on/${totalFrames})*(iw-1080)':y='ih/2-960':s=1080x1920:fps=${fps}`;
+      vfFilter = `scale=2484:3840:force_original_aspect_ratio=increase,crop=2484:3840,zoompan=z=1.0:d=${totalFrames}:x='(on/${totalFrames})*(iw-2160)':y='ih/2-1920':s=2160x3840:fps=${fps},scale=1080:1920:flags=bicubic`;
       break;
     case "ZOOM_IN":
     default:
-      vfFilter = `scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,zoompan=z='min(zoom+0.0012,1.2)':d=${totalFrames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=${fps}`;
+      vfFilter = `scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840,zoompan=z='min(zoom+0.0012,1.25)':d=${totalFrames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=2160x3840:fps=${fps},scale=1080:1920:flags=bicubic`;
       break;
   }
 
@@ -372,5 +372,139 @@ export async function composeHybridVideo(
     } catch {
       // Bỏ qua lỗi dọn dẹp
     }
+  }
+}
+
+export interface ComposeChainedVideoInput {
+  segmentVideoBuffers: Buffer[];
+  voiceoverScript: string;
+  textOverlay: TextOverlayConfig;
+  targetDurationSec?: number;
+}
+
+/**
+ * 4. Hợp nhất chuỗi phân cảnh AI Chained Omni (15s - 18s) + Voiceover + Text Overlays
+ * Nối liền mạch N phân cảnh AI với độ phân giải đồng nhất 1080x1920 30fps.
+ */
+export async function composeChainedOmniVideo(
+  input: ComposeChainedVideoInput
+): Promise<Buffer> {
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "chained-composition-"));
+
+  try {
+    // 4.1. Sinh Voiceover audio bằng Edge-TTS
+    const voiceoverPath = path.join(tempDir, "voiceover.mp3");
+    await generateVoiceoverAudio(input.voiceoverScript, voiceoverPath);
+
+    // 4.2. Chuẩn hóa tất cả các phân cảnh video về cùng 1080x1920 30fps
+    const normalizedClipPaths: string[] = [];
+    for (let i = 0; i < input.segmentVideoBuffers.length; i++) {
+      const rawPath = path.join(tempDir, `raw_seg_${i}.mp4`);
+      await fs.writeFile(rawPath, input.segmentVideoBuffers[i]);
+
+      const normPath = path.join(tempDir, `norm_seg_${i}.mp4`);
+      await runFFmpeg([
+        "-i",
+        rawPath,
+        "-vf",
+        "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,fps=30",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "ultrafast",
+        "-an",
+        "-y",
+        normPath,
+      ]);
+      normalizedClipPaths.push(normPath);
+    }
+
+    // 4.3. Nối các phân cảnh
+    const concatListPath = path.join(tempDir, "concat_list.txt");
+    const concatContent = normalizedClipPaths
+      .map((p) => `file '${p.replace(/\\/g, "/")}'`)
+      .join("\n");
+    await fs.writeFile(concatListPath, concatContent);
+
+    const mergedVisualPath = path.join(tempDir, "merged_visual.mp4");
+    await runFFmpeg([
+      "-f",
+      "concat",
+      "-safe",
+      "0",
+      "-i",
+      concatListPath,
+      "-c:v",
+      "libx264",
+      "-preset",
+      "ultrafast",
+      "-pix_fmt",
+      "yuv420p",
+      "-y",
+      mergedVisualPath,
+    ]);
+
+    // 4.4. Áp dụng Text Overlay (Hook 0-3s, Badge giá vé từ 3s, CTA cuối video)
+    const finalOutputPath = path.join(tempDir, "final_composition.mp4");
+    const fontPath = "C\\:/Windows/Fonts/arial.ttf";
+    const drawtextFilters: string[] = [];
+
+    if (input.textOverlay.hookText) {
+      const escapedHook = input.textOverlay.hookText
+        .replace(/'/g, "")
+        .replace(/:/g, "\\:");
+      drawtextFilters.push(
+        `drawtext=fontfile='${fontPath}':text='${escapedHook}':fontcolor=0xFFD700:fontsize=36:borderw=3:bordercolor=black:x=(w-text_w)/2:y=(h-text_h)/2-100:enable='between(t,0,3)'`
+      );
+    }
+
+    if (input.textOverlay.priceBadgeText) {
+      const escapedPrice = input.textOverlay.priceBadgeText
+        .replace(/'/g, "")
+        .replace(/:/g, "\\:");
+      drawtextFilters.push(
+        `drawtext=fontfile='${fontPath}':text='${escapedPrice}':fontcolor=white:fontsize=28:box=1:boxcolor=black@0.6:boxborderw=10:x=(w-text_w)/2:y=120:enable='gte(t,3)'`
+      );
+    }
+
+    if (input.textOverlay.ctaText) {
+      const escapedCta = input.textOverlay.ctaText
+        .replace(/'/g, "")
+        .replace(/:/g, "\\:");
+      drawtextFilters.push(
+        `drawtext=fontfile='${fontPath}':text='${escapedCta}':fontcolor=0x00FFCC:fontsize=26:borderw=2:bordercolor=black:x=(w-text_w)/2:y=h-180:enable='gte(t,4)'`
+      );
+    }
+
+    const vfString = drawtextFilters.length > 0 ? drawtextFilters.join(",") : "null";
+
+    // Ghép visual + voiceover audio chuẩn xác
+    await runFFmpeg([
+      "-i",
+      mergedVisualPath,
+      "-i",
+      voiceoverPath,
+      "-vf",
+      vfString,
+      "-c:v",
+      "libx264",
+      "-preset",
+      "ultrafast",
+      "-c:a",
+      "aac",
+      "-b:a",
+      "128k",
+      "-shortest",
+      "-movflags",
+      "+faststart",
+      "-y",
+      finalOutputPath,
+    ]);
+
+    return await fs.readFile(finalOutputPath);
+  } finally {
+    try {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    } catch {}
   }
 }

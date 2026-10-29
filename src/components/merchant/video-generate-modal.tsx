@@ -94,7 +94,7 @@ export function VideoGenerateModal({
 
   // Form parameters
   const [persona, setPersona] = useState("Local Guide");
-  const [durationSec, setDurationSec] = useState(28);
+  const [durationSec, setDurationSec] = useState(16);
   const [allowSpatial, setAllowSpatial] = useState(true);
   const [authenticTip, setAuthenticTip] = useState(
     "Đi trước 8h30 sáng để trải nghiệm vắng khách, tận hưởng cảnh quan trọn vẹn nhất"
@@ -457,34 +457,35 @@ export function VideoGenerateModal({
             {selectedItems && selectedItems.length > 0 ? (
               <div className="mt-3 rounded-xl border border-purple-500/30 bg-purple-950/20 p-3 text-xs text-zinc-300 space-y-2">
                 <div className="font-semibold text-purple-300 flex items-center justify-between">
-                  <span>⭐ Phân bổ tư liệu thật theo đúng thứ tự bạn đã chọn:</span>
+                  <span>⭐ Chuỗi phân cảnh Chained AI (15s - 18s) liền mạch:</span>
                   <span className="text-[11px] text-emerald-400 font-normal">
-                    {selectedItems.length} ảnh đã chọn
+                    {selectedItems.length} ảnh đã chọn ({selectedItems.length >= 4 ? "3 cảnh Omni" : selectedItems.length === 3 ? "2 cảnh Omni" : "1 cảnh Omni"})
                   </span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                  <div className="bg-zinc-900/80 p-2.5 rounded-lg border border-purple-500/20">
-                    <span className="text-emerald-400 font-semibold block mb-0.5">
-                      ⭐ Hero 1 (Omni Frame 1):
-                    </span>
-                    <span className="line-clamp-1 text-zinc-200">
-                      {selectedItems[0]?.title}
+                <div className="grid grid-cols-1 gap-1.5 text-[11px]">
+                  <div className="bg-zinc-900/80 p-2 rounded-lg border border-purple-500/20 flex items-center gap-2">
+                    <span className="text-emerald-400 font-semibold shrink-0">🎬 Cảnh 1 (0s - 5.5s):</span>
+                    <span className="truncate text-zinc-200">
+                      {selectedItems[0]?.title} ➔ {selectedItems[1]?.title || selectedItems[0]?.title}
                     </span>
                   </div>
-                  <div className="bg-zinc-900/80 p-2.5 rounded-lg border border-purple-500/20">
-                    <span className="text-emerald-400 font-semibold block mb-0.5">
-                      ⭐ Hero 2 (Omni Frame 2):
-                    </span>
-                    <span className="line-clamp-1 text-zinc-200">
-                      {selectedItems[1]?.title || selectedItems[0]?.title}
-                    </span>
-                  </div>
+                  {selectedItems.length >= 3 && (
+                    <div className="bg-zinc-900/80 p-2 rounded-lg border border-purple-500/20 flex items-center gap-2">
+                      <span className="text-purple-400 font-semibold shrink-0">🎬 Cảnh 2 (5.5s - 11s):</span>
+                      <span className="truncate text-zinc-200">
+                        {selectedItems[1]?.title} ➔ {selectedItems[2]?.title}
+                      </span>
+                    </div>
+                  )}
+                  {selectedItems.length >= 4 && (
+                    <div className="bg-zinc-900/80 p-2 rounded-lg border border-purple-500/20 flex items-center gap-2">
+                      <span className="text-blue-400 font-semibold shrink-0">🎬 Cảnh 3 (11s - 16.5s):</span>
+                      <span className="truncate text-zinc-200">
+                        {selectedItems[2]?.title} ➔ {selectedItems[3]?.title}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                {selectedItems.length > 2 && (
-                  <p className="text-[11px] text-muted-foreground pt-0.5">
-                    🎬 + {selectedItems.length - 2} ảnh tiếp theo làm Body Slideshow Ken Burns mượt mà 30fps.
-                  </p>
-                )}
               </div>
             ) : selectedItem ? (
               <div className={styles.focalAssetNotice}>
@@ -573,9 +574,9 @@ export function VideoGenerateModal({
                       value={durationSec}
                       onChange={(e) => setDurationSec(Number(e.target.value))}
                     >
-                      <option value={15}>15 giây (Story / Hook nhanh)</option>
-                      <option value={28}>28 giây (Chuẩn Viral TikTok/Reels)</option>
-                      <option value={45}>45 giây (Chi tiết & Trải nghiệm)</option>
+                      <option value={16}>16 giây (Chuỗi AI Chained 3 cảnh 15-18s - Tối ưu)</option>
+                      <option value={18}>18 giây (Chuỗi AI Chained 18s)</option>
+                      <option value={28}>28 giây (Chuẩn Hybrid Slideshow)</option>
                     </select>
                   </div>
                 </div>

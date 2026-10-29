@@ -472,9 +472,15 @@ function LibraryRead({
                   const isSelected = selectedIndex !== -1;
                   let badgeText = "";
                   if (isSelected) {
-                    if (selectedIndex === 0) badgeText = "⭐ Hero 1 (Omni)";
-                    else if (selectedIndex === 1) badgeText = "⭐ Hero 2 (Omni)";
-                    else badgeText = `🎬 Body #${selectedIndex + 1}`;
+                    const roleLabel =
+                      selectedIndex === 0
+                        ? "Mở đầu (Hook)"
+                        : selectedIndex === 1
+                        ? "Chuyển tiếp (Traverse)"
+                        : selectedIndex === 2
+                        ? "Khám phá (Explore)"
+                        : "Đỉnh cao (Climax)";
+                    badgeText = `🎬 Cảnh #${selectedIndex + 1}: ${roleLabel}`;
                   }
 
                   return (
@@ -542,8 +548,7 @@ function LibraryRead({
               Đã chọn {selectedIds.length} ảnh:
             </span>{" "}
             <span className="text-zinc-300">
-              {Math.min(2, selectedIds.length)} Hero (Omni) +{" "}
-              {Math.max(0, selectedIds.length - 2)} Body (Ken Burns)
+              Ghép chuỗi {Math.max(1, selectedIds.length - 1)} phân cảnh liền mạch (~16s)
             </span>
           </div>
           <div className="flex items-center gap-2">

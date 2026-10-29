@@ -1,5 +1,5 @@
 import { generateGeminiOmniHeroVideo, type OmniVideoCostBreakdown } from "../ai/gemini-omni-video.ts";
-import { composeHybridVideo } from "../video-engine/ffmpeg-compositor.ts";
+import { composeHybridVideo, composeChainedOmniVideo } from "../video-engine/ffmpeg-compositor.ts";
 import { buildChainedPromptPlan } from "../video-engine/chained-prompt-generator.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/src/lib/database.types";
@@ -308,34 +308,23 @@ export async function generateMerchantCampaignVideo(
       return null;
     }
 
-    const hero1Asset = mediaAssets[0];
-    const hero2Asset = mediaAssets[1] || mediaAssets[0];
-
-    const hero1Buffer = hero1Asset ? await fetchBufferWithFallback(hero1Asset.url) : null;
-    const hero2Buffer = hero2Asset ? await fetchBufferWithFallback(hero2Asset.url) : hero1Buffer;
-
-    const heroImages: Buffer[] = [];
-    if (hero1Buffer) heroImages.push(hero1Buffer);
-    if (hero2Buffer) heroImages.push(hero2Buffer);
-
-    const bodyImages: Buffer[] = [];
-    for (const asset of mediaAssets.slice(2, 6)) {
+    // 7.1. Tải các ảnh tư liệu được chọn (tối đa 4 ảnh cho chuỗi Chained 15s - 18s)
+    const imageBuffers: Buffer[] = [];
+    for (const asset of mediaAssets.slice(0, 4)) {
       const buf = await fetchBufferWithFallback(asset.url);
-      if (buf) {
-        bodyImages.push(buf);
-      }
+      if (buf) imageBuffers.push(buf);
     }
 
-    if (heroImages.length > 0) {
+    const location = (campaign as any).target_location || "Đà Nẵng";
+    const isShortFormat = !input.target_duration_sec || input.target_duration_sec <= 18;
+    const effectiveDuration = isShortFormat
+      ? (input.target_duration_sec || 16.5)
+      : input.target_duration_sec;
+
+    if (imageBuffers.length >= 2) {
       // 7.2. Xây dựng Kế hoạch Prompt & Phân cảnh Chained chuẩn 15s - 18s
       // Theo đúng chuẩn docs/be2/system_prompt_travel_video_director_agent.md:
       // Vector Momentum Matching + Terminal Stabilization + Unified Atmospheric Anchor
-      const location = (campaign as any).target_location || "Đà Nẵng";
-      const isShortFormat = !input.target_duration_sec || input.target_duration_sec <= 18;
-      const effectiveDuration = isShortFormat
-        ? (input.target_duration_sec || 16.5)
-        : input.target_duration_sec;
-
       const promptPlan = buildChainedPromptPlan({
         productName: product.name,
         location,
@@ -352,35 +341,67 @@ export async function generateMerchantCampaignVideo(
         targetDurationSec: effectiveDuration,
       });
 
-      const heroPrompt = promptPlan.segments[0]?.omniPrompt;
-      const heroDuration = promptPlan.segments[0]?.durationSeconds || 6;
+      let finalBuffer: Buffer;
 
-      const omniResult = await generateGeminiOmniHeroVideo({
-        prompt: heroPrompt,
-        startImageBuffer: heroImages[0],
-        endImageBuffer: heroImages[1] || heroImages[0],
-        durationSeconds: heroDuration,
-        aspectRatio: "9:16",
-      });
+      if (isShortFormat) {
+        // Sinh chuỗi phân cảnh Chained Omni liền mạch (15s - 18s)
+        const segmentBuffers: Buffer[] = [];
+        for (const segment of promptPlan.segments) {
+          const startBuf = imageBuffers[segment.startImageIndex] || imageBuffers[0];
+          const endBuf = imageBuffers[segment.endImageIndex] || imageBuffers[1] || startBuf;
 
-      costBreakdown = omniResult.cost;
+          console.log(`[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) - ${segment.durationSeconds}s...`);
 
-      // 7.3. Gọi FFmpeg ghép nối Hero + Body Slideshow + Edge-TTS + Text Overlay
-      const finalBuffer = await composeHybridVideo({
-        heroVideoBuffer: omniResult.videoBuffer,
-        bodyImageBuffers: bodyImages,
-        voiceoverScript: isShortFormat
-          ? promptPlan.audioSpec.fullVoiceoverScript
-          : directorResult.audio_config.full_voiceover_script_with_pauses,
-        targetDurationSec: effectiveDuration,
-        textOverlay: isShortFormat
-          ? promptPlan.textOverlaySpec
-          : {
-              hookText: directorResult.timeline_scenes[0]?.on_screen_text?.text || `Khám phá ${product.name}`,
-              priceBadgeText: `Vé trọn gói chỉ: ${Number(product.sale_price).toLocaleString("vi-VN")}đ`,
-              ctaText: "Bình luận hoặc bấm link giỏ hàng nhận vé chính hãng",
-            },
-      });
+          const segResult = await generateGeminiOmniHeroVideo({
+            prompt: segment.omniPrompt,
+            startImageBuffer: startBuf,
+            endImageBuffer: endBuf,
+            durationSeconds: segment.durationSeconds,
+            aspectRatio: "9:16",
+          });
+
+          segmentBuffers.push(segResult.videoBuffer);
+          if (!costBreakdown) costBreakdown = segResult.cost;
+        }
+
+        totalDurationSec = promptPlan.totalDurationSec;
+
+        finalBuffer = await composeChainedOmniVideo({
+          segmentVideoBuffers: segmentBuffers,
+          voiceoverScript: promptPlan.audioSpec.fullVoiceoverScript,
+          targetDurationSec: promptPlan.totalDurationSec,
+          textOverlay: promptPlan.textOverlaySpec,
+        });
+      } else {
+        // Chế độ Hybrid dài cho thời lượng > 18s
+        const bodyImages: Buffer[] = [];
+        for (const asset of mediaAssets.slice(2, 6)) {
+          const buf = await fetchBufferWithFallback(asset.url);
+          if (buf) bodyImages.push(buf);
+        }
+
+        const omniResult = await generateGeminiOmniHeroVideo({
+          prompt: promptPlan.segments[0]?.omniPrompt,
+          startImageBuffer: imageBuffers[0],
+          endImageBuffer: imageBuffers[1] || imageBuffers[0],
+          durationSeconds: 6,
+          aspectRatio: "9:16",
+        });
+
+        costBreakdown = omniResult.cost;
+
+        finalBuffer = await composeHybridVideo({
+          heroVideoBuffer: omniResult.videoBuffer,
+          bodyImageBuffers: bodyImages,
+          voiceoverScript: directorResult.audio_config.full_voiceover_script_with_pauses,
+          targetDurationSec: effectiveDuration,
+          textOverlay: {
+            hookText: directorResult.timeline_scenes[0]?.on_screen_text?.text || `Khám phá ${product.name}`,
+            priceBadgeText: `Vé trọn gói chỉ: ${Number(product.sale_price).toLocaleString("vi-VN")}đ`,
+            ctaText: "Bình luận hoặc bấm link giỏ hàng nhận vé chính hãng",
+          },
+        });
+      }
 
       // 7.4. Đẩy video thành phẩm lên Supabase Storage bucket 'campaign-videos'
       const timestamp = Date.now();

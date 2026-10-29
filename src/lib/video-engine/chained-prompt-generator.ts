@@ -120,8 +120,8 @@ export function buildSegmentOmniPrompt(params: {
     `Action: Cinematic 4K 30fps drone video transition seamlessly flying from Frame 1 to Frame 2 at ${location} in ${durationSeconds} seconds.`,
     `Momentum: ${momentumInstruction}`,
     `Boundary Continuity: ${terminalInstruction}`,
-    `Visual Grading & Atmosphere: Consistent natural 5600K golden-hour daylight, realistic atmospheric haze over landscape, photorealistic lighting momentum, vertical 9:16 portrait framing (1080x1920).`,
-    `Physics: Preserve authentic physical landmarks without artificial morphing, melting, or textural warping.`,
+    `Atmospheric Anchor: Consistent natural 5600K golden-hour daylight, vertical 9:16 portrait framing (1080x1920).`,
+    `Preserve authentic physical landmarks without artificial morphing or warping.`,
   ].join(" ");
 }
 
