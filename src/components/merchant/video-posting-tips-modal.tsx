@@ -103,7 +103,7 @@ export function VideoPostingTipsModal({
           type="button"
           onClick={onClose}
           aria-label="Đóng mẹo đăng video"
-          className="absolute right-4 top-4 grid size-10 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:right-6 sm:top-6"
+          className="absolute right-4 top-4 grid size-[46px] place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:right-6 sm:top-6"
         >
           <X size={20} aria-hidden="true" />
         </button>
