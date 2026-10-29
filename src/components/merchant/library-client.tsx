@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight, CircleHelp, Search, Sparkles, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircleHelp, Lightbulb, Search, Sparkles, X } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { MediaCard as Card, MediaCardGrid as Grid } from "./media-card";
 import { VideoGuidelinesModal as Guidelines } from "./video-guidelines-modal";
+import { VideoPostingTipsModal } from "./video-posting-tips-modal";
 import { VideoGenerateModal } from "./video-generate-modal";
 import { initialLibraryQuery, readLibrary, toMediaCardProps, type LibraryItem, type LibraryQuery, type LibraryRequest, type LibraryResult } from "@/src/lib/merchant/media-library";
 import styles from "./library.module.css";
@@ -21,7 +22,7 @@ export function LibraryClient({request,contextKey,observeInvalidation}:{request:
 function LibraryRead({request,observeInvalidation,merchantId}:{request:LibraryRequest;observeInvalidation?:(invalidate:()=>void)=>()=>void;merchantId?:string}) {
   const [query,setQuery]=useState(initialLibraryQuery),[draft,setDraft]=useState(""),[result,setResult]=useState<LibraryState>({status:"loading"});
   const [attempt,setAttempt]=useState(0),[selected,setSelected]=useState<LibraryItem|null>(null),[guide,setGuide]=useState(false);
-  const [generateOpen,setGenerateOpen]=useState(false);
+  const [generateOpen,setGenerateOpen]=useState(false),[tipsOpen,setTipsOpen]=useState(false);
   const invalid=useRef(false),privateView=useRef<HTMLDivElement>(null);
   useEffect(()=>{
     let alive=true;const abort=new AbortController();let timer:ReturnType<typeof setTimeout>|undefined;
@@ -40,7 +41,7 @@ function LibraryRead({request,observeInvalidation,merchantId}:{request:LibraryRe
   function change(next:LibraryQuery){if(invalid.current)return;setSelected(null);setResult({status:"loading"});setQuery(next);}
   const failed=result.status==="session"||result.status==="forbidden";
   return <>
-    <div className={styles.sectionHeader}><div><p className="eyebrow">BỘ SƯU TẬP THAM KHẢO</p><h2>Chọn cảm hứng của bạn</h2><p>Chọn mẫu để đánh dấu trong phiên xem này.</p></div><Button variant="outline" onClick={()=>setGuide(true)}><CircleHelp size={18} aria-hidden="true" />Quy chuẩn video</Button></div>
+    <div className={styles.sectionHeader}><div><p className="eyebrow">BỘ SƯU TẬP THAM KHẢO</p><h2>Chọn cảm hứng của bạn</h2><p>Chọn mẫu để đánh dấu trong phiên xem này.</p></div><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={()=>setGuide(true)}><CircleHelp size={18} aria-hidden="true" />Quy chuẩn video</Button><Button variant="outline" onClick={()=>setTipsOpen(true)}><Lightbulb size={18} aria-hidden="true" />Mẹo đăng video hiệu quả</Button></div></div>
     {!failed&&<form className={styles.filters} onSubmit={e=>{e.preventDefault();change({...query,page:1,search:draft.trim()});}}>
       <label className={styles.search}><span>Tìm theo tiêu đề</span><span className={styles.searchInput}><Search size={18} aria-hidden="true" /><input type="search" maxLength={255} value={draft} onChange={e=>setDraft(e.target.value)} placeholder="Tìm cảm hứng cho video…" /></span></label>
       <label>Nền tảng<select value={query.platform} onChange={e=>change({...query,page:1,platform:e.target.value as LibraryQuery["platform"]})}><option value="">Tất cả nền tảng</option><option value="upload">Tải lên</option><option value="tiktok">TikTok</option><option value="reels">Reels</option><option value="youtube_shorts">YouTube Shorts</option><option value="youtube">YouTube</option><option value="other">Khác</option></select></label>
@@ -74,6 +75,7 @@ function LibraryRead({request,observeInvalidation,merchantId}:{request:LibraryRe
       {result.data.pagination.totalPages>1&&<nav aria-label="Phân trang thư viện" className={styles.pagination}><Button variant="outline" disabled={query.page<=1} onClick={()=>change({...query,page:query.page-1})}><ChevronLeft size={18} aria-hidden="true" />Trước</Button><span>Trang {query.page} / {result.data.pagination.totalPages}</span><Button variant="outline" disabled={query.page>=result.data.pagination.totalPages} onClick={()=>change({...query,page:query.page+1})}>Sau<ChevronRight size={18} aria-hidden="true" /></Button></nav>}
     </div>}
     <Guidelines isOpen={guide} onClose={()=>setGuide(false)} />
+    <VideoPostingTipsModal isOpen={tipsOpen} onClose={()=>setTipsOpen(false)} />
     <VideoGenerateModal isOpen={generateOpen} onClose={()=>setGenerateOpen(false)} selectedItem={selected} merchantId={merchantId} />
   </>;
 }
