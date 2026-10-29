@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type KeyboardEvent } from "react";
 import { AudioLines, Clock3, Link2, MessageCircleQuestion, X } from "lucide-react";
 
 export interface VideoPostingTipsModalProps {
@@ -41,6 +41,7 @@ export function VideoPostingTipsModal({
 }: VideoPostingTipsModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const understoodButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -71,11 +72,28 @@ export function VideoPostingTipsModal({
     };
   }, [isOpen]);
 
+  function handleTabKeyDown(event: KeyboardEvent<HTMLDialogElement>) {
+    if (event.key !== "Tab" || event.altKey || event.ctrlKey || event.metaKey) return;
+
+    const closeButton = closeButtonRef.current;
+    const understoodButton = understoodButtonRef.current;
+    const activeElement = document.activeElement;
+
+    if (event.shiftKey && activeElement === closeButton) {
+      event.preventDefault();
+      understoodButton?.focus();
+    } else if (!event.shiftKey && activeElement === understoodButton) {
+      event.preventDefault();
+      closeButton?.focus();
+    }
+  }
+
   return (
     <dialog
       ref={dialogRef}
       aria-labelledby="video-posting-tips-title"
       aria-describedby="video-posting-tips-description"
+      onKeyDown={handleTabKeyDown}
       onCancel={(event) => {
         event.preventDefault();
         onClose();
@@ -126,6 +144,7 @@ export function VideoPostingTipsModal({
 
       <div className="mt-6 flex justify-end">
         <button
+          ref={understoodButtonRef}
           type="button"
           onClick={onClose}
           className="min-h-11 rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
