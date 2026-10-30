@@ -3,6 +3,8 @@
 import { useId, useRef, useState } from "react";
 import { Copy, Check, LoaderCircle, Send } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
+import { VideoPlayer } from "@/src/components/video-player";
+import { VideoPostingTipsModal } from "@/src/components/merchant/video-posting-tips-modal";
 import { FeedNotice } from "./feed-states";
 import { personas, type Persona, type ContentVariant } from "@/src/lib/reseller/content-kit";
 import { dataFailureDescriptions, type DataFailureKind } from "@/src/lib/reseller/data-failure";
@@ -71,9 +73,19 @@ function CopyCtaWithLink({ cta }: { cta: string | null }) {
   </div>;
 }
 
-export function ContentKit({ variants, contentStatus, contentReason, campaignId, productId, preview = false }: {
+function PostingTipsAction() {
+  const [isOpen, setIsOpen] = useState(false);
+  return <>
+    <Button type="button" variant="outline" className="mt-3 min-h-11" onClick={() => setIsOpen(true)}>
+      Mẹo đăng video hiệu quả
+    </Button>
+    <VideoPostingTipsModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+  </>;
+}
+
+export function ContentKit({ variants, contentStatus, contentReason, campaignId, campaignName, productId, preview = false }: {
   variants: ContentVariant[]; contentStatus: "blocked" | "ready" | "error"; contentReason?: DataFailureKind;
-  campaignId: string; productId: string | null; preview?: boolean;
+  campaignId: string; campaignName?: string; productId: string | null; preview?: boolean;
 }) {
   const [persona, setPersona] = useState<Persona>("local-guide");
   const [variantId, setVariantId] = useState("");
@@ -140,6 +152,10 @@ export function ContentKit({ variants, contentStatus, contentReason, campaignId,
             </select>
           </div>
           <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+            <div>
+              <VideoPlayer videoId={selected.id} videoUrl={selected.videoUrl} title={campaignName || `Video chiến dịch ${campaignId}`} />
+              <PostingTipsAction key={`${campaignId}:${selected.id}`} />
+            </div>
             {(["hook", "script", "caption", "cta"] as const).map((field) => <CopyField key={`${selected.id}-${field}`}
               label={field === "cta" ? "CTA" : field.charAt(0).toUpperCase() + field.slice(1)} value={selected[field]} />)}
             <CopyCtaWithLink key={selected.id} cta={selected.cta} />

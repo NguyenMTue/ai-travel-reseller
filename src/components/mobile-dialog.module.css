@@ -1,0 +1,25 @@
+.surface.surface {
+  --dialog-safe-top: max(12px, env(safe-area-inset-top, 0px));
+  --dialog-safe-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  --dialog-safe-left: max(16px, env(safe-area-inset-left, 0px));
+  --dialog-safe-right: max(16px, env(safe-area-inset-right, 0px));
+  position: fixed;
+  inset: auto;
+  top: calc(var(--dialog-viewport-top, 0px) + var(--dialog-safe-top) + (var(--dialog-viewport-height, 100dvh) - var(--dialog-safe-top) - var(--dialog-safe-bottom)) / 2);
+  left: calc(var(--dialog-safe-left) + (100% - var(--dialog-safe-left) - var(--dialog-safe-right)) / 2);
+  transform: translate(-50%, -50%);
+  margin: 0;
+  width: min(var(--dialog-width, 680px), calc(100% - var(--dialog-safe-left) - var(--dialog-safe-right)));
+  max-height: calc(var(--dialog-viewport-height, 100dvh) - var(--dialog-safe-top) - var(--dialog-safe-bottom));
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scroll-padding-block: 16px;
+}
+.surface button, .surface a { min-height: 44px; touch-action: manipulation; }
+.surface input, .surface select, .surface textarea { scroll-margin-block: 16px; }
+@media (max-width: 767px) {
+  .surface input, .surface select, .surface textarea { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .surface.surface, .surface.surface * { scroll-behavior: auto; transition: none; animation: none; }
+}

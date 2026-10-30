@@ -14,6 +14,14 @@ const row = {
   hook: "Hook", script: "Script", caption: "Caption", cta: null,
 };
 
+test("video URLs follow the same campaign/publication/owner boundary as text", () => {
+  const video = { ...row, video_url: "https://fixture.invalid/approved.mp4" };
+  const variants = parseContentVariants([video, { ...video, reseller_id: otherId }, { ...video, status: "ready" }, { ...video, campaign_id: otherId }], context, policy);
+  expect(variants).toHaveLength(1);
+  expect(variants[0].videoUrl).toBe(video.video_url);
+  expect(parseContentVariants([row], context, policy)[0].videoUrl).toBeNull();
+});
+
 test("an unconfirmed policy never fetches or leaks contents; live policy follows BE handoff", async () => {
   let reads = 0;
   expect(getConfirmedContentPolicy()).toEqual({

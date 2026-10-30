@@ -1,4 +1,13 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+async function openChat(page: Page) {
+  const dialog = page.getByRole("dialog", { name: "Trợ lý du lịch TravelLink" });
+  if ((page.viewportSize()?.width ?? 1440) < 768) {
+    await expect(dialog).not.toBeVisible();
+    await page.getByRole("button", { name: "Hỏi TravelLink Assistant", exact: true }).click();
+  }
+  await expect(dialog).toBeVisible();
+}
 test("pages render without overflow or runtime errors", async ({
   page,
 }, testInfo) => {
@@ -13,7 +22,9 @@ test("pages render without overflow or runtime errors", async ({
   ]) {
     const response = await page.goto(route);
     expect(response?.status()).toBe(200);
-    await expect(page.locator("h1")).toBeVisible();
+    const heading = page.getByRole("heading", { level: 1 });
+    await expect(heading).toHaveCount(1);
+    await expect(heading).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
     expect(
       await page.evaluate(
@@ -76,6 +87,7 @@ test("chat demo opens, sends and resets without requesting AI", async ({
     calls++;
   });
   await page.goto("/chat");
+  await openChat(page);
   await page
     .getByRole("button", { name: "Tôi muốn tìm hiểu về sản phẩm" })
     .click();
@@ -114,6 +126,7 @@ test("chat preserves attribution, retries errors and rejects unsafe checkout lin
     );
   });
   await page.goto("/chat?" + new URLSearchParams(context));
+  await openChat(page);
   await page.getByLabel("Tin nhắn cho trợ lý AI").fill("Chính sách thế nào?");
   await page.getByRole("button", { name: "Gửi tin nhắn" }).click();
   await expect(page.locator(".error-message[role=alert]")).toBeVisible();

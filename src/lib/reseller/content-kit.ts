@@ -15,6 +15,7 @@ export type ContentVariant = {
   script: string | null;
   caption: string | null;
   cta: string | null;
+  videoUrl?: string | null;
 };
 
 export type ContentPublicationPolicy = {
@@ -40,6 +41,7 @@ const contentRowSchema = z.object({
   id: databaseUuidSchema, campaign_id: databaseUuidSchema.nullable(),
   reseller_id: databaseUuidSchema.nullable(), persona: z.string().nullable(), status: z.string().nullable(),
   hook: optionalContentText, script: optionalContentText, caption: optionalContentText, cta: optionalContentText,
+  video_url: z.string().nullish(),
 });
 
 export type ContentExclusionCode = "STATUS_EXCLUDED" | "CAMPAIGN_EXCLUDED" | "OWNER_EXCLUDED" | "PERSONA_UNMAPPED";
@@ -56,7 +58,7 @@ export function parseContentVariants(data: unknown, context: ContentContext, pol
     if (row.campaign_id !== scope.campaignId) { onExcluded?.("CAMPAIGN_EXCLUDED", ["campaign_id"]); return []; }
     if (!visibleOwner) { onExcluded?.("OWNER_EXCLUDED", ["reseller_id"]); return []; }
     if (!persona) { onExcluded?.("PERSONA_UNMAPPED", ["persona"]); return []; }
-    return [{ id: row.id, persona, hook: row.hook, script: row.script, caption: row.caption, cta: row.cta }];
+    return [{ id: row.id, persona, hook: row.hook, script: row.script, caption: row.caption, cta: row.cta, videoUrl: row.video_url ?? null }];
   });
 }
 
