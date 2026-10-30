@@ -5,8 +5,8 @@ import { chromium, expect as baseExpect } from "@playwright/test";
 
 const expect = baseExpect.configure({ timeout: 60_000 });
 
-const base = "http://127.0.0.1:3184";
-const output = "build/fe-w3-nav-evidence";
+const base = process.env.PREVIEW_BASE || "http://127.0.0.1:3184";
+const output = process.env.NAV_EVIDENCE_DIR || "build/fe-w3-nav-evidence";
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({
   headless: true,

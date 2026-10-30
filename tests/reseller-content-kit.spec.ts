@@ -12,6 +12,28 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+test("posting tips belong to permitted Reseller Content Kit and stay hidden for unavailable content", async ({ page }) => {
+  const opener = page.getByRole("button", { name: "Mẹo đăng video hiệu quả", exact: true });
+  for (const state of ["blocked", "empty", "error", "permission-error", "schema-error", "network-error", "configuration-error"]) {
+    await page.goto(`${url}?state=${state}`);
+    await expect(opener).toHaveCount(0);
+    await expect(page.getByRole("dialog", { name: "Mẹo Đăng Video AI Triệu View Dành Cho Reseller" })).toHaveCount(0);
+  }
+  await page.goto(url);
+  await page.getByRole("button", { name: "Budget Traveler", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Persona này chưa có nội dung" })).toBeVisible();
+  await expect(opener).toHaveCount(0);
+  await page.goto(`${url}?state=approved`);
+  await expect(page.getByRole("region", { name: "Content Kit", exact: true }).getByRole("button", { name: "Mẹo đăng video hiệu quả", exact: true })).toHaveCount(1);
+  await opener.click();
+  const dialog = page.getByRole("dialog", { name: "Mẹo Đăng Video AI Triệu View Dành Cho Reseller" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("listitem")).toHaveCount(4);
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(opener).toBeFocused();
+});
+
 test("feed opens correct fixture ID; personas and variants show only selected content", async ({ page }) => {
   await page.goto("/preview/reseller");
   await page.getByRole("link", { name: "Xem chi tiết Hội An Foodie", exact: true }).click();

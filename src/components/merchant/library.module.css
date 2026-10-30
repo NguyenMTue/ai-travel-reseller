@@ -1,4 +1,9 @@
 .shell{min-height:100dvh;background:var(--background);color:var(--foreground)}
+.shell{padding-top:env(safe-area-inset-top,0px)}
+.shell button,.nav a{min-height:44px;touch-action:manipulation}
+.shell input,.shell select{font-size:16px}
+@media(max-width:767px){.shell .header,.shell .main,.shell .footer{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}}
+.shell .footer{padding-bottom:max(24px,env(safe-area-inset-bottom,0px))}
 .header,.main,.footer{max-width:1280px;margin:auto;padding-left:clamp(16px,4vw,56px);padding-right:clamp(16px,4vw,56px)}
 .header{min-height:88px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid var(--border)}
 .workspace{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted-foreground)}

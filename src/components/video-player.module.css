@@ -1,11 +1,11 @@
 .player { min-width: 0; width: 100%; display: grid; gap: 12px; overflow-wrap: anywhere; }
-.frame { position: relative; width: 100%; max-width: 280px; aspect-ratio: 9 / 16; margin-inline: auto; overflow: hidden; border-radius: 14px; background: #0b2023; box-shadow: 0 8px 24px #0b202320; }
+.frame { position: relative; width: min(100%, 280px, calc((var(--dialog-viewport-height, 100dvh) - 100px) * 9 / 16)); aspect-ratio: 9 / 16; margin-inline: auto; overflow: hidden; border-radius: 14px; background: #0b2023; box-shadow: 0 8px 24px #0b202320; }
 .frame video { display: block; width: 100%; height: 100%; object-fit: contain; }
 .empty { display: grid; place-content: center; justify-items: center; gap: 12px; height: 100%; padding: 20px; text-align: center; color: #e4eeeb; font-size: 13px; }
 .loading { position: absolute; inset: 12px 12px auto; display: flex; align-items: center; gap: 6px; padding: 8px; border-radius: 8px; background: #0b2023e6; color: white; font-size: 12px; pointer-events: none; }
 .actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
-.actions button { min-height: 44px; max-width: 100%; white-space: normal; }
-.actions a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--primary); text-decoration: underline; font-size: 13px; }
+.actions button { min-height: 44px; max-width: 100%; white-space: normal; touch-action: manipulation; }
+.actions a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--primary); text-decoration: underline; font-size: 13px; touch-action: manipulation; }
 .actions a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 .help { margin: 0; color: var(--muted-foreground); font-size: 12px; line-height: 1.6; }
 .sample { margin: 0; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--secondary); font-size: 13px; }

@@ -1,7 +1,11 @@
 .shell { --reseller-nav-height: 88px; --reseller-safe-area-bottom: env(safe-area-inset-bottom, 0px); }
+.safeHeader { padding-top: env(safe-area-inset-top, 0px); }
+.safeContent { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+@media (min-width: 640px) { .safeContent { padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); } }
+@media (min-width: 1024px) { .safeContent { padding-left: max(40px, env(safe-area-inset-left, 0px)); padding-right: max(40px, env(safe-area-inset-right, 0px)); } }
 .desktopNav { display: flex; }
 .nav { display: none; }
-.dialog { width: min(440px, calc(100% - 32px)); max-height: calc(100dvh - 32px); margin: auto; padding: 24px; border: 1px solid var(--border); border-radius: 20px; background: var(--background); color: var(--foreground); overflow: auto; }
+.dialog { --dialog-width: 440px; width: min(440px, calc(100% - 32px)); max-height: calc(100dvh - 32px); margin: auto; padding: 24px; border: 1px solid var(--border); border-radius: 20px; background: var(--background); color: var(--foreground); overflow: auto; }
 .dialog::backdrop { background: rgb(14 37 36 / 65%); }
 .dialogHeader { display: flex; align-items: start; gap: 12px; margin-bottom: 12px; }
 .dialogHeader h2 { flex: 1; font-family: var(--font-display); font-size: 24px; line-height: 1.3; }
@@ -28,6 +32,7 @@
   .active::after { content: ""; position: absolute; bottom: 4px; width: 16px; height: 2px; border-radius: 2px; background: var(--accent); }
   .item:hover { background: var(--secondary); color: var(--primary); }
   .item:focus-visible { outline-offset: -3px; }
+  .item { touch-action: manipulation; }
 }
 @media (max-width: 359px) { .label { font-size: 11px; } }
 @media (prefers-reduced-motion: reduce) { .item { transition: none; } .shell { scroll-behavior: auto; } }

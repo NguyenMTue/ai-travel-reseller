@@ -5,16 +5,22 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Compass, QrCode, Sparkles, Wallet, X } from "lucide-react";
 import styles from "./bottom-nav.module.css";
+import mobileStyles from "@/src/components/mobile-dialog.module.css";
+import { useDialogViewport } from "@/src/components/use-dialog-viewport";
 
 function subscribe(callback: () => void) {
   window.addEventListener("hashchange", callback);
   window.addEventListener("popstate", callback);
-  const observer = new MutationObserver(callback);
+  let frame = 0;
+  const observer = new MutationObserver(() => {
+    if (!frame) frame = requestAnimationFrame(() => { frame = 0; callback(); });
+  });
   observer.observe(document.body, { childList: true, subtree: true });
   return () => {
     window.removeEventListener("hashchange", callback);
     window.removeEventListener("popstate", callback);
     observer.disconnect();
+    cancelAnimationFrame(frame);
   };
 }
 function snapshot() {
@@ -28,7 +34,9 @@ export function ResellerBottomNav({ preview = false }: { preview?: boolean }) {
   const [hash, hasContent, hasTracking] = useSyncExternalStore(subscribe, snapshot, () => "|false|false").split("|");
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [notice, setNotice] = useState("content");
+  const [noticeOpen, setNoticeOpen] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
+  useDialogViewport(dialog, noticeOpen);
   const title = useRef<HTMLHeadingElement>(null);
   const opener = useRef<HTMLButtonElement | null>(null);
   const feedPath = preview ? "/preview/reseller" : "/reseller/campaigns";
@@ -41,18 +49,31 @@ export function ResellerBottomNav({ preview = false }: { preview?: boolean }) {
     : trackingReady && hash === "#reseller-tracking" ? "tracking" : "discover";
 
   useEffect(() => {
+    if (!noticeOpen) return;
+    const bodyOverflow = document.body.style.overflow;
+    const documentOverflow = document.documentElement.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    return () => { document.body.style.overflow = bodyOverflow; document.documentElement.style.overflow = documentOverflow; };
+  }, [noticeOpen]);
+
+  useEffect(() => {
     const viewport = window.visualViewport;
+    let frame = 0;
     function measure() {
+      frame = 0;
       const editable = document.activeElement?.matches('input:not([readonly]), textarea:not([readonly]), [contenteditable="true"]');
       setKeyboardOpen(!!editable && !!viewport && window.innerHeight - viewport.height > 150);
     }
-    viewport?.addEventListener("resize", measure);
-    document.addEventListener("focusin", measure);
-    document.addEventListener("focusout", measure);
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(measure); };
+    viewport?.addEventListener("resize", schedule, { passive: true });
+    document.addEventListener("focusin", schedule);
+    document.addEventListener("focusout", schedule);
     return () => {
-      viewport?.removeEventListener("resize", measure);
-      document.removeEventListener("focusin", measure);
-      document.removeEventListener("focusout", measure);
+      cancelAnimationFrame(frame);
+      viewport?.removeEventListener("resize", schedule);
+      document.removeEventListener("focusin", schedule);
+      document.removeEventListener("focusout", schedule);
     };
   }, []);
 
@@ -90,14 +111,15 @@ export function ResellerBottomNav({ preview = false }: { preview?: boolean }) {
             aria-label={`${label} — ${hint}`} onClick={(event) => {
               opener.current = event.currentTarget;
               setNotice(key);
+              setNoticeOpen(true);
               dialog.current?.showModal();
               title.current?.focus();
             }}>{contents}</button>;
         })}
       </div>
     </nav>
-    <dialog ref={dialog} className={styles.dialog} aria-labelledby="reseller-nav-notice" aria-describedby="reseller-nav-help"
-      onClose={() => opener.current?.focus()}>
+    <dialog ref={dialog} className={`${styles.dialog} ${mobileStyles.surface}`} aria-labelledby="reseller-nav-notice" aria-describedby="reseller-nav-help"
+      onClose={() => { setNoticeOpen(false); opener.current?.focus(); }}>
       <div className={styles.dialogHeader}>
         <h2 id="reseller-nav-notice" ref={title} tabIndex={-1}>Chọn chiến dịch trước</h2>
         <button type="button" className={styles.close} aria-label="Đóng hướng dẫn" onClick={() => dialog.current?.close()}><X size={20} aria-hidden="true" /></button>

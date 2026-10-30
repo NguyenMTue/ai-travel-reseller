@@ -64,7 +64,7 @@ try {
   assert.equal(await page.evaluate(() => window.fixtureObjects.size), 0, "object URL revoked on source change");
   let failPlayback;
   const playbackGate = new Promise(resolve => { failPlayback = resolve; });
-  await page.route("**/fixture-video-unavailable.mp4", async route => { await playbackGate; await route.fulfill({ status: 403, body: "expired" }); });
+  await page.route("**/campaign-videos/fixture-video-unavailable.mp4", async route => { await playbackGate; await route.fulfill({ status: 403, body: "expired" }); });
   await select.selectOption("expired");
   await player.locator("video").evaluate(video => { void video.play().catch(() => {}); });
   await expect(player.getByText("Đang tải video…", { exact: true })).toBeVisible();

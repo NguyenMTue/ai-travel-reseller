@@ -14,6 +14,8 @@ import {
 import { Button } from "@/src/components/ui/button";
 import { VideoPlayer } from "@/src/components/video-player";
 import { playableVideoUrl } from "@/src/lib/video-delivery";
+import { useDialogViewport } from "@/src/components/use-dialog-viewport";
+import mobileStyles from "@/src/components/mobile-dialog.module.css";
 import type { LibraryItem } from "@/src/lib/merchant/media-library";
 import styles from "./video-generate-modal.module.css";
 
@@ -66,6 +68,7 @@ function VideoGenerateSession({
   selectedItem,
 }: VideoGenerateModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  useDialogViewport(dialogRef, isOpen);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
 
   const [campaigns, setCampaigns] = useState<CampaignOption[]>([]);
@@ -107,11 +110,14 @@ function VideoGenerateSession({
         : null;
 
     const previousOverflow = document.body.style.overflow;
+    const previousDocumentOverflow = document.documentElement.style.overflow;
     if (!dialog.open) dialog.showModal();
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      document.documentElement.style.overflow = previousDocumentOverflow;
       if (dialog.open) dialog.close();
       restoreFocusRef.current?.focus();
     };
@@ -310,7 +316,7 @@ function VideoGenerateSession({
         e.preventDefault();
         if (mode !== "generating" && mode !== "polling") onClose();
       }}
-      className={styles.dialog}
+      className={`${styles.dialog} ${mobileStyles.surface}`}
     >
       <div className={styles.container}>
         <button

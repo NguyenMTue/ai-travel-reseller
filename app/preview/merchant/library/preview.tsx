@@ -31,9 +31,8 @@ function VideoDeliveryPreview() {
     sample: "/campaign-videos/banahills-remediated.mp4",
     missing: null, invalid: "javascript:alert(1)",
     mock: "https://storage.travellink.vn/campaign-videos/hoi-an.mp4",
-    // Outside the baseline /campaign-videos/* rewrite: a missing fixture must
-    // actually fail, rather than showing the Bà Nà sample as a different video.
-    expired: "/fixture-video-unavailable.mp4",
+    // Exercise a real missing campaign file, never a rewrite to the sample.
+    expired: "/campaign-videos/fixture-video-unavailable.mp4",
   };
   return <section className="mt-8 max-w-xl rounded-xl border border-border bg-white p-4" aria-label="Mô phỏng player tuần 4">
     <h2 className="text-xl">Kiểm thử phát và tải MP4 · Fixture</h2>
