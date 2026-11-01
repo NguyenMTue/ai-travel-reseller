@@ -1,0 +1,29 @@
+Mã Task	Thành viên	Vai trò	Tên Task	Phân hệ	Sản phẩm bàn giao	Trạng thái	Mức ưu tiên
+TASK-184	Nguyễn Minh Tuệ	PM	Điều phối Sprint 5 & Ban hành Quyết định Code Freeze	Management	Biên bản Kick-off & Quyết định Code Freeze	Kế hoạch	P0
+TASK-185	Nguyễn Minh Tuệ	PM	Chủ trì Phiên Nghiệm thu UAT & Bàn giao Dự án	Management	Biên bản UAT Sign-off & Báo cáo Tổng kết	Kế hoạch	P0
+TASK-186	Nguyễn Minh Tuệ	BE1	Setup Hạ tầng Supabase Cloud Production & Migration	DevOps/DB	Supabase Production Database (Schema + RLS + Seed)	Kế hoạch	P0
+TASK-187	Nguyễn Minh Tuệ	BE1	Tối ưu Hiệu năng Database & Supavisor Connection Pooling	Performance	Cấu hình Connection Pooling, Audit RPC Orders/Wallets	Kế hoạch	P0
+TASK-188	Nguyễn Minh Tuệ	BE1	Phối hợp DevOps Deploy Vercel Production & SSL Domain	Deployment	Vercel Production URL & Custom Domain SSL	Kế hoạch	P0
+TASK-189	Nguyễn Huỳnh	BE2	Deploy AI Gateway & Production LLM Endpoints	AI Engine	Vercel AI SDK Fallback & Rate Limiting Config	Kế hoạch	P0
+TASK-190	Nguyễn Huỳnh	BE2	Final Grounding & Intent Routing UAT trên Production	AI Safety	Báo cáo Grounding & Intent Verification (100% Pass)	Kế hoạch	P0
+TASK-191	Nguyễn Huỳnh	BE2	Giám sát Real-time Logs AI & Khắc phục Lỗi Prompt	AI Monitoring	Production AI Logs & Prompt Fine-tune Notes	Kế hoạch	P1
+TASK-192	Thái Thanh Tú	BE3	Triển khai Production n8n Workflows có SSL	Automation	Production n8n Instance & Exported Workflows JSON	Kế hoạch	P0
+TASK-193	Thái Thanh Tú	BE3	Thiết lập Funnel Tracking 5 Bước trên PostHog	Analytics	PostHog Conversion Funnel Dashboard	Kế hoạch	P1
+TASK-194	Thái Thanh Tú	BE3	Hệ thống Cảnh báo Lỗi Telegram cho Quản trị viên	Alerting	Telegram Alert Bot Webhook & Incident Notification	Kế hoạch	P1
+TASK-195	Cao T. Thu Diệu	FE	Tích hợp Luồng Thanh toán & Checkout Redirect	FE Commerce	Nút Checkout Chatbot & Trang Thanh toán Merchant	Kế hoạch	P0
+TASK-196	Cao T. Thu Diệu	FE	PWA Production Build & Lighthouse Optimization	FE Performance	Lighthouse Score >= 90 & PWA Service Worker Cache	Kế hoạch	P0
+TASK-197	Cao T. Thu Diệu	FE	Trực chiến Fix Bug UAT Frontend trên Mobile & Desktop	FE Maintenance	Bug Fix PRs & UAT Verification	Kế hoạch	P0
+TASK-198	Cao T. Thu Diệu	FE	Code Review & Giám sát Kỹ thuật PR của Tester 3	Code Review	Approval 1 trên PR nhánh feature/fe-t3-w5-standalone-ui	Kế hoạch	P1
+TASK-199	Nguyễn Anh Tuấn	Tester 3	Xây dựng Component Static Reseller FAQ Modal	FE Junior	src/components/reseller/reseller-faq-modal.tsx	Kế hoạch	P2
+TASK-200	Nguyễn Anh Tuấn	Tester 3	Xây dựng Component Offline Banner & Network Status	FE Junior	src/components/common/offline-banner.tsx	Kế hoạch	P2
+TASK-201	Nguyễn Anh Tuấn	Tester 3	Chạy Lint, Typecheck & Mở PR Độc lập	FE Junior	0 errors tsc & eslint, GitHub PR trên branch riêng	Kế hoạch	P2
+TASK-202	Nguyễn Anh Tuấn	Tester 3	Kiểm thử Trải nghiệm Giao diện & Đóng góp Feedback	FE Junior	Feedback log trải nghiệm trên thiết bị cá nhân	Kế hoạch	P2
+TASK-203	Trương Đức Huy	QA1	Thực thi Kịch bản k6 Load Test 1.000 VUs	QA Performance	k6 Test Script & Báo cáo p95 < 200ms	Kế hoạch	P0
+TASK-204	Trương Đức Huy	QA1	Điều phối Phiên Final E2E UAT 3 Vai trò	QA Testing	E2E UAT Execution Report (Desktop + Mobile)	Kế hoạch	P0
+TASK-205	Trương Đức Huy	QA1	Smoke Test Tự động Môi trường Production sau Deploy	QA Automation	Playwright Smoke Test Suite & Production Pass Log	Kế hoạch	P0
+TASK-206	Trần Văn Minh	QA2	Kiểm định Bảo mật Supabase RLS & Chống Gian lận Click	Security QA	RLS Penetration Report & Anti-Fraud Audit	Kế hoạch	P0
+TASK-207	Trần Văn Minh	QA2	Kiểm định Chất lượng Video & Bot Chat trên Production	AI QA	Production Video Rubric & Live Chat Assessment	Kế hoạch	P0
+TASK-208	Nguyễn Phước Quý Bửu	UI/UX	Bộ Banner Store, PWA Splash Screen & App Icons	Design	PWA Assets (192x192, 512x512) & Splash Screen	Kế hoạch	P1
+TASK-209	Nguyễn Phước Quý Bửu	UI/UX	Slide Deck Thuyết trình Dự án & Visual Demo Assets	Design	Slide Deck Pitching & Visual Value-chain Graphics	Kế hoạch	P1
+TASK-210	Lê Mỹ Uyên	BA	Điều phối Biên bản Nghiệm thu UAT Sign-off	BA/Scrum	UAT Sign-off Checklist & 3-Role Acceptance Sheet	Kế hoạch	P0
+TASK-211	Lê Mỹ Uyên	BA	Hoàn thiện Bộ Tài liệu Dự án & Hướng dẫn Vận hành	Documentation	PRD v2.0, User Guide (Merchant & Reseller)	Kế hoạch	P0
