@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
+import { useDialogViewport } from "@/src/components/use-dialog-viewport";
+import mobileStyles from "@/src/components/mobile-dialog.module.css";
 
 export interface VideoGuidelinesModalProps {
   isOpen: boolean;
@@ -13,6 +15,7 @@ export function VideoGuidelinesModal({
   onClose,
 }: VideoGuidelinesModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  useDialogViewport(dialogRef, isOpen);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
 
@@ -54,7 +57,7 @@ export function VideoGuidelinesModal({
         event.preventDefault();
         onClose();
       }}
-      className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-2xl border border-border bg-background p-0 text-foreground shadow-xl backdrop:bg-black/50"
+      className={`${mobileStyles.surface} m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg overflow-y-auto rounded-2xl border border-border bg-background p-0 text-foreground shadow-xl backdrop:bg-black/50`}
     >
       <div className="relative p-6 sm:p-8">
         <button
@@ -62,7 +65,7 @@ export function VideoGuidelinesModal({
           type="button"
           onClick={onClose}
           aria-label="Đóng hướng dẫn quy chuẩn video"
-          className="absolute right-4 top-4 grid size-10 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:right-6 sm:top-6"
+          className="absolute right-4 top-4 grid size-11 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:right-6 sm:top-6"
         >
           <X size={20} aria-hidden="true" />
         </button>

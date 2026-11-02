@@ -19,7 +19,7 @@ export async function queryContentKit(
   const rows: unknown[] = [];
   for (let offset = 0; ; ) {
     let query = client.from("contents")
-      .select("id,campaign_id,reseller_id,persona,status,hook,script,caption,cta")
+      .select("id,campaign_id,reseller_id,persona,status,hook,script,caption,cta,video_url")
       .eq("campaign_id", scope.campaignId).in("status", [...policy.statuses])
       .order("id", { ascending: true }).range(offset, offset + 499);
     if (policy.allowOwned && policy.allowShared) query = query.or(`reseller_id.is.null,reseller_id.eq.${scope.resellerId}`);

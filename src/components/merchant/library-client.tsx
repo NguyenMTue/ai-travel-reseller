@@ -74,7 +74,7 @@ function LibraryRead({request,observeInvalidation,merchantId}:{request:LibraryRe
       {result.data.pagination.totalPages>1&&<nav aria-label="Phân trang thư viện" className={styles.pagination}><Button variant="outline" disabled={query.page<=1} onClick={()=>change({...query,page:query.page-1})}><ChevronLeft size={18} aria-hidden="true" />Trước</Button><span>Trang {query.page} / {result.data.pagination.totalPages}</span><Button variant="outline" disabled={query.page>=result.data.pagination.totalPages} onClick={()=>change({...query,page:query.page+1})}>Sau<ChevronRight size={18} aria-hidden="true" /></Button></nav>}
     </div>}
     <Guidelines isOpen={guide} onClose={()=>setGuide(false)} />
-    <VideoGenerateModal isOpen={generateOpen} onClose={()=>setGenerateOpen(false)} selectedItem={selected} merchantId={merchantId} />
+    <VideoGenerateModal isOpen={generateOpen && selected !== null && result.status === "ready"} onClose={()=>setGenerateOpen(false)} selectedItem={selected} merchantId={merchantId} />
   </>;
 }
 export function LibraryNotice({title,description,children,empty=false}:{title:string;description:string;children?:ReactNode;empty?:boolean}) {
