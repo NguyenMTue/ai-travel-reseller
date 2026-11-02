@@ -93,8 +93,23 @@ export async function generateVideoViaAIStudioBrowser(
       }
     } catch {}
 
-    // Lưu ý: Profile AI Studio đã được cấu hình mặc định là model gemini-omni-1.1-flash.
-    // Tuyệt đối không click vào menu chọn model vì sẽ mở Angular CDK Backdrop che khuất toàn bộ giao diện!
+    // Đảm bảo model đang chọn là Gemini Omni 1.1 Flash
+    try {
+      const modelBtn = page.locator('ms-run-settings ms-model-select button, ms-model-select button, button:has-text("gemini-")').first();
+      if (await modelBtn.isVisible({ timeout: 2000 })) {
+        const currentModelText = await modelBtn.innerText();
+        if (!currentModelText.includes("omni") && !currentModelText.includes("Omni")) {
+          console.log("[AI Studio Browser] Phát hiện model chưa phải Omni, đang tự động chuyển sang Gemini Omni 1.1 Flash...");
+          await modelBtn.click();
+          await page.waitForTimeout(600);
+          const omniOption = page.locator('[role="menuitem"]:has-text("Gemini Omni"), mat-option:has-text("Gemini Omni"), div:has-text("Gemini Omni 1.1 Flash")').last();
+          if (await omniOption.isVisible({ timeout: 2000 })) {
+            await omniOption.click({ force: true });
+            await page.waitForTimeout(800);
+          }
+        }
+      }
+    } catch {}
     await page.keyboard.press("Escape").catch(() => {});
     await page.waitForTimeout(300);
 
@@ -145,10 +160,14 @@ export async function generateVideoViaAIStudioBrowser(
     // 6. Theo dõi phân cảnh chat cuối cùng để phát hiện Video thành phẩm hoặc Lỗi Rate Limit
     console.log("[AI Studio Browser] Đang theo dõi tiến trình tạo video...");
     let videoBuffer: Buffer | null = null;
-    const maxPollSeconds = 55;
+    const maxPollSeconds = 95;
 
     for (let sec = 0; sec < maxPollSeconds; sec += 3) {
       await page.waitForTimeout(3000);
+
+      if (sec > 0 && sec % 15 === 0) {
+        console.log(`[AI Studio Browser] Đang chờ AI Studio kết xuất video (${sec}s/${maxPollSeconds}s)...`);
+      }
 
       const turnStatus = await page.evaluate(() => {
         const turns = Array.from(document.querySelectorAll("ms-chat-turn"));

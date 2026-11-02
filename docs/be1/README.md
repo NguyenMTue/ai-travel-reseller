@@ -4,6 +4,13 @@ Thư mục tài liệu kỹ thuật, hợp đồng bàn giao và mẫu dữ li�
 
 ---
 
+## Danh mục tài liệu Sprint 5 (Tuần 5)
+
+1. **Tài liệu bàn giao tích hợp Checkout & Attribution cho Frontend:**
+   - [`checkout_integration_guide_for_fe.md`](./checkout_integration_guide_for_fe.md): Hướng dẫn chi tiết luồng tích hợp nút đặt vé từ chat sang checkout, quy chuẩn tham số URL tiếp thị (`ref`, `campaign`, `product`), domain hợp lệ, vòng đời đơn hàng, và script mô phỏng đơn hàng mẫu không tốn tiền thật (phục vụ task `FE-W5-01`).
+
+---
+
 ## Danh mục tài liệu Sprint 3 (Tuần 3)
 
 1. **Tài liệu bàn giao kỹ thuật chính:**

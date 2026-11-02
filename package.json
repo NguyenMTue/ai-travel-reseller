@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "auth:ai-studio": "node scripts/setup-ai-studio-auth.mjs",
+    "auth:switch": "node scripts/setup-ai-studio-auth.mjs --switch",
     "build:be2:w3-schemas": "node --experimental-strip-types scripts/build-be2-week3-schemas.mjs",
     "test:ui": "playwright test",
     "test:be2": "node --experimental-strip-types --test tests/content-factory.test.ts tests/n8n-campaign-workflow.test.ts tests/sales-agent.test.ts tests/video-pipeline.test.ts",
