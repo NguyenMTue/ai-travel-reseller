@@ -24,7 +24,7 @@
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|:---:|:---:|---|:---:|---|:---:|
 | **FE-W5-01** | Tích hợp Hoàn chỉnh Luồng Thanh toán & Checkout Redirect | **P0** | `IN_PROGRESS` | BE1 Order API | FE Lead | Nút đặt vé dẫn sang checkout có lưu attribution token | 03/11 17:00 |
-| **FE-W5-02** | Tối ưu Production Build Next.js & PWA Lighthouse Score $\ge 90$ | **P1** | `READY` | Next.js config | FE Lead | Bundle tối ưu, PWA cài đặt 1-chạm không lỗi | 04/11 12:00 |
+| **FE-W5-02** | Tối ưu Production Build Next.js & PWA Lighthouse Score $\ge 90$ | **P1** | `IN_PROGRESS` | Next.js config | FE Lead | Bundle tối ưu, PWA cài đặt 1-chạm không lỗi | 04/11 12:00 |
 | **FE-W5-03** | Trực chiến Fix Bug Giao diện trong phiên Final E2E UAT | **P0** | `READY` | Bug reports BA | FE Lead | 100% UI bugs resolved trước Go-Live | 05/11 12:00 |
 | **FE-W5-04** | Review cấp 1 & Hỗ trợ tích hợp an toàn component của Tester 3 | **P2** | `READY` | PR Tester 3 | FE Lead | Review comments, Approval 1 & Safe integration | 04/11 17:00 |
 
@@ -181,3 +181,115 @@ npm.cmd run build -- --webpack
 - Nhánh tuần 5 xuất phát từ dev nên không mang commit riêng của #54. Sau khi #54 thực sự merge, đọc merged flag/merge_commit_sha và lịch sử dev để ghi nhận merge/squash/rebase thực tế.
 - Chỉ sau khi bảo toàn và lưu thay đổi tuần 5 bằng cách được người dùng cho phép, fetch riêng dev với lệnh đã dùng, kiểm tra status/ancestry/diff rồi merge origin/dev vào nhánh tuần 5 (fast-forward nếu phù hợp). Cách này lấy kết quả #54 từ dev cho mọi kiểu merge, không cherry-pick/rebase/force-push.
 - Rà conflict next.config/PWA/mobile theo hai phía; dừng nếu chưa đủ căn cứ. Chạy lại checkout/Bottom Sheet, video/PWA regression, typecheck và build sau tích hợp; ghi rõ thay đổi đến từ #54.
+---
+
+## 7. FE-W5-02 thực thi — 02/11/2026 (Asia/Bangkok)
+
+### Bảo toàn và đồng bộ Git
+
+- Worktree/branch giữ nguyên: E:/THUCTAP/ai-travel-reseller-fe-w5, feature/fe-w5-production-checkout-pwa-polish.
+- Đã sao lưu ngoài worktree 12 file thay đổi (source/test/tài liệu và tsconfig local) tại E:/THUCTAP/fe-w5-recovery/20261102-f41e5871. Đã so sánh SHA256 từng bản sao và đọc lại manifest.json trước thao tác Git.
+- Checkpoint LOCAL duy nhất: 44d02ca775d479f73a939a41c52d7fbdbdf6a16b, 11 file FE-W5-01. Stage đích danh, không đưa tsconfig local, env, output/log/artifact vào commit.
+- Fetch riêng dev thành công: origin/dev vẫn 7ced50a54997e639145d1ce83330ad2557b38574. git merge --no-edit origin/dev trả Already up to date; không phát sinh merge commit/conflict. Không có thay đổi dev mới ảnh hưởng FE trong lần đồng bộ này.
+- PR #54 vẫn OPEN/DRAFT, merged=false, head df2147e tại lần kiểm tra 02/11. Không coi merge_commit_sha tạm khi PR còn mở là bằng chứng merge.
+- Không tích hợp/cherry-pick nhánh tuần 4. Đã đối chiếu: #54 sửa video rewrite trong next.config.ts, safe area, bottom-nav touch/viewport/rAF, mobile-dialog và video/modal. Các tối ưu lần này không sửa các file đó, không làm lại tuần 4.
+- FE-W5-02 hiện IN_PROGRESS: kết quả đo là baseline nhánh chưa tích hợp #54; phải chạy lại sau khi #54 thực sự merge vào dev.
+- Không commit tối ưu mới hoặc push. Không sửa env/DB/RLS/backend, exclude/recovery hay checkout tuần 3/4. tsconfig.json của riêng tuần 5 có thêm include do Next sinh cho output baseline/optimized/final; giữ local, chưa commit.
+
+### Phương pháp và nguồn đang đo
+
+- Baseline: checkpoint 44d02ca trên dev 7ced50a, Webpack output build/fe-w5-w2-baseline.
+- Sau tối ưu: cùng checkpoint + diff FE-W5-02, output build/fe-w5-w2-final. Source patch và SHA256 từng file runtime nằm trong performance-optimized/summary.json; helper analytics mới được hash riêng dù chưa tracked.
+- Lighthouse 13.0.1 (CLI Node), Chrome cài sẵn 156.0.8078.74, Next.js 16.3.8, Node 24.16.0. Công cụ Lighthouse cài ngoài repo tại E:/THUCTAP/fe-w5-tools-20261102, không sửa package.json/lockfile. Hai lần tải đầu ECONNRESET; tải với maxsockets=1 đã thành công, không sửa ACL/xóa lock.
+- Cùng origin production http://127.0.0.1:3196, mỗi route 3 lượt tuần tự, profile Chrome mới từng lượt, không cookie/session. Storage reset bật, không dùng cache/SW ấm để tăng điểm.
+- Lighthouse mobile mặc định theo report: 412x823, DPR 1.75; simulated throttling RTT 150ms, throughput 1638.4Kbps, CPU slowdown 4x (các tham số request/download/upload thực tế cũng được lưu trong JSON).
+- Route đại diện: / (landing), /chat (UI chat thật, không attribution, không gửi AI), /login (auth UI). Không đo /preview/fixture để kết luận hiệu năng thật.
+- /merchant và /reseller khi chưa có session redirect /login. Không lấy điểm login thay cho portal, Wallet, Library hoặc Content Kit; các route dữ liệu thật còn chờ session/staging an toàn.
+- Không dùng dev server để đo Lighthouse. Môi trường local không có .env.local; SDK analytics không được tải khi thiếu cấu hình. Hành vi có cấu hình được kiểm tra bằng SDK fixture, không gửi analytics thật.
+
+### Bảng đo trước/sau (3 lượt, trung vị và min–max)
+
+| Route | Performance trước | Performance sau | A sau | BP sau | JS transfer trước → sau (KiB) | LCP trung vị trước → sau |
+|---|---|---|---|---|---|---|
+| / | 88 (70–88) | 93 (84–94) | 95 | 100 | 243.9 → 142.2 | 3626 → 2927 ms |
+| /chat | 88 (87–95) | 94 (94–96) | 95 | 100 | 262.5 → 160.8 | 3697 → 2475 ms |
+| /login | 90 (89–90) | 94 (92–95) | 100 | 100 | 298.1 → 196.4 | 3391 → 2631 ms |
+
+- Các lượt P nguyên gốc: / trước [70,88,88], sau [84,94,93]; /chat trước [88,95,87], sau [96,94,94]; /login trước [89,90,90], sau [92,94,95]. Không loại lượt thấp.
+- TBT trung vị trước → sau: / 141→132ms; /chat 126→143ms; /login 144→184ms. Không khẳng định mọi chỉ số đều cải thiện; cần profiling TBT/độ ổn định tiếp trên staging và thiết bị thật.
+- CLS trung vị không đổi: / 0.0021, /chat 0.0051, /login 0.0010.
+- Performance trung vị >=90, A>=95, BP>=95 đạt cho ba route đã đo; chưa đạt yêu cầu ổn định mọi lượt vì / có lượt 84.
+- First Load JS <120kB CHƯA ĐẠT theo giả định tạm: JavaScript truyền tải lượt điều hướng lạnh từng route, đơn vị KiB (1024 bytes), gồm runtime/framework và script quan sát trong cửa sổ Lighthouse. Cần PM/QA thống nhất route, raw/compressed và có tính prefetch/analytics không.
+- Next 16.3.8 Webpack không in bảng First Load JS kiểu tài liệu cũ. Dùng Lighthouse resource-summary Script.transferSize và Resource Timing làm số đo thay thế, không gọi đó là chỉ số First Load JS chính thức của Next.
+- Chỉ hai chunk runtime/router dùng chung của bản sau đã truyền khoảng 126.9KiB; không tắt framework, auth hay chức năng để ép ngân sách. Không nâng dependencies trong lượt này.
+
+Đối chiếu Resource Timing riêng, cùng viewport 390x844, Chrome mới, SW blocked và HTTP cache tắt bởi route guard, chỉ GET localhost (khác cấu hình Lighthouse, không trộn số):
+
+| Route | JS decoded trước → sau (KiB) | JS encoded body trước → sau (KiB) |
+|---|---|---|
+| / | 772.3 → 462.5 | 240.3 → 139.1 |
+| /chat | 822.6 → 512.7 | 257.8 → 156.5 |
+| /login | 933.6 → 623.8 | 291.5 → 190.2 |
+
+### Tối ưu đã thực hiện theo bằng chứng
+
+- instrumentation-client.ts + src/lib/analytics.ts + src/lib/analytics-client.ts: baseline tải SDK PostHog đồng bộ (~101.7KiB transfer) dù chưa có đủ cấu hình. Nay dynamic import khi có đủ hai setting, dùng chung một lần load/init; sự kiện funnel sớm chờ init, giữ thứ tự/properties. Giữ autocapture/pageview/pageleave off và session recording disabled như cũ; không tắt analytics đã được cấu hình để tăng điểm.
+- app/page.tsx: Lighthouse chỉ ra ảnh LCP thiếu fetchpriority=high. Thay prop priority đã deprecated trong Next 16 bằng loading=eager + fetchPriority=high theo docs nội bộ. Không đổi ảnh/logo/layout hoặc kích thước khung.
+- Fonts tiếp tục self-host bằng Fontsource với display:swap; không gọi Google Fonts, đổi font hoặc tải asset thương hiệu khác.
+- public/sw.js: giữ một cơ chế đăng ký hiện hữu. Core cache v2 vẫn chỉ offline document + 3 icon; thêm static-v2 tối đa 32 mục, chỉ font Be Vietnam Pro/Lora WOFF2 và CSS content-hashed của Next.
+- Cache runtime chỉ nhận response thành công, không redirect, đúng MIME, có immutable và không private/no-store. Request tĩnh bỏ credentials và custom headers. Không cache JavaScript, API, Supabase, session/token, HTML/RSC, Server Actions, checkout/đơn/payment.
+- Giữ navigation network-only/no-store và offline generic trung thực; /api, /auth, /r bypass nguyên trạng. Không mở /r trong browser test; bypass được chứng minh bằng unit dispatch không phát request.
+- Không skipWaiting/clients.claim. Worker mới chờ các tab cũ đóng; activate xóa cache owned cũ, giữ unrelated cache. Development unregister worker/cache owned cũ, không tạo cache dev.
+- Không làm FAQ Modal/Offline Banner thay Tester 3, không đổi Auth/guard, Tracking/QR, Wallet, Content Kit hoặc Merchant Library.
+
+### Kiểm chứng
+
+- Unit 15/15 PASS: analytics SDK chỉ load khi đủ cấu hình; init một lần/giữ event sớm/xử lý load lỗi; SW static allowlist, no credentials, MIME/cache headers, không cache response riêng tư/lỗi, giới hạn 32 mục, no-store/offline; checkout URL/transport hồi quy.
+- Production Webpack baseline, optimized và final PASS, typecheck bắt buộc không bị tắt. Scoped lint và tsc --noEmit --incremental false PASS.
+- tests/pwa-production-browser.mjs PASS: một manifest, metadata, icon 192/512/apple180, SW headers/scope/controller, cập nhật v1→v2 chờ đóng tab, dọn cache cũ/giữ cache khác, CSS/font cache thực, portal guard chưa đăng nhập, offline /merchant /reseller /chat generic và online recovery.
+- Chrome Page.getAppManifest.errors=[] và Page.getInstallabilityErrors.installabilityErrors=[] trong profile thường riêng. Không tuyên bố đã cài Android/iOS thật hoặc PWA đạt 100% trên mọi thiết bị.
+- Lần thử đầu Chrome báo in-incognito; đã chuyển profile riêng. Lần thử lifecycle mở tab mới quá sớm giữ worker cũ; đã chờ activate khi không còn controlled client. Giữ nguyên assertions và chạy lại PASS.
+- Kiểm tra development PASS: gỡ worker/cache owned cũ, giữ other-app cache; không request API/external/tracking.
+- Hồi quy tests/checkout-browser.mjs PASS lại bốn viewport 320/390/768/1440, URL/attribution, double click, focus, pending/offline/expiry, draft/error/timeout, đóng/mở/context/session/late reply. Không phát sinh API thật/external/write requests.
+- Lỗi nền còn thấy trong Lighthouse: chữ AI nhỏ trong brand có contrast 3.82 (điểm A=95 cho / và /chat); không sửa logo/brand ngoài phạm vi. TBT trên chat/login tăng trong các lượt đo, chưa có bằng chứng nguyên nhân/regression chức năng.
+- Lighthouse đã bỏ PWA category từ v12: không bịa điểm PWA. Thay bằng manifest/icons, native Chrome installability, SW lifecycle/cache/offline và checklist thiết bị. Nguồn: https://developers.google.com/speed/docs/insights/release_notes (10/05/2024).
+- Full lint/portal dữ liệu thật/Lighthouse trên thiết bị thật chưa được tuyên bố PASS. FE-W5-01 vẫn chưa nghiệm thu checkout thật; contract Order API/attribution/status còn thiếu như mục 6.
+
+### Artifacts ngoài Git và lệnh chạy lại
+
+- Backup/hash: E:/THUCTAP/fe-w5-recovery/20261102-f41e5871/manifest.json.
+- Lighthouse HTML/JSON từng lượt + summary/source: E:/THUCTAP/fe-w5-recovery/performance-baseline và performance-optimized.
+- Resource Timing/ảnh: E:/THUCTAP/fe-w5-recovery/transfer-baseline và transfer-optimized.
+- Installability/cache/ảnh PWA: E:/THUCTAP/fe-w5-recovery/pwa-production.
+- Production final đang chạy: http://127.0.0.1:3196/ (PID 15740). Dev fixture: http://127.0.0.1:3195/preview/chat (PID 16528). Chỉ dừng server tuần 5 do lượt này tạo; không dừng mọi Node hoặc server worktree khác.
+- Khi cổng trống, khởi động production:
+
+~~~powershell
+Set-Location E:\THUCTAP\ai-travel-reseller-fe-w5
+$env:NEXT_BUILD_DIR = 'build/fe-w5-w2-final'
+npm.cmd run build -- --webpack
+npm.cmd run start -- --hostname 127.0.0.1 --port 3196
+~~~
+
+~~~powershell
+node --experimental-strip-types --test tests/analytics-client.test.ts tests/pwa-worker.test.mjs tests/checkout.test.ts tests/chat-transport.test.ts
+node node_modules/typescript/bin/tsc --noEmit --incremental false
+node node_modules/eslint/bin/eslint.js instrumentation-client.ts src/lib/analytics.ts src/lib/analytics-client.ts public/sw.js app/page.tsx tests/analytics-client.test.ts tests/pwa-worker.test.mjs tests/pwa-browser.mjs tests/pwa-production-browser.mjs
+$env:PWA_BASE_URL = 'http://127.0.0.1:3196'
+node tests/pwa-browser.mjs
+node E:/THUCTAP/fe-w5-recovery/performance-run.mjs rerun
+~~~
+
+### Tester 3 và việc tiếp theo
+
+- Truy vấn GitHub head:feature/fe-t3-w5-standalone-ui (all states) trả rỗng; ls-remote đúng ref cũng rỗng ngày 02/11. Chưa có PR/HEAD/file FAQ Modal hoặc Offline Banner để nhận bàn giao; không đăng comment/review/approval/merge.
+- FE-W5-04 vẫn chờ bàn giao, review trước 04/11 17:00. FE-W5-03 chờ BA/QA bugs trước 05/11 12:00.
+- FE-W5-02 deadline 04/11 12:00: còn ngân sách 120KiB chưa thống nhất/đạt, ổn định lượt đo, portal có session, UIUX maskable assets, tích hợp #54 và thiết bị thật.
+- Sau khi #54 thực sự merge: xác minh lịch sử/cách merge từ dev, bảo toàn các tối ưu chưa commit theo ủy quyền mới rồi tích hợp origin/dev, không merge lại nhánh tuần 4 hoặc force-push/rebase. Chạy lại video/PWA/mobile/checkout và Lighthouse trên bản tích hợp cuối.
+
+Checklist QA thiết bị tiếp theo (chưa thực hiện):
+1. Android/realme C21Y: cài từ Chrome, icon/splash/standalone, safe area/bàn phím, font/CSS khi mạng chậm.
+2. Safari iOS: Add to Home Screen, standalone, mở/đóng Bottom Sheet và focus trên máy thật.
+3. Mở bản mới khi tab cũ còn chạy: không tự reload; đóng hết tab/PWA rồi mở lại để nhận worker mới.
+4. Trên staging được QA cho phép, đăng xuất tài khoản rồi offline/mở lại portal: chỉ generic offline, không lộ HTML/tài khoản cũ; online phải qua guard.
+5. Không coi redirect hoặc status=success là thanh toán thành công; nghiệm thu checkout riêng khi BE bàn giao contract và sandbox.

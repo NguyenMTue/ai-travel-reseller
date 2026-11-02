@@ -26,7 +26,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | BE3-W5-02 | Thái Thanh Tú | BE3 Lead | Khóa cấu hình Phễu Chuyển đổi 5 bước trên PostHog Analytics | READY | 03/11 08:30 | 03/11 17:00 |
 | BE3-W5-03 | Thái Thanh Tú | BE3 Lead | Xây dựng Telegram Bot cảnh báo sự cố khẩn cấp cho Quản trị viên | READY | 04/11 08:30 | 04/11 12:00 |
 | FE-W5-01 | Cao T. Thu Diệu | FE Lead | CTA checkout, attribution và fixture đã triển khai; chờ contract BE để nghiệm thu thật | IN_PROGRESS | 01/11/2026 | 03/11 17:00 |
-| FE-W5-02 | Cao T. Thu Diệu | FE Lead | Tối ưu Production Build Next.js & PWA Lighthouse Score $\ge 90$ | READY | 03/11 13:00 | 04/11 12:00 |
+| FE-W5-02 | Cao T. Thu Diệu | FE Lead | Tách tải analytics, ưu tiên ảnh LCP, cache font/CSS an toàn; đo 3 lượt production | IN_PROGRESS | 02/11/2026 | 04/11 12:00 |
 | FE-W5-03 | Cao T. Thu Diệu | FE Lead | Trực chiến fix bug giao diện trong phiên Final E2E UAT | READY | 04/11 09:00 | 05/11 12:00 |
 | FE-W5-04 | Cao T. Thu Diệu | FE Lead | Review cấp 1 & hỗ trợ tích hợp an toàn component của Tester 3 | READY | 04/11 14:00 | 04/11 17:00 |
 | T3-FE-W5-01 | Nguyễn Anh Tuấn | FE Junior | Xây dựng Component tĩnh `reseller-faq-modal.tsx` (Dumb UI) | READY | 02/11 10:00 | 03/11 17:00 |
@@ -82,6 +82,14 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 - FE-W5-02: 04/11 12:00, build riêng PASS nhưng Lighthouse/PWA còn chờ đo. FE-W5-04: 04/11 17:00, chưa thấy remote branch/PR feature/fe-t3-w5-standalone-ui hoặc bàn giao FAQ/Offline Banner; không làm thay. FE-W5-03: 05/11 12:00, chờ BA/QA UAT bugs.
 - Preview fixture: http://127.0.0.1:3195/preview/chat. Không gọi AI trả phí, API tạo đơn/thanh toán/link tracking hoặc ghi dữ liệu dùng chung; chưa nghiệm thu thiết bị thật. Không commit/push/PR/approval/merge GitHub.
 
+### FE: thực thi Production/PWA — 02/11/2026
+
+- Backup 12 file/hash tại E:/THUCTAP/fe-w5-recovery/20261102-f41e5871; checkpoint LOCAL 44d02ca chỉ source/test/tài liệu FE-W5-01. Fetch riêng dev vẫn 7ced50a, tích hợp trả Already up to date, không conflict/merge commit. Tối ưu mới chưa commit/push.
+- PR #54 vẫn OPEN/DRAFT, chưa tích hợp; đây là baseline trước bản tuần 4 đầy đủ. Không merge/cherry-pick nhánh tuần 4 hoặc làm lại mobile/video.
+- FE-W5-02: Lighthouse 13.0.1, Chrome 156, production Webpack, 3 lượt/route. P trung vị / 88→93 (sau 84–94), /chat 88→94 (94–96), /login 90→94 (92–95); A sau 95/95/100, BP đều100. Script transfer KiB 243.9→142.2, 262.5→160.8, 298.1→196.4. Ngân sách120KiB chưa đạt; TBT chat/login tăng, không kết luận mọi chỉ số tốt hơn.
+- Tách tải PostHog nhưng giữ configured analytics/early funnel events; ưu tiên ảnh LCP; SW v2 chỉ core offline/icons + font/CSS content-hashed immutable, giới hạn32, không cache private data. Unit15/15, PWA lifecycle/installability/offline/dev cleanup, checkout4viewport, scoped lint/typecheck/build PASS. Thiết bị thật/portal có session chưa nghiệm thu.
+- Báo cáo HTML/JSON/ảnh ngoài Git tại E:/THUCTAP/fe-w5-recovery; chi tiết phương pháp, số đo và lệnh ở FE_W5.md mục7. Production http://127.0.0.1:3196/; fixture http://127.0.0.1:3195/preview/chat.
+- FE-W5-01 vẫn chờ contract BE và chưa nghiệm thu checkout thật. FE-W5-04: truy vấn đúng nhánh/PR Tester3 ngày02/11 chưa thấy bàn giao; không làm FAQ/Offline Banner thay hoặc đăng approval. FE-W5-03 chờ BA/QA UAT bugs. Không đánh dấu cả tuần hoàn thành hoặc UIUX/QA đã duyệt.
 ## 4. BLOCKED
 *Hiện tại không có blocker nào cản trở luồng công việc.* Toàn bộ mã nguồn trên nhánh `dev` sạch sẽ và đã vượt qua tất cả các bài kiểm tra chất lượng của Sprint 4.
 

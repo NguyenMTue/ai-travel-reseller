@@ -1,4 +1,11 @@
-import posthog from "posthog-js";
+import { createAnalyticsClient } from "./analytics-client";
+
+const analytics = createAnalyticsClient({
+  projectToken: process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN,
+  apiHost: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+}, async () => (await import("posthog-js")).default);
+
+export const initializeAnalytics = analytics.initialize;
 
 export type FunnelAttribution = {
   campaign_id: string;
@@ -11,9 +18,7 @@ export function captureChatFunnelEvent(
   attribution: FunnelAttribution | null,
   properties: Record<string, string | number | boolean> = {},
 ): void {
-  if (!posthog.__loaded) return;
-
-  posthog.capture(event, {
+  analytics.capture(event, {
     ...properties,
     has_attribution: attribution !== null,
     ...(attribution ?? {}),
