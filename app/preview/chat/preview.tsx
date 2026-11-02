@@ -13,7 +13,7 @@ export function ChatPreview() {
     <section aria-label="Điều khiển mô phỏng" className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-secondary p-4">
       <strong className="w-full">Mô phỏng · Chờ UI/UX review · Không gọi AI, Tracking hoặc tạo đơn</strong>
       <label>Trạng thái <select className="rounded border border-border bg-background p-2" aria-label="Trạng thái mô phỏng" value={scenario} onChange={e => setScenario(e.target.value as ChatScenario)}>
-        <option value="success">Thành công</option><option value="error">Lỗi</option><option value="timeout">Timeout</option><option value="slow">Phản hồi chậm</option><option value="long">Nội dung dài</option>
+        <option value="success">Phản hồi hợp lệ</option><option value="checkout">Checkout hợp lệ</option><option value="missing-url">Thiếu checkout URL</option><option value="unsafe-url">URL không được phép</option><option value="wrong-attribution">Sai attribution</option><option value="expired">Hết phiên</option><option value="error">Lỗi</option><option value="timeout">Timeout</option><option value="slow">Phản hồi chậm</option><option value="long">Nội dung dài</option>
       </select></label>
       <button className="rounded border border-primary p-2" onClick={() => setContext(n => n + 1)}>Đổi campaign/product</button>
       <button className="rounded border border-primary p-2" onClick={() => setSession(n => n + 1)}>Đổi phiên</button>

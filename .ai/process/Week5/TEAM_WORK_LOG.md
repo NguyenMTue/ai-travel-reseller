@@ -25,7 +25,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | BE3-W5-01 | Thái Thanh Tú | BE3 Lead | Triển khai n8n Workflows có xác thực token trên Production Instance | READY | 02/11 10:00 | 02/11 17:00 |
 | BE3-W5-02 | Thái Thanh Tú | BE3 Lead | Khóa cấu hình Phễu Chuyển đổi 5 bước trên PostHog Analytics | READY | 03/11 08:30 | 03/11 17:00 |
 | BE3-W5-03 | Thái Thanh Tú | BE3 Lead | Xây dựng Telegram Bot cảnh báo sự cố khẩn cấp cho Quản trị viên | READY | 04/11 08:30 | 04/11 12:00 |
-| FE-W5-01 | Cao T. Thu Diệu | FE Lead | Tích hợp hoàn chỉnh luồng thanh toán & Checkout Redirect | READY | 02/11 10:00 | 03/11 17:00 |
+| FE-W5-01 | Cao T. Thu Diệu | FE Lead | CTA checkout, attribution và fixture đã triển khai; chờ contract BE để nghiệm thu thật | IN_PROGRESS | 01/11/2026 | 03/11 17:00 |
 | FE-W5-02 | Cao T. Thu Diệu | FE Lead | Tối ưu Production Build Next.js & PWA Lighthouse Score $\ge 90$ | READY | 03/11 13:00 | 04/11 12:00 |
 | FE-W5-03 | Cao T. Thu Diệu | FE Lead | Trực chiến fix bug giao diện trong phiên Final E2E UAT | READY | 04/11 09:00 | 05/11 12:00 |
 | FE-W5-04 | Cao T. Thu Diệu | FE Lead | Review cấp 1 & hỗ trợ tích hợp an toàn component của Tester 3 | READY | 04/11 14:00 | 04/11 17:00 |
@@ -71,9 +71,16 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 ## 3. IN PROGRESS
 1. **PM-W5-01:** Họp Kick-off Sprint 5, phổ biến quyết định Feature Freeze và chốt timeline 6 ngày.
 2. **BE1-W5-01:** Khởi tạo project Supabase Cloud Production khu vực Singapore `ap-southeast-1`.
-3. **FE-W5-01:** Rà soát luồng điều hướng nút thanh toán từ khung chat AI sang trang đặt vé.
+3. **FE-W5-01 (cập nhật FE 01/11/2026):** Worktree E:/THUCTAP/ai-travel-reseller-fe-w5, branch feature/fe-w5-production-checkout-pwa-polish từ origin/dev 7ced50a. CTA/URL-attribution/error/expiry và fixture hoàn tất theo contract chat hiện hữu; unit 6/6, browser 4 viewport, Bottom Sheet regression, scoped lint, typecheck và Webpack build PASS. Chưa nghiệm thu checkout thật; xem FE_W5.md mục 6.
 
 ---
+
+### FE: bằng chứng và phụ thuộc thực tế — 01/11/2026
+
+- FE-W5-01 còn chờ BE1/BE2 bàn giao Order API, signed attribution/tracking_code/session và trạng thái đơn/thanh toán đáng tin. Query ref/campaign/product hiện hữu không phải bằng chứng quyền hoặc hoa hồng. Không dựng màn hình thành công hay cập nhật ví giả.
+- PR #54 vẫn OPEN/DRAFT tại df2147e, chưa merge. Tuần 5 không phụ thuộc code riêng tuần 4 cho checkout; FE-W5-02 phải đồng bộ video/PWA/mobile từ dev sau khi PR thực sự merge. Đây không phải xác nhận nghiệm thu lịch sử tuần 4.
+- FE-W5-02: 04/11 12:00, build riêng PASS nhưng Lighthouse/PWA còn chờ đo. FE-W5-04: 04/11 17:00, chưa thấy remote branch/PR feature/fe-t3-w5-standalone-ui hoặc bàn giao FAQ/Offline Banner; không làm thay. FE-W5-03: 05/11 12:00, chờ BA/QA UAT bugs.
+- Preview fixture: http://127.0.0.1:3195/preview/chat. Không gọi AI trả phí, API tạo đơn/thanh toán/link tracking hoặc ghi dữ liệu dùng chung; chưa nghiệm thu thiết bị thật. Không commit/push/PR/approval/merge GitHub.
 
 ## 4. BLOCKED
 *Hiện tại không có blocker nào cản trở luồng công việc.* Toàn bộ mã nguồn trên nhánh `dev` sạch sẽ và đã vượt qua tất cả các bài kiểm tra chất lượng của Sprint 4.
