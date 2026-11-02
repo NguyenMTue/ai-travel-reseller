@@ -4,6 +4,19 @@ Thư mục tài liệu kỹ thuật, hợp đồng bàn giao và mẫu dữ li�
 
 ---
 
+## Danh mục tài liệu Sprint 5 (Tuần 5 - Final Go-Live)
+
+1. **Báo cáo Kỹ thuật & Bàn giao Hạ tầng Production:**
+   - [`week5-be1-production-deployment-and-perf.md`](./week5-be1-production-deployment-and-perf.md): Báo cáo hoàn tất nghiệm thu và bàn giao hạ tầng Database Supabase Cloud Production, Supavisor Connection Pooling cổng 6543, kết quả benchmark latency $p95 < 20\text{ ms}$ cho RPC ví hoa hồng và cấu hình Storage `campaign-videos`.
+
+2. **Lệnh chạy kiểm thử và benchmark:**
+   ```powershell
+   npm run test:be1:w5
+   npm run benchmark:wallet
+   ```
+
+---
+
 ## Danh mục tài liệu Sprint 3 (Tuần 3)
 
 1. **Tài liệu bàn giao kỹ thuật chính:**

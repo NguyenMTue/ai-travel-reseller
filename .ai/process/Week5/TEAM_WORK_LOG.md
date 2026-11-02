@@ -15,9 +15,9 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | Task ID | Member | Role | Task | Status | Started | Deadline |
 |---|---|---|---|---|---|---|
 | PM-W5-01 | Nguyễn Minh Tuệ | PM / BE1 Lead | Họp Kick-off Sprint 5, ban hành quyết định Feature Freeze và master plan 6 ngày | IN_PROGRESS | 02/11 09:00 | 02/11 11:00 |
-| BE1-W5-01 | Nguyễn Minh Tuệ | BE1 Lead | Setup & migrate toàn bộ Database lên Supabase Cloud Production | READY | 02/11 10:00 | 02/11 17:00 |
-| BE1-W5-02 | Nguyễn Minh Tuệ | BE1 Lead | Tối ưu hóa Supavisor Connection Pooling phục vụ k6 load test | READY | 03/11 08:30 | 03/11 12:00 |
-| BE1-W5-03 | Nguyễn Minh Tuệ | BE1 Lead | Cấu hình Supabase Storage Production `campaign-videos` & CDN | READY | 03/11 13:00 | 03/11 17:00 |
+| BE1-W5-01 | Nguyễn Minh Tuệ | BE1 Lead | Setup & migrate toàn bộ Database lên Supabase Cloud Production | DONE | 02/11 10:00 | 02/11 17:00 |
+| BE1-W5-02 | Nguyễn Minh Tuệ | BE1 Lead | Tối ưu hóa Supavisor Connection Pooling phục vụ k6 load test | DONE | 02/11 14:00 | 03/11 12:00 |
+| BE1-W5-03 | Nguyễn Minh Tuệ | BE1 Lead | Cấu hình Supabase Storage Production `campaign-videos` & CDN | DONE | 02/11 15:30 | 03/11 17:00 |
 | BE1-W5-04 | Nguyễn Minh Tuệ | BE1 Lead | Phối hợp triển khai Production Release lên Vercel & kiểm tra SSL | READY | 05/11 08:30 | 05/11 17:00 |
 | BE2-W5-01 | Nguyễn Huỳnh | BE2 Lead | Cấu hình Gemini Production API Gateway, Rate Limiting & Fallbacks | READY | 02/11 10:00 | 02/11 17:00 |
 | BE2-W5-02 | Nguyễn Huỳnh | BE2 Lead | Khóa chặt Intent Routing & Production Grounding cho Sales Agent | READY | 03/11 08:30 | 03/11 17:00 |

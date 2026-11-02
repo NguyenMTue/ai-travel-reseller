@@ -5,7 +5,7 @@
 **Role:** Backend Developer 1 (Database Architect, Supabase Cloud, Connection Pooling & Production Deployment)  
 **Current Milestone:** FINAL E2E UAT, PERFORMANCE STRESS TESTING, RLS SECURITY AUDIT & PRODUCTION GO-LIVE  
 **Deadline:** 17:00 Thứ Bảy (07/11/2026)  
-**Branch:** `feature/be1-w5-production-deployment-and-perf` (tách từ `dev`)  
+**Branch:** `feature/be1-w5-supabase-cloud-and-perf` (giai đoạn 1 trước 03/11, tách từ `dev`)  
 
 ---
 
@@ -23,9 +23,9 @@
 
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|:---:|:---:|---|:---:|---|:---:|
-| **BE1-W5-01** | Setup & Migrate toàn bộ Database lên Supabase Cloud Production | **P0** | `READY` | Code Freeze W5 | BE1 | Production DB URL, Schema & Migrations 100% khớp | 02/11 17:00 |
-| **BE1-W5-02** | Tối ưu Hiệu năng Database & Supavisor Connection Pooling cho k6 Test | **P0** | `READY` | BE1-W5-01 | BE1 | Connection Pooler active, query latency $p95 < 50\text{ ms}$ | 03/11 12:00 |
-| **BE1-W5-03** | Cấu hình Supabase Storage Production `campaign-videos` & CDN | **P1** | `READY` | BE1-W5-01 | BE1 | Bucket public đọc, upload video mẫu thành công | 03/11 17:00 |
+| **BE1-W5-01** | Setup & Migrate toàn bộ Database lên Supabase Cloud Production | **P0** | `DONE` | Code Freeze W5 | BE1 | Production DB URL, Schema & Migrations 100% khớp | 02/11 17:00 |
+| **BE1-W5-02** | Tối ưu Hiệu năng Database & Supavisor Connection Pooling cho k6 Test | **P0** | `DONE` | BE1-W5-01 | BE1 | Connection Pooler active, query latency $p95 = 17.09\text{ ms} < 20\text{ ms}$ | 03/11 12:00 |
+| **BE1-W5-03** | Cấu hình Supabase Storage Production `campaign-videos` & CDN | **P1** | `DONE` | BE1-W5-01 | BE1 | Bucket public đọc, upload video mẫu thành công | 03/11 17:00 |
 | **BE1-W5-04** | Phối hợp triển khai Production Release lên Vercel & Kiểm tra Domain SSL | **P0** | `READY` | UAT Pass | BE1 | URL Production chính thức hoạt động 24/7 | 05/11 17:00 |
 | **BE1-W5-05** | Trực chiến Hotfix backend trong phiên UAT và Smoke Test | **P1** | `READY` | Bug reports | BE1 | Zero critical database / API bugs | 06/11 17:00 |
 
