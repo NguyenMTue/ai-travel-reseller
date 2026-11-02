@@ -12,6 +12,28 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+test("posting tips belong to permitted Reseller Content Kit and stay hidden for unavailable content", async ({ page }) => {
+  const opener = page.getByRole("button", { name: "Mẹo đăng video hiệu quả", exact: true });
+  for (const state of ["blocked", "empty", "error", "permission-error", "schema-error", "network-error", "configuration-error"]) {
+    await page.goto(`${url}?state=${state}`);
+    await expect(opener).toHaveCount(0);
+    await expect(page.getByRole("dialog", { name: "Mẹo Đăng Video AI Triệu View Dành Cho Reseller" })).toHaveCount(0);
+  }
+  await page.goto(url);
+  await page.getByRole("button", { name: "Budget Traveler", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Persona này chưa có nội dung" })).toBeVisible();
+  await expect(opener).toHaveCount(0);
+  await page.goto(`${url}?state=approved`);
+  await expect(page.getByRole("region", { name: "Content Kit", exact: true }).getByRole("button", { name: "Mẹo đăng video hiệu quả", exact: true })).toHaveCount(1);
+  await opener.click();
+  const dialog = page.getByRole("dialog", { name: "Mẹo Đăng Video AI Triệu View Dành Cho Reseller" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("listitem")).toHaveCount(4);
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(opener).toBeFocused();
+});
+
 test("feed opens correct fixture ID; personas and variants show only selected content", async ({ page }) => {
   await page.goto("/preview/reseller");
   await page.getByRole("link", { name: "Xem chi tiết Hội An Foodie", exact: true }).click();
@@ -120,7 +142,12 @@ test("confirmed contract fixture maps personas and variants, copies untouched pl
   await page.goto(`${url}?state=approved`);
   await expect(page.getByText("14/10/2026", { exact: true })).toBeVisible();
   await expect(page.getByText("21/10/2026", { exact: true })).toBeVisible();
-  await expect(page.getByRole("note")).toContainText("Bạn cần bổ sung link tiếp thị trước khi đăng.");
+  const placeholderNotice = page.getByRole("note").filter({ hasText: "Nội dung còn [LINK_MUA_VE]." });
+  await expect(placeholderNotice).toHaveCount(1);
+  await expect(placeholderNotice).toContainText("Bạn cần bổ sung link tiếp thị trước khi đăng.");
+  await expect(page.getByRole("region", { name: "Đăng lên Telegram" }).getByRole("note")).toHaveText([
+    "Tạo link tiếp thị trước khi đăng để ghi nhận hoa hồng.", "Bản xem trước không gửi bài thật.",
+  ]);
   await expect(page.getByTestId("content-script")).toHaveText(approvedFixtureVariants[0].script ?? "");
   await page.getByRole("button", { name: "Copy CTA", exact: true }).click();
   await expect(page.getByText("Đã sao chép CTA.", { exact: true })).toBeVisible();
@@ -136,7 +163,8 @@ test("confirmed contract fixture maps personas and variants, copies untouched pl
   await page.getByLabel("Biến thể", { exact: true }).selectOption(approvedFixtureVariants[1].id);
   await expect(page.getByRole("button", { name: "Copy Hook", exact: true })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Copy CTA", exact: true })).toBeDisabled();
-  await expect(page.getByRole("note")).toHaveCount(0);
+  await expect(placeholderNotice).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Đăng lên Telegram" }).getByRole("note")).toHaveCount(2);
   for (const [label, hook] of [["Family", "Hook contract fixture riêng Family"], ["Foodie", "Hook contract fixture Foodie"], ["Budget Traveler", "Hook contract fixture Budget Traveler"]]) {
     await page.getByRole("button", { name: label, exact: true }).click();
     await expect(page.getByTestId("content-hook")).toHaveText(hook);

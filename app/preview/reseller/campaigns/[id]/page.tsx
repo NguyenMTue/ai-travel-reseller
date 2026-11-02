@@ -6,6 +6,7 @@ import { TrackingPreview, TrackingScopePreview } from "./tracking-preview";
 import { trackingScenarios } from "@/tests/fixtures/reseller-tracking";
 
 export const metadata = { title: "Fixture Content Kit", robots: { index: false, follow: false } };
+export const viewport = { viewportFit: "cover" };
 export default async function ContentKitPreviewPage({ params, searchParams }: {
   params: Promise<{ id: string }>; searchParams: Promise<{ state?: string; tracking?: string; poster?: string }>;
 }) {

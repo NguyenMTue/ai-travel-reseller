@@ -12,6 +12,10 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
+import { VideoPlayer } from "@/src/components/video-player";
+import { playableVideoUrl } from "@/src/lib/video-delivery";
+import { useDialogViewport } from "@/src/components/use-dialog-viewport";
+import mobileStyles from "@/src/components/mobile-dialog.module.css";
 import type { LibraryItem } from "@/src/lib/merchant/media-library";
 import styles from "./video-generate-modal.module.css";
 
@@ -52,13 +56,19 @@ interface BlockedItem {
   required_action: string;
 }
 
-export function VideoGenerateModal({
+export function VideoGenerateModal(props: VideoGenerateModalProps) {
+  // Each opening/selected record owns fresh state and resources. Closing unmounts
+  // the player instead of resetting the previous session from an effect.
+  return props.isOpen ? <VideoGenerateSession key={props.selectedItem?.id ?? "new"} {...props} /> : null;
+}
+
+function VideoGenerateSession({
   isOpen,
   onClose,
   selectedItem,
-  autoStart = false,
 }: VideoGenerateModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  useDialogViewport(dialogRef, isOpen);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
 
   const [campaigns, setCampaigns] = useState<CampaignOption[]>([]);
@@ -100,11 +110,14 @@ export function VideoGenerateModal({
         : null;
 
     const previousOverflow = document.body.style.overflow;
+    const previousDocumentOverflow = document.documentElement.style.overflow;
     if (!dialog.open) dialog.showModal();
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
 
     return () => {
       document.body.style.overflow = previousOverflow;
+      document.documentElement.style.overflow = previousDocumentOverflow;
       if (dialog.open) dialog.close();
       restoreFocusRef.current?.focus();
     };
@@ -115,12 +128,13 @@ export function VideoGenerateModal({
     if (!isOpen) return;
 
     let alive = true;
-    setLoadingCampaigns(true);
+    const abort = new AbortController();
 
     fetch("/api/merchant/campaigns", {
       method: "GET",
       cache: "no-store",
       credentials: "same-origin",
+      signal: abort.signal,
     })
       .then((res) => res.json())
       .then((res) => {
@@ -141,21 +155,9 @@ export function VideoGenerateModal({
 
     return () => {
       alive = false;
+      abort.abort();
     };
   }, [isOpen]);
-
-  // Reset form khi mở mới
-  useEffect(() => {
-    if (isOpen) {
-      setMode("config");
-      setProgress(0);
-      setCurrentStepIndex(0);
-      setVideoResult(null);
-      setBlockedErrors([]);
-      setErrorMessage("");
-      setCopied(false);
-    }
-  }, [isOpen, selectedItem]);
 
   // 3. Kích hoạt pipeline sinh video AI
   async function handleStartGeneration() {
@@ -259,29 +261,19 @@ export function VideoGenerateModal({
           json.error || "Không thể khởi tạo video. Vui lòng kiểm tra lại cấu hình."
         );
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       clearTimeout(stepTimer1);
       clearTimeout(stepTimer2);
       clearTimeout(stepTimer3);
       setMode("error");
-      setErrorMessage("Lỗi kết nối mạng: " + (err?.message || "Không xác định"));
+      setErrorMessage("Lỗi kết nối mạng: " + (err instanceof Error ? err.message : "Không xác định"));
     }
-  }
-
-  function getPlayableVideoUrl(rawUrl: string | undefined): string {
-    if (!rawUrl) return "/campaign-videos/banahills-remediated.mp4";
-    // Nếu là domain giả lập storage.travellink.vn (chưa cấu hình public DNS trong môi trường demo/dev)
-    // tự động trỏ về video thành phẩm thực tế trong local public/campaign-videos/
-    if (rawUrl.includes("storage.travellink.vn")) {
-      return "/campaign-videos/banahills-remediated.mp4";
-    }
-    return rawUrl;
   }
 
   function handleCopyLink() {
-    const rawUrl = videoResult?.video_url;
+    const rawUrl = videoResult?.status === "ready" ? playableVideoUrl(videoResult.video_url) : null;
     if (rawUrl) {
-      const playable = getPlayableVideoUrl(rawUrl);
+      const playable = rawUrl;
       const copyUrl =
         typeof window !== "undefined" && playable.startsWith("/")
           ? `${window.location.origin}${playable}`
@@ -295,12 +287,10 @@ export function VideoGenerateModal({
             setTimeout(() => setCopied(false), 2500);
           })
           .catch(() => {
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2500);
+            setCopied(false);
           });
       } else {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2500);
+        setCopied(false);
       }
     }
   }
@@ -313,14 +303,20 @@ export function VideoGenerateModal({
       aria-labelledby="video-generate-title"
       aria-describedby="video-generate-desc"
       aria-busy={mode === "generating" || mode === "polling"}
-      onCancel={(e) => {
-        if (mode === "generating" || mode === "polling") {
-          e.preventDefault();
-        } else {
-          onClose();
-        }
+      onKeyDown={(event) => {
+        if (event.key !== "Tab") return;
+        const dialog = event.currentTarget;
+        const targets = [...dialog.querySelectorAll<HTMLElement>("button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),video[controls],[tabindex='0']")]
+          .filter(element => element.getClientRects().length > 0);
+        const first = targets[0], last = targets[targets.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
       }}
-      className={styles.dialog}
+      onCancel={(e) => {
+        e.preventDefault();
+        if (mode !== "generating" && mode !== "polling") onClose();
+      }}
+      className={`${styles.dialog} ${mobileStyles.surface}`}
     >
       <div className={styles.container}>
         <button
@@ -337,8 +333,9 @@ export function VideoGenerateModal({
         <div className={styles.header}>
           <p className="eyebrow">AI VIDEO GENERATOR · 9:16 UGC</p>
           <h2 id="video-generate-title">
-            {mode === "ready"
+            {mode === "ready" && videoResult?.status === "ready" && playableVideoUrl(videoResult.video_url)
               ? "Video AI của bạn đã sẵn sàng!"
+              : mode === "ready" ? "Đã nhận kết quả xử lý · Chờ video hợp lệ"
               : mode === "generating" || mode === "polling"
               ? "Đang tổng hợp video AI..."
               : "Tạo video AI từ mẫu tham khảo"}
@@ -583,19 +580,11 @@ export function VideoGenerateModal({
         {/* ============================================================== */}
         {/* TRẠNG THÁI 3: KẾT QUẢ THÀNH CÔNG (READY & PREVIEW)            */}
         {/* ============================================================== */}
-        {mode === "ready" && videoResult && (
+        {isOpen && mode === "ready" && videoResult && (
           <div className={styles.previewSection}>
             <div className={styles.previewGrid}>
-              <div className={styles.videoWrapper}>
-                <video
-                  src={getPlayableVideoUrl(videoResult.video_url)}
-                  controls
-                  playsInline
-                  poster={selectedItem?.thumbnailUrl || undefined}
-                >
-                  Trình duyệt không hỗ trợ thẻ video.
-                </video>
-              </div>
+              <VideoPlayer videoId={videoResult.content_id} videoUrl={videoResult.video_url}
+                ready={videoResult.status === "ready"} title={selectedCampaign?.name || `Video ${videoResult.content_id}`} />
 
               <div className={styles.previewDetails}>
                 <div className={styles.detailBox}>
@@ -634,23 +623,9 @@ export function VideoGenerateModal({
             </div>
 
             <div className={styles.actions}>
-              <Button variant="outline" onClick={handleCopyLink}>
+              <Button variant="outline" onClick={handleCopyLink} disabled={videoResult.status !== "ready" || !playableVideoUrl(videoResult.video_url)}>
                 <Copy size={16} aria-hidden="true" />
                 {copied ? "Đã sao chép link!" : "Sao chép link video"}
-              </Button>
-              <Button
-                variant="outline"
-                asChild
-              >
-                <a
-                  href={getPlayableVideoUrl(videoResult.video_url)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  download="banahills-campaign-video.mp4"
-                >
-                  <ExternalLink size={16} aria-hidden="true" />
-                  Mở / Tải video
-                </a>
               </Button>
               <Button variant="default" onClick={onClose}>
                 Hoàn tất

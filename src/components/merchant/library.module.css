@@ -1,4 +1,9 @@
 .shell{min-height:100dvh;background:var(--background);color:var(--foreground)}
+.shell{padding-top:env(safe-area-inset-top,0px)}
+.shell button,.nav a{min-height:44px;touch-action:manipulation}
+.shell input,.shell select{font-size:16px}
+@media(max-width:767px){.shell .header,.shell .main,.shell .footer{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}}
+.shell .footer{padding-bottom:max(24px,env(safe-area-inset-bottom,0px))}
 .header,.main,.footer{max-width:1280px;margin:auto;padding-left:clamp(16px,4vw,56px);padding-right:clamp(16px,4vw,56px)}
 .header{min-height:88px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid var(--border)}
 .workspace{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted-foreground)}
@@ -28,9 +33,11 @@
 .notice p,.pending p{max-width:65ch;color:var(--muted-foreground);font-size:14px}
 .pending{background:linear-gradient(130deg,var(--white),var(--secondary));padding-top:40px;padding-bottom:40px}
 .icon{width:58px;height:58px;display:grid;place-items:center;border:1px solid var(--border);border-radius:50%;color:var(--primary);background:var(--white)}
-.selection{display:flex;align-items:center;gap:16px;justify-content:space-between;margin:0 0 22px;padding:18px 20px;border-left:4px solid var(--accent);border-radius:10px;background:var(--accent-soft);overflow-wrap:anywhere}
+.selection{display:flex;flex-wrap:wrap;align-items:center;gap:16px;justify-content:space-between;margin:0 0 22px;padding:18px 20px;border-left:4px solid var(--accent);border-radius:10px;background:var(--accent-soft);overflow-wrap:anywhere}
 .selection>div{min-width:0}.selection p{font-size:14px;font-weight:500;margin:4px 0}.selection small{display:block;font-size:12px;color:var(--muted-foreground)}
-.selectionActions{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.selection>div:first-child{flex:1 1 220px}
+.selectionActions{display:flex;align-items:center;flex-wrap:wrap;gap:10px;max-width:100%}
+.selectionActions button{max-width:100%;white-space:normal;height:auto;padding-block:10px}
 .generateButton{display:inline-flex;align-items:center;gap:8px;font-weight:600;min-height:44px;box-shadow:0 2px 8px -1px rgba(12,114,114,0.3)}
 .pagination{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:32px;font-size:13px;flex-wrap:wrap}
 .footer{padding-top:24px;padding-bottom:24px;border-top:1px solid var(--border);font-size:12px;color:var(--muted-foreground)}

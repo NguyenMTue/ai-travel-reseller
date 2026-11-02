@@ -22,7 +22,11 @@ try{
     const normalCardWidth=await page.getByRole("article").first().evaluate(el=>el.getBoundingClientRect().width);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`document overflow ${width}`);
     assert(await page.getByRole("article").evaluateAll(cards=>cards.every(card=>{const c=card.getBoundingClientRect(),b=card.querySelector("button").getBoundingClientRect();return b.right<=c.right+1&&b.left>=c.left-1&&card.scrollWidth<=card.clientWidth+2;})),`card clip ${width}`);
-    await page.getByRole("button",{name:"Chọn mẫu",exact:true}).first().click();await expect(page.getByRole("button",{name:"Đã chọn",exact:true})).toHaveAttribute("aria-pressed","true");await expect(page.getByText("Chỉ đánh dấu trong phiên này.",{exact:false})).toBeVisible();
+    await page.getByRole("button",{name:"Chọn mẫu",exact:true}).first().click();await expect(page.getByRole("button",{name:"Đã chọn",exact:true})).toHaveAttribute("aria-pressed","true");await expect(page.getByText("Chỉ đánh dấu trong phiên này để tạo video AI từ mẫu.",{exact:true})).toBeVisible();
+    assert(await page.getByText("Chỉ đánh dấu trong phiên này để tạo video AI từ mẫu.",{exact:true}).evaluate(el=>el.getBoundingClientRect().width>100),`selection text must retain readable width ${width}`);
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`selected document overflow ${width}`);
+    const generate=page.getByRole("button",{name:"Tạo video từ mẫu đã chọn",exact:true});
+    assert(await generate.evaluate(button=>{const card=button.closest("section").getBoundingClientRect(),rect=button.getBoundingClientRect();return rect.left>=card.left&&rect.right<=card.right;}),`generation action must stay inside selection ${width}`);
     await page.getByRole("button",{name:"Bỏ chọn mẫu"}).click();
     await shot(`media-${width}`);
     const opener=page.getByRole("button",{name:"Quy chuẩn video",exact:true});await opener.click();const modal=page.getByRole("dialog",{name:"Quy chuẩn video du lịch"});
