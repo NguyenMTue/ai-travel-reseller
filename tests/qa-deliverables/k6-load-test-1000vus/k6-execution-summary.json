@@ -1,0 +1,444 @@
+{
+  "state": {
+    "isStdErrTTY": false,
+    "testRunDurationMs": 127687.7857,
+    "isStdOutTTY": false
+  },
+  "metrics": {
+    "http_req_connecting": {
+      "values": {
+        "max": 8.5153,
+        "p(90)": 0,
+        "p(95)": 0,
+        "avg": 0.03976885773820796,
+        "min": 0,
+        "med": 0
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "total_scenarios_executed": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 5279,
+        "rate": 41.3430303537639
+      }
+    },
+    "static_assets_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 3.51245,
+        "max": 56.8499,
+        "p(90)": 15.9214,
+        "p(95)": 22.44445,
+        "avg": 6.372699355670106,
+        "min": 0
+      }
+    },
+    "tracking_redirect_success_rate": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 3230
+      },
+      "thresholds": {
+        "rate>0.95": {
+          "ok": false
+        }
+      }
+    },
+    "landing_page_success_rate": {
+      "thresholds": {
+        "rate>0.98": {
+          "ok": true
+        }
+      },
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "fails": 0,
+        "rate": 1,
+        "passes": 3230
+      }
+    },
+    "iterations": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "rate": 41.3430303537639,
+        "count": 5279
+      }
+    },
+    "landing_page_duration": {
+      "contains": "time",
+      "values": {
+        "avg": 6.879106501547962,
+        "min": 0.5024,
+        "med": 4.5119,
+        "max": 61.6958,
+        "p(90)": 15.269699999999998,
+        "p(95)": 19.80374499999999
+      },
+      "thresholds": {
+        "p(95)<1500": {
+          "ok": true
+        }
+      },
+      "type": "trend"
+    },
+    "reseller_portal_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 5.980444069128054,
+        "min": 0,
+        "med": 3.5711,
+        "max": 52.1186,
+        "p(90)": 13.911959999999997,
+        "p(95)": 19.261719999999983
+      },
+      "thresholds": {
+        "p(95)<2000": {
+          "ok": true
+        }
+      }
+    },
+    "vus": {
+      "values": {
+        "value": 4,
+        "min": 4,
+        "max": 499
+      },
+      "type": "gauge",
+      "contains": "default"
+    },
+    "http_req_failed": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 10558
+      },
+      "thresholds": {
+        "rate<0.05": {
+          "ok": true
+        }
+      }
+    },
+    "data_sent": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 3518836,
+        "rate": 27558.125318794686
+      }
+    },
+    "iteration_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 6058.235713487422,
+        "min": 1207.9695,
+        "med": 8381.6335,
+        "max": 9366.5645,
+        "p(90)": 9032.94678,
+        "p(95)": 9134.82854
+      }
+    },
+    "reseller_portal_success_rate": {
+      "values": {
+        "rate": 1,
+        "passes": 1273,
+        "fails": 0
+      },
+      "thresholds": {
+        "rate>0.95": {
+          "ok": true
+        }
+      },
+      "type": "rate",
+      "contains": "default"
+    },
+    "http_req_receiving": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 0,
+        "med": 0,
+        "max": 6.5989,
+        "p(90)": 0.8951300000000001,
+        "p(95)": 1.0002,
+        "avg": 0.28134089789732897
+      }
+    },
+    "merchant_portal_success_rate": {
+      "values": {
+        "rate": 1,
+        "passes": 776,
+        "fails": 0
+      },
+      "type": "rate",
+      "contains": "default"
+    },
+    "http_req_duration": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 7061.50282,
+        "avg": 2161.4324513638967,
+        "min": 0,
+        "med": 10.407150000000001,
+        "max": 7146.4391,
+        "p(90)": 7049.72607
+      },
+      "thresholds": {
+        "p(90)<1500": {
+          "ok": false
+        },
+        "p(95)<2000": {
+          "ok": false
+        },
+        "p(99)<3500": {
+          "ok": false
+        }
+      }
+    },
+    "http_req_blocked": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 0.04820319189240383,
+        "min": 0,
+        "med": 0,
+        "max": 8.5153,
+        "p(90)": 0,
+        "p(95)": 0
+      }
+    },
+    "data_received": {
+      "type": "counter",
+      "contains": "data",
+      "values": {
+        "count": 140738952,
+        "rate": 1102211.548492692
+      }
+    },
+    "http_req_duration{expected_response:true}": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "min": 0,
+        "med": 10.407150000000001,
+        "max": 7146.4391,
+        "p(90)": 7049.72607,
+        "p(95)": 7061.50282,
+        "avg": 2161.4324513638967
+      }
+    },
+    "http_req_sending": {
+      "values": {
+        "avg": 0.012596069331312744,
+        "min": 0,
+        "med": 0,
+        "max": 2.3012,
+        "p(90)": 0,
+        "p(95)": 0
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "http_req_waiting": {
+      "values": {
+        "avg": 2161.1385143966713,
+        "min": 0,
+        "med": 10.0657,
+        "max": 7145.7814,
+        "p(90)": 7049.42961,
+        "p(95)": 7061.296345
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "vus_max": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 500,
+        "min": 500,
+        "max": 500
+      }
+    },
+    "http_req_tls_handshaking": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 0,
+        "avg": 0,
+        "min": 0,
+        "med": 0,
+        "max": 0,
+        "p(90)": 0
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 10558,
+        "rate": 82.6860607075278
+      }
+    },
+    "checks": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "passes": 20340,
+        "fails": 3230,
+        "rate": 0.8629613915994909
+      }
+    },
+    "merchant_portal_duration": {
+      "values": {
+        "avg": 5.776616881443305,
+        "min": 0,
+        "med": 3.35555,
+        "max": 58.3537,
+        "p(90)": 13.963149999999999,
+        "p(95)": 18.296425
+      },
+      "thresholds": {
+        "p(95)<2500": {
+          "ok": true
+        }
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "tracking_redirect_duration": {
+      "contains": "time",
+      "values": {
+        "p(95)": 7082.526055,
+        "avg": 7044.199841145503,
+        "min": 7007.6652,
+        "med": 7040.6813999999995,
+        "max": 7146.4391,
+        "p(90)": 7069.96696
+      },
+      "thresholds": {
+        "p(95)<2000": {
+          "ok": false
+        }
+      },
+      "type": "trend"
+    }
+  },
+  "root_group": {
+    "path": "",
+    "id": "d41d8cd98f00b204e9800998ecf8427e",
+    "groups": [],
+    "checks": [
+        {
+          "fails": 0,
+          "name": "Reseller Portal: Status 200 or 307 redirect to login",
+          "path": "::Reseller Portal: Status 200 or 307 redirect to login",
+          "id": "d59cfa55031ff8ae128487233a13fcc7",
+          "passes": 1273
+        },
+        {
+          "path": "::Reseller Portal: Latency (< 2000ms)",
+          "id": "1560a91a4c83596dd443d0b72c5cbbcd",
+          "passes": 1273,
+          "fails": 0,
+          "name": "Reseller Portal: Latency (< 2000ms)"
+        },
+        {
+          "path": "::Login Page: Status 200",
+          "id": "55da563522685e4c7582f8ead99363bc",
+          "passes": 1273,
+          "fails": 0,
+          "name": "Login Page: Status 200"
+        },
+        {
+          "name": "Login Page: Latency (< 1500ms)",
+          "path": "::Login Page: Latency (< 1500ms)",
+          "id": "0f163741c3858f411a5fa4a2975a167d",
+          "passes": 1273,
+          "fails": 0
+        },
+        {
+          "name": "Merchant Portal: Status 200 or 307 redirect",
+          "path": "::Merchant Portal: Status 200 or 307 redirect",
+          "id": "9ee24f65c865cded1176bedbfc2ca1b2",
+          "passes": 776,
+          "fails": 0
+        },
+        {
+          "passes": 776,
+          "fails": 0,
+          "name": "Merchant Portal: Latency (< 2500ms)",
+          "path": "::Merchant Portal: Latency (< 2500ms)",
+          "id": "78b7f4eec222147ef88d6aed76f8b505"
+        },
+        {
+          "id": "46330612fcb52c226b68d48b7dda8720",
+          "passes": 776,
+          "fails": 0,
+          "name": "Static Icon: Status 200",
+          "path": "::Static Icon: Status 200"
+        },
+        {
+          "name": "Redirect: Status code is 302 or 307",
+          "path": "::Redirect: Status code is 302 or 307",
+          "id": "289766f7352fa13f2dd998e4ec668b2d",
+          "passes": 3230,
+          "fails": 0
+        },
+        {
+          "name": "Redirect: Latency satisfies SLA (< 2000ms)",
+          "path": "::Redirect: Latency satisfies SLA (< 2000ms)",
+          "id": "543103ff38007274d36e60b936e27182",
+          "passes": 0,
+          "fails": 3230
+        },
+        {
+          "id": "e85d526ba587b9131d0fc610529b102b",
+          "passes": 3230,
+          "fails": 0,
+          "name": "Landing Page: Status code 200",
+          "path": "::Landing Page: Status code 200"
+        },
+        {
+          "id": "beb0499bce62aa010ae57eb30e2ccbd3",
+          "passes": 3230,
+          "fails": 0,
+          "name": "Landing Page: Latency satisfies SLA (< 1500ms)",
+          "path": "::Landing Page: Latency satisfies SLA (< 1500ms)"
+        },
+        {
+          "name": "Landing Page: Content contains Travel Reseller text",
+          "path": "::Landing Page: Content contains Travel Reseller text",
+          "id": "f6fc1f2aeece86918d2c81b29df1a7ed",
+          "passes": 3230,
+          "fails": 0
+        }
+      ],
+    "name": ""
+  },
+  "options": {
+    "summaryTrendStats": [
+      "avg",
+      "min",
+      "med",
+      "max",
+      "p(90)",
+      "p(95)"
+    ],
+    "summaryTimeUnit": "",
+    "noColor": false
+  }
+}
