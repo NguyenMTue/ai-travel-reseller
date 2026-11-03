@@ -46,8 +46,10 @@ async function loadProductAndCheckout(
     description: string;
     original_price: number | null;
     sale_price: number;
-    payment_url: string;
+    payment_url: string | null;
     booking_url: string | null;
+    valid_to?: string | null;
+    status?: string | null;
   };
   campaign: {
     id: string;
@@ -66,7 +68,7 @@ async function loadProductAndCheckout(
   const [productResult, campaignResult, resellerResult] = await Promise.all([
     supabase
       .from("products")
-      .select("id, merchant_id, name, description, original_price, sale_price, payment_url, booking_url")
+      .select("id, merchant_id, name, description, original_price, sale_price, payment_url, booking_url, valid_to, status")
       .eq("id", attribution.product_id)
       .maybeSingle(),
     supabase
@@ -96,14 +98,16 @@ async function loadProductAndCheckout(
   const product = productResult.data;
   const campaign = campaignResult.data;
 
-  // Runtime validation đối với sale_price và payment_url
+  // Runtime validation đối với sale_price
   if (product.sale_price === null || product.sale_price === undefined || product.sale_price <= 0) {
     throw new Error(`Product ${product.id} has invalid or non-positive sale_price: ${product.sale_price}`);
   }
 
-  if (!product.payment_url || !product.payment_url.startsWith("http")) {
-    throw new Error(`Product ${product.id} has invalid payment_url: ${product.payment_url}`);
-  }
+  // Contract alignment: Fallback payment_url || booking_url & validity check
+  const now = new Date();
+  const isExpired = product.valid_to ? new Date(product.valid_to).getTime() < now.getTime() : false;
+  const isActive = !product.status || product.status === "active";
+  const isValidForCheckout = !isExpired && isActive;
 
   // Load thông tin merchant nếu có
   const merchantId = product.merchant_id || campaign.merchant_id;
@@ -123,10 +127,10 @@ async function loadProductAndCheckout(
     merchant = merchantData;
   }
 
-  const checkoutUrl = buildCheckoutUrl(
-    product.payment_url,
-    attribution,
-  );
+  const checkoutUrl = isValidForCheckout
+    ? buildCheckoutUrl(product.payment_url, attribution, product.booking_url)
+    : null;
+
   return {
     checkoutUrl,
     product,
