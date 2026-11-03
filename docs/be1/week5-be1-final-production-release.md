@@ -1,9 +1,10 @@
 # BÁO CÁO NGHIỆM THU PRODUCTION RELEASE & HOTFIX — BE1 SPRINT 5 (03/11/2026)
 **Dự án:** AI Travel Reseller Platform (TravelLink AI)  
 **Sprint:** Tuần 5 (02/11/2026 – 07/11/2026) — Final Sprint / Go-Live  
-**Thời gian lập:** 13:45 Thứ Ba, 03/11/2026  
+**Thời gian lập:** 14:05 Thứ Ba, 03/11/2026  
 **Người thực hiện:** Nguyễn Minh Tuệ (Backend 1 Lead kiêm Project Manager) & Trợ lý Antigravity  
 **Nhánh Git:** `feature/be1-w5-production-release-and-hotfix` (tách từ `dev`)  
+**Pull Request đang mở:** [**PR #58: feat(be1): week 5 production release readiness, health check endpoint, vercel headers, and checkout fallback hotfix**](https://github.com/NguyenMTue/ai-travel-reseller/pull/58) *(Trạng thái: OPEN, Chưa merge)*  
 **Mục tiêu bàn giao:** Hoàn tất toàn bộ các task còn lại của BE1 trong Sprint 5 (`BE1-W5-04` và `BE1-W5-05`), khóa chặn các hợp đồng dữ liệu FE/BE, thiết lập endpoint giám sát hệ thống và kiểm định 100% tiêu chí Go-Live Production.
 
 ---
