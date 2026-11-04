@@ -80,3 +80,4 @@ pie title Phân bổ 50 phiên chat UAT theo Intent Taxonomy
 3. **Hiệu quả của Dual Temperature:**
    * Việc hạ `temperature = 0.2` cho câu hỏi giá vé và chính sách đã giúp độ lệch giá bằng $0\%$.
    * Việc nâng `temperature = 0.5` cho lời chào và câu hỏi ngoài lề giúp trải nghiệm trò chuyện ấm áp, tự nhiên hơn đáng kể.
+

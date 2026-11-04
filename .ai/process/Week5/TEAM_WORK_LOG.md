@@ -19,9 +19,10 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | BE1-W5-02 | Nguyễn Minh Tuệ | BE1 Lead | Tối ưu hóa Supavisor Connection Pooling phục vụ k6 load test | DONE | 02/11 14:00 | 03/11 12:00 |
 | BE1-W5-03 | Nguyễn Minh Tuệ | BE1 Lead | Cấu hình Supabase Storage Production `campaign-videos` & CDN | DONE | 02/11 15:30 | 03/11 17:00 |
 | BE1-W5-04 | Nguyễn Minh Tuệ | BE1 Lead | Phối hợp triển khai Production Release lên Vercel & kiểm tra SSL | READY | 05/11 08:30 | 05/11 17:00 |
-| BE2-W5-01 | Nguyễn Huỳnh | BE2 Lead | Cấu hình Gemini Production API Gateway, Rate Limiting & Fallbacks | READY | 02/11 10:00 | 02/11 17:00 |
-| BE2-W5-02 | Nguyễn Huỳnh | BE2 Lead | Khóa chặt Intent Routing & Production Grounding cho Sales Agent | READY | 03/11 08:30 | 03/11 17:00 |
-| BE2-W5-03 | Nguyễn Huỳnh | BE2 Lead | Giám sát AI logs real-time và tinh chỉnh prompt trong phiên UAT | READY | 04/11 08:30 | 04/11 17:00 |
+| BE2-W5-01 | Nguyễn Huỳnh | BE2 Lead | Cấu hình Gemini Production API Gateway, Rate Limiting & Fallbacks | DONE | 02/11 10:00 | 02/11 17:00 |
+| BE2-W5-02 | Nguyễn Huỳnh | BE2 Lead | Khóa chặt Intent Routing & Production Grounding cho Sales Agent | DONE | 03/11 08:30 | 03/11 17:00 |
+| BE2-W5-03 | Nguyễn Huỳnh | BE2 Lead | Giám sát AI logs real-time và tinh chỉnh prompt trong phiên UAT | DONE | 04/11 08:30 | 04/11 17:00 |
+| BE2-W5-04 | Nguyễn Huỳnh | BE2 Lead | Đóng gói Báo cáo Kiến trúc AI & Bằng chứng Grounding Bàn giao | DONE | 04/11 14:00 | 06/11 17:00 |
 | BE3-W5-01 | Thái Thanh Tú | BE3 Lead | Triển khai n8n Workflows có xác thực token trên Production Instance | READY | 02/11 10:00 | 02/11 17:00 |
 | BE3-W5-02 | Thái Thanh Tú | BE3 Lead | Khóa cấu hình Phễu Chuyển đổi 5 bước trên PostHog Analytics | READY | 03/11 08:30 | 03/11 17:00 |
 | BE3-W5-03 | Thái Thanh Tú | BE3 Lead | Xây dựng Telegram Bot cảnh báo sự cố khẩn cấp cho Quản trị viên | READY | 04/11 08:30 | 04/11 12:00 |
@@ -87,7 +88,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | PM / BE1 | Toàn team | Quyết định Feature Freeze & Master Gantt 6 Ngày | Biên bản họp Kick-off | 02/11 11:00 | `IN_PROGRESS` |
 | UI/UX | FE & Tester 3 | PWA Icons & Design Specs cho FAQ/Offline Modal | Assets & Figma link | 02/11 17:00 | `READY` |
 | BE1 Lead | QA Lead (Huy) | Connection string Supabase Pooler để chạy k6 | Credentials an toàn | 03/11 08:30 | `WAITING` |
-| BE2 Lead | FE Lead (Diệu) | Production Streaming Chat Endpoint | API Spec | 02/11 17:00 | `READY` |
+| BE2 Lead | FE Lead (Diệu) | Production Streaming Chat Endpoint | API Spec | 02/11 17:00 | `DONE` |
 | FE Lead | QA Lead (Huy) | Bản build Staging sẵn sàng cho E2E UAT | Web URL Staging | 03/11 17:00 | `WAITING` |
 | Tester 3 | FE Lead (Diệu) | PR component `reseller-faq-modal` & `offline-banner` | GitHub PR trên nhánh cô lập | 04/11 17:00 | `WAITING` |
 | BA Lead | Dev Team | Danh sách ticket bug UAT phát sinh | Bug Log table | 04/11 17:30 | `WAITING` |
