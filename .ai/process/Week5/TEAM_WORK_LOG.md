@@ -76,6 +76,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | QA-W4-04 | Trương Đức Huy | Kế hoạch & Ma trận kịch bản tổng thể End-to-End & UAT Test Plan Sprint 5 (`docs/qa/e2e-uat-test-plan-sprint5.md`) | 31/10/2026 12:00 | Toàn team, PM, BA Lead |
 | QA-W4-05 | Trần Văn Minh | Báo cáo kiểm định độc lập an toàn chống Hallucination AI Sales Agent (46/46 tests PASS, tỷ lệ ảo giác 0%, `docs/tester2/sales-agent-anti-hallucination-report.md`) | 29/10/2026 20:40 | BE2 Lead, Stakeholders |
 | T3-FE-W4-01 | Nguyễn Tuấn Anh | Trích xuất Dumb UI `VideoPostingTipsModal` và tích hợp vào Library Client (`src/components/merchant/video-posting-tips-modal.tsx`, `library-client.tsx`) | 28/10/2026 17:00 | FE Lead, PM |
+| FE-T3-W5 | Nguyễn Anh Tuấn | Xây dựng 02 Dumb UI component độc lập `ResellerFaqModal` và `OfflineBanner` (`src/components/reseller/reseller-faq-modal.tsx`, `src/components/common/offline-banner.tsx`) | 04/11/2026 17:00 | FE Lead, PM |
 
 ---
 
@@ -102,7 +103,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | BE1 Lead | FE Lead (Diệu) | Production Storage URL, Keys & Checkout Fallback | Env Vars & Code | 03/11 12:00 | `DONE` |
 | BE2 Lead | FE Lead (Diệu) | Production Streaming Chat Endpoint | API Spec | 02/11 17:00 | `DONE` |
 | FE Lead | QA Lead (Huy) | Bản build Staging sẵn sàng cho E2E UAT | Web URL Staging | 03/11 17:00 | `WAITING` |
-| Tester 3 | FE Lead (Diệu) | PR component `reseller-faq-modal` & `offline-banner` | GitHub PR trên nhánh cô lập | 04/11 17:00 | `WAITING` |
+| Tester 3 | FE Lead (Diệu) | PR component `reseller-faq-modal` & `offline-banner` | GitHub PR trên nhánh cô lập | 04/11 17:00 | `DONE` |
 | BA Lead | Dev Team | Danh sách ticket bug UAT phát sinh | Bug Log table | 04/11 17:30 | `WAITING` |
 | BE1 & FE | Toàn team | Production Live URL trên Vercel + Supabase Cloud | Domain chính thức + SSL | 05/11 17:00 | `READY` |
 | UI/UX | PM & Team | Video Walkthrough Demo 4K & Slide Deck Pitch | File MP4 & Slide PDF | 06/11 17:00 | `WAITING` |
@@ -162,3 +163,4 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | 03/11/2026 | Nghiệm thu Final E2E UAT 3 vai trò Sprint 5 | 9/9 kịch bản PASS 100%, 0 lỗi P0/P1, bảo mật PII đạt chuẩn NFR-SEC-02 | QA Lead (Huy) | Đủ điều kiện nghiệm thu cho Sprint 5 Release |
 | 04/11/2026 | Khóa cấu hình Dual Temperature & Circuit Breaker | Đảm bảo 0% ảo giác giá vé/chính sách và fast failover khi API Google quá tải | BE2 Lead | Sales Agent đạt chuẩn an toàn 100% |
 | 04/11/2026 | Nghiệm thu độc lập giao diện Tester 3 (QA Sign-off) | 12/12 tests PASS, 0% tràn ngang, 0 request API, đáp ứng FR-AIS-14 | QA Lead (Huy) | Đủ điều kiện để FE Lead và PM phê duyệt PR #59 |
+| 04/11/2026 | Phê duyệt và hợp nhất PR #61 của Tester 3 (FE-T3-W5) | Mã nguồn tuân thủ 100% nguyên tắc Dumb Component, độc lập an toàn, 0 lỗi typecheck | FE Lead & PM | Bổ sung ResellerFaqModal và OfflineBanner vào hệ thống |
