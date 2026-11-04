@@ -157,3 +157,4 @@ test("BE2-W5-01: generateSalesReply fast failover when circuit breaker is OPEN",
   salesAgentCircuitBreaker.reset();
   assert.equal(salesAgentCircuitBreaker.isOpen(), false);
 });
+

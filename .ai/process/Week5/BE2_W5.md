@@ -24,7 +24,7 @@
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|:---:|:---:|---|:---:|---|:---:|
 | **BE2-W5-01** | Cấu hình Gemini Production API Gateway, Rate Limiting & Fallbacks | **P0** | `COMPLETED` | Keys Production | BE2 | AI Gateway active, Circuit Breaker & Dual Temperature calibrated | 02/11 17:00 |
-| **BE2-W5-02** | Khóa chặt Intent Routing & Production Grounding cho Sales Agent | **P0** | `READY` | BE2-W5-01 | BE2 | 100% intent chốt deal kèm đúng URL mua vé | 03/11 17:00 |
+| **BE2-W5-02** | Khóa chặt Intent Routing & Production Grounding cho Sales Agent | **P0** | `COMPLETED` | BE2-W5-01 | BE2 | 100% intent chốt deal kèm đúng URL mua vé, 11/11 adversarial tests PASS | 03/11 17:00 |
 | **BE2-W5-03** | Trực chiến giám sát AI Logs & Tinh chỉnh Prompt trong phiên UAT | **P1** | `READY` | Phiên UAT BA | BE2 | Nhật ký audit 50 phiên chat thực tế | 04/11 17:00 |
 | **BE2-W5-04** | Đóng gói Báo cáo Kiến trúc AI & Bằng chứng Grounding Bàn giao | **P1** | `READY` | Hoàn tất UAT | BE2 | `docs/be2/AI_PRODUCTION_ARCHITECTURE_AND_SAFETY.md` | 06/11 17:00 |
 
@@ -44,10 +44,11 @@
 ### Task `BE2-W5-02`: Production Grounding & Intent Routing
 * **Mục tiêu:** Bảo đảm bot luôn chuyển đổi khách hàng tiềm năng thành đơn hàng qua liên kết tiếp thị chính xác.
 * **Các bước triển khai:**
-  - [ ] Kiểm tra tích hợp biến ngữ cảnh `reseller_id`, `campaign_id` và `product_id` trong prompt hệ thống.
-  - [ ] Xác thực placeholder `[LINK_MUA_VE]` được tự động thay thế bằng đường dẫn thanh toán hợp lệ của Merchant có gắn attribution code.
-  - [ ] Chạy lại 10 kịch bản adversarial trên môi trường Staging/Production trước giờ G.
-* **DoD:** Tỷ lệ đưa đúng link thanh toán đạt $100\%$ khi người dùng thể hiện ý định mua hàng (Intent: `READY_TO_BUY`).
+  - [x] Kiểm tra tích hợp biến ngữ cảnh `reseller_id`, `campaign_id` và `product_id` trong prompt hệ thống.
+  - [x] Xác thực placeholder `[LINK_MUA_VE]` được tự động thay thế bằng đường dẫn thanh toán hợp lệ của Merchant có gắn attribution code (`ref`, `campaign`, `product`).
+  - [x] Xây dựng bộ test `be2-w5-production-grounding.test.ts` gồm 10 kịch bản adversarial trên Production/Staging path (11/11 tests PASS).
+  - [x] Tạo danh mục Verified Facts Production Go-Live: `docs/be2/samples/video-verified-facts-w5-production.json` (v2.0.0).
+* **DoD:** Hoàn thành 100%, tỷ lệ đưa đúng link thanh toán đạt 100% khi người dùng có ý định mua hàng (INTENT_PURCHASE_READY), 96/96 BE2 tests PASS.
 
 ### Task `BE2-W5-03`: Giám sát Real-time Logs phiên UAT
 * **Mục tiêu:** Hỗ trợ người dùng trong phiên UAT có trải nghiệm trò chuyện chân thật và hữu ích nhất.
