@@ -71,6 +71,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | QA-W5-01 | Trương Đức Huy | Kịch bản k6 1.000 VUs & Báo cáo tải cao (98.24% success rate, 486.2 RPS, `docs/qa/k6-load-test-report-1000vus.md`) | 02/11/2026 17:00 | BE1 Lead, FE Lead |
 | QA-W5-02 | Trương Đức Huy | Nhật ký thực thi Final E2E UAT 3 vai trò Desktop & Mobile (9/9 kịch bản PASS 100%, `docs/qa/e2e-uat-execution-log-sprint5.md`) | 03/11/2026 11:30 | Toàn team, Hội đồng nghiệm thu |
 | QA-W5-04 | Trương Đức Huy | Báo cáo kiểm định độc lập giao diện Tester 3 (12/12 test cases PASS, `docs/qa/tester3-ui-audit-w5.md`) | 04/11/2026 14:30 | PM, FE Lead, Tester 3 |
+| QA-W4-05 | Trần Văn Minh | Báo cáo kiểm định độc lập an toàn chống Hallucination AI Sales Agent (46/46 tests PASS, tỷ lệ ảo giác 0%, `docs/tester2/sales-agent-anti-hallucination-report.md`) | 29/10/2026 20:40 | BE2 Lead, Stakeholders |
 
 ---
 
@@ -145,6 +146,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 
 | Ngày | Quyết định | Lý do | Người quyết định | Tác động |
 |---|---|---|---|---|
+| 29/10/2026 | Nghiệm thu an toàn chống Hallucination cho AI Sales Agent | 46/46 test cases đạt chuẩn, 0% tỷ lệ ảo giác, hoàn tất kiến trúc phòng thủ 4 tầng | Tester 2 (Minh) | Đủ điều kiện đưa AI Sales Agent vào phục vụ mạng lưới Reseller |
 | 02/11/2026 | Ban hành quyết định Feature Freeze | Tập trung toàn lực kiểm thử UAT, sửa lỗi và phát hành Production an toàn | PM (Tuệ) | Toàn team không mở feature mới |
 | 02/11/2026 | Xác lập nguyên tắc Non-blocking cho Tester 3 | Bảo đảm công việc của Tester 3 độc lập, không ảnh hưởng đến tiến độ chung | PM & FE Lead | Đường găng UAT/Go-Live an toàn tuyệt đối |
 | 02/11/2026 | Nghiệm thu k6 Load Test 1.000 VUs (Pass with Scaling Recommendations) | Tỷ lệ thành công 98.24%, P95 tracking redirect < 2s; chuyển hướng dẫn tối ưu pooler cho BE1 | QA Lead (Huy) | Bàn giao kết quả kiểm thử tải cho BE1 tối ưu Supavisor Pooler |
