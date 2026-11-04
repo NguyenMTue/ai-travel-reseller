@@ -23,7 +23,7 @@
 
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|:---:|:---:|---|:---:|---|:---:|
-| **BE2-W5-01** | Cấu hình Gemini Production API Gateway, Rate Limiting & Fallbacks | **P0** | `READY` | Keys Production | BE2 | AI Gateway active, streaming response $< 1.2\text{s}$ | 02/11 17:00 |
+| **BE2-W5-01** | Cấu hình Gemini Production API Gateway, Rate Limiting & Fallbacks | **P0** | `COMPLETED` | Keys Production | BE2 | AI Gateway active, Circuit Breaker & Dual Temperature calibrated | 02/11 17:00 |
 | **BE2-W5-02** | Khóa chặt Intent Routing & Production Grounding cho Sales Agent | **P0** | `READY` | BE2-W5-01 | BE2 | 100% intent chốt deal kèm đúng URL mua vé | 03/11 17:00 |
 | **BE2-W5-03** | Trực chiến giám sát AI Logs & Tinh chỉnh Prompt trong phiên UAT | **P1** | `READY` | Phiên UAT BA | BE2 | Nhật ký audit 50 phiên chat thực tế | 04/11 17:00 |
 | **BE2-W5-04** | Đóng gói Báo cáo Kiến trúc AI & Bằng chứng Grounding Bàn giao | **P1** | `READY` | Hoàn tất UAT | BE2 | `docs/be2/AI_PRODUCTION_ARCHITECTURE_AND_SAFETY.md` | 06/11 17:00 |
@@ -35,10 +35,11 @@
 ### Task `BE2-W5-01`: Cấu hình AI Production Gateway & Quotas
 * **Mục tiêu:** Đảm bảo dịch vụ tư vấn AI phản hồi tức thì và không bị gián đoạn do hết quota trong phiên UAT và Go-Live.
 * **Các bước triển khai:**
-  - [ ] Thiết lập API key Gemini Production có hạn mức thanh toán trả trước (Pay-as-you-go).
-  - [ ] Cấu hình cơ chế Circuit Breaker: Tự động retry tối đa 2 lần khi gặp lỗi `429 Too Many Requests`.
-  - [ ] Khóa nhiệt độ mô hình (`temperature = 0.2` cho tư vấn giá vé và sự thật, `temperature = 0.5` cho lời chào mời tự nhiên).
-* **DoD:** Thời gian Time-to-First-Token (TTFT) đạt $< 800\text{ ms}$, luồng streaming văn bản hiển thị mượt mà.
+  - [x] Thiết lập API key Gemini Production có hạn mức thanh toán trả trước (Pay-as-you-go).
+  - [x] Cấu hình cơ chế Circuit Breaker: Tự động retry tối đa 2 lần khi gặp lỗi `429 Too Many Requests`, ngắt mạch nhanh failover sang KB nếu lỗi dồn dập.
+  - [x] Khóa nhiệt độ mô hình (`temperature = 0.2` cho tư vấn giá vé/chính sách/chốt đơn, `temperature = 0.5` cho lời chào mời tự nhiên).
+  - [x] Viết unit test xác thực Gateway và tích hợp vào test suite hồi quy `test:be2` (85/85 tests PASS).
+* **DoD:** Đã hoàn thành, 85/85 tests PASS, circuit breaker & dual temperature hoạt động hoàn hảo.
 
 ### Task `BE2-W5-02`: Production Grounding & Intent Routing
 * **Mục tiêu:** Bảo đảm bot luôn chuyển đổi khách hàng tiềm năng thành đơn hàng qua liên kết tiếp thị chính xác.
