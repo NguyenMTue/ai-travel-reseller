@@ -73,6 +73,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | QA-W5-04 | Trương Đức Huy | Báo cáo kiểm định độc lập giao diện Tester 3 (12/12 test cases PASS, `docs/qa/tester3-ui-audit-w5.md`) | 04/11/2026 14:30 | PM, FE Lead, Tester 3 |
 | QA-W4-01 | Trần Văn Minh | Báo cáo thẩm định AI Video Rubric W4 cho 03 video mẫu BE1 (Điểm TB: 9.59/10, APPROVED, `docs/tester2/AI_VIDEO_RUBRIC_W4_EVALUATION.md`) | 29/10/2026 20:30 | FE Lead, Stakeholders |
 | QA-W4-02 | Trương Đức Huy | Kiểm thử Responsive & PWA trên thiết bị iPhone/Android Phương án C3 (12/12 tests PASS, `docs/qa/cross-device-pwa-test-log.md`) | 29/10/2026 17:00 | FE Lead, UI/UX |
+| QA-W4-03 | Trương Đức Huy | Báo cáo kiểm tra độc lập chất lượng giao diện modal tĩnh của Tester 3 (6/6 tests PASS 100%, `docs/qa/tester3-ui-audit-report.md`) | 28/10/2026 17:00 | FE Lead, PM |
 | QA-W4-04 | Trương Đức Huy | Kế hoạch & Ma trận kịch bản tổng thể End-to-End & UAT Test Plan Sprint 5 (`docs/qa/e2e-uat-test-plan-sprint5.md`) | 31/10/2026 12:00 | Toàn team, PM, BA Lead |
 | QA-W4-05 | Trần Văn Minh | Báo cáo kiểm định độc lập an toàn chống Hallucination AI Sales Agent (46/46 tests PASS, tỷ lệ ảo giác 0%, `docs/tester2/sales-agent-anti-hallucination-report.md`) | 29/10/2026 20:40 | BE2 Lead, Stakeholders |
 | T3-FE-W4-01 | Nguyễn Tuấn Anh | Trích xuất Dumb UI `VideoPostingTipsModal` và tích hợp vào Library Client (`src/components/merchant/video-posting-tips-modal.tsx`, `library-client.tsx`) | 28/10/2026 17:00 | FE Lead, PM |
@@ -151,6 +152,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 
 | Ngày | Quyết định | Lý do | Người quyết định | Tác động |
 |---|---|---|---|---|
+| 28/10/2026 | Nghiệm thu độc lập giao diện modal tĩnh của Tester 3 (QA Audit W4) | 6/6 test cases PASS trên Desktop & Mobile, 0% tràn viền, chuẩn ARIA & WCAG Touch | QA Lead (Huy) | Bảo đảm chất lượng giao diện câm của Tester 3 trước khi FE Lead tích hợp |
 | 28/10/2026 | Nghiệm thu Dumb UI VideoPostingTipsModal của Tester 3 | Đáp ứng quy chuẩn Dumb Component tĩnh, không logic mạng, tích hợp chuẩn vào Library Client | FE Lead & PM | Đưa cẩm nang mẹo đăng video lên hệ thống cho Merchant/Reseller |
 | 29/10/2026 | Nghiệm thu khả năng tương thích PWA & Responsive đa thiết bị (Phương án C3) | 12/12 tests PASS trên iPhone & Android, đạt chuẩn Apple HIG & Google Material 3 | QA Lead (Huy) | Bảo đảm trải nghiệm mượt mà cho Reseller & Khách hàng trên mobile |
 | 29/10/2026 | Nghiệm thu chất lượng 03 video mẫu BE1 đạt chuẩn Rubric W4 | Điểm 9.59/10, 0 Critical Failures, đạt chuẩn phát hành video dọc 9:16 | Tester 2 (Minh) | Bàn giao thông số kịch bản cho FE Lead và pipeline FFmpeg |
