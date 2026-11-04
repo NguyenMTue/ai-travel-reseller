@@ -38,7 +38,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | QA-W5-01 | Trương Đức Huy | QA Lead | Thực thi kịch bản k6 Load Test với 1.000 VUs trên Staging/Production | READY | 03/11 08:30 | 03/11 17:00 |
 | QA-W5-02 | Trương Đức Huy | QA Lead | Điều phối & thực thi kịch bản Final E2E UAT 3 vai trò | READY | 04/11 09:00 | 04/11 17:00 |
 | QA-W5-03 | Trương Đức Huy | QA Lead | Chạy bộ kiểm thử Smoke Test Playwright trên Domain Production | READY | 05/11 13:00 | 05/11 17:00 |
-| QA-W5-04 | Trương Đức Huy | QA Lead | Kiểm tra độc lập giao diện FAQ Modal & Offline Banner của Tester 3 | READY | 04/11 14:00 | 04/11 17:00 |
+| QA-W5-04 | Trương Đức Huy | QA Lead | Kiểm tra độc lập giao diện FAQ Modal & Offline Banner của Tester 3 | DONE | 04/11 14:00 | 04/11 17:00 |
 | QA-W5-06 | Trần Văn Minh | AI Safety QA | Kiểm định bảo mật Supabase RLS & Thử nghiệm xâm nhập trái phép | READY | 03/11 08:30 | 03/11 17:00 |
 | QA-W5-07 | Trần Văn Minh | AI Safety QA | Kiểm thử cơ chế chống gian lận click bot (Anti-Fraud Verification) | READY | 04/11 08:30 | 04/11 12:00 |
 | QA-W5-08 | Trần Văn Minh | AI Safety QA | Thẩm định chất lượng video & hội thoại AI Sales Agent trên Production | READY | 05/11 08:30 | 05/11 17:00 |
@@ -55,7 +55,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 
 ---
 
-## 2. COMPLETED WORK (BE1 & BE2 ĐÃ HOÀN TẤT 100%)
+## 2. COMPLETED WORK (BE1, BE2 & QA LEAD ĐÃ HOÀN TẤT)
 
 | Task ID | Member | Deliverable | Completed At | Handoff To |
 |---|---|---|---|---|
@@ -68,6 +68,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | BE2-W5-02 | Nguyễn Huỳnh | Khóa chặt Intent Routing & Production Grounding cho Sales Agent, 11/11 adversarial tests PASS | 03/11/2026 17:00 | QA Lead, Toàn team |
 | BE2-W5-03 | Nguyễn Huỳnh | Trực chiến giám sát AI logs real-time, audit 50 phiên chat thực tế (`uat-chat-audit-log-w5.md`) | 04/11/2026 12:00 | BA Lead, QA Lead |
 | BE2-W5-04 | Nguyễn Huỳnh | Báo cáo Kiến trúc AI & Bằng chứng Grounding Bàn giao (`docs/be2/AI_PRODUCTION_ARCHITECTURE_AND_SAFETY.md`) | 04/11/2026 14:00 | PM, BA, QA Lead |
+| QA-W5-04 | Trương Đức Huy | Báo cáo kiểm định độc lập giao diện Tester 3 (12/12 test cases PASS, `docs/qa/tester3-ui-audit-w5.md`) | 04/11/2026 14:30 | PM, FE Lead, Tester 3 |
 
 ---
 
@@ -147,3 +148,4 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | 02/11/2026 | Sử dụng Supavisor Transaction Pooler | Đảm bảo hệ thống chịu được tải 1.000 VUs trong k6 test | BE1 Lead | Database không bị tràn connection pool |
 | 03/11/2026 | Thống nhất fallback checkout & valid_to filter | Ngăn chặn 100% crash bot khi thiếu payment_url hoặc tour hết hạn | BE1 & FE Lead | Luồng tư vấn AI ổn định tuyệt đối |
 | 04/11/2026 | Khóa cấu hình Dual Temperature & Circuit Breaker | Đảm bảo 0% ảo giác giá vé/chính sách và fast failover khi API Google quá tải | BE2 Lead | Sales Agent đạt chuẩn an toàn 100% |
+| 04/11/2026 | Nghiệm thu độc lập giao diện Tester 3 (QA Sign-off) | 12/12 tests PASS, 0% tràn ngang, 0 request API, đáp ứng FR-AIS-14 | QA Lead (Huy) | Đủ điều kiện để FE Lead và PM phê duyệt PR #59 |
