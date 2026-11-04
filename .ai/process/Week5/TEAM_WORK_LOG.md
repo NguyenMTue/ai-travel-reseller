@@ -35,7 +35,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | T3-FE-W5-02 | Nguyễn Anh Tuấn | FE Junior | Xây dựng Component tĩnh `offline-banner.tsx` (Dumb UI) | READY | 03/11 13:00 | 04/11 12:00 |
 | T3-FE-W5-03 | Nguyễn Anh Tuấn | FE Junior | Chạy kiểm tra Typecheck (`tsc`), Linter (`eslint`) & nộp PR sạch | READY | 04/11 13:00 | 04/11 17:00 |
 | T3-FE-W5-04 | Nguyễn Anh Tuấn | FE Junior | Tiếp thu review, hoàn thiện component & hỗ trợ test feedback UI | READY | 05/11 08:30 | 05/11 17:00 |
-| QA-W5-01 | Trương Đức Huy | QA Lead | Thực thi kịch bản k6 Load Test với 1.000 VUs trên Staging/Production | READY | 03/11 08:30 | 03/11 17:00 |
+| QA-W5-01 | Trương Đức Huy | QA Lead | Thực thi kịch bản k6 Load Test với 1.000 VUs trên Staging/Production | DONE | 02/11 10:00 | 02/11 17:00 |
 | QA-W5-02 | Trương Đức Huy | QA Lead | Điều phối & thực thi kịch bản Final E2E UAT 3 vai trò | DONE | 03/11 09:00 | 04/11 17:00 |
 | QA-W5-03 | Trương Đức Huy | QA Lead | Chạy bộ kiểm thử Smoke Test Playwright trên Domain Production | READY | 05/11 13:00 | 05/11 17:00 |
 | QA-W5-04 | Trương Đức Huy | QA Lead | Kiểm tra độc lập giao diện FAQ Modal & Offline Banner của Tester 3 | DONE | 04/11 14:00 | 04/11 17:00 |
@@ -68,6 +68,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | BE2-W5-02 | Nguyễn Huỳnh | Khóa chặt Intent Routing & Production Grounding cho Sales Agent, 11/11 adversarial tests PASS | 03/11/2026 17:00 | QA Lead, Toàn team |
 | BE2-W5-03 | Nguyễn Huỳnh | Trực chiến giám sát AI logs real-time, audit 50 phiên chat thực tế (`uat-chat-audit-log-w5.md`) | 04/11/2026 12:00 | BA Lead, QA Lead |
 | BE2-W5-04 | Nguyễn Huỳnh | Báo cáo Kiến trúc AI & Bằng chứng Grounding Bàn giao (`docs/be2/AI_PRODUCTION_ARCHITECTURE_AND_SAFETY.md`) | 04/11/2026 14:00 | PM, BA, QA Lead |
+| QA-W5-01 | Trương Đức Huy | Kịch bản k6 1.000 VUs & Báo cáo tải cao (98.24% success rate, 486.2 RPS, `docs/qa/k6-load-test-report-1000vus.md`) | 02/11/2026 17:00 | BE1 Lead, FE Lead |
 | QA-W5-02 | Trương Đức Huy | Nhật ký thực thi Final E2E UAT 3 vai trò Desktop & Mobile (9/9 kịch bản PASS 100%, `docs/qa/e2e-uat-execution-log-sprint5.md`) | 03/11/2026 11:30 | Toàn team, Hội đồng nghiệm thu |
 | QA-W5-04 | Trương Đức Huy | Báo cáo kiểm định độc lập giao diện Tester 3 (12/12 test cases PASS, `docs/qa/tester3-ui-audit-w5.md`) | 04/11/2026 14:30 | PM, FE Lead, Tester 3 |
 
@@ -146,6 +147,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 |---|---|---|---|---|
 | 02/11/2026 | Ban hành quyết định Feature Freeze | Tập trung toàn lực kiểm thử UAT, sửa lỗi và phát hành Production an toàn | PM (Tuệ) | Toàn team không mở feature mới |
 | 02/11/2026 | Xác lập nguyên tắc Non-blocking cho Tester 3 | Bảo đảm công việc của Tester 3 độc lập, không ảnh hưởng đến tiến độ chung | PM & FE Lead | Đường găng UAT/Go-Live an toàn tuyệt đối |
+| 02/11/2026 | Nghiệm thu k6 Load Test 1.000 VUs (Pass with Scaling Recommendations) | Tỷ lệ thành công 98.24%, P95 tracking redirect < 2s; chuyển hướng dẫn tối ưu pooler cho BE1 | QA Lead (Huy) | Bàn giao kết quả kiểm thử tải cho BE1 tối ưu Supavisor Pooler |
 | 02/11/2026 | Sử dụng Supavisor Transaction Pooler | Đảm bảo hệ thống chịu được tải 1.000 VUs trong k6 test | BE1 Lead | Database không bị tràn connection pool |
 | 03/11/2026 | Thống nhất fallback checkout & valid_to filter | Ngăn chặn 100% crash bot khi thiếu payment_url hoặc tour hết hạn | BE1 & FE Lead | Luồng tư vấn AI ổn định tuyệt đối |
 | 03/11/2026 | Nghiệm thu Final E2E UAT 3 vai trò Sprint 5 | 9/9 kịch bản PASS 100%, 0 lỗi P0/P1, bảo mật PII đạt chuẩn NFR-SEC-02 | QA Lead (Huy) | Đủ điều kiện nghiệm thu cho Sprint 5 Release |
