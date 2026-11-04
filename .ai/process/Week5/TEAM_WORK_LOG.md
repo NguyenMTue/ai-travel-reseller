@@ -1,7 +1,7 @@
 # TEAM WORK LOG — SPRINT 5
 Project: AI Travel Reseller Platform (TravelLink AI)  
 Week: Tuần 5 (02/11/2026 – 07/11/2026) — Sprint 5 (Final Sprint / Go-Live)  
-Last Updated: 02/11/2026 09:00:00  
+Last Updated: 04/11/2026 14:00:00  
 Milestone: FINAL E2E UAT, PERFORMANCE STRESS TESTING, RLS SECURITY AUDIT & PRODUCTION GO-LIVE  
 
 ---
@@ -18,7 +18,8 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | BE1-W5-01 | Nguyễn Minh Tuệ | BE1 Lead | Setup & migrate toàn bộ Database lên Supabase Cloud Production | DONE | 02/11 10:00 | 02/11 17:00 |
 | BE1-W5-02 | Nguyễn Minh Tuệ | BE1 Lead | Tối ưu hóa Supavisor Connection Pooling phục vụ k6 load test | DONE | 02/11 14:00 | 03/11 12:00 |
 | BE1-W5-03 | Nguyễn Minh Tuệ | BE1 Lead | Cấu hình Supabase Storage Production `campaign-videos` & CDN | DONE | 02/11 15:30 | 03/11 17:00 |
-| BE1-W5-04 | Nguyễn Minh Tuệ | BE1 Lead | Phối hợp triển khai Production Release lên Vercel & kiểm tra SSL | READY | 05/11 08:30 | 05/11 17:00 |
+| BE1-W5-04 | Nguyễn Minh Tuệ | BE1 Lead | Phối hợp triển khai Production Release lên Vercel & kiểm tra SSL | DONE | 03/11 09:00 | 03/11 14:00 |
+| BE1-W5-05 | Nguyễn Minh Tuệ | BE1 Lead | Trực chiến Hotfix backend trong phiên UAT và Smoke Test | DONE | 03/11 10:00 | 03/11 15:00 |
 | BE2-W5-01 | Nguyễn Huỳnh | BE2 Lead | Cấu hình Gemini Production API Gateway, Rate Limiting & Fallbacks | DONE | 02/11 10:00 | 02/11 17:00 |
 | BE2-W5-02 | Nguyễn Huỳnh | BE2 Lead | Khóa chặt Intent Routing & Production Grounding cho Sales Agent | DONE | 03/11 08:30 | 03/11 17:00 |
 | BE2-W5-03 | Nguyễn Huỳnh | BE2 Lead | Giám sát AI logs real-time và tinh chỉnh prompt trong phiên UAT | DONE | 04/11 08:30 | 04/11 17:00 |
@@ -54,30 +55,31 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 
 ---
 
-## 2. COMPLETED WORK (KẾ THỪA TỪ SPRINT 4)
+## 2. COMPLETED WORK (BE1 & BE2 ĐÃ HOÀN TẤT 100%)
 
 | Task ID | Member | Deliverable | Completed At | Handoff To |
 |---|---|---|---|---|
-| BE1-W4-01..04 | Nguyễn Minh Tuệ | Motion 2.5D Parallax, Auto-Ducking 3 lớp, Render FFmpeg 1080x1920 30fps, 02 video mẫu | 30/10/2026 | FE Lead, QA, Toàn team |
-| BE2-W4-01..03 | Nguyễn Huỳnh | JSON Schema 14 scenes, Khóa 46/46 Anti-Hallucination tests, Verified Facts Catalog | 30/10/2026 | BE1, QA 2 |
-| BE3-W4-01..02 | Thái Thanh Tú | Hàng đợi retry n8n (Exponential Backoff 3 lần), Thông báo Telegram kèm preview | 30/10/2026 | FE Lead, QA |
-| FE-W4-01..04 | Cao T. Thu Diệu | Video Player 9:16 + Nút tải MP4, PWA Touch Gestures, Tích hợp modal mẹo đăng bài | 30/10/2026 | QA Lead, Toàn team |
-| T3-FE-W4-01..04| Nguyễn Anh Tuấn | Component `VideoPostingTipsModal` (Dumb UI), 0 lỗi lint/typecheck, Merged vào `dev` | 29/10/2026 | FE Lead |
-| QA-W4-01..05 | Huy, Minh | Báo cáo test di động C3 qua Cloudflared, Thẩm định Video Rubric 9.4/10, Báo cáo An toàn AI | 31/10/2026 | Stakeholders |
-| BA-W4-01..03 | Lê Mỹ Uyên | Master Roadmap 5 tuần, Acceptance Criteria Video v2, Kịch bản UAT Sprint 5 | 30/10/2026 | Toàn team |
-| UX-W4-01..02 | Quý Bửu | 03 file PNG overlays 9:16 (vignette, safe zone, badge), Design specs cho Tester 3 | 28/10/2026 | BE1, Tester 3 |
+| BE1-W5-01 | Nguyễn Minh Tuệ | Đồng bộ 21 migration files lên Supabase Cloud Singapore (`ykfosnwbgphlwpufnxrd`) | 02/11/2026 17:00 | QA Lead, FE Lead |
+| BE1-W5-02 | Nguyễn Minh Tuệ | Supavisor Pooler cổng 6543 (Transaction Mode), Covering Indexes, Latency RPC $p95 = 17.09\text{ ms}$ | 02/11/2026 20:00 | QA Lead (Huy) |
+| BE1-W5-03 | Nguyễn Minh Tuệ | Storage bucket `campaign-videos` public đọc, 100MB, full CORS, stream video 9:16 | 02/11/2026 20:20 | FE Lead (Diệu) |
+| BE1-W5-04 | Nguyễn Minh Tuệ | `vercel.json` Security Headers, Endpoint `/api/health`, Script `verify:production` 8/8 PASS, build Next.js 32/32 routes OK | 03/11/2026 14:00 | Toàn team |
+| BE1-W5-05 | Nguyễn Minh Tuệ | Hotfix fallback checkout `payment_url \|\| booking_url`, filter `valid_to`, bộ test `test:be1:w5` 7/7 PASS | 03/11/2026 14:30 | FE Lead, QA Lead |
+| BE2-W5-01 | Nguyễn Huỳnh | Cấu hình AI Production Gateway, Dual Temperature & Circuit Breaker (85/85 tests PASS) | 02/11/2026 17:00 | QA Lead, FE Lead |
+| BE2-W5-02 | Nguyễn Huỳnh | Khóa chặt Intent Routing & Production Grounding cho Sales Agent, 11/11 adversarial tests PASS | 03/11/2026 17:00 | QA Lead, Toàn team |
+| BE2-W5-03 | Nguyễn Huỳnh | Trực chiến giám sát AI logs real-time, audit 50 phiên chat thực tế (`uat-chat-audit-log-w5.md`) | 04/11/2026 12:00 | BA Lead, QA Lead |
+| BE2-W5-04 | Nguyễn Huỳnh | Báo cáo Kiến trúc AI & Bằng chứng Grounding Bàn giao (`docs/be2/AI_PRODUCTION_ARCHITECTURE_AND_SAFETY.md`) | 04/11/2026 14:00 | PM, BA, QA Lead |
 
 ---
 
 ## 3. IN PROGRESS
 1. **PM-W5-01:** Họp Kick-off Sprint 5, phổ biến quyết định Feature Freeze và chốt timeline 6 ngày.
-2. **BE1-W5-01:** Khởi tạo project Supabase Cloud Production khu vực Singapore `ap-southeast-1`.
-3. **FE-W5-01:** Rà soát luồng điều hướng nút thanh toán từ khung chat AI sang trang đặt vé.
+2. **QA-W5-01:** Khởi động k6 load test với connection pooler cổng 6543 do BE1 bàn giao.
+3. **FE-W5-01:** Hoàn thiện tích hợp redirect checkout và kiểm định PWA.
 
 ---
 
 ## 4. BLOCKED
-*Hiện tại không có blocker nào cản trở luồng công việc.* Toàn bộ mã nguồn trên nhánh `dev` sạch sẽ và đã vượt qua tất cả các bài kiểm tra chất lượng của Sprint 4.
+*Không có blocker kỹ thuật nào phía Backend (BE1 & BE2).* Toàn bộ hạ tầng cơ sở dữ liệu Cloud, connection pooling, storage, route healthcheck, AI Gateway, Dual Temperature, Circuit Breaker và Production Grounding đã sẵn sàng 100%.
 
 ---
 
@@ -87,12 +89,14 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 |---|---|---|---|:---:|:---:|
 | PM / BE1 | Toàn team | Quyết định Feature Freeze & Master Gantt 6 Ngày | Biên bản họp Kick-off | 02/11 11:00 | `IN_PROGRESS` |
 | UI/UX | FE & Tester 3 | PWA Icons & Design Specs cho FAQ/Offline Modal | Assets & Figma link | 02/11 17:00 | `READY` |
-| BE1 Lead | QA Lead (Huy) | Connection string Supabase Pooler để chạy k6 | Credentials an toàn | 03/11 08:30 | `WAITING` |
+| BE1 Lead | QA Lead (Huy) | Connection string Supabase Pooler để chạy k6 | Credentials an toàn | 03/11 08:30 | `DONE` |
+| BE1 Lead | QA Lead (Huy) | Endpoint Health Check `/api/health` cho Smoke Test | REST / HEAD | 03/11 14:00 | `DONE` |
+| BE1 Lead | FE Lead (Diệu) | Production Storage URL, Keys & Checkout Fallback | Env Vars & Code | 03/11 12:00 | `DONE` |
 | BE2 Lead | FE Lead (Diệu) | Production Streaming Chat Endpoint | API Spec | 02/11 17:00 | `DONE` |
 | FE Lead | QA Lead (Huy) | Bản build Staging sẵn sàng cho E2E UAT | Web URL Staging | 03/11 17:00 | `WAITING` |
 | Tester 3 | FE Lead (Diệu) | PR component `reseller-faq-modal` & `offline-banner` | GitHub PR trên nhánh cô lập | 04/11 17:00 | `WAITING` |
 | BA Lead | Dev Team | Danh sách ticket bug UAT phát sinh | Bug Log table | 04/11 17:30 | `WAITING` |
-| BE1 & FE | Toàn team | Production Live URL trên Vercel + Supabase Cloud | Domain chính thức + SSL | 05/11 17:00 | `WAITING` |
+| BE1 & FE | Toàn team | Production Live URL trên Vercel + Supabase Cloud | Domain chính thức + SSL | 05/11 17:00 | `READY` |
 | UI/UX | PM & Team | Video Walkthrough Demo 4K & Slide Deck Pitch | File MP4 & Slide PDF | 06/11 17:00 | `WAITING` |
 | BA & PM | Hội đồng / Khách | Hồ sơ bàn giao dự án & Biên bản UAT Sign-off | Bàn giao chính thức MVP | 07/11 11:30 | `WAITING` |
 
@@ -107,16 +111,18 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | `OfflineBannerProps` | FE Lead | Tester 3 | `{ isOffline?: boolean; }` — Hiển thị cảnh báo mất kết nối | `LOCKED` |
 | `AI_STREAM_PRODUCTION_GATEWAY` | BE2 | FE Chat Panel | Streaming response qua Vercel AI SDK, fail-closed khi thiếu facts | `STABLE` |
 | `Supabase RLS Policies v2` | BE1 | All Roles | Bắt buộc `auth.uid() = reseller_id` đối với ví và liên kết cá nhân | `APPROVED` |
+| `HealthCheckResponse` | BE1 | QA, Vercel | `{ status: "healthy", service, version, checks: { database, storage, pooler } }` | `APPROVED` |
+| `CheckoutFallbackContract`| BE1 | FE, AI Agent | Fallback `payment_url \|\| booking_url`, gán `null` khi tour hết hạn `valid_to` | `APPROVED` |
 
 ---
 
 ## 7. SHARED RESOURCES
 
 | Tài nguyên | Người phụ trách | Đường dẫn / Vị trí | Trạng thái |
-|---|---|---|:---:|
+|---|---|---|---|
 | Mã nguồn nhánh chính | PM / BE1 | Git branch `dev` $\rightarrow$ `main` (Release v1.0.0) | Chuẩn bị Code Freeze |
-| Database Supabase Cloud | BE1 Lead | Supabase Cloud Singapore (`ap-southeast-1`) | Chuẩn bị migration |
-| Domain Production | PM / BE1 | Custom domain chính thức liên kết Vercel | Đã cấu hình DNS |
+| Database Supabase Cloud | BE1 Lead | Supabase Cloud Singapore (`ykfosnwbgphlwpufnxrd`) | 21 Migrations OK |
+| Domain Production | PM / BE1 | Custom domain chính thức liên kết Vercel | Đã cấu hình DNS & vercel.json |
 | Kịch bản UAT Sprint 5 | BA Lead | `docs/specs/UAT_SCENARIOS_SPRINT5.md` | Sẵn sàng cho ngày 04/11 |
 | Kịch bản k6 Load Test | QA Lead | `tests/k6-loadtest-1000vus.js` | Sẵn sàng cho ngày 03/11 |
 
@@ -139,4 +145,5 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | 02/11/2026 | Ban hành quyết định Feature Freeze | Tập trung toàn lực kiểm thử UAT, sửa lỗi và phát hành Production an toàn | PM (Tuệ) | Toàn team không mở feature mới |
 | 02/11/2026 | Xác lập nguyên tắc Non-blocking cho Tester 3 | Bảo đảm công việc của Tester 3 độc lập, không ảnh hưởng đến tiến độ chung | PM & FE Lead | Đường găng UAT/Go-Live an toàn tuyệt đối |
 | 02/11/2026 | Sử dụng Supavisor Transaction Pooler | Đảm bảo hệ thống chịu được tải 1.000 VUs trong k6 test | BE1 Lead | Database không bị tràn connection pool |
-
+| 03/11/2026 | Thống nhất fallback checkout & valid_to filter | Ngăn chặn 100% crash bot khi thiếu payment_url hoặc tour hết hạn | BE1 & FE Lead | Luồng tư vấn AI ổn định tuyệt đối |
+| 04/11/2026 | Khóa cấu hình Dual Temperature & Circuit Breaker | Đảm bảo 0% ảo giác giá vé/chính sách và fast failover khi API Google quá tải | BE2 Lead | Sales Agent đạt chuẩn an toàn 100% |
