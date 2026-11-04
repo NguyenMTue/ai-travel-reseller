@@ -19,7 +19,8 @@
     "test:tester2:hallucination:live": "node --env-file=.env.local --experimental-strip-types tests/hallucination/run_hallucination_suite.mjs",
     "test:tester2:hallucination:node": "node --experimental-strip-types --test tests/hallucination/test_sales_agent_hallucination.ts",
     "test:be1:w5": "node --env-file=.env.local --experimental-strip-types --test tests/be1-w5-production-verification.test.ts",
-    "benchmark:wallet": "node --env-file=.env.local scripts/benchmark-reseller-wallet.mjs"
+    "benchmark:wallet": "node --env-file=.env.local scripts/benchmark-reseller-wallet.mjs",
+    "verify:production": "node --env-file=.env.local scripts/verify-production-readiness.mjs"
   },
   "dependencies": {
     "@fontsource/be-vietnam-pro": "^5.3.0",
