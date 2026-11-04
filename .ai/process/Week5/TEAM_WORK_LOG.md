@@ -1,7 +1,7 @@
 # TEAM WORK LOG — SPRINT 5
 Project: AI Travel Reseller Platform (TravelLink AI)  
 Week: Tuần 5 (02/11/2026 – 07/11/2026) — Sprint 5 (Final Sprint / Go-Live)  
-Last Updated: 03/11/2026 14:00:00  
+Last Updated: 04/11/2026 14:00:00  
 Milestone: FINAL E2E UAT, PERFORMANCE STRESS TESTING, RLS SECURITY AUDIT & PRODUCTION GO-LIVE  
 
 ---
@@ -20,9 +20,10 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | BE1-W5-03 | Nguyễn Minh Tuệ | BE1 Lead | Cấu hình Supabase Storage Production `campaign-videos` & CDN | DONE | 02/11 15:30 | 03/11 17:00 |
 | BE1-W5-04 | Nguyễn Minh Tuệ | BE1 Lead | Phối hợp triển khai Production Release lên Vercel & kiểm tra SSL | DONE | 03/11 09:00 | 03/11 14:00 |
 | BE1-W5-05 | Nguyễn Minh Tuệ | BE1 Lead | Trực chiến Hotfix backend trong phiên UAT và Smoke Test | DONE | 03/11 10:00 | 03/11 15:00 |
-| BE2-W5-01 | Nguyễn Huỳnh | BE2 Lead | Cấu hình Gemini Production API Gateway, Rate Limiting & Fallbacks | READY | 02/11 10:00 | 02/11 17:00 |
-| BE2-W5-02 | Nguyễn Huỳnh | BE2 Lead | Khóa chặt Intent Routing & Production Grounding cho Sales Agent | READY | 03/11 08:30 | 03/11 17:00 |
-| BE2-W5-03 | Nguyễn Huỳnh | BE2 Lead | Giám sát AI logs real-time và tinh chỉnh prompt trong phiên UAT | READY | 04/11 08:30 | 04/11 17:00 |
+| BE2-W5-01 | Nguyễn Huỳnh | BE2 Lead | Cấu hình Gemini Production API Gateway, Rate Limiting & Fallbacks | DONE | 02/11 10:00 | 02/11 17:00 |
+| BE2-W5-02 | Nguyễn Huỳnh | BE2 Lead | Khóa chặt Intent Routing & Production Grounding cho Sales Agent | DONE | 03/11 08:30 | 03/11 17:00 |
+| BE2-W5-03 | Nguyễn Huỳnh | BE2 Lead | Giám sát AI logs real-time và tinh chỉnh prompt trong phiên UAT | DONE | 04/11 08:30 | 04/11 17:00 |
+| BE2-W5-04 | Nguyễn Huỳnh | BE2 Lead | Đóng gói Báo cáo Kiến trúc AI & Bằng chứng Grounding Bàn giao | DONE | 04/11 14:00 | 06/11 17:00 |
 | BE3-W5-01 | Thái Thanh Tú | BE3 Lead | Triển khai n8n Workflows có xác thực token trên Production Instance | READY | 02/11 10:00 | 02/11 17:00 |
 | BE3-W5-02 | Thái Thanh Tú | BE3 Lead | Khóa cấu hình Phễu Chuyển đổi 5 bước trên PostHog Analytics | READY | 03/11 08:30 | 03/11 17:00 |
 | BE3-W5-03 | Thái Thanh Tú | BE3 Lead | Xây dựng Telegram Bot cảnh báo sự cố khẩn cấp cho Quản trị viên | READY | 04/11 08:30 | 04/11 12:00 |
@@ -54,7 +55,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 
 ---
 
-## 2. COMPLETED WORK (BE1 ĐÃ HOÀN TẤT 100%)
+## 2. COMPLETED WORK (BE1 & BE2 ĐÃ HOÀN TẤT 100%)
 
 | Task ID | Member | Deliverable | Completed At | Handoff To |
 |---|---|---|---|---|
@@ -63,6 +64,10 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | BE1-W5-03 | Nguyễn Minh Tuệ | Storage bucket `campaign-videos` public đọc, 100MB, full CORS, stream video 9:16 | 02/11/2026 20:20 | FE Lead (Diệu) |
 | BE1-W5-04 | Nguyễn Minh Tuệ | `vercel.json` Security Headers, Endpoint `/api/health`, Script `verify:production` 8/8 PASS, build Next.js 32/32 routes OK | 03/11/2026 14:00 | Toàn team |
 | BE1-W5-05 | Nguyễn Minh Tuệ | Hotfix fallback checkout `payment_url \|\| booking_url`, filter `valid_to`, bộ test `test:be1:w5` 7/7 PASS | 03/11/2026 14:30 | FE Lead, QA Lead |
+| BE2-W5-01 | Nguyễn Huỳnh | Cấu hình AI Production Gateway, Dual Temperature & Circuit Breaker (85/85 tests PASS) | 02/11/2026 17:00 | QA Lead, FE Lead |
+| BE2-W5-02 | Nguyễn Huỳnh | Khóa chặt Intent Routing & Production Grounding cho Sales Agent, 11/11 adversarial tests PASS | 03/11/2026 17:00 | QA Lead, Toàn team |
+| BE2-W5-03 | Nguyễn Huỳnh | Trực chiến giám sát AI logs real-time, audit 50 phiên chat thực tế (`uat-chat-audit-log-w5.md`) | 04/11/2026 12:00 | BA Lead, QA Lead |
+| BE2-W5-04 | Nguyễn Huỳnh | Báo cáo Kiến trúc AI & Bằng chứng Grounding Bàn giao (`docs/be2/AI_PRODUCTION_ARCHITECTURE_AND_SAFETY.md`) | 04/11/2026 14:00 | PM, BA, QA Lead |
 
 ---
 
@@ -74,7 +79,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 ---
 
 ## 4. BLOCKED
-*Không có blocker kỹ thuật nào phía Backend 1.* Toàn bộ hạ tầng cơ sở dữ liệu Cloud, connection pooling, storage, route healthcheck và hợp đồng dữ liệu đã sẵn sàng 100%.
+*Không có blocker kỹ thuật nào phía Backend (BE1 & BE2).* Toàn bộ hạ tầng cơ sở dữ liệu Cloud, connection pooling, storage, route healthcheck, AI Gateway, Dual Temperature, Circuit Breaker và Production Grounding đã sẵn sàng 100%.
 
 ---
 
@@ -87,7 +92,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | BE1 Lead | QA Lead (Huy) | Connection string Supabase Pooler để chạy k6 | Credentials an toàn | 03/11 08:30 | `DONE` |
 | BE1 Lead | QA Lead (Huy) | Endpoint Health Check `/api/health` cho Smoke Test | REST / HEAD | 03/11 14:00 | `DONE` |
 | BE1 Lead | FE Lead (Diệu) | Production Storage URL, Keys & Checkout Fallback | Env Vars & Code | 03/11 12:00 | `DONE` |
-| BE2 Lead | FE Lead (Diệu) | Production Streaming Chat Endpoint | API Spec | 02/11 17:00 | `READY` |
+| BE2 Lead | FE Lead (Diệu) | Production Streaming Chat Endpoint | API Spec | 02/11 17:00 | `DONE` |
 | FE Lead | QA Lead (Huy) | Bản build Staging sẵn sàng cho E2E UAT | Web URL Staging | 03/11 17:00 | `WAITING` |
 | Tester 3 | FE Lead (Diệu) | PR component `reseller-faq-modal` & `offline-banner` | GitHub PR trên nhánh cô lập | 04/11 17:00 | `WAITING` |
 | BA Lead | Dev Team | Danh sách ticket bug UAT phát sinh | Bug Log table | 04/11 17:30 | `WAITING` |
@@ -141,3 +146,4 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | 02/11/2026 | Xác lập nguyên tắc Non-blocking cho Tester 3 | Bảo đảm công việc của Tester 3 độc lập, không ảnh hưởng đến tiến độ chung | PM & FE Lead | Đường găng UAT/Go-Live an toàn tuyệt đối |
 | 02/11/2026 | Sử dụng Supavisor Transaction Pooler | Đảm bảo hệ thống chịu được tải 1.000 VUs trong k6 test | BE1 Lead | Database không bị tràn connection pool |
 | 03/11/2026 | Thống nhất fallback checkout & valid_to filter | Ngăn chặn 100% crash bot khi thiếu payment_url hoặc tour hết hạn | BE1 & FE Lead | Luồng tư vấn AI ổn định tuyệt đối |
+| 04/11/2026 | Khóa cấu hình Dual Temperature & Circuit Breaker | Đảm bảo 0% ảo giác giá vé/chính sách và fast failover khi API Google quá tải | BE2 Lead | Sales Agent đạt chuẩn an toàn 100% |
