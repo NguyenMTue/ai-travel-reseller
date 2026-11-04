@@ -53,6 +53,8 @@ export async function POST(request: Request) {
     );
   }
 
+  const startTime = Date.now();
+
   try {
     const answer = await answerProductChat({
       message: parsed.data.message,
@@ -60,8 +62,36 @@ export async function POST(request: Request) {
       attribution: parsed.data.attribution_context,
     });
 
+    const durationMs = Date.now() - startTime;
+
+    console.info(
+      JSON.stringify({
+        tag: "AI_SALES_CHAT_AUDIT",
+        timestamp: new Date().toISOString(),
+        reseller_id: parsed.data.attribution_context.reseller_id,
+        campaign_id: parsed.data.attribution_context.campaign_id,
+        product_id: parsed.data.attribution_context.product_id,
+        question_length: parsed.data.message.length,
+        intent_detected: answer.intent_detected,
+        has_checkout_url: Boolean(answer.suggested_checkout_url),
+        reply_length: answer.reply.length,
+        duration_ms: durationMs,
+      }),
+    );
+
     return NextResponse.json(answer);
   } catch (error) {
+    const durationMs = Date.now() - startTime;
+
+    console.error(
+      JSON.stringify({
+        tag: "AI_SALES_CHAT_ERROR",
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+        duration_ms: durationMs,
+      }),
+    );
+
     if (error instanceof InvalidAttributionError) {
       return NextResponse.json(
         { error: "Attribution context was not found" },
@@ -69,7 +99,6 @@ export async function POST(request: Request) {
       );
     }
 
-    console.error("Sales agent chat error:", error);
     return NextResponse.json(
       { error: "Unable to answer this message right now" },
       { status: 500 },
