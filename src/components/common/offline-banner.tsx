@@ -11,7 +11,7 @@ export function OfflineBanner({ isOffline = false }: OfflineBannerProps) {
     <div
       role="alert"
       aria-live="polite"
-      className="fixed inset-x-0 top-0 z-50 flex min-h-11 items-center justify-center gap-2 border-b border-[#fde68a] bg-[#fef3c7] px-4 py-2 text-center text-xs font-medium text-[#92400e] sm:text-sm"
+      className="fixed right-4 top-4 z-50 flex min-h-11 max-w-[calc(100%-2rem)] items-center justify-center gap-2 rounded-xl border border-[#fde68a] bg-[#fef3c7] px-4 py-2 text-center text-xs font-medium text-[#92400e] shadow-lg sm:right-6 sm:top-6 sm:max-w-md sm:text-sm"
     >
       <WifiOff size={18} aria-hidden="true" className="shrink-0" />
       <span>

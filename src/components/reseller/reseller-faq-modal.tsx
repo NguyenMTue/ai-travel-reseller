@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type KeyboardEvent } from "react";
 import { ChevronDown, X } from "lucide-react";
 
 import { useDialogViewport } from "../use-dialog-viewport";
@@ -45,8 +45,25 @@ export function ResellerFaqModal({
 }: ResellerFaqModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dismissButtonRef = useRef<HTMLButtonElement>(null);
 
   useDialogViewport(dialogRef, isOpen);
+
+  function handleTabKeyDown(event: KeyboardEvent<HTMLDialogElement>) {
+    if (event.key !== "Tab" || event.altKey || event.ctrlKey || event.metaKey) return;
+
+    const firstButton = closeButtonRef.current;
+    const lastButton = dismissButtonRef.current;
+    if (!firstButton || !lastButton) return;
+
+    if (event.shiftKey && document.activeElement === firstButton) {
+      event.preventDefault();
+      lastButton.focus();
+    } else if (!event.shiftKey && document.activeElement === lastButton) {
+      event.preventDefault();
+      firstButton.focus();
+    }
+  }
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -84,6 +101,7 @@ export function ResellerFaqModal({
       aria-modal="true"
       aria-labelledby="reseller-faq-title"
       aria-describedby="reseller-faq-description"
+      onKeyDown={handleTabKeyDown}
       onCancel={(event) => {
         event.preventDefault();
         onClose();
@@ -143,6 +161,7 @@ export function ResellerFaqModal({
 
       <div className="mt-5 flex justify-end">
         <button
+          ref={dismissButtonRef}
           type="button"
           onClick={onClose}
           className="min-h-11 rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
