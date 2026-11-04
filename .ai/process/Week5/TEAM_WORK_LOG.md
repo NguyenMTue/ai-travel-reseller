@@ -72,6 +72,8 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | QA-W5-02 | Trương Đức Huy | Nhật ký thực thi Final E2E UAT 3 vai trò Desktop & Mobile (9/9 kịch bản PASS 100%, `docs/qa/e2e-uat-execution-log-sprint5.md`) | 03/11/2026 11:30 | Toàn team, Hội đồng nghiệm thu |
 | QA-W5-04 | Trương Đức Huy | Báo cáo kiểm định độc lập giao diện Tester 3 (12/12 test cases PASS, `docs/qa/tester3-ui-audit-w5.md`) | 04/11/2026 14:30 | PM, FE Lead, Tester 3 |
 | QA-W4-01 | Trần Văn Minh | Báo cáo thẩm định AI Video Rubric W4 cho 03 video mẫu BE1 (Điểm TB: 9.59/10, APPROVED, `docs/tester2/AI_VIDEO_RUBRIC_W4_EVALUATION.md`) | 29/10/2026 20:30 | FE Lead, Stakeholders |
+| QA-W4-02 | Trương Đức Huy | Kiểm thử Responsive & PWA trên thiết bị iPhone/Android Phương án C3 (12/12 tests PASS, `docs/qa/cross-device-pwa-test-log.md`) | 29/10/2026 17:00 | FE Lead, UI/UX |
+| QA-W4-04 | Trương Đức Huy | Kế hoạch & Ma trận kịch bản tổng thể End-to-End & UAT Test Plan Sprint 5 (`docs/qa/e2e-uat-test-plan-sprint5.md`) | 31/10/2026 12:00 | Toàn team, PM, BA Lead |
 | QA-W4-05 | Trần Văn Minh | Báo cáo kiểm định độc lập an toàn chống Hallucination AI Sales Agent (46/46 tests PASS, tỷ lệ ảo giác 0%, `docs/tester2/sales-agent-anti-hallucination-report.md`) | 29/10/2026 20:40 | BE2 Lead, Stakeholders |
 
 ---
@@ -147,6 +149,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 
 | Ngày | Quyết định | Lý do | Người quyết định | Tác động |
 |---|---|---|---|---|
+| 29/10/2026 | Nghiệm thu khả năng tương thích PWA & Responsive đa thiết bị (Phương án C3) | 12/12 tests PASS trên iPhone & Android, đạt chuẩn Apple HIG & Google Material 3 | QA Lead (Huy) | Bảo đảm trải nghiệm mượt mà cho Reseller & Khách hàng trên mobile |
 | 29/10/2026 | Nghiệm thu chất lượng 03 video mẫu BE1 đạt chuẩn Rubric W4 | Điểm 9.59/10, 0 Critical Failures, đạt chuẩn phát hành video dọc 9:16 | Tester 2 (Minh) | Bàn giao thông số kịch bản cho FE Lead và pipeline FFmpeg |
 | 29/10/2026 | Nghiệm thu an toàn chống Hallucination cho AI Sales Agent | 46/46 test cases đạt chuẩn, 0% tỷ lệ ảo giác, hoàn tất kiến trúc phòng thủ 4 tầng | Tester 2 (Minh) | Đủ điều kiện đưa AI Sales Agent vào phục vụ mạng lưới Reseller |
 | 02/11/2026 | Ban hành quyết định Feature Freeze | Tập trung toàn lực kiểm thử UAT, sửa lỗi và phát hành Production an toàn | PM (Tuệ) | Toàn team không mở feature mới |
