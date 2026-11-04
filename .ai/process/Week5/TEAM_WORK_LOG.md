@@ -75,6 +75,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | QA-W4-02 | Trương Đức Huy | Kiểm thử Responsive & PWA trên thiết bị iPhone/Android Phương án C3 (12/12 tests PASS, `docs/qa/cross-device-pwa-test-log.md`) | 29/10/2026 17:00 | FE Lead, UI/UX |
 | QA-W4-04 | Trương Đức Huy | Kế hoạch & Ma trận kịch bản tổng thể End-to-End & UAT Test Plan Sprint 5 (`docs/qa/e2e-uat-test-plan-sprint5.md`) | 31/10/2026 12:00 | Toàn team, PM, BA Lead |
 | QA-W4-05 | Trần Văn Minh | Báo cáo kiểm định độc lập an toàn chống Hallucination AI Sales Agent (46/46 tests PASS, tỷ lệ ảo giác 0%, `docs/tester2/sales-agent-anti-hallucination-report.md`) | 29/10/2026 20:40 | BE2 Lead, Stakeholders |
+| T3-FE-W4-01 | Nguyễn Tuấn Anh | Trích xuất Dumb UI `VideoPostingTipsModal` và tích hợp vào Library Client (`src/components/merchant/video-posting-tips-modal.tsx`, `library-client.tsx`) | 28/10/2026 17:00 | FE Lead, PM |
 
 ---
 
@@ -149,6 +150,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 
 | Ngày | Quyết định | Lý do | Người quyết định | Tác động |
 |---|---|---|---|---|
+| 28/10/2026 | Nghiệm thu Dumb UI VideoPostingTipsModal của Tester 3 | Đáp ứng quy chuẩn Dumb Component tĩnh, không logic mạng, tích hợp chuẩn vào Library Client | FE Lead & PM | Đưa cẩm nang mẹo đăng video lên hệ thống cho Merchant/Reseller |
 | 29/10/2026 | Nghiệm thu khả năng tương thích PWA & Responsive đa thiết bị (Phương án C3) | 12/12 tests PASS trên iPhone & Android, đạt chuẩn Apple HIG & Google Material 3 | QA Lead (Huy) | Bảo đảm trải nghiệm mượt mà cho Reseller & Khách hàng trên mobile |
 | 29/10/2026 | Nghiệm thu chất lượng 03 video mẫu BE1 đạt chuẩn Rubric W4 | Điểm 9.59/10, 0 Critical Failures, đạt chuẩn phát hành video dọc 9:16 | Tester 2 (Minh) | Bàn giao thông số kịch bản cho FE Lead và pipeline FFmpeg |
 | 29/10/2026 | Nghiệm thu an toàn chống Hallucination cho AI Sales Agent | 46/46 test cases đạt chuẩn, 0% tỷ lệ ảo giác, hoàn tất kiến trúc phòng thủ 4 tầng | Tester 2 (Minh) | Đủ điều kiện đưa AI Sales Agent vào phục vụ mạng lưới Reseller |
