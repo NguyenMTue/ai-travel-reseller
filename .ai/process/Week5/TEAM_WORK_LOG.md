@@ -71,6 +71,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | QA-W5-01 | Trương Đức Huy | Kịch bản k6 1.000 VUs & Báo cáo tải cao (98.24% success rate, 486.2 RPS, `docs/qa/k6-load-test-report-1000vus.md`) | 02/11/2026 17:00 | BE1 Lead, FE Lead |
 | QA-W5-02 | Trương Đức Huy | Nhật ký thực thi Final E2E UAT 3 vai trò Desktop & Mobile (9/9 kịch bản PASS 100%, `docs/qa/e2e-uat-execution-log-sprint5.md`) | 03/11/2026 11:30 | Toàn team, Hội đồng nghiệm thu |
 | QA-W5-04 | Trương Đức Huy | Báo cáo kiểm định độc lập giao diện Tester 3 (12/12 test cases PASS, `docs/qa/tester3-ui-audit-w5.md`) | 04/11/2026 14:30 | PM, FE Lead, Tester 3 |
+| T2-W3-01 | Trần Văn Minh | Nâng cấp Bảng tiêu chí đánh giá chất lượng & an toàn nội dung AI Rubric W3 v3.0 (`docs/tester2/AI_VIDEO_RUBRIC_W3.md`) | 20/10/2026 17:00 | BE2 Lead, Toàn team |
 | QA-W3-03..05 | Trương Đức Huy | Kiểm thử Merchant Media Library, Diễn tập Demo C1 & C3, Báo cáo Nghiệm thu Sprint 3 (`tests/qa-deliverables/`) | 24/10/2026 12:00 | Toàn team, PM |
 | QA-W4-01 | Trần Văn Minh | Báo cáo thẩm định AI Video Rubric W4 cho 03 video mẫu BE1 (Điểm TB: 9.59/10, APPROVED, `docs/tester2/AI_VIDEO_RUBRIC_W4_EVALUATION.md`) | 29/10/2026 20:30 | FE Lead, Stakeholders |
 | QA-W4-02 | Trương Đức Huy | Kiểm thử Responsive & PWA trên thiết bị iPhone/Android Phương án C3 (12/12 tests PASS, `docs/qa/cross-device-pwa-test-log.md`) | 29/10/2026 17:00 | FE Lead, UI/UX |
@@ -153,6 +154,7 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 
 | Ngày | Quyết định | Lý do | Người quyết định | Tác động |
 |---|---|---|---|---|
+| 20/10/2026 | Ban hành bộ tiêu chuẩn thẩm định AI Video Rubric W3 (v3.0) | Khóa 7 lỗi nghiêm trọng Fatal Flaws FF-01..07, tiêu chí kịch bản 9:16 và template LLM-as-a-Judge | Tester 2 (Minh) | Làm căn cứ kiểm định cho kịch bản video AI và chatbot tư vấn bán hàng |
 | 24/10/2026 | Nghiệm thu chất lượng Sprint 3 & kịch bản diễn tập Demo C1 & C3 | 100% test cases Media Library & Rehearsal đạt chuẩn, sẵn sàng demo trên mobile & desktop | QA Lead (Huy) | Bàn giao hồ sơ nghiệm thu Sprint 3 và kịch bản demo cho toàn team |
 | 28/10/2026 | Nghiệm thu độc lập giao diện modal tĩnh của Tester 3 (QA Audit W4) | 6/6 test cases PASS trên Desktop & Mobile, 0% tràn viền, chuẩn ARIA & WCAG Touch | QA Lead (Huy) | Bảo đảm chất lượng giao diện câm của Tester 3 trước khi FE Lead tích hợp |
 | 28/10/2026 | Nghiệm thu Dumb UI VideoPostingTipsModal của Tester 3 | Đáp ứng quy chuẩn Dumb Component tĩnh, không logic mạng, tích hợp chuẩn vào Library Client | FE Lead & PM | Đưa cẩm nang mẹo đăng video lên hệ thống cho Merchant/Reseller |
