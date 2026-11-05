@@ -107,7 +107,16 @@ export function ResellerFaqModal({
         onClose();
       }}
       onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (event.target !== event.currentTarget) return;
+
+        const bounds = event.currentTarget.getBoundingClientRect();
+        const clickedOutsideDialog =
+          event.clientX < bounds.left ||
+          event.clientX > bounds.right ||
+          event.clientY < bounds.top ||
+          event.clientY > bounds.bottom;
+
+        if (clickedOutsideDialog) onClose();
       }}
       className={`${mobileStyles.surface} [--dialog-width:600px] rounded-2xl border border-border bg-background p-4 text-foreground shadow-2xl backdrop:bg-black/45 backdrop:backdrop-blur-sm sm:p-6`}
     >
