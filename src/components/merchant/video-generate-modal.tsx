@@ -94,7 +94,8 @@ export function VideoGenerateModal({
 
   // Form parameters
   const [persona, setPersona] = useState("Local Guide");
-  const [durationSec, setDurationSec] = useState(16);
+  const [durationSec, setDurationSec] = useState(10);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [allowSpatial, setAllowSpatial] = useState(true);
   const [authenticTip, setAuthenticTip] = useState(
     "Đi trước 8h30 sáng để trải nghiệm vắng khách, tận hưởng cảnh quan trọn vẹn nhất"
@@ -253,40 +254,34 @@ export function VideoGenerateModal({
     }
 
     setMode("generating");
-    setProgress(2);
-    setCurrentStepIndex(0);
+    setProgress(5);
+    setElapsedSeconds(0);
     setErrorMessage("");
     cachedResultRef.current = null;
 
     const startTime = Date.now();
 
     function scheduleTick() {
-      const nextDelay = 800;
+      const nextDelay = 1000;
 
       const timer = setTimeout(() => {
         const elapsedMs = Date.now() - startTime;
-        const elapsedSec = elapsedMs / 1000;
+        const elapsedSec = Math.floor(elapsedMs / 1000);
+        setElapsedSeconds(elapsedSec);
 
-        let targetPct = 8;
-        if (elapsedSec < 3) {
-          // Giai đoạn 1 (0s - 3s): Phân tích kịch bản & Hook -> 8%..32%
-          targetPct = Math.min(32, 8 + Math.floor((elapsedSec / 3) * 24));
-          setCurrentStepIndex(0);
-        } else if (elapsedSec < 8) {
-          // Giai đoạn 2 (3s - 8s): Hero Gemini Omni / Interpolation -> 33%..68%
-          targetPct = Math.min(68, 33 + Math.floor(((elapsedSec - 3) / 5) * 35));
-          setCurrentStepIndex(1);
-        } else if (elapsedSec < 14) {
-          // Giai đoạn 3 (8s - 14s): Edge-TTS & Lồng tiếng -> 69%..88%
-          targetPct = Math.min(88, 69 + Math.floor(((elapsedSec - 8) / 6) * 19));
-          setCurrentStepIndex(2);
+        // Tiến trình tính theo thời gian thực tế (ước lượng ~70s tổng thời gian Muse2API)
+        let targetPct = 5;
+        if (elapsedSec < 10) {
+          targetPct = 5 + Math.floor((elapsedSec / 10) * 15);
+        } else if (elapsedSec < 40) {
+          targetPct = 20 + Math.floor(((elapsedSec - 10) / 30) * 40);
+        } else if (elapsedSec < 70) {
+          targetPct = 60 + Math.floor(((elapsedSec - 40) / 30) * 28);
         } else {
-          // Giai đoạn 4: Đóng gói & lưu trữ Supabase -> 89%..96%
-          targetPct = Math.min(96, 89 + Math.floor(Math.random() * 5));
-          setCurrentStepIndex(3);
+          targetPct = Math.min(95, 88 + Math.floor(Math.min(elapsedSec - 70, 7)));
         }
 
-        setProgress((prev) => Math.min(96, Math.max(prev, targetPct)));
+        setProgress(targetPct);
         scheduleTick();
       }, nextDelay);
 
@@ -574,9 +569,8 @@ export function VideoGenerateModal({
                       value={durationSec}
                       onChange={(e) => setDurationSec(Number(e.target.value))}
                     >
-                      <option value={16}>16 giây (Chuỗi AI Chained 3 cảnh 15-18s - Tối ưu)</option>
-                      <option value={18}>18 giây (Chuỗi AI Chained 18s)</option>
-                      <option value={28}>28 giây (Chuẩn Hybrid Slideshow)</option>
+                      <option value={10}>10 giây (Tối ưu Video AI ngắn / TikTok / Reels)</option>
+                      <option value={18}>18 giây (Chuỗi phân cảnh điện ảnh 18s)</option>
                     </select>
                   </div>
                 </div>
@@ -647,63 +641,47 @@ export function VideoGenerateModal({
               />
             </div>
 
-            <div className={styles.stepsList}>
-              {[
-                {
-                  title: "Phân tích kịch bản & Hook viral cho chiến dịch",
-                  desc: "Trích xuất góc quay, nhịp điệu và thông điệp nổi bật từ tư liệu thực tế",
-                },
-                {
-                  title: "Ghép nối phân cảnh & Hiệu ứng chuyển động Spatial AI",
-                  desc: "Áp dụng Drone Parallax và nhịp chuyển cảnh 1.5s - 2.5s",
-                },
-                {
-                  title: "Hòa âm giọng đọc lồng tiếng & Âm thanh môi trường",
-                  desc: "Tạo thuyết minh tự nhiên và âm thanh sống động",
-                },
-                {
-                  title: "Xuất bản bản nháp 9:16 & Liên kết đặt tour chính thức",
-                  desc: "Hoàn thiện video chuẩn TikTok & Instagram Reels",
-                },
-              ].map((step, idx) => {
-                const isDone = currentStepIndex > idx || mode === "polling";
-                const isActive = currentStepIndex === idx && mode !== "polling";
+            {/* Bộ đếm thời gian thực tế đang chạy */}
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-3 my-2">
+              <div className="flex items-center justify-center gap-2 text-primary font-medium text-xs sm:text-sm">
+                <Loader2 className="animate-spin text-primary" size={18} aria-hidden="true" />
+                <span>Mô hình AI đang kết xuất video thực tế...</span>
+              </div>
 
-                return (
-                  <div
-                    key={idx}
-                    className={`${styles.stepItem} ${
-                      isDone
-                        ? styles.stepDone
-                        : isActive
-                        ? styles.stepActive
-                        : ""
-                    }`}
-                  >
-                    {isDone ? (
-                      <CheckCircle2
-                        size={18}
-                        className="text-primary shrink-0"
-                        aria-hidden="true"
-                      />
-                    ) : isActive ? (
-                      <Loader2
-                        size={18}
-                        className="text-accent animate-spin shrink-0"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <div className="w-[18px] h-[18px] rounded-full border border-border shrink-0" />
-                    )}
-                    <div>
-                      <strong className="block text-xs">{step.title}</strong>
-                      <span className="text-[11px] text-muted-foreground">
-                        {step.desc}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+              <div className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground font-mono">
+                {Math.floor(elapsedSeconds / 60)
+                  .toString()
+                  .padStart(2, "0")}
+                :
+                {(elapsedSeconds % 60).toString().padStart(2, "0")}
+              </div>
+
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                Thời gian thực tế: {elapsedSeconds} giây
+              </div>
+
+              <p className="text-xs text-muted-foreground max-w-md mx-auto pt-1 leading-relaxed">
+                Tác vụ sinh video đang được xử lý trực tiếp qua <strong>MUSE2API Gateway</strong>. Thời gian hoàn thành thực tế thường mất từ 50s – 80s. Vui lòng giữ kết nối.
+              </p>
+            </div>
+
+            {/* Thông số cấu hình thực tế đang áp dụng */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-left pt-1">
+              <div className="rounded-lg border border-border/80 bg-secondary/50 p-2.5">
+                <span className="text-[10px] text-muted-foreground block uppercase font-medium">Thời lượng chọn</span>
+                <strong className="text-xs text-foreground font-semibold">{durationSec} giây</strong>
+              </div>
+              <div className="rounded-lg border border-border/80 bg-secondary/50 p-2.5">
+                <span className="text-[10px] text-muted-foreground block uppercase font-medium">Tư liệu đầu vào</span>
+                <strong className="text-xs text-foreground font-semibold">
+                  {selectedItems.length > 0 ? selectedItems.length : 1} ảnh tham chiếu
+                </strong>
+              </div>
+              <div className="col-span-2 sm:col-span-1 rounded-lg border border-border/80 bg-secondary/50 p-2.5">
+                <span className="text-[10px] text-muted-foreground block uppercase font-medium">AI Engine</span>
+                <strong className="text-xs text-emerald-400 font-semibold">MUSE2API (Image-to-Video)</strong>
+              </div>
             </div>
 
             <div className="mt-4 pt-3 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
@@ -774,7 +752,7 @@ export function VideoGenerateModal({
                         )}
                       </div>
                       <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
-                        {videoResult.cost_breakdown.is_live_call ? "Google Cloud AI" : "100% Ảnh thật · 0đ"}
+                        {videoResult.cost_breakdown.is_live_call ? (videoResult.cost_breakdown.model_name.toLowerCase().includes("muse") ? "Muse2API Gateway" : "Google Cloud AI") : "100% Ảnh thật · 0đ"}
                       </span>
                     </div>
 

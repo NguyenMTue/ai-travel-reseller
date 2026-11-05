@@ -4,6 +4,13 @@ import {
   isAIStudioProfileAuthenticated,
   generateVideoViaAIStudioBrowser,
 } from "./ai-studio-browser-bridge.ts";
+import {
+  isMuse2ApiConfigured,
+  generateMuseVideoClip,
+  getMuse2ApiConfig,
+} from "./muse-video.ts";
+
+export { isMuse2ApiConfigured, generateMuseVideoClip, getMuse2ApiConfig };
 
 export interface OmniVideoCostBreakdown {
   model_name: string;
@@ -98,19 +105,45 @@ export function calculateGeminiOmniCost(
 }
 
 /**
- * Sinh video Hero chuyển cảnh từ 2 ảnh đầu vào bằng gemini-omni-1.1-flash
- * Nếu Google API trả về video: sử dụng video AI thật từ Google.
- * Nếu API key ở mức Free Tier (Google giới hạn limit = 0):
- * Tự động tạo video chuyển cảnh Hero nội suy trực tiếp từ 2 ảnh thật của Merchant,
- * TUYỆT ĐỐI không sử dụng video mẫu mock banahills-remediated.mp4.
+ * Sinh video phân cảnh / Hero chuyển cảnh từ ảnh đầu vào.
+ * 1. Ưu tiên hàng đầu: MUSE2API Gateway (qua MUSE2API_KEY).
+ * 2. Ưu tiên 2: Google Interactions API (Gemini Omni Flash).
+ * 3. Ưu tiên 3: Tự động hóa Browser Google AI Studio.
+ * 4. Fallback 4: Nội suy chuyển cảnh mượt mà 4K Ken Burns bằng FFmpeg từ ảnh thật của Merchant.
  */
 export async function generateGeminiOmniHeroVideo(
   input: OmniVideoGenerationInput
 ): Promise<OmniVideoGenerationResult> {
   const duration = input.durationSeconds || 6;
+
+  // 1. Ưu tiên cao nhất: MUSE2API Gateway nếu MUSE2API_KEY được cấu hình
+  if (isMuse2ApiConfigured()) {
+    try {
+      console.log(`[Video Engine] Kích hoạt MUSE2API Gateway cho phân cảnh (${duration}s)...`);
+      const museResult = await generateMuseVideoClip({
+        prompt: input.prompt,
+        startImageBuffer: input.startImageBuffer,
+        endImageBuffer: input.endImageBuffer,
+        durationSeconds: duration,
+        aspectRatio: input.aspectRatio || "9:16",
+      });
+
+      if (museResult?.videoBuffer && museResult.videoBuffer.length > 1000) {
+        return {
+          videoBuffer: museResult.videoBuffer,
+          durationSeconds: museResult.durationSeconds,
+          cost: museResult.cost,
+        };
+      }
+    } catch (museErr: any) {
+      console.warn("[Video Engine] MUSE2API call notice:", museErr?.message || museErr);
+      // Tự động chuyển tiếp xuống các phương án dự phòng tiếp theo
+    }
+  }
+
   const apiKey = process.env.GEMINI_API_KEY?.trim();
 
-  // 1. Thử gọi Google Interactions API với gemini-omni-1.1-flash
+  // 2. Thử gọi Google Interactions API với gemini-omni-1.1-flash
   if (apiKey) {
     try {
       const response = await fetch(
@@ -199,7 +232,7 @@ export async function generateGeminiOmniHeroVideo(
     }
   }
 
-  // 2. Thử tự động hóa Browser Playwright nếu Profile đã đăng nhập Google AI Studio
+  // 3. Thử tự động hóa Browser Playwright nếu Profile đã đăng nhập Google AI Studio
   try {
     const isAuthed = await isAIStudioProfileAuthenticated();
     if (isAuthed) {
@@ -238,7 +271,7 @@ export async function generateGeminiOmniHeroVideo(
     console.warn("[Gemini Omni] AI Studio Browser Automation notice:", browserErr?.message);
   }
 
-  // 3. Chế độ tạo chuyển cảnh Hero nội suy từ 2 ảnh thật:
+  // 4. Chế độ tạo chuyển cảnh Hero nội suy từ 2 ảnh thật:
   // Sử dụng trực tiếp 2 ảnh mà Merchant đã chọn để tổng hợp video Hero chuyển cảnh
   // (Đảm bảo 100% hình ảnh hiển thị là từ ảnh thật của Merchant, không mock)
   try {

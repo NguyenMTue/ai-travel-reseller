@@ -4,6 +4,13 @@ Thư mục tài liệu kỹ thuật, hợp đồng bàn giao và mẫu dữ li�
 
 ---
 
+## Danh mục tài liệu Tích hợp AI Video Engine (Tháng 11/2026)
+
+1. **Nhật ký bàn giao phiên làm việc Tích hợp MUSE2API & Tối ưu UI Video:**
+   - [`session_handover_2026_11_05_muse2api.md`](./session_handover_2026_11_05_muse2api.md): Chi tiết tích hợp cổng Muse2API Gateway (`POST /v1/videos`, polling, download buffer), cấu hình biến môi trường `MUSE2API_KEY`, cập nhật dropdown thời lượng 10s & 18s, thay thế giai đoạn giả lập bằng đồng hồ đếm thời gian thực (Live Elapsed Timer), và dữ liệu chiến dịch mẫu test trên Cloud Supabase.
+
+---
+
 ## Danh mục tài liệu Sprint 5 (Tuần 5)
 
 1. **Tài liệu bàn giao tích hợp Checkout & Attribution cho Frontend:**
@@ -23,6 +30,7 @@ Thư mục tài liệu kỹ thuật, hợp đồng bàn giao và mẫu dữ li�
 
 3. **Lệnh chạy kiểm thử độc lập:**
    ```powershell
+   npm run test:muse-video
    npm run test:video-engine
    node --experimental-strip-types --test tests/merchant-media-api.test.ts
    npx tsc --noEmit
