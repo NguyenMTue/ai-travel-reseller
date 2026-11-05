@@ -10,7 +10,6 @@ import {
   Sparkles,
   ArrowUpRight,
 } from "lucide-react";
-import { Button } from "@/src/components/ui/button";
 import { requestChat, ChatRequestError, type ChatTransport, type Attribution } from "@/src/lib/chat/transport";
 export type { Attribution } from "@/src/lib/chat/transport";
 type Message = {
@@ -172,9 +171,8 @@ export function ChatPanel({
               {preview ? "Mô phỏng · Không kết nối AI" : attribution ? "Tư vấn theo sản phẩm" : "Bản xem trước giao diện"}
             </small>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
+            className="button button-ghost button-icon"
             disabled={pending || messages.length === 0}
             aria-label="Cuộc trò chuyện mới"
             onClick={() => {
@@ -184,7 +182,7 @@ export function ChatPanel({
             }}
           >
             <Plus />
-          </Button>
+          </button>
         </header>
         <div
           ref={scroll}
@@ -270,14 +268,14 @@ export function ChatPanel({
                 }
               }}
             />
-            <Button
+            <button
               type="submit"
-              size="icon"
+              className="button button-primary button-icon"
               aria-label="Gửi tin nhắn"
               disabled={!input.trim() || pending || expired}
             >
               <ArrowUp />
-            </Button>
+            </button>
           </form>
           <p>
             AI có thể mắc lỗi. Vui lòng xác nhận thông tin với doanh nghiệp.

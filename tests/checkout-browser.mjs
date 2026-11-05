@@ -40,7 +40,10 @@ try {
     await expect(count).toHaveText("1");
     await expect(card).toBeVisible();
     const link = card.getByRole("link");
-    await expect(link).toHaveAttribute("href", /https:\/\/merchant.example\/booking\?ref=/);
+    await expect(link).toHaveAttribute("href", /https:\/\/sunworld.vn\/booking\/ba-na-hills-buffet\?ref=/);
+    await expect(link).toHaveAttribute("target","_blank");
+    await expect(link).toHaveAttribute("rel","noopener noreferrer");
+    await expect(card).toContainText("sunworld.vn");
     const href = new URL(await link.getAttribute("href"));
     assert.equal(href.searchParams.get("ref"), "22222222-2222-4222-8222-222222222222");
     assert.equal(href.searchParams.get("campaign"), "11111111-1111-4111-8111-111111111111");
@@ -79,7 +82,13 @@ try {
     await page.screenshot({path:output + "/checkout-" + width + ".png"});
     console.log("PASS checkout, attribution, dedup, focus and layout " + width);
   }
-  for (const value of ["missing-url","unsafe-url","wrong-attribution"]) {
+  await fresh(); await scenario.selectOption("be-contract"); await open(); await ask();
+  const beLink=card.getByRole("link");
+  await expect(beLink).toHaveAttribute("href","https://sunworld.vn/booking/ba-na-hills-buffet?ref=22222222-2222-2222-2222-222222222222&campaign=44444444-4444-4444-4444-222222222222&product=33333333-3333-3333-3333-333333333333");
+  await beLink.click(); await expect(card).toContainText("M\u00f4 ph\u1ecfng m\u1edf checkout");
+  assert.equal(context.pages().length,1);
+  console.log("PASS exact BE1 payload and safe simulated navigation");
+  for (const value of ["missing-url","unsafe-url","untrusted-domain","wrong-attribution"]) {
     await fresh(); await scenario.selectOption(value); await open(); await ask();
     await expect(card).toContainText("Chưa có liên kết đặt vé hợp lệ");
     await expect(card.getByRole("link")).toHaveCount(0);

@@ -5,9 +5,10 @@ import { execFileSync } from "node:child_process";
 import sharp from "sharp";
 const expect=baseExpect.configure({timeout:30000});
 const base=process.env.PWA_BASE_URL??"http://127.0.0.1:3196";
-const output="E:/THUCTAP/fe-w5-recovery/pwa-production";
+const output=process.env.PWA_EVIDENCE_DIR??"build/fe-w5-pwa-evidence";
 await mkdir(output,{recursive:true});
-const oldWorker=execFileSync("git",["show","HEAD:public/sw.js"],{encoding:"utf8"});
+// Pin the v1 fixture: HEAD now contains v2 after the checkpoint/merge.
+const oldWorker=execFileSync("git",["show","7ced50a54997e639145d1ce83330ad2557b38574:public/sw.js"],{encoding:"utf8"});
 const context=await chromium.launchPersistentContext(output+"/chrome-profile-"+Date.now(),{headless:true,executablePath:process.env.PLAYWRIGHT_CHROMIUM_PATH??"C:/Program Files/Google/Chrome/Application/chrome.exe",serviceWorkers:"allow",viewport:{width:390,height:844}});
 const browser=context.browser();
 try{
