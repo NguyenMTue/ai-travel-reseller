@@ -1,7 +1,7 @@
 # TEAM WORK LOG — SPRINT 5
 Project: AI Travel Reseller Platform (TravelLink AI)  
 Week: Tuần 5 (02/11/2026 – 07/11/2026) — Sprint 5 (Final Sprint / Go-Live)  
-Last Updated: 02/11/2026 09:00:00  
+Last Updated: 04/11/2026 14:00:00  
 Milestone: FINAL E2E UAT, PERFORMANCE STRESS TESTING, RLS SECURITY AUDIT & PRODUCTION GO-LIVE  
 
 ---
@@ -15,13 +15,15 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | Task ID | Member | Role | Task | Status | Started | Deadline |
 |---|---|---|---|---|---|---|
 | PM-W5-01 | Nguyễn Minh Tuệ | PM / BE1 Lead | Họp Kick-off Sprint 5, ban hành quyết định Feature Freeze và master plan 6 ngày | IN_PROGRESS | 02/11 09:00 | 02/11 11:00 |
-| BE1-W5-01 | Nguyễn Minh Tuệ | BE1 Lead | Setup & migrate toàn bộ Database lên Supabase Cloud Production | READY | 02/11 10:00 | 02/11 17:00 |
-| BE1-W5-02 | Nguyễn Minh Tuệ | BE1 Lead | Tối ưu hóa Supavisor Connection Pooling phục vụ k6 load test | READY | 03/11 08:30 | 03/11 12:00 |
-| BE1-W5-03 | Nguyễn Minh Tuệ | BE1 Lead | Cấu hình Supabase Storage Production `campaign-videos` & CDN | READY | 03/11 13:00 | 03/11 17:00 |
-| BE1-W5-04 | Nguyễn Minh Tuệ | BE1 Lead | Phối hợp triển khai Production Release lên Vercel & kiểm tra SSL | READY | 05/11 08:30 | 05/11 17:00 |
-| BE2-W5-01 | Nguyễn Huỳnh | BE2 Lead | Cấu hình Gemini Production API Gateway, Rate Limiting & Fallbacks | READY | 02/11 10:00 | 02/11 17:00 |
-| BE2-W5-02 | Nguyễn Huỳnh | BE2 Lead | Khóa chặt Intent Routing & Production Grounding cho Sales Agent | READY | 03/11 08:30 | 03/11 17:00 |
-| BE2-W5-03 | Nguyễn Huỳnh | BE2 Lead | Giám sát AI logs real-time và tinh chỉnh prompt trong phiên UAT | READY | 04/11 08:30 | 04/11 17:00 |
+| BE1-W5-01 | Nguyễn Minh Tuệ | BE1 Lead | Setup & migrate toàn bộ Database lên Supabase Cloud Production | DONE | 02/11 10:00 | 02/11 17:00 |
+| BE1-W5-02 | Nguyễn Minh Tuệ | BE1 Lead | Tối ưu hóa Supavisor Connection Pooling phục vụ k6 load test | DONE | 02/11 14:00 | 03/11 12:00 |
+| BE1-W5-03 | Nguyễn Minh Tuệ | BE1 Lead | Cấu hình Supabase Storage Production `campaign-videos` & CDN | DONE | 02/11 15:30 | 03/11 17:00 |
+| BE1-W5-04 | Nguyễn Minh Tuệ | BE1 Lead | Phối hợp triển khai Production Release lên Vercel & kiểm tra SSL | DONE | 03/11 09:00 | 03/11 14:00 |
+| BE1-W5-05 | Nguyễn Minh Tuệ | BE1 Lead | Trực chiến Hotfix backend trong phiên UAT và Smoke Test | DONE | 03/11 10:00 | 03/11 15:00 |
+| BE2-W5-01 | Nguyễn Huỳnh | BE2 Lead | Cấu hình Gemini Production API Gateway, Rate Limiting & Fallbacks | DONE | 02/11 10:00 | 02/11 17:00 |
+| BE2-W5-02 | Nguyễn Huỳnh | BE2 Lead | Khóa chặt Intent Routing & Production Grounding cho Sales Agent | DONE | 03/11 08:30 | 03/11 17:00 |
+| BE2-W5-03 | Nguyễn Huỳnh | BE2 Lead | Giám sát AI logs real-time và tinh chỉnh prompt trong phiên UAT | DONE | 04/11 08:30 | 04/11 17:00 |
+| BE2-W5-04 | Nguyễn Huỳnh | BE2 Lead | Đóng gói Báo cáo Kiến trúc AI & Bằng chứng Grounding Bàn giao | DONE | 04/11 14:00 | 06/11 17:00 |
 | BE3-W5-01 | Thái Thanh Tú | BE3 Lead | Triển khai n8n Workflows có xác thực token trên Production Instance | READY | 02/11 10:00 | 02/11 17:00 |
 | BE3-W5-02 | Thái Thanh Tú | BE3 Lead | Khóa cấu hình Phễu Chuyển đổi 5 bước trên PostHog Analytics | READY | 03/11 08:30 | 03/11 17:00 |
 | BE3-W5-03 | Thái Thanh Tú | BE3 Lead | Xây dựng Telegram Bot cảnh báo sự cố khẩn cấp cho Quản trị viên | READY | 04/11 08:30 | 04/11 12:00 |
@@ -33,10 +35,10 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | T3-FE-W5-02 | Nguyễn Anh Tuấn | FE Junior | Xây dựng Component tĩnh `offline-banner.tsx` (Dumb UI) | READY | 03/11 13:00 | 04/11 12:00 |
 | T3-FE-W5-03 | Nguyễn Anh Tuấn | FE Junior | Chạy kiểm tra Typecheck (`tsc`), Linter (`eslint`) & nộp PR sạch | READY | 04/11 13:00 | 04/11 17:00 |
 | T3-FE-W5-04 | Nguyễn Anh Tuấn | FE Junior | Tiếp thu review, hoàn thiện component & hỗ trợ test feedback UI | READY | 05/11 08:30 | 05/11 17:00 |
-| QA-W5-01 | Trương Đức Huy | QA Lead | Thực thi kịch bản k6 Load Test với 1.000 VUs trên Staging/Production | READY | 03/11 08:30 | 03/11 17:00 |
-| QA-W5-02 | Trương Đức Huy | QA Lead | Điều phối & thực thi kịch bản Final E2E UAT 3 vai trò | READY | 04/11 09:00 | 04/11 17:00 |
+| QA-W5-01 | Trương Đức Huy | QA Lead | Thực thi kịch bản k6 Load Test với 1.000 VUs trên Staging/Production | DONE | 02/11 10:00 | 02/11 17:00 |
+| QA-W5-02 | Trương Đức Huy | QA Lead | Điều phối & thực thi kịch bản Final E2E UAT 3 vai trò | DONE | 03/11 09:00 | 04/11 17:00 |
 | QA-W5-03 | Trương Đức Huy | QA Lead | Chạy bộ kiểm thử Smoke Test Playwright trên Domain Production | READY | 05/11 13:00 | 05/11 17:00 |
-| QA-W5-04 | Trương Đức Huy | QA Lead | Kiểm tra độc lập giao diện FAQ Modal & Offline Banner của Tester 3 | READY | 04/11 14:00 | 04/11 17:00 |
+| QA-W5-04 | Trương Đức Huy | QA Lead | Kiểm tra độc lập giao diện FAQ Modal & Offline Banner của Tester 3 | DONE | 04/11 14:00 | 04/11 17:00 |
 | QA-W5-06 | Trần Văn Minh | AI Safety QA | Kiểm định bảo mật Supabase RLS & Thử nghiệm xâm nhập trái phép | READY | 03/11 08:30 | 03/11 17:00 |
 | QA-W5-07 | Trần Văn Minh | AI Safety QA | Kiểm thử cơ chế chống gian lận click bot (Anti-Fraud Verification) | READY | 04/11 08:30 | 04/11 12:00 |
 | QA-W5-08 | Trần Văn Minh | AI Safety QA | Thẩm định chất lượng video & hội thoại AI Sales Agent trên Production | READY | 05/11 08:30 | 05/11 17:00 |
@@ -53,24 +55,37 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 
 ---
 
-## 2. COMPLETED WORK (KẾ THỪA TỪ SPRINT 4)
+## 2. COMPLETED WORK (BE1, BE2 & QA LEAD ĐÃ HOÀN TẤT)
 
 | Task ID | Member | Deliverable | Completed At | Handoff To |
 |---|---|---|---|---|
-| BE1-W4-01..04 | Nguyễn Minh Tuệ | Motion 2.5D Parallax, Auto-Ducking 3 lớp, Render FFmpeg 1080x1920 30fps, 02 video mẫu | 30/10/2026 | FE Lead, QA, Toàn team |
-| BE2-W4-01..03 | Nguyễn Huỳnh | JSON Schema 14 scenes, Khóa 46/46 Anti-Hallucination tests, Verified Facts Catalog | 30/10/2026 | BE1, QA 2 |
-| BE3-W4-01..02 | Thái Thanh Tú | Hàng đợi retry n8n (Exponential Backoff 3 lần), Thông báo Telegram kèm preview | 30/10/2026 | FE Lead, QA |
-| FE-W4-01..04 | Cao T. Thu Diệu | Video Player 9:16 + Nút tải MP4, PWA Touch Gestures, Tích hợp modal mẹo đăng bài | 30/10/2026 | QA Lead, Toàn team |
-| T3-FE-W4-01..04| Nguyễn Anh Tuấn | Component `VideoPostingTipsModal` (Dumb UI), 0 lỗi lint/typecheck, Merged vào `dev` | 29/10/2026 | FE Lead |
-| QA-W4-01..05 | Huy, Minh | Báo cáo test di động C3 qua Cloudflared, Thẩm định Video Rubric 9.4/10, Báo cáo An toàn AI | 31/10/2026 | Stakeholders |
-| BA-W4-01..03 | Lê Mỹ Uyên | Master Roadmap 5 tuần, Acceptance Criteria Video v2, Kịch bản UAT Sprint 5 | 30/10/2026 | Toàn team |
-| UX-W4-01..02 | Quý Bửu | 03 file PNG overlays 9:16 (vignette, safe zone, badge), Design specs cho Tester 3 | 28/10/2026 | BE1, Tester 3 |
+| BE1-W5-01 | Nguyễn Minh Tuệ | Đồng bộ 21 migration files lên Supabase Cloud Singapore (`ykfosnwbgphlwpufnxrd`) | 02/11/2026 17:00 | QA Lead, FE Lead |
+| BE1-W5-02 | Nguyễn Minh Tuệ | Supavisor Pooler cổng 6543 (Transaction Mode), Covering Indexes, Latency RPC $p95 = 17.09\text{ ms}$ | 02/11/2026 20:00 | QA Lead (Huy) |
+| BE1-W5-03 | Nguyễn Minh Tuệ | Storage bucket `campaign-videos` public đọc, 100MB, full CORS, stream video 9:16 | 02/11/2026 20:20 | FE Lead (Diệu) |
+| BE1-W5-04 | Nguyễn Minh Tuệ | `vercel.json` Security Headers, Endpoint `/api/health`, Script `verify:production` 8/8 PASS, build Next.js 32/32 routes OK | 03/11/2026 14:00 | Toàn team |
+| BE1-W5-05 | Nguyễn Minh Tuệ | Hotfix fallback checkout `payment_url \|\| booking_url`, filter `valid_to`, bộ test `test:be1:w5` 7/7 PASS | 03/11/2026 14:30 | FE Lead, QA Lead |
+| BE2-W5-01 | Nguyễn Huỳnh | Cấu hình AI Production Gateway, Dual Temperature & Circuit Breaker (85/85 tests PASS) | 02/11/2026 17:00 | QA Lead, FE Lead |
+| BE2-W5-02 | Nguyễn Huỳnh | Khóa chặt Intent Routing & Production Grounding cho Sales Agent, 11/11 adversarial tests PASS | 03/11/2026 17:00 | QA Lead, Toàn team |
+| BE2-W5-03 | Nguyễn Huỳnh | Trực chiến giám sát AI logs real-time, audit 50 phiên chat thực tế (`uat-chat-audit-log-w5.md`) | 04/11/2026 12:00 | BA Lead, QA Lead |
+| BE2-W5-04 | Nguyễn Huỳnh | Báo cáo Kiến trúc AI & Bằng chứng Grounding Bàn giao (`docs/be2/AI_PRODUCTION_ARCHITECTURE_AND_SAFETY.md`) | 04/11/2026 14:00 | PM, BA, QA Lead |
+| QA-W5-01 | Trương Đức Huy | Kịch bản k6 1.000 VUs & Báo cáo tải cao (98.24% success rate, 486.2 RPS, `docs/qa/k6-load-test-report-1000vus.md`) | 02/11/2026 17:00 | BE1 Lead, FE Lead |
+| QA-W5-02 | Trương Đức Huy | Nhật ký thực thi Final E2E UAT 3 vai trò Desktop & Mobile (9/9 kịch bản PASS 100%, `docs/qa/e2e-uat-execution-log-sprint5.md`) | 03/11/2026 11:30 | Toàn team, Hội đồng nghiệm thu |
+| QA-W5-04 | Trương Đức Huy | Báo cáo kiểm định độc lập giao diện Tester 3 (12/12 test cases PASS, `docs/qa/tester3-ui-audit-w5.md`) | 04/11/2026 14:30 | PM, FE Lead, Tester 3 |
+| T2-W3-01 | Trần Văn Minh | Nâng cấp Bảng tiêu chí đánh giá chất lượng & an toàn nội dung AI Rubric W3 v3.0 (`docs/tester2/AI_VIDEO_RUBRIC_W3.md`) | 20/10/2026 17:00 | BE2 Lead, Toàn team |
+| QA-W3-03..05 | Trương Đức Huy | Kiểm thử Merchant Media Library, Diễn tập Demo C1 & C3, Báo cáo Nghiệm thu Sprint 3 (`tests/qa-deliverables/`) | 24/10/2026 12:00 | Toàn team, PM |
+| QA-W4-01 | Trần Văn Minh | Báo cáo thẩm định AI Video Rubric W4 cho 03 video mẫu BE1 (Điểm TB: 9.59/10, APPROVED, `docs/tester2/AI_VIDEO_RUBRIC_W4_EVALUATION.md`) | 29/10/2026 20:30 | FE Lead, Stakeholders |
+| QA-W4-02 | Trương Đức Huy | Kiểm thử Responsive & PWA trên thiết bị iPhone/Android Phương án C3 (12/12 tests PASS, `docs/qa/cross-device-pwa-test-log.md`) | 29/10/2026 17:00 | FE Lead, UI/UX |
+| QA-W4-03 | Trương Đức Huy | Báo cáo kiểm tra độc lập chất lượng giao diện modal tĩnh của Tester 3 (6/6 tests PASS 100%, `docs/qa/tester3-ui-audit-report.md`) | 28/10/2026 17:00 | FE Lead, PM |
+| QA-W4-04 | Trương Đức Huy | Kế hoạch & Ma trận kịch bản tổng thể End-to-End & UAT Test Plan Sprint 5 (`docs/qa/e2e-uat-test-plan-sprint5.md`) | 31/10/2026 12:00 | Toàn team, PM, BA Lead |
+| QA-W4-05 | Trần Văn Minh | Báo cáo kiểm định độc lập an toàn chống Hallucination AI Sales Agent (46/46 tests PASS, tỷ lệ ảo giác 0%, `docs/tester2/sales-agent-anti-hallucination-report.md`) | 29/10/2026 20:40 | BE2 Lead, Stakeholders |
+| T3-FE-W4-01 | Nguyễn Tuấn Anh | Trích xuất Dumb UI `VideoPostingTipsModal` và tích hợp vào Library Client (`src/components/merchant/video-posting-tips-modal.tsx`, `library-client.tsx`) | 28/10/2026 17:00 | FE Lead, PM |
+| FE-T3-W5 | Nguyễn Anh Tuấn | Xây dựng 02 Dumb UI component độc lập `ResellerFaqModal` và `OfflineBanner` (`src/components/reseller/reseller-faq-modal.tsx`, `src/components/common/offline-banner.tsx`) | 04/11/2026 17:00 | FE Lead, PM |
 
 ---
 
 ## 3. IN PROGRESS
 1. **PM-W5-01:** Họp Kick-off Sprint 5, phổ biến quyết định Feature Freeze và chốt timeline 6 ngày.
-2. **BE1-W5-01:** Khởi tạo project Supabase Cloud Production khu vực Singapore `ap-southeast-1`.
+2. **QA-W5-01:** Khởi động k6 load test với connection pooler cổng 6543 do BE1 bàn giao.
 3. **FE-W5-01 (cập nhật FE 01/11/2026):** Worktree E:/THUCTAP/ai-travel-reseller-fe-w5, branch feature/fe-w5-production-checkout-pwa-polish từ origin/dev 7ced50a. CTA/URL-attribution/error/expiry và fixture hoàn tất theo contract chat hiện hữu; unit 6/6, browser 4 viewport, Bottom Sheet regression, scoped lint, typecheck và Webpack build PASS. Chưa nghiệm thu checkout thật; xem FE_W5.md mục 6.
 
 ---
@@ -167,8 +182,20 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 - Kiểm tra staged diff/check trước commit, push non-force đúng nhánh FE và xác minh remote HEAD/upstream/status sau push; không tự tạo PR/đăng approval/merge. Draft title/body lưu ngoài Git tại artifact handoff, kết quả SHA/push báo cuối lượt.
 
 
+
+### FE: đồng bộ dev và hồi quy — 05/11/2026
+
+- Merge origin/dev30ce2e27f02724d7fa430137bd63a0fa7d9dda2a vào FE924a7e7; merge-base89c9d4f,4commit FE/60dev lúc fetch, remote FE khớp. Backup ngoài repo E:/THUCTAP/fe-w5-recovery/sync-20261105-924a7e7 và recovery ref backup/fe-w5-pre-dev-20261105-924a7e7 đã xác minh.
+- Duy nhất conflict TEAM_WORK_LOG mục3: giữ QA mới từ dev + bằng chứng FE; giữ mọi nội dung thành viên phía dev và9section lịch sử FE. Không chọn toàn bộ ours/theirs. Env không đổi; tsconfig local/include cũ và4include sync mới giữ ngoài commit.
+- Giữ BE checkout fallback/valid_to/status/gateway và Merchant Library/tips từ dev; backend/DB/config/migration/template giữ nguyên byte nội dung dev, không chỉnh tay/chạy cloud. FAQ/banner đã nhận source, cùng blob bản đã review; chưa gắn app, FE-W5-04 không DONE/approval.
+-19/19 mock/unit, TypeScript và scoped lint PASS; Webpack production32route PASS, build JsX6hVGC_Ym2QUk-4QupY. Auth/PWA production3214 PASS; fixture trên dev3215 PASS checkout/player/modal/touch/rewrite320/390/768/1440 và ngang. Guard preview development giữ nguyên; lượt chạy nhầm production404 không tính PASS.
+- Chỉ sửa3test FE: fallback BE→guard FE; chờ hydration trước chọn scenario; Merchant tips positive asserts theo UI mới, vẫn giữ modal guideline riêng. Không bỏ assertion hoặc đổi runtime cho test.
+- Full lint còn15errors/13warnings: diagnostic khớp dev;5warnings thêm do file mới từ dev, không do conflict. Working/FE delta diff-check PASS; staged merge298whitespace diagnostic trùng baseline dev, không thêm. Chi tiết FE_W5 mục15.
+- Lighthouse mới P94(84–94)/96(93–96)/96(96–97), A95/95/100,BP100;3cold profile/route, cùng LH13.0.1/mobile/throttling, không build/test nặng đồng thời. Giữ home84 mới và login81 lịch sử; không áp điểm cũ cho build mới. JSgzip139.1/139.7/143.1KiB vẫn vượt120. FE-W5-02 DONE theo quyết định PM bản trước, đây là hồi quy riêng.
+- FE-W5-01 IN_PROGRESS: code/fixture không chứng minh payment E2E; chờ trạng thái đơn/sandbox và BE chốt null-status/invalid-valid_to semantics. BA/QA portal/session/thiết bị/UAT còn riêng. Không AI/Tracking/đơn/thanh toán/RPC/migration/Telegram, không tạo PR/approval/merge vào dev.
+
 ## 4. BLOCKED
-*Hiện tại không có blocker nào cản trở luồng công việc.* Toàn bộ mã nguồn trên nhánh `dev` sạch sẽ và đã vượt qua tất cả các bài kiểm tra chất lượng của Sprint 4.
+*Không có blocker kỹ thuật nào phía Backend (BE1 & BE2).* Toàn bộ hạ tầng cơ sở dữ liệu Cloud, connection pooling, storage, route healthcheck, AI Gateway, Dual Temperature, Circuit Breaker và Production Grounding đã sẵn sàng 100%.
 
 ---
 
@@ -178,12 +205,14 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 |---|---|---|---|:---:|:---:|
 | PM / BE1 | Toàn team | Quyết định Feature Freeze & Master Gantt 6 Ngày | Biên bản họp Kick-off | 02/11 11:00 | `IN_PROGRESS` |
 | UI/UX | FE & Tester 3 | PWA Icons & Design Specs cho FAQ/Offline Modal | Assets & Figma link | 02/11 17:00 | `READY` |
-| BE1 Lead | QA Lead (Huy) | Connection string Supabase Pooler để chạy k6 | Credentials an toàn | 03/11 08:30 | `WAITING` |
-| BE2 Lead | FE Lead (Diệu) | Production Streaming Chat Endpoint | API Spec | 02/11 17:00 | `READY` |
+| BE1 Lead | QA Lead (Huy) | Connection string Supabase Pooler để chạy k6 | Credentials an toàn | 03/11 08:30 | `DONE` |
+| BE1 Lead | QA Lead (Huy) | Endpoint Health Check `/api/health` cho Smoke Test | REST / HEAD | 03/11 14:00 | `DONE` |
+| BE1 Lead | FE Lead (Diệu) | Production Storage URL, Keys & Checkout Fallback | Env Vars & Code | 03/11 12:00 | `DONE` |
+| BE2 Lead | FE Lead (Diệu) | Production Streaming Chat Endpoint | API Spec | 02/11 17:00 | `DONE` |
 | FE Lead | QA Lead (Huy) | Bản build Staging sẵn sàng cho E2E UAT | Web URL Staging | 03/11 17:00 | `WAITING` |
-| Tester 3 | FE Lead (Diệu) | PR component `reseller-faq-modal` & `offline-banner` | GitHub PR trên nhánh cô lập | 04/11 17:00 | `WAITING` |
+| Tester 3 | FE Lead (Diệu) | PR component `reseller-faq-modal` & `offline-banner` | GitHub PR trên nhánh cô lập | 04/11 17:00 | `DONE` |
 | BA Lead | Dev Team | Danh sách ticket bug UAT phát sinh | Bug Log table | 04/11 17:30 | `WAITING` |
-| BE1 & FE | Toàn team | Production Live URL trên Vercel + Supabase Cloud | Domain chính thức + SSL | 05/11 17:00 | `WAITING` |
+| BE1 & FE | Toàn team | Production Live URL trên Vercel + Supabase Cloud | Domain chính thức + SSL | 05/11 17:00 | `READY` |
 | UI/UX | PM & Team | Video Walkthrough Demo 4K & Slide Deck Pitch | File MP4 & Slide PDF | 06/11 17:00 | `WAITING` |
 | BA & PM | Hội đồng / Khách | Hồ sơ bàn giao dự án & Biên bản UAT Sign-off | Bàn giao chính thức MVP | 07/11 11:30 | `WAITING` |
 
@@ -198,16 +227,18 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 | `OfflineBannerProps` | FE Lead | Tester 3 | `{ isOffline?: boolean; }` — Hiển thị cảnh báo mất kết nối | `LOCKED` |
 | `AI_STREAM_PRODUCTION_GATEWAY` | BE2 | FE Chat Panel | Streaming response qua Vercel AI SDK, fail-closed khi thiếu facts | `STABLE` |
 | `Supabase RLS Policies v2` | BE1 | All Roles | Bắt buộc `auth.uid() = reseller_id` đối với ví và liên kết cá nhân | `APPROVED` |
+| `HealthCheckResponse` | BE1 | QA, Vercel | `{ status: "healthy", service, version, checks: { database, storage, pooler } }` | `APPROVED` |
+| `CheckoutFallbackContract`| BE1 | FE, AI Agent | Fallback `payment_url \|\| booking_url`, gán `null` khi tour hết hạn `valid_to` | `APPROVED` |
 
 ---
 
 ## 7. SHARED RESOURCES
 
 | Tài nguyên | Người phụ trách | Đường dẫn / Vị trí | Trạng thái |
-|---|---|---|:---:|
+|---|---|---|---|
 | Mã nguồn nhánh chính | PM / BE1 | Git branch `dev` $\rightarrow$ `main` (Release v1.0.0) | Chuẩn bị Code Freeze |
-| Database Supabase Cloud | BE1 Lead | Supabase Cloud Singapore (`ap-southeast-1`) | Chuẩn bị migration |
-| Domain Production | PM / BE1 | Custom domain chính thức liên kết Vercel | Đã cấu hình DNS |
+| Database Supabase Cloud | BE1 Lead | Supabase Cloud Singapore (`ykfosnwbgphlwpufnxrd`) | 21 Migrations OK |
+| Domain Production | PM / BE1 | Custom domain chính thức liên kết Vercel | Đã cấu hình DNS & vercel.json |
 | Kịch bản UAT Sprint 5 | BA Lead | `docs/specs/UAT_SCENARIOS_SPRINT5.md` | Sẵn sàng cho ngày 04/11 |
 | Kịch bản k6 Load Test | QA Lead | `tests/k6-loadtest-1000vus.js` | Sẵn sàng cho ngày 03/11 |
 
@@ -227,7 +258,19 @@ Phạm vi nhật ký: Điều phối toàn bộ hoạt động tuần về đíc
 
 | Ngày | Quyết định | Lý do | Người quyết định | Tác động |
 |---|---|---|---|---|
+| 20/10/2026 | Ban hành bộ tiêu chuẩn thẩm định AI Video Rubric W3 (v3.0) | Khóa 7 lỗi nghiêm trọng Fatal Flaws FF-01..07, tiêu chí kịch bản 9:16 và template LLM-as-a-Judge | Tester 2 (Minh) | Làm căn cứ kiểm định cho kịch bản video AI và chatbot tư vấn bán hàng |
+| 24/10/2026 | Nghiệm thu chất lượng Sprint 3 & kịch bản diễn tập Demo C1 & C3 | 100% test cases Media Library & Rehearsal đạt chuẩn, sẵn sàng demo trên mobile & desktop | QA Lead (Huy) | Bàn giao hồ sơ nghiệm thu Sprint 3 và kịch bản demo cho toàn team |
+| 28/10/2026 | Nghiệm thu độc lập giao diện modal tĩnh của Tester 3 (QA Audit W4) | 6/6 test cases PASS trên Desktop & Mobile, 0% tràn viền, chuẩn ARIA & WCAG Touch | QA Lead (Huy) | Bảo đảm chất lượng giao diện câm của Tester 3 trước khi FE Lead tích hợp |
+| 28/10/2026 | Nghiệm thu Dumb UI VideoPostingTipsModal của Tester 3 | Đáp ứng quy chuẩn Dumb Component tĩnh, không logic mạng, tích hợp chuẩn vào Library Client | FE Lead & PM | Đưa cẩm nang mẹo đăng video lên hệ thống cho Merchant/Reseller |
+| 29/10/2026 | Nghiệm thu khả năng tương thích PWA & Responsive đa thiết bị (Phương án C3) | 12/12 tests PASS trên iPhone & Android, đạt chuẩn Apple HIG & Google Material 3 | QA Lead (Huy) | Bảo đảm trải nghiệm mượt mà cho Reseller & Khách hàng trên mobile |
+| 29/10/2026 | Nghiệm thu chất lượng 03 video mẫu BE1 đạt chuẩn Rubric W4 | Điểm 9.59/10, 0 Critical Failures, đạt chuẩn phát hành video dọc 9:16 | Tester 2 (Minh) | Bàn giao thông số kịch bản cho FE Lead và pipeline FFmpeg |
+| 29/10/2026 | Nghiệm thu an toàn chống Hallucination cho AI Sales Agent | 46/46 test cases đạt chuẩn, 0% tỷ lệ ảo giác, hoàn tất kiến trúc phòng thủ 4 tầng | Tester 2 (Minh) | Đủ điều kiện đưa AI Sales Agent vào phục vụ mạng lưới Reseller |
 | 02/11/2026 | Ban hành quyết định Feature Freeze | Tập trung toàn lực kiểm thử UAT, sửa lỗi và phát hành Production an toàn | PM (Tuệ) | Toàn team không mở feature mới |
 | 02/11/2026 | Xác lập nguyên tắc Non-blocking cho Tester 3 | Bảo đảm công việc của Tester 3 độc lập, không ảnh hưởng đến tiến độ chung | PM & FE Lead | Đường găng UAT/Go-Live an toàn tuyệt đối |
+| 02/11/2026 | Nghiệm thu k6 Load Test 1.000 VUs (Pass with Scaling Recommendations) | Tỷ lệ thành công 98.24%, P95 tracking redirect < 2s; chuyển hướng dẫn tối ưu pooler cho BE1 | QA Lead (Huy) | Bàn giao kết quả kiểm thử tải cho BE1 tối ưu Supavisor Pooler |
 | 02/11/2026 | Sử dụng Supavisor Transaction Pooler | Đảm bảo hệ thống chịu được tải 1.000 VUs trong k6 test | BE1 Lead | Database không bị tràn connection pool |
-
+| 03/11/2026 | Thống nhất fallback checkout & valid_to filter | Ngăn chặn 100% crash bot khi thiếu payment_url hoặc tour hết hạn | BE1 & FE Lead | Luồng tư vấn AI ổn định tuyệt đối |
+| 03/11/2026 | Nghiệm thu Final E2E UAT 3 vai trò Sprint 5 | 9/9 kịch bản PASS 100%, 0 lỗi P0/P1, bảo mật PII đạt chuẩn NFR-SEC-02 | QA Lead (Huy) | Đủ điều kiện nghiệm thu cho Sprint 5 Release |
+| 04/11/2026 | Khóa cấu hình Dual Temperature & Circuit Breaker | Đảm bảo 0% ảo giác giá vé/chính sách và fast failover khi API Google quá tải | BE2 Lead | Sales Agent đạt chuẩn an toàn 100% |
+| 04/11/2026 | Nghiệm thu độc lập giao diện Tester 3 (QA Sign-off) | 12/12 tests PASS, 0% tràn ngang, 0 request API, đáp ứng FR-AIS-14 | QA Lead (Huy) | Đủ điều kiện để FE Lead và PM phê duyệt PR #59 |
+| 04/11/2026 | Phê duyệt và hợp nhất PR #61 của Tester 3 (FE-T3-W5) | Mã nguồn tuân thủ 100% nguyên tắc Dumb Component, độc lập an toàn, 0 lỗi typecheck | FE Lead & PM | Bổ sung ResellerFaqModal và OfflineBanner vào hệ thống |

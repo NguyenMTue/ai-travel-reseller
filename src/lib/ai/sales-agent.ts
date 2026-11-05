@@ -39,7 +39,10 @@ export type GenerateSalesReplyInput = {
   context: string;
   checkoutAvailable: boolean;
   knowledgeBase?: VerifiedSalesKnowledgeBase;
-  invokeModelFn?: (modelName: string) => Promise<{
+  invokeModelFn?: (
+    modelName: string,
+    temperature?: number,
+  ) => Promise<{
     reply: string;
     intent_detected: SalesIntent;
     purchase_intent: boolean;
@@ -142,7 +145,76 @@ Quy tắc bắt buộc:
   ["human", "{question}"],
 ]);
 
-function createSalesModel(modelName = SALES_AGENT_MODEL) {
+export function getRecommendedTemperatureForIntent(intent: SalesIntent): number {
+  switch (intent) {
+    case "INTENT_PRICE_INQUIRY":
+    case "INTENT_POLICY_INQUIRY":
+    case "INTENT_PURCHASE_READY":
+      return 0.2;
+    case "INTENT_FACILITY_INQUIRY":
+      return 0.3;
+    case "INTENT_BARGAIN_SEEKING":
+      return 0.4;
+    case "INTENT_OUT_OF_SCOPE":
+    default:
+      return 0.5;
+  }
+}
+
+export class SalesAgentCircuitBreaker {
+  private failureCount = 0;
+  private lastFailureTime = 0;
+  private state: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED";
+  public readonly failureThreshold: number;
+  public readonly resetTimeoutMs: number;
+
+  constructor(options?: { failureThreshold?: number; resetTimeoutMs?: number }) {
+    this.failureThreshold = options?.failureThreshold ?? 3;
+    this.resetTimeoutMs = options?.resetTimeoutMs ?? 30_000;
+  }
+
+  public isOpen(): boolean {
+    if (this.state === "OPEN") {
+      if (Date.now() - this.lastFailureTime > this.resetTimeoutMs) {
+        this.state = "HALF_OPEN";
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  public recordSuccess(): void {
+    this.failureCount = 0;
+    this.state = "CLOSED";
+  }
+
+  public recordFailure(): void {
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+    if (this.failureCount >= this.failureThreshold) {
+      this.state = "OPEN";
+    }
+  }
+
+  public getState() {
+    return {
+      state: this.state,
+      failureCount: this.failureCount,
+      lastFailureTime: this.lastFailureTime,
+    };
+  }
+
+  public reset(): void {
+    this.failureCount = 0;
+    this.lastFailureTime = 0;
+    this.state = "CLOSED";
+  }
+}
+
+export const salesAgentCircuitBreaker = new SalesAgentCircuitBreaker();
+
+export function createSalesModel(modelName = SALES_AGENT_MODEL, temperature = 0.2) {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
 
   if (!apiKey) {
@@ -152,7 +224,7 @@ function createSalesModel(modelName = SALES_AGENT_MODEL) {
   return new ChatGoogleGenerativeAI({
     model: modelName,
     apiKey,
-    temperature: 0,
+    temperature,
     maxOutputTokens: 512,
     maxRetries: 2,
   });
@@ -223,11 +295,13 @@ export async function generateSalesReply({
       : new AIMessage(message.content),
   );
 
-  async function invokeModel(modelName: string) {
+  const intentTemperature = getRecommendedTemperatureForIntent(intentHint);
+
+  async function invokeModel(modelName: string, temp = intentTemperature) {
     if (invokeModelFn) {
-      return invokeModelFn(modelName);
+      return invokeModelFn(modelName, temp);
     }
-    const model = createSalesModel(modelName).withStructuredOutput(
+    const model = createSalesModel(modelName, temp).withStructuredOutput(
       salesAgentResponseSchema,
       { name: "sales_agent_response" },
     );
@@ -244,15 +318,33 @@ export async function generateSalesReply({
     );
   }
 
-  let rawResult: {
-    reply: string;
-    intent_detected: SalesIntent;
-    purchase_intent: boolean;
-  };
+  let rawResult:
+    | {
+        reply: string;
+        intent_detected: SalesIntent;
+        purchase_intent: boolean;
+      }
+    | undefined;
 
-  try {
+  if (!invokeModelFn && salesAgentCircuitBreaker.isOpen()) {
+    if (kb) {
+      console.warn(
+        "Sales agent circuit breaker is OPEN. Fast failover to safe knowledge-base reply.",
+      );
+      rawResult = {
+        reply: buildSafeFallbackReply(question, kb, intentHint),
+        intent_detected: intentHint,
+        purchase_intent: false,
+      };
+    }
+  }
+
+  if (!rawResult) {
+    try {
     rawResult = await invokeModel(SALES_AGENT_MODEL);
+    salesAgentCircuitBreaker.recordSuccess();
   } catch (err: unknown) {
+    salesAgentCircuitBreaker.recordFailure();
     // Tự động fallback sang gemini-3.5-flash-lite nếu model chính bị 503 Service Unavailable
     if (SALES_AGENT_MODEL !== "gemini-3.5-flash-lite" && !invokeModelFn) {
       try {
@@ -281,6 +373,20 @@ export async function generateSalesReply({
       } else {
         throw err;
       }
+    }
+  }
+
+  }
+
+  if (!rawResult) {
+    if (kb) {
+      rawResult = {
+        reply: buildSafeFallbackReply(question, kb, intentHint),
+        intent_detected: intentHint,
+        purchase_intent: false,
+      };
+    } else {
+      throw new Error("Unable to generate sales reply: model unavailable and no KB provided");
     }
   }
 

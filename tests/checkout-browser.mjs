@@ -30,6 +30,9 @@ try {
   async function fresh(width = 390) {
     await page.setViewportSize({width,height:844});
     await page.goto(base + "/preview/chat");
+    // Confirm client handlers are hydrated before changing the controlled scenario.
+    await page.getByRole("button", {name:"Đổi phiên", exact:true}).click();
+    await expect(page.getByText("Ngữ cảnh 1 · Phiên 2", {exact:true})).toBeVisible();
   }
   async function open() { if ((await page.viewportSize()).width < 768) await launcher.click(); }
   async function ask(text = "Tôi muốn đặt vé") { await input.fill(text); await send.click(); }

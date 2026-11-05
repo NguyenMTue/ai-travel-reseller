@@ -112,9 +112,9 @@ try {
     await page.keyboard.press("Escape"); await expect(tracking).not.toBeVisible(); await expect(modal).toBeVisible(); await expect(first).toBeFocused(); assert.deepEqual(await overflow(), ["hidden", "hidden"]); await close();
   });
   await check("application resize while open", async () => { await open(); await page.setViewportSize({ width: 390, height: 380 }); await settle(); const b = await modal.boundingBox(); assert(b.y >= 12 && b.y + b.height <= 368, JSON.stringify(b)); await close(); });
-  await check("Merchant guidelines remain separate and unchanged", async () => {
+  await check("Merchant tips and guidelines remain separate after dev integration", async () => {
     await page.setViewportSize({ width: 390, height: 844 }); await page.goto(base + "/preview/merchant/library");
-    await expect(opener).toHaveCount(0); const guide = page.getByRole("button", { name: "Quy chuẩn video", exact: true }); await guide.click();
+    await expect(opener).toHaveCount(1); await open(); await expect(modal.locator("li")).toHaveCount(4); await close(); const guide = page.getByRole("button", { name: "Quy chuẩn video", exact: true }); await guide.click();
     const dialog = page.getByRole("dialog", { name: "Quy chuẩn video du lịch" }); await expect(dialog).toBeVisible(); await expect(dialog.locator("li")).toHaveCount(3); await page.keyboard.press("Escape"); await expect(dialog).not.toBeVisible(); await expect(guide).toBeFocused();
   });
   assert.deepEqual(errors, []); assert.deepEqual(forbidden, []);

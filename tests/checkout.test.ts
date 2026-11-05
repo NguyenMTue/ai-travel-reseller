@@ -82,3 +82,15 @@ test("BE1 payload passes transport without synthesizing checkout from reply", as
     }
   } finally {globalThis.fetch=original;}
 });
+test("merged BE helper prefers payment_url, falls back to booking_url and keeps FE guards", () => {
+  const booking = "https://sunworld.vn/booking?offer=fallback";
+  const fallback = buildCheckoutUrl(null, attribution, booking)!;
+  assert.equal(new URL(fallback).searchParams.get("offer"), "fallback");
+  assert.deepEqual(checkoutDestination(fallback, attribution), { href: fallback, hostname: "sunworld.vn" });
+  const priority = buildCheckoutUrl("https://vinwonders.com/pay", attribution, booking)!;
+  assert.equal(new URL(priority).hostname, "vinwonders.com");
+  assert.equal(buildCheckoutUrl(null, attribution, null), null);
+  assert.equal(buildCheckoutUrl("", attribution, booking), fallback);
+  const insecure = buildCheckoutUrl(null, attribution, "http://sunworld.vn/booking");
+  assert.equal(checkoutDestination(insecure, attribution), null);
+});

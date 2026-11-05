@@ -788,3 +788,60 @@ Artifact mới ngoài Git: E:/THUCTAP/ai-travel-reseller/build/fe-w4-worktree/bu
 - Tester3: mục13 cần sửa FAQ-01 và chốt placement banner/copy, bàn giao PR/HEAD phù hợp để review lại; không có component T3 trong branch FE ở lượt này và không có approval.
 - BA/QA: Final UAT/portal có session, thiết bị thật realme C21Y/Safari/PWA, xác nhận copy nghiệp vụ và kiểm thử thanh toán E2E trong môi trường được phép. Đơn mẫu/Wallet và fixture redirect không phải thanh toán thật.
 - Git/PR: dev đã đi thêm60commit; reviewer cần xét nền mới, khả năng conflict và các contract BE mới trước tích hợp. Không tự ghép lịch sử trong lượt bàn giao. Nhánh riêng có thể push để review mà không khẳng định sẵn sàng merge/dev hoặc full lint repo sạch.
+
+---
+
+## 15. Đồng bộ origin/dev vào FE tuần5 — 05/11/2026 (Asia/Bangkok)
+
+### Nền Git, bảo toàn và conflict
+
+- Preflight đúng E:/THUCTAP/ai-travel-reseller-fe-w5, branch feature/fe-w5-production-checkout-pwa-polish, HEAD/upstream remote FE cùng924a7e76c8b9ee5072eb18f68e1f665fe7940c01. Không merge/rebase dở. Fetch chỉ dev và nhánh FE; dev30ce2e27f02724d7fa430137bd63a0fa7d9dda2a, merge-base89c9d4f9e71f74c960f296705cc9af26bbddd27b, chênh4commit FE/60commit dev; remote FE không có commit lạ.
+- Recovery ref backup/fe-w5-pre-dev-20261105-924a7e7 và backup ngoài repository tại E:/THUCTAP/fe-w5-recovery/sync-20261105-924a7e7. Đã đối chiếu hash bản backup tsconfig và local.patch trước merge. Không sao chép env, chỉ đối chiếu hash kín; .env.local không đổi/không tracked.
+- Merge thường origin/dev vào FE với --no-commit/--no-ff, không rebase/cherry-pick/reset/clean/force. Duy nhất conflict .ai/process/Week5/TEAM_WORK_LOG.md ở mục3: giữ mục QA mới từ dev và dòng FE có bằng chứng từ nhánh FE; không lấy nguyên ours/theirs. Phần còn lại ghép tự động.
+- Giữ toàn bộ9 section lịch sử FE và tất cả dòng nội dung dev ngoài dòng trạng thái FE đã cập nhật; xác minh chuẩn hóa CRLF/LF, không thay log/DoD của thành viên khác. Giữ FE_W5 mục1–14 và các số đo cũ.
+- tsconfig không cản merge, không cần tạm hoàn nguyên hay áp cả backup. Tất cả include local cũ còn nguyên; Next thêm4 include types/dev-types cho hai output sync production/preview. Không stage tsconfig, generated types, log/ảnh/build/harness/backup.
+- Các .env.example, Supabase config/migration, QA assets, backend/package/vercel.json là tracked update đã có từ dev, giữ nguyên khi merge; không sửa tay credential/env/backend/DB/RLS, không chạy migration/seed/RPC hoặc script production/cloud. Delta riêng FE so với dev ở backend/config này bằng0.
+
+### Thay đổi dev đã nhận và contract còn lại
+
+- BE1 có code fallback payment_url||booking_url trong src/lib/ai/checkout-url.ts; chat loader đọc valid_to/status và trả checkout null nếu expired/inactive. BE2 có gateway/grounding và audit log trong route chat. FE tiếp tục chỉ dùng suggested_checkout_url, giữ HTTPS/exact allowlist/attribution, không tự ghép/fallback trong UI hoặc suy payment success.
+- Test FE mới kiểm helper payment ưu tiên/booking fallback/both null và HTTP fallback vẫn bị FE chặn. Đây là pure unit, không dùng cloud. Không chạy test:be1:w5 vì script đó truy vấn Supabase cloud; không biến bộ test này thành mock hoặc ghi PASS thay BE.
+- Cần BE chốt/kiểm chứng semantics còn lại: code !status coi null/thiếu status là active; valid_to parse không hợp lệ không bị so sánh là expired. Không tự sửa backend theo suy đoán, không xác nhận hạn dùng triển khai cloud chỉ từ đọc code. Chưa thấy endpoint order/payment/booking-status cho FE trong app/api; Wallet có endpoint riêng, không dùng tổng số dư làm trạng thái theo đơn.
+- Dev đã có source ResellerFaqModal/OfflineBanner, Git blob tương ứng439d45e39ba2bd4bd8539fa3c9de4fc03bc64639/5fd6fc080fa838a25c54ffdb9a677b12fe3402c1 (banner/FAQ): cùng bản8f02a22 đã review ở mục13, chưa có sửa FAQ-01/placement banner. Không import hai component vào app; FE-W5-04 vẫn IN_PROGRESS/REVIEWED_ISOLATED, chưa approval hoặc hoàn tất tích hợp. Trạng thái QA trong log dev là báo cáo của QA, không thay kết luận FE.
+- Merchant Library từ dev có thêm nút/modal mẹo đăng video. Giữ cập nhật này cùng Content Kit/modal/player tuần4; không nhân đôi listener/SDK/SW hoặc bỏ tính năng mới để làm test cũ pass.
+
+### Sửa test tích hợp và bằng chứng
+
+Runtime app/guard không chỉnh thêm sau merge. Chỉ sửa3 test FE:
+1. tests/checkout.test.ts thêm test helper fallback của BE và guard FE.
+2. tests/checkout-browser.mjs xác nhận hydration bằng bấm Đổi phiên/đợi UI Phiên2 trước chọn controlled scenario; sửa điều kiện runner trước đó có thể thao tác select SSR khi handler chưa gắn. Không bỏ kiểm tra URL, attribution, dedup/offline/session/late reply.
+3. tests/video-posting-tips-browser.mjs thay kỳ vọng cũ Merchant không có nút bằng assert đúng1 nút, mở/đóng/focus và4 mục mẹo; vẫn kiểm modal quy chuẩn3mục riêng. Lỗi test cũ tái hiện do Merchant UI mới từ dev; không sửa component về giao diện cũ.
+
+Kết quả cuối:
+- Unit/mock19/19 PASS (checkout/domain/attribution/fallback, CTA analytics, transport, analytics SDK và SW privacy/cache). Không gọi AI/Tracking/đơn/thanh toán/cloud DB.
+- TypeScript noEmit/incremental false PASS trước build và sau cập nhật test; scoped lint FE19file/tích hợp PASS,3test sửa được lint lại --max-warnings0 PASS. Không tắt rule/assertion/typecheck.
+- Production Webpack PASS,32route; output riêng build/fe-w5-sync-20261105, BUILD_ID JsX6hVGC_Ym2QUk-4QupY. Production chạy cổng3214; auth smoke PASS toggle2chiều, next/role/field/class và mismatch chặn cục bộ, không gửi auth request; PWA production PASS manifest/icons/scope/headers/v1→v2 waiting-activation/cache/offline-online, không API/tracking/external.
+- Các route preview có guard NODE_ENV=development. Lượt đầu runner dùng production gặp404/fixture unavailable, không ghi PASS hoặc coi là regression runtime; guard khớp FE trước merge và không bị bỏ. Đã chạy lại đúng dev Webpack3215, output riêng build/fe-w5-sync-preview-20261105.
+- Fixture browser cuối PASS checkout/Bottom Sheet320/390/768/1440; video player/download/hash/range/error/focus/cleanup320/390/768/1440; modal mẹo320/390/768/1440/ngang667, Tab/ShiftTab/Escape/scroll/visualViewport/listener cleanup; touch/safe area/keyboard mô phỏng và video GET+HEAD404/rewrite. Merchant tips và guidelines riêng biệt đạt. Không bấm tạo Tracking; video response là fixture fulfill, không gọi AI/service thật. Ảnh checkout390 đã mở xem, không coi desktop emulation là điện thoại thật.
+- Full lint exit1:15errors/13warnings tại15file. Mọi file có diagnostic khớp origin/dev;15errors/8warnings đã tồn tại trên FE trước merge;5warnings thêm do5file mới từ dev (monitor-uat-chat-logs, be2-w5-ai-gateway.test, demo-rehearsal, k6-load-test, security_test_runner). Không sửa backend/QA hoặc ghi full lint PASS.
+- git diff --check working PASS; staged FE delta so với origin/dev PASS. Staged merge so với HEAD exit2 có298diagnostic whitespace, đối chiếu baseline89c9d4f→origin/dev cũng298 và không có diagnostic thêm. Không tắt whitespace rule hoặc sửa hàng loạt tài liệu người khác để làm sạch số liệu. Không còn unmerged/conflict marker.
+
+### Lighthouse hồi quy mới — tách khỏi nghiệm thu bản trước
+
+Chạy9lượt lạnh với Chrome profile riêng mỗi lượt, cùng Lighthouse13.0.1/configSettings như mục10 (so sánh JSON bằng nhau): mobile412x823 DPR1.75, simulate RTT150ms/CPU4x. Không build/test nặng đồng thời; dev fixture3215 đã dừng sau xác minh listener/CLI trước đo. Khác biệt: merge source/build mới, server3214 thay3196, Chrome156.0.8078.80 thay bản156.0.8078.74 trước. Đây là browser lạnh, không reset cache/server CPU giữa các lượt. Nguồn/build/hash và9HTML/JSON lưu ngoài repo, không áp điểm cũ lên build mới.
+
+| Route | P median(min–max) | A median(min–max) | BP median(min–max) | JS transfer KiB median | JS decoded KiB median | Initial modern gzip KiB |
+|---|---|---|---|---|---|---|
+| / | 94 (84–94) | 95 (95–95) | 100 (100–100) | 142.2 | 462.5 | 139.1 |
+| /chat | 96 (93–96) | 95 (95–95) | 100 (100–100) | 150.3 | 481.5 | 139.7 |
+| /login | 96 (96–97) | 100 (100–100) | 100 (100–100) | 151.1 | 479.2 | 143.1 |
+
+JS transfer là Lighthouse resource-summary Script transferSize; decoded là tổng Script resourceSize minified giải nén; initial modern gzip là tổng gzip từng unique initial HTML script, loại nomodule có điều kiện. Không gọi các số này là Next First Load JS hoặc bỏ vendor để báo đạt120KiB. Dung lượng JS transfer/decoded ổn định trong3lượt từng route; bảng ghi min–max điểm và median bytes. Initial modern gzip vẫn vượt120KiB.
+
+Giữ home84 ở bộ mới và login81 ở bộ lịch sử mục10; không bỏ lượt thấp hoặc quy toàn bộ chênh lệch score cho merge. FE-W5-02 giữ DONE theo PM nghiệm thu bản trước và tiêu chí điều chỉnh, không tự tạo approval/đổi tiêu chí cho bản này. Portal có session/realme C21Y/Safari/PWA trên thiết bị thật còn riêng.
+
+### Trạng thái bàn giao
+
+FE-W5-01 vẫn IN_PROGRESS: code BE mới và fixture không chứng minh thanh toán end-to-end; còn endpoint trạng thái theo đơn/correlation, semantics valid_to/status và sandbox/quyền QA. Wallet giữ contract đã chốt. FE-W5-03 chờ BA/QA UAT, FE-W5-04 giữ giới hạn mục13. Không nghiệm thu toàn tuần.
+
+Artifacts/backup/bằng chứng: E:/THUCTAP/fe-w5-recovery/sync-20261105-924a7e7 (backup.json/local.patch, build/typecheck/unit/lint/browser logs, merge-audit, diff-check-summary, results-summary và lighthouse/*). Chỉ tài liệu FE/test sửa nằm ngoài phần merge nguyên trạng từ dev. SHA merge/push được xác minh sau commit và báo cuối lượt; không tạo PR/approval hoặc merge ngược vào dev.
