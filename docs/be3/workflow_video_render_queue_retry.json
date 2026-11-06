@@ -1,0 +1,254 @@
+{
+  "name": "TravelLink – Video Render Queue and Retry",
+  "description": "Nhận render job từ BE1 qua webhook, xử lý theo giới hạn concurrency của n8n, retry request có giới hạn bằng generation_key để chống tạo video trùng, rồi báo Telegram.",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "video-render-queue-retry",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "af308c84-7bb0-47c9-8bb6-ff043a6d1001",
+      "name": "Receive render job",
+      "webhookId": "1ed2214c-4890-4b25-91ef-81f965a91001"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "772915f0-cc88-4d7e-a9e7-237856cf1001",
+              "leftValue": "={{$json.body.event}}",
+              "rightValue": "video.render.requested",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "405d47db-ff49-41be-8c6b-73e75c921001",
+              "leftValue": "={{$json.body.generation_key}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            },
+            {
+              "id": "8140d4d0-7e4f-4e34-b02f-84a6a5601001",
+              "leftValue": "={{typeof $json.body.render_input === 'object' && $json.body.render_input !== null}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        240,
+        0
+      ],
+      "id": "3448373d-a158-4422-9673-142a31d01001",
+      "name": "Validate render job"
+    },
+    {
+      "parameters": {
+        "chatId": "-1004373825301",
+        "text": "=⛔ Render job bị từ chối vì payload không đúng. Cần event=video.render.requested, generation_key và render_input dạng object.\nJob key nhận được: {{$json.body.generation_key || '—'}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        128
+      ],
+      "id": "f8f25ff9-5716-4da6-bca4-51f82d511001",
+      "name": "Reject invalid job",
+      "credentials": {
+        "telegramApi": {
+          "id": "T1z3iZA7jr0AkRrW",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://REPLACE-WITH-BE1-RENDER-ENDPOINT.example.invalid/api/video/render",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Idempotency-Key",
+              "value": "={{$json.body.generation_key}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{$json.body.render_input}}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        512,
+        -96
+      ],
+      "id": "9046c2e2-6ddf-4d0b-8c9a-1eab2caf1001",
+      "name": "Call BE1 render API",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "-1004373825301",
+        "text": "=🎬 BE1 đã xử lý render video thành công.\n\nJob key: {{$node['Receive render job'].json.body.generation_key}}\nCampaign ID: {{$node['Receive render job'].json.body.campaign_id || '—'}}\nProduct ID: {{$node['Receive render job'].json.body.product_id || '—'}}\nMerchant ID: {{$node['Receive render job'].json.body.merchant_id || '—'}}\nContent ID: {{$json.content_id || $json.body?.content_id || '—'}}\nVideo: {{$json.video_url || $json.body?.video_url || 'Chưa có URL trong response'}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        -160
+      ],
+      "id": "e0a151a5-8ef2-42f4-ae4b-3d9271721001",
+      "name": "Notify render success",
+      "credentials": {
+        "telegramApi": {
+          "id": "T1z3iZA7jr0AkRrW",
+          "name": "Telegram account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "-1004373825301",
+        "text": "=⚠️ Job render video lỗi sau tối đa 3 lần thử.\n\nJob key: {{$node['Receive render job'].json.body.generation_key}}\nCampaign ID: {{$node['Receive render job'].json.body.campaign_id || '—'}}\nProduct ID: {{$node['Receive render job'].json.body.product_id || '—'}}\nMerchant ID: {{$node['Receive render job'].json.body.merchant_id || '—'}}\nLỗi: {{$json.error?.message || $json.message || 'Xem execution log trong n8n'}}\n\nKiểm tra job/status với BE1 trước khi retry thủ công để tránh tạo video trùng.",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        64
+      ],
+      "id": "ad32dc7d-974e-470d-945e-8c03dcef1001",
+      "name": "Notify render failure",
+      "credentials": {
+        "telegramApi": {
+          "id": "T1z3iZA7jr0AkRrW",
+          "name": "Telegram account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## BE1 input contract\n\nBefore activation, replace the placeholder URL in **Call BE1 render API** and map `render_input` to BE1's final schema. BE1 must honor `Idempotency-Key` (or agree on an equivalent generation key) so retrying the same job cannot create duplicate renders. This starter uses bounded fixed-delay retries (3 tries, 5 seconds); refine status-aware backoff only after BE1 documents its HTTP/status contract.\n\nThe Webhook responds immediately. A successful render API response should include `content_id` and `video_url`. This workflow is inactive and must not be published with the placeholder endpoint.",
+        "height": 280,
+        "width": 420
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        240
+      ],
+      "id": "8232de34-f890-48c0-b15f-3f3126811001",
+      "name": "Setup notes"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive render job": {
+      "main": [
+        [
+          {
+            "node": "Validate render job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate render job": {
+      "main": [
+        [
+          {
+            "node": "Call BE1 render API",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reject invalid job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call BE1 render API": {
+      "main": [
+        [
+          {
+            "node": "Notify render success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify render failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
