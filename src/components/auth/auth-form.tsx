@@ -10,8 +10,6 @@ import {
   Users,
 } from "lucide-react";
 import { login, signup } from "@/app/actions/auth";
-import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
 export function AuthForm({
   mode,
   configured,
@@ -97,7 +95,7 @@ export function AuthForm({
             </fieldset>
             <label className="field" htmlFor="full_name">
               Họ và tên
-              <Input
+              <input className="input"
                 id="full_name"
                 name="full_name"
                 autoComplete="name"
@@ -110,7 +108,7 @@ export function AuthForm({
         )}
         <label className="field" htmlFor="email">
           Email
-          <Input
+          <input className="input"
             id="email"
             name="email"
             type="email"
@@ -123,7 +121,7 @@ export function AuthForm({
         <div className="field">
           <label htmlFor="password">Mật khẩu</label>
           <div className="password-wrap">
-            <Input
+            <input className="input"
               id="password"
               name="password"
               type={showPassword ? "text" : "password"}
@@ -148,7 +146,7 @@ export function AuthForm({
         {register && (
           <label className="field" htmlFor="confirm_password">
             Xác nhận mật khẩu
-            <Input
+            <input className="input"
               id="confirm_password"
               name="confirm_password"
               type={showPassword ? "text" : "password"}
@@ -165,10 +163,10 @@ export function AuthForm({
             {error}
           </p>
         )}
-        <Button
+        <button
           type="submit"
           disabled={pending || !configured}
-          className="w-full"
+          className="button button-primary w-full"
         >
           {pending ? (
             <>
@@ -181,7 +179,7 @@ export function AuthForm({
               <ArrowRight />
             </>
           )}
-        </Button>
+        </button>
       </form>
       <p className="auth-switch">
         {register ? "Bạn đã có tài khoản?" : "Chưa có tài khoản?"}{" "}
@@ -190,7 +188,7 @@ export function AuthForm({
         </Link>
       </p>
       <div className="auth-preview">
-        <Link href="/preview/merchant">
+        <Link href="/preview/merchant" prefetch={false}>
           Xem thử Dashboard, không cần tài khoản ↗
         </Link>
       </div>
