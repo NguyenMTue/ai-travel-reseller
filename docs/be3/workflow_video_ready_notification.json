@@ -1,0 +1,132 @@
+{
+  "name": "TravelLink – Video Ready Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "video-generation-completed",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e7f18ee3-1810-4cad-b611-d1d934c0f02d",
+      "name": "Video completed webhook",
+      "webhookId": "321b94e4-5a17-4ca8-a6e2-922a14bb8d8c"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bef7d8e0-b9b2-4361-bd53-b36658d77fc6",
+              "leftValue": "={{$json.body.event}}",
+              "rightValue": "video.generation.completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "9ae43590-d1ee-4a9b-9ee1-d55046ae6b4e",
+              "leftValue": "={{$json.body.status}}",
+              "rightValue": "ready",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c2b65598-f093-471a-a757-113a848015dd",
+              "leftValue": "={{$json.body.video_url}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        240,
+        0
+      ],
+      "id": "da2684f8-47d0-4e35-b42c-cfa9724cc348",
+      "name": "Validate completed video event"
+    },
+    {
+      "parameters": {
+        "chatId": "-1004373825301",
+        "text": "=🎬 Video chiến dịch đã sẵn sàng!\n\nTiêu đề: {{$json.body.metadata?.title || $json.body.product_name || 'Chưa có tên sản phẩm'}}\nContent ID: {{$json.body.content_id || $json.body.metadata?.content_id || '—'}}\nCampaign ID: {{$json.body.campaign_id || $json.body.metadata?.campaign_id || '—'}}\nProduct ID: {{$json.body.product_id || $json.body.metadata?.product_id || '—'}}\nMerchant ID: {{$json.body.merchant_id || $json.body.metadata?.merchant_id || '—'}}\nThời lượng: {{$json.body.duration_sec || $json.body.metadata?.duration_sec || '—'}} giây\nĐộ phân giải: {{$json.body.metadata?.resolution || '—'}}\nHook: {{$json.body.hook_headline || '—'}}\nVideo: {{$json.body.video_url || '—'}}\nHoàn tất lúc: {{$json.body.created_at || '—'}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        496,
+        -96
+      ],
+      "id": "5c686a8f-6fa2-4b30-a210-e8a4ce7b78bf",
+      "name": "Send video ready notification",
+      "credentials": {
+        "telegramApi": {
+          "id": "T1z3iZA7jr0AkRrW",
+          "name": "Telegram account"
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Video completed webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate completed video event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate completed video event": {
+      "main": [
+        [
+          {
+            "node": "Send video ready notification",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
