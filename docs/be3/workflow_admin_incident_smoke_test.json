@@ -1,0 +1,61 @@
+{
+  "name": "[TEST] Admin Incident Alert Smoke Test",
+  "description": "Protected one-request webhook that intentionally fails to verify the configured n8n Error Workflow and Telegram admin alert. Disable after testing.",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "admin-incident-alert-smoke-test",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        300
+      ],
+      "id": "26943eb6-5514-4736-80eb-73f4dbbd0675",
+      "name": "Receive protected test request",
+      "webhookId": "d074a5d7-ea26-4c33-a265-d7f469eb120e",
+      "notes": "Select a Header Auth credential after import. Use a private test token stored in n8n/Postman only; never commit it."
+    },
+    {
+      "parameters": {
+        "errorMessage": "Intentional smoke test failure: verify the configured Telegram admin incident alert."
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        520,
+        300
+      ],
+      "id": "263ec748-1942-4160-8f1a-b99ecdd13dda",
+      "name": "Fail intentionally for alert test",
+      "notes": "This node always fails. Keep this workflow disabled except during a controlled smoke test."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive protected test request": {
+      "main": [
+        [
+          {
+            "node": "Fail intentionally for alert test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
