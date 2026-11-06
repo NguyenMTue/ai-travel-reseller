@@ -317,9 +317,9 @@ export async function generateMerchantCampaignVideo(
 
     const location = (campaign as any).target_location || "Đà Nẵng";
     const isShortFormat = !input.target_duration_sec || input.target_duration_sec <= 18;
-    const effectiveDuration = isShortFormat
-      ? (input.target_duration_sec || 16.5)
-      : input.target_duration_sec;
+    const effectiveDuration = (input.target_duration_sec && input.target_duration_sec <= 14)
+      ? 10.0
+      : (input.target_duration_sec ? input.target_duration_sec : 10.0);
 
     if (imageBuffers.length >= 2) {
       // 7.2. Xây dựng Kế hoạch Prompt & Phân cảnh Chained chuẩn 15s - 18s

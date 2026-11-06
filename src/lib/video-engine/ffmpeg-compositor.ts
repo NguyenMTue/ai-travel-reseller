@@ -11,6 +11,8 @@ export interface TextOverlayConfig {
   hookText?: string;
   priceBadgeText?: string;
   ctaText?: string;
+  tipText?: string;
+  destinationText?: string;
 }
 
 export interface ComposeHybridVideoInput {
@@ -300,54 +302,78 @@ export async function composeHybridVideo(
       mergedVisualPath,
     ]);
 
-    // 3.5. Áp dụng Text Overlay (Hook 3s đầu, Badge giá vé, Link mua vé)
-    // và lồng ghép âm thanh Voiceover
+    // 3.5. Áp dụng Text Overlay và chuẩn hóa thời lượng tuyệt đối
     const finalOutputPath = path.join(tempDir, "final_composition.mp4");
     const fontPath = "C\\:/Windows/Fonts/arial.ttf"; // Font Arial Windows hỗ trợ Unicode tiếng Việt hoàn hảo
+    const is10s = targetDuration <= 12;
 
     const drawtextFilters: string[] = [];
 
-    // Hook 3s đầu: chữ vàng viền đen ở trung tâm
+    // Hook: 0-2s (10s) hoặc 0-3s (18s+)
     if (input.textOverlay.hookText) {
       const escapedHook = input.textOverlay.hookText
         .replace(/'/g, "")
         .replace(/:/g, "\\:");
+      const hookEnd = is10s ? 2 : 3;
       drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedHook}':fontcolor=0xFFD700:fontsize=36:borderw=3:bordercolor=black:x=(w-text_w)/2:y=(h-text_h)/2-100:enable='between(t,0,3)'`
+        `drawtext=fontfile='${fontPath}':text='${escapedHook}':fontcolor=0xFFD700:fontsize=36:borderw=3:bordercolor=black:x=(w-text_w)/2:y=(h-text_h)/2-100:enable='between(t,0,${hookEnd})'`
       );
     }
 
-    // Badge giá vé: xuất hiện từ giây thứ 3 ở góc trên
+    // Mẹo du lịch / Trải nghiệm thực tế
+    if (input.textOverlay.tipText) {
+      const escapedTip = input.textOverlay.tipText
+        .replace(/'/g, "")
+        .replace(/:/g, "\\:");
+      const tipStart = is10s ? 2 : 3;
+      const tipEnd = is10s ? 5 : 7;
+      drawtextFilters.push(
+        `drawtext=fontfile='${fontPath}':text='${escapedTip}':fontcolor=0x34C759:fontsize=26:borderw=2:bordercolor=black:x=(w-text_w)/2:y=h-240:enable='between(t,${tipStart},${tipEnd})'`
+      );
+    }
+
+    // Badge giá vé: 5-8s (10s) hoặc 11-15s (18s+)
     if (input.textOverlay.priceBadgeText) {
       const escapedPrice = input.textOverlay.priceBadgeText
         .replace(/'/g, "")
         .replace(/:/g, "\\:");
+      const priceStart = is10s ? 5 : 11;
+      const priceEnd = is10s ? 8 : 15;
       drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedPrice}':fontcolor=white:fontsize=28:box=1:boxcolor=black@0.6:boxborderw=10:x=(w-text_w)/2:y=120:enable='gte(t,3)'`
+        `drawtext=fontfile='${fontPath}':text='${escapedPrice}':fontcolor=white:fontsize=28:box=1:boxcolor=black@0.6:boxborderw=10:x=(w-text_w)/2:y=120:enable='between(t,${priceStart},${priceEnd})'`
       );
     }
 
-    // CTA & Link đặt vé: xuất hiện ở cuối video
+    // CTA & Link đặt vé: 8-10s (10s) hoặc 15-18s (18s+)
     if (input.textOverlay.ctaText) {
       const escapedCta = input.textOverlay.ctaText
         .replace(/'/g, "")
         .replace(/:/g, "\\:");
+      const ctaStart = is10s ? 8 : 15;
       drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedCta}':fontcolor=0x00FFCC:fontsize=26:borderw=2:bordercolor=black:x=(w-text_w)/2:y=h-180:enable='gte(t,4)'`
+        `drawtext=fontfile='${fontPath}':text='${escapedCta}':fontcolor=0x00FFCC:fontsize=26:borderw=2:bordercolor=black:x=(w-text_w)/2:y=h-180:enable='gte(t,${ctaStart})'`
       );
     }
 
-    const vfString =
-      drawtextFilters.length > 0 ? drawtextFilters.join(",") : "null";
+    const vfFilters = [
+      "tpad=stop_mode=clone:stop_duration=3",
+      ...(drawtextFilters.length > 0 ? drawtextFilters : []),
+    ].join(",");
 
-    // Ghép visual + voiceover audio chuẩn xác (không lặp lại video visual)
+    // Ghép visual + voiceover audio chuẩn xác (cắt đúng targetDuration tuyệt đối)
     await runFFmpeg([
       "-i",
       mergedVisualPath,
       "-i",
       voiceoverPath,
-      "-vf",
-      vfString,
+      "-filter_complex",
+      `[0:v]${vfFilters}[vout];[1:a]apad=whole_dur=${targetDuration}[aout]`,
+      "-map",
+      "[vout]",
+      "-map",
+      "[aout]",
+      "-t",
+      `${targetDuration}`,
       "-c:v",
       "libx264",
       "-preset",
@@ -356,7 +382,6 @@ export async function composeHybridVideo(
       "aac",
       "-b:a",
       "128k",
-      "-shortest",
       "-movflags",
       "+faststart",
       "-y",
@@ -444,48 +469,79 @@ export async function composeChainedOmniVideo(
       mergedVisualPath,
     ]);
 
-    // 4.4. Áp dụng Text Overlay (Hook 0-3s, Badge giá vé từ 3s, CTA cuối video)
+    // 4.4. Áp dụng Text Overlay và chuẩn hóa thời lượng tuyệt đối
     const finalOutputPath = path.join(tempDir, "final_composition.mp4");
     const fontPath = "C\\:/Windows/Fonts/arial.ttf";
+    const targetDuration = Number((input.targetDurationSec || 10).toFixed(1));
+    const is10s = targetDuration <= 12;
+
     const drawtextFilters: string[] = [];
 
+    // Hook: 0-2s (10s) hoặc 0-3s (18s+)
     if (input.textOverlay.hookText) {
       const escapedHook = input.textOverlay.hookText
         .replace(/'/g, "")
         .replace(/:/g, "\\:");
+      const hookEnd = is10s ? 2 : 3;
       drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedHook}':fontcolor=0xFFD700:fontsize=36:borderw=3:bordercolor=black:x=(w-text_w)/2:y=(h-text_h)/2-100:enable='between(t,0,3)'`
+        `drawtext=fontfile='${fontPath}':text='${escapedHook}':fontcolor=0xFFD700:fontsize=36:borderw=3:bordercolor=black:x=(w-text_w)/2:y=(h-text_h)/2-100:enable='between(t,0,${hookEnd})'`
       );
     }
 
+    // Mẹo du lịch / Trải nghiệm thực tế
+    if (input.textOverlay.tipText) {
+      const escapedTip = input.textOverlay.tipText
+        .replace(/'/g, "")
+        .replace(/:/g, "\\:");
+      const tipStart = is10s ? 2 : 3;
+      const tipEnd = is10s ? 5 : 7;
+      drawtextFilters.push(
+        `drawtext=fontfile='${fontPath}':text='${escapedTip}':fontcolor=0x34C759:fontsize=26:borderw=2:bordercolor=black:x=(w-text_w)/2:y=h-240:enable='between(t,${tipStart},${tipEnd})'`
+      );
+    }
+
+    // Badge giá vé: 5-8s (10s) hoặc 11-15s (18s+)
     if (input.textOverlay.priceBadgeText) {
       const escapedPrice = input.textOverlay.priceBadgeText
         .replace(/'/g, "")
         .replace(/:/g, "\\:");
+      const priceStart = is10s ? 5 : 11;
+      const priceEnd = is10s ? 8 : 15;
       drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedPrice}':fontcolor=white:fontsize=28:box=1:boxcolor=black@0.6:boxborderw=10:x=(w-text_w)/2:y=120:enable='gte(t,3)'`
+        `drawtext=fontfile='${fontPath}':text='${escapedPrice}':fontcolor=white:fontsize=28:box=1:boxcolor=black@0.6:boxborderw=10:x=(w-text_w)/2:y=120:enable='between(t,${priceStart},${priceEnd})'`
       );
     }
 
+    // CTA & Link đặt vé: 8-10s (10s) hoặc 15-18s (18s+)
     if (input.textOverlay.ctaText) {
       const escapedCta = input.textOverlay.ctaText
         .replace(/'/g, "")
         .replace(/:/g, "\\:");
+      const ctaStart = is10s ? 8 : 15;
       drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedCta}':fontcolor=0x00FFCC:fontsize=26:borderw=2:bordercolor=black:x=(w-text_w)/2:y=h-180:enable='gte(t,4)'`
+        `drawtext=fontfile='${fontPath}':text='${escapedCta}':fontcolor=0x00FFCC:fontsize=26:borderw=2:bordercolor=black:x=(w-text_w)/2:y=h-180:enable='gte(t,${ctaStart})'`
       );
     }
 
-    const vfString = drawtextFilters.length > 0 ? drawtextFilters.join(",") : "null";
+    const vfFilters = [
+      "tpad=stop_mode=clone:stop_duration=3",
+      ...(drawtextFilters.length > 0 ? drawtextFilters : []),
+    ].join(",");
 
-    // Ghép visual + voiceover audio chuẩn xác
+    // Ghép visual + voiceover audio chuẩn xác (cắt đúng targetDuration tuyệt đối)
     await runFFmpeg([
       "-i",
       mergedVisualPath,
       "-i",
       voiceoverPath,
-      "-vf",
-      vfString,
+      "-filter_complex",
+      `[0:v]${vfFilters}[vout];[1:a]apad=whole_dur=${targetDuration}[aout]`,
+      "-map",
+      "[vout]",
+      "-map",
+      "[aout]",
+      "-t",
+      `${targetDuration}`,
       "-c:v",
       "libx264",
       "-preset",
@@ -494,7 +550,6 @@ export async function composeChainedOmniVideo(
       "aac",
       "-b:a",
       "128k",
-      "-shortest",
       "-movflags",
       "+faststart",
       "-y",

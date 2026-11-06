@@ -9,6 +9,10 @@ Thư mục tài liệu kỹ thuật, hợp đồng bàn giao và mẫu dữ li�
 1. **Nhật ký bàn giao phiên làm việc Tích hợp MUSE2API & Tối ưu UI Video:**
    - [`session_handover_2026_11_05_muse2api.md`](./session_handover_2026_11_05_muse2api.md): Chi tiết tích hợp cổng Muse2API Gateway (`POST /v1/videos`, polling, download buffer), cấu hình biến môi trường `MUSE2API_KEY`, cập nhật dropdown thời lượng 10s & 18s, thay thế giai đoạn giả lập bằng đồng hồ đếm thời gian thực (Live Elapsed Timer), và dữ liệu chiến dịch mẫu test trên Cloud Supabase.
 
+2. **Hệ thống System Prompts chuẩn hóa (10s & 18s Profiles):**
+   - [`prompts/system_prompt_ai_tourism_video_10s.md`](./prompts/system_prompt_ai_tourism_video_10s.md): System prompt & Storyboard chuyên gia quảng cáo 10 giây cho video ngắn TikTok, Reels, Shorts với cấu trúc 4 hồi (Hook 0-2s, Experience 2-5s, Tour Info 5-8s, CTA 8-10s).
+   - [`prompts/system_prompt_ai_tourism_video_18s.md`](./prompts/system_prompt_ai_tourism_video_18s.md): System prompt & Storyboard chuyên gia kể chuyện trực quan 18 giây với cấu trúc 5 hồi (Hook 0-3s, Destination 3-7s, Experience 7-11s, Tour Info 11-15s, CTA 15-18s).
+
 ---
 
 ## Danh mục tài liệu Sprint 5 (Tuần 5)
