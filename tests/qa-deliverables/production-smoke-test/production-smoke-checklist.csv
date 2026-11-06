@@ -1,0 +1,20 @@
+﻿STT,Mã Kịch bản,Phân hệ / Module,Hạng mục Kiểm tra Cốt lõi,Thiết bị / Viewport,Phương thức / URL,HTTP Status,Thời gian (ms),Kết quả,Người kiểm thử,Minh chứng Ảnh chụp / Ghi chú
+1,Smoke-01,Hạ tầng & Sức khỏe,Kiểm tra Landing Page tải thành công (Không White Screen),Desktop (1440x900),GET /,200 OK,1120,PASS,Trương Đức Huy,smoke-01-home-and-health.png
+2,Smoke-01,Hạ tầng & Sức khỏe,Ping kiểm tra Uptime Monitor qua phương thức HEAD,Backend API,HEAD /api/health,200 OK,45,PASS,Trương Đức Huy,X-Health-Status: healthy
+3,Smoke-01,Hạ tầng & Sức khỏe,Kiểm tra Health Check Endpoint kết nối Database & Storage,Backend API,GET /api/health,200 OK,185,PASS,Trương Đức Huy,JSON payload status healthy
+4,Smoke-01,PWA Mobile,Kiểm tra Web App Manifest và cấu hình Standalone,PWA Config,GET /manifest.webmanifest,200 OK,28,PASS,Trương Đức Huy,name: TravelLink AI
+5,Smoke-01,PWA Mobile,Kiểm tra Meta Viewport và Theme Color chuẩn PWA,Mobile Web,meta[name="viewport"],200 OK,15,PASS,Trương Đức Huy,theme-color: #204e4c
+6,Smoke-02,Reseller Portal,Duyệt Campaign Feed hiển thị danh sách chiến dịch,Desktop (1440x900),GET /preview/reseller,200 OK,850,PASS,Trương Đức Huy,Chiến dịch dành cho bạn
+7,Smoke-02,Reseller Portal,Mở Modal Tạo Tracking Link & QR trong chi tiết chiến dịch,Desktop (1440x900),Click Button 'Tạo link',200 OK,140,PASS,Trương Đức Huy,role=dialog hiển thị
+8,Smoke-02,Reseller Portal,Khởi tạo liên kết tiếp thị rút gọn định dạng /r/[code],Desktop (1440x900),Click 'Tạo link tiếp thị',200 OK,310,PASS,Trương Đức Huy,Tracking URL + QR Code
+9,Smoke-02,Reseller Portal,Thử nghiệm tính năng Copy 1-Click Clipboard và Toast thông báo,Desktop (1440x900),Click 'Copy link',200 OK,85,PASS,Trương Đức Huy,Đã sao chép link.
+10,Smoke-02,Reseller Portal,Kiểm tra khu vực Ví Reseller và thông tin hoa hồng VND,Desktop (1440x900),GET /preview/reseller/wallet,200 OK,855,PASS,Trương Đức Huy,smoke-02-reseller-portal-and-tracking.png
+11,Smoke-03,Merchant Portal,Kiểm tra Dashboard Quản trị Doanh nghiệp Du lịch,Desktop (1440x900),GET /preview/merchant,200 OK,620,PASS,Trương Đức Huy,Không gian doanh nghiệp
+12,Smoke-03,Merchant Portal,Kiểm tra Form khởi tạo Chiến dịch Mới (Tên & Tỷ lệ hoa hồng),Desktop (1440x900),GET /preview/merchant/campaigns/new,200 OK,290,PASS,Trương Đức Huy,Client form validation OK
+13,Smoke-03,Merchant Portal,Kiểm tra Media Library và trình phát Video mẫu MP4 9:16,Desktop (1440x900),GET /preview/merchant/library,200 OK,300,PASS,Trương Đức Huy,smoke-03-merchant-portal-and-media.png
+14,Smoke-04,Khách hàng & Tracking,Kiểm tra Router điều hướng Tracking Link 302 an toàn,Backend Router,GET /r/BANA-TEST-01,302 Found,120,PASS,Trương Đức Huy,Chuyển hướng an toàn
+15,Smoke-04,Khách hàng & Minh bạch,Kiểm tra Cam kết Minh bạch Đối tác theo RULE-01,Web Client,GET /,200 OK,450,PASS,Trương Đức Huy,Khách hàng thanh toán trực tiếp
+16,Smoke-04,Khách hàng & AI Chat,Kiểm tra Khung Chat Trợ lý AI Sales Agent và FAQ Modal,Web Client,GET /chat?attribution,200 OK,1060,PASS,Trương Đức Huy,smoke-04-customer-landing-and-ai-chat.png
+17,Smoke-05,Mobile Responsive,Kiểm tra co giãn không tràn ngang (Zero Horizontal Overflow),iPhone 13 (390x844),GET / (Mobile),200 OK,310,PASS,Trương Đức Huy,scrollWidth <= clientWidth
+18,Smoke-05,Mobile Responsive,Kiểm tra thanh điều hướng Mobile Bottom Navigation Bar,iPhone 13 (390x844),GET /preview/reseller,200 OK,220,PASS,Trương Đức Huy,Bottom Nav hiển thị cố định
+19,Smoke-05,Mobile Responsive,Kiểm định kích thước Touch Target đạt chuẩn Finger-Friendly,iPhone 13 (390x844),Bounding Box Check,200 OK,179,PASS,Trương Đức Huy,smoke-05-mobile-responsive-check.png
