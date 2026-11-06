@@ -1,0 +1,58 @@
+{
+  "name": "[OPS] Admin Incident Alert - Telegram",
+  "description": "Receives unhandled failures from selected production workflows and sends a concise Telegram alert to administrators. It deliberately excludes execution payloads and secrets from the message.",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "id": "b18e69bb-a25b-4a6c-8ef0-d7bb54ee9401",
+      "name": "Receive workflow failure"
+    },
+    {
+      "parameters": {
+        "chatId": "REPLACE_WITH_ADMIN_CHAT_ID",
+        "text": "=🚨 N8N WORKFLOW FAILURE\n\nWorkflow: {{$json.workflow?.name || 'Unknown workflow'}}\nWorkflow ID: {{$json.workflow?.id || '—'}}\nFailed node: {{$json.execution?.lastNodeExecuted || $json.trigger?.error?.node?.name || 'Trigger/activation'}}\nExecution ID: {{$json.execution?.id || 'Unavailable'}}\nMode: {{$json.execution?.mode || $json.trigger?.mode || '—'}}\nTime: {{DateTime.fromMillis($json.trigger?.error?.timestamp || DateTime.now().toMillis()).setZone('Asia/Ho_Chi_Minh').toFormat('yyyy-LL-dd HH:mm:ss ZZZZ')}}\n\nError: {{(($json.execution?.error?.message || $json.trigger?.error?.message || $json.trigger?.error?.cause?.message || 'No error message provided').replace(/[\\r\\n]+/g, ' ')).slice(0, 700)}}\n\nExecution: {{$json.execution?.url || 'No execution link (trigger/activation failure)'}}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        520,
+        300
+      ],
+      "id": "59113df3-271e-4c94-a190-3d11a1e39402",
+      "name": "Send incident alert to admins",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "notes": "After import, select the Telegram API credential and replace the chat ID placeholder. Do not include the failed execution payload, tokens, or personal data in this alert."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive workflow failure": {
+      "main": [
+        [
+          {
+            "node": "Send incident alert to admins",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
