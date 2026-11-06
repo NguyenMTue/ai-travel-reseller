@@ -14,12 +14,19 @@ export async function GET(request: Request) {
     } = await supabase.auth.getUser();
 
     let merchantId = user?.id;
+    let queryClient = supabase;
 
     if (!merchantId && process.env.NODE_ENV !== "production") {
       merchantId =
         request.headers.get("x-merchant-id")?.trim() ||
         new URL(request.url).searchParams.get("merchant_id")?.trim() ||
         undefined;
+      if (merchantId) {
+        try {
+          const { createAdminClient } = await import("@/src/lib/supabase/admin");
+          queryClient = createAdminClient() as any;
+        } catch {}
+      }
     }
 
     if (!merchantId) {
@@ -29,7 +36,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const { data: campaigns, error } = await supabase
+    const { data: campaigns, error } = await queryClient
       .from("campaigns")
       .select(
         "id, name, merchant_id, product_id, status, target_location, products:product_id (id, name, sale_price, original_price)"

@@ -43,13 +43,23 @@ async function resolveMerchantId(request: Request): Promise<{
   if (process.env.NODE_ENV !== "production") {
     const headerId = request.headers.get("x-merchant-id")?.trim();
     if (headerId && UUID_PATTERN.test(headerId)) {
-      return { merchantId: headerId, supabase, isSession: false };
+      try {
+        const { createAdminClient } = await import("@/src/lib/supabase/admin");
+        return { merchantId: headerId, supabase: createAdminClient() as any, isSession: false };
+      } catch {
+        return { merchantId: headerId, supabase, isSession: false };
+      }
     }
 
     const { searchParams } = new URL(request.url);
     const queryId = searchParams.get("merchant_id")?.trim();
     if (queryId && UUID_PATTERN.test(queryId)) {
-      return { merchantId: queryId, supabase, isSession: false };
+      try {
+        const { createAdminClient } = await import("@/src/lib/supabase/admin");
+        return { merchantId: queryId, supabase: createAdminClient() as any, isSession: false };
+      } catch {
+        return { merchantId: queryId, supabase, isSession: false };
+      }
     }
   }
 

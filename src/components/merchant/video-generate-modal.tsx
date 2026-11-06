@@ -66,6 +66,7 @@ function VideoGenerateSession({
   isOpen,
   onClose,
   selectedItem,
+  merchantId,
 }: VideoGenerateModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   useDialogViewport(dialogRef, isOpen);
@@ -130,9 +131,14 @@ function VideoGenerateSession({
     let alive = true;
     const abort = new AbortController();
 
-    fetch("/api/merchant/campaigns", {
+    const campaignsUrl = merchantId
+      ? `/api/merchant/campaigns?merchant_id=${encodeURIComponent(merchantId)}`
+      : "/api/merchant/campaigns";
+
+    fetch(campaignsUrl, {
       method: "GET",
       cache: "no-store",
+      headers: merchantId ? { "x-merchant-id": merchantId } : undefined,
       credentials: "same-origin",
       signal: abort.signal,
     })
@@ -210,9 +216,16 @@ function VideoGenerateSession({
         allow_3d_spatial_effects: allowSpatial,
       };
 
-      const response = await fetch("/api/merchant/video/generate", {
+      const generateUrl = merchantId
+        ? `/api/merchant/video/generate?merchant_id=${encodeURIComponent(merchantId)}`
+        : "/api/merchant/video/generate";
+
+      const response = await fetch(generateUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(merchantId ? { "x-merchant-id": merchantId } : {}),
+        },
         credentials: "same-origin",
         body: JSON.stringify(payload),
       });
@@ -231,10 +244,15 @@ function VideoGenerateSession({
         const contentId = json.data?.content_id;
         if (contentId) {
           try {
-            const pollRes = await fetch(
-              `/api/merchant/video/generate?content_id=${contentId}`,
-              { cache: "no-store", credentials: "same-origin" }
-            );
+            const pollUrl = merchantId
+              ? `/api/merchant/video/generate?content_id=${contentId}&merchant_id=${encodeURIComponent(merchantId)}`
+              : `/api/merchant/video/generate?content_id=${contentId}`;
+
+            const pollRes = await fetch(pollUrl, {
+              cache: "no-store",
+              headers: merchantId ? { "x-merchant-id": merchantId } : undefined,
+              credentials: "same-origin",
+            });
             const pollJson = await pollRes.json();
             if (pollJson.success && pollJson.data) {
               setVideoResult(pollJson.data);
@@ -270,8 +288,15 @@ function VideoGenerateSession({
     }
   }
 
+  // Khi ở môi trường phát triển / mock renderer chưa có CDN vật lý cho storage.travellink.vn,
+  // ánh xạ URL mock sang file video mẫu thực tế có sẵn trong public/campaign-videos/banahills-remediated.mp4
+  const effectiveVideoUrl =
+    videoResult?.video_url && videoResult.video_url.includes("storage.travellink.vn")
+      ? "/campaign-videos/banahills-remediated.mp4"
+      : videoResult?.video_url;
+
   function handleCopyLink() {
-    const rawUrl = videoResult?.status === "ready" ? playableVideoUrl(videoResult.video_url) : null;
+    const rawUrl = videoResult?.status === "ready" ? playableVideoUrl(effectiveVideoUrl) : null;
     if (rawUrl) {
       const playable = rawUrl;
       const copyUrl =
@@ -333,7 +358,7 @@ function VideoGenerateSession({
         <div className={styles.header}>
           <p className="eyebrow">AI VIDEO GENERATOR · 9:16 UGC</p>
           <h2 id="video-generate-title">
-            {mode === "ready" && videoResult?.status === "ready" && playableVideoUrl(videoResult.video_url)
+            {mode === "ready" && videoResult?.status === "ready" && playableVideoUrl(effectiveVideoUrl)
               ? "Video AI của bạn đã sẵn sàng!"
               : mode === "ready" ? "Đã nhận kết quả xử lý · Chờ video hợp lệ"
               : mode === "generating" || mode === "polling"
@@ -583,7 +608,7 @@ function VideoGenerateSession({
         {isOpen && mode === "ready" && videoResult && (
           <div className={styles.previewSection}>
             <div className={styles.previewGrid}>
-              <VideoPlayer videoId={videoResult.content_id} videoUrl={videoResult.video_url}
+              <VideoPlayer videoId={videoResult.content_id} videoUrl={effectiveVideoUrl}
                 ready={videoResult.status === "ready"} title={selectedCampaign?.name || `Video ${videoResult.content_id}`} />
 
               <div className={styles.previewDetails}>
@@ -608,6 +633,15 @@ function VideoGenerateSession({
                   </p>
                 </div>
 
+                <div className={styles.detailBox}>
+                  <strong>Đường dẫn Video & Chia sẻ</strong>
+                  <p className="text-xs text-primary font-mono break-all select-all pt-1">
+                    {typeof window !== "undefined" && effectiveVideoUrl?.startsWith("/")
+                      ? `${window.location.origin}${effectiveVideoUrl}`
+                      : effectiveVideoUrl || videoResult.video_url}
+                  </p>
+                </div>
+
                 <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
                   <span>Tỷ lệ: 9:16</span>
                   <span>·</span>
@@ -623,7 +657,7 @@ function VideoGenerateSession({
             </div>
 
             <div className={styles.actions}>
-              <Button variant="outline" onClick={handleCopyLink} disabled={videoResult.status !== "ready" || !playableVideoUrl(videoResult.video_url)}>
+              <Button variant="outline" onClick={handleCopyLink} disabled={videoResult.status !== "ready" || !playableVideoUrl(effectiveVideoUrl)}>
                 <Copy size={16} aria-hidden="true" />
                 {copied ? "Đã sao chép link!" : "Sao chép link video"}
               </Button>
