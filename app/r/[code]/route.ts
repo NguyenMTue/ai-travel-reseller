@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { createAdminClient } from "@/src/lib/supabase/admin";
 import { parseUserAgent } from "@/src/lib/tracking/ua-parser";
 import { checkClickRateLimit } from "@/src/lib/tracking/rate-limiter";
@@ -48,38 +48,40 @@ export async function GET(request: Request, context: RouteContext) {
     // Kiểm tra Rate Limiting (Cùng 1 IP bấm > 10 lần trong 1 phút thì đánh dấu không hợp lệ)
     const rateLimit = checkClickRateLimit(ipAddress, link.id);
 
-    // 3. Ghi nhận bất đồng bộ lượt click vào bảng `clicks`
-    // Sử dụng khối try/catch riêng để đảm bảo lỗi ghi click không bao giờ làm gián đoạn chuyển hướng của khách
-    try {
-      const { error: clickErr } = await adminClient.from("clicks").insert({
-        link_id: link.id,
-        ip_address: ipAddress,
-        user_agent: userAgent,
-        referer: referer,
-        device_type: uaInfo.deviceType,
-        os: uaInfo.os,
-        browser: uaInfo.browser,
-        is_bot: uaInfo.isBot,
-        bot_name: uaInfo.botName,
-        is_valid: rateLimit.isValid,
-        invalid_reason: rateLimit.invalidReason,
-        metadata: {
-          code: cleanCode,
-          reseller_id: link.reseller_id,
-          campaign_id: link.campaign_id,
-          product_id: link.product_id,
-          timestamp: new Date().toISOString(),
-          parsed_ua: uaInfo,
-          rate_limit_count: rateLimit.currentCount,
-        },
-      });
+    // 3. Tối ưu Non-blocking: Ghi nhận bất đồng bộ lượt click vào bảng `clicks` với after()
+    // Đảm bảo lệnh redirect HTTP 302 trả về ngay lập tức cho client (< 150ms), không bị nghẽn bởi I/O cơ sở dữ liệu
+    after(async () => {
+      try {
+        const { error: clickErr } = await adminClient.from("clicks").insert({
+          link_id: link.id,
+          ip_address: ipAddress,
+          user_agent: userAgent,
+          referer: referer,
+          device_type: uaInfo.deviceType,
+          os: uaInfo.os,
+          browser: uaInfo.browser,
+          is_bot: uaInfo.isBot,
+          bot_name: uaInfo.botName,
+          is_valid: rateLimit.isValid,
+          invalid_reason: rateLimit.invalidReason,
+          metadata: {
+            code: cleanCode,
+            reseller_id: link.reseller_id,
+            campaign_id: link.campaign_id,
+            product_id: link.product_id,
+            timestamp: new Date().toISOString(),
+            parsed_ua: uaInfo,
+            rate_limit_count: rateLimit.currentCount,
+          },
+        });
 
-      if (clickErr) {
-        console.warn(`[Tracking] Ghi nhận click thất bại cho code ${cleanCode}:`, clickErr.message);
+        if (clickErr) {
+          console.warn(`[Tracking] Ghi nhận click thất bại cho code ${cleanCode}:`, clickErr.message);
+        }
+      } catch (insertError) {
+        console.warn(`[Tracking] Exception khi ghi nhận click:`, insertError);
       }
-    } catch (insertError) {
-      console.warn(`[Tracking] Exception khi ghi nhận click:`, insertError);
-    }
+    });
 
     // 4. HTTP 302 Redirect an toàn đến trang thanh toán chính thức của Merchant
     // Lưu ý: Luôn luôn chuyển hướng 302 kể cả với Bot hoặc spam để bảo đảm OpenGraph Preview trên MXH không bị lỗi
