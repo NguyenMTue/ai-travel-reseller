@@ -6,10 +6,13 @@ Thư mục tài liệu kỹ thuật, hợp đồng bàn giao và mẫu dữ li�
 
 ## Danh mục tài liệu Tích hợp AI Video Engine (Tháng 11/2026)
 
-1. **Báo cáo Phân tích Khoảng trống Nghiệp vụ & Kế hoạch Hoàn thiện Trước Go-Live:**
-   - [`pre_deployment_missing_business_features.md`](./pre_deployment_missing_business_features.md): **(MỚI)** Báo cáo phân tích chuyên sâu 7 tính năng nghiệp vụ còn thiếu trước khi deploy Production: Đấu nối Dashboard Merchant với DB thật, Màn hình Quản lý Chiến dịch `/merchant/campaigns`, Quy trình Yêu cầu Rút tiền Ví Reseller, Webhook nhận đơn hàng đối tác, Quản lý Mã Voucher offline (`FR-ATT-01`), Hàng đợi bất đồng bộ Video AI và Kênh thông báo đẩy.
+1. **Bảng Phân công Tác vụ Nước rút Đóng gói Dự án trong Ngày (BE1 & BE2):**
+   - [`final_sprint_task_assignment_be1_be2.md`](./final_sprint_task_assignment_be1_be2.md): **(MỚI)** Bảng phân công 8 tác vụ chi tiết chia đều cho BE1 và BE2 thực hiện song song trong ngày hôm nay, cam kết Zero Merge Conflict, bao gồm: Dashboard thật, DS Chiến dịch, Rút tiền ví Reseller, Webhook đơn hàng, Mã voucher livestream và Video Job Polling.
 
-2. **Nhật ký bàn giao phiên làm việc Tích hợp MUSE2API & Tối ưu UI Video:**
+2. **Báo cáo Phân tích Khoảng trống Nghiệp vụ & Kế hoạch Hoàn thiện Trước Go-Live:**
+   - [`pre_deployment_missing_business_features.md`](./pre_deployment_missing_business_features.md): Báo cáo phân tích chuyên sâu 7 tính năng nghiệp vụ còn thiếu trước khi deploy Production: Đấu nối Dashboard Merchant với DB thật, Màn hình Quản lý Chiến dịch `/merchant/campaigns`, Quy trình Yêu cầu Rút tiền Ví Reseller, Webhook nhận đơn hàng đối tác, Quản lý Mã Voucher offline (`FR-ATT-01`), Hàng đợi bất đồng bộ Video AI và Kênh thông báo đẩy.
+
+3. **Nhật ký bàn giao phiên làm việc Tích hợp MUSE2API & Tối ưu UI Video:**
    - [`session_handover_2026_11_05_muse2api.md`](./session_handover_2026_11_05_muse2api.md): Chi tiết tích hợp cổng Muse2API Gateway (`POST /v1/videos`, polling, download buffer), cấu hình biến môi trường `MUSE2API_KEY`, cập nhật dropdown thời lượng 10s & 18s, thay thế giai đoạn giả lập bằng đồng hồ đếm thời gian thực (Live Elapsed Timer), và dữ liệu chiến dịch mẫu test trên Cloud Supabase.
 
 3. **Hệ thống System Prompts chuẩn hóa (10s & 18s Profiles):**
