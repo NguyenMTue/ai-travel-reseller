@@ -204,9 +204,19 @@ export async function answerProductChat({
     knowledgeBase: kb,
   });
 
+  const checkoutUrlWithVoucher =
+    result.purchaseIntent && checkoutUrl
+      ? buildCheckoutUrl(
+          product.payment_url,
+          attribution,
+          product.booking_url,
+          result.voucherCode,
+        )
+      : null;
+
   return {
     reply: result.reply,
     intent_detected: result.intentDetected,
-    suggested_checkout_url: result.purchaseIntent ? checkoutUrl : null,
+    suggested_checkout_url: checkoutUrlWithVoucher,
   };
 }

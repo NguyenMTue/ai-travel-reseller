@@ -39,3 +39,27 @@ export function prepareCtaWithLink(cta: string | null, link: ScopedTrackingLink 
   // Literal replacement preserves whitespace/newlines and never mutates contents.
   return { status: "ready", value: cta.split("[LINK_MUA_VE]").join(link.shortUrl) };
 }
+
+/**
+ * Generate a compact reseller voucher code (e.g. `BANA-A1B2`) for livestream/offline attribution.
+ */
+export function generateVoucherCode(campaignName: string, resellerId: string): string {
+  const asciiCampaign = (campaignName || "")
+    .replace(/[Đđ]/g, "d")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toUpperCase();
+  const rawPrefix = asciiCampaign.slice(0, 4);
+  const prefix =
+    rawPrefix.length >= 3 ? rawPrefix : `${rawPrefix}TOUR`.slice(0, 4);
+
+  const asciiReseller = (resellerId || "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toUpperCase()
+    .slice(0, 4);
+  const suffix =
+    asciiReseller.length >= 3 ? asciiReseller : `${asciiReseller}TL00`.slice(0, 4);
+
+  return `${prefix}-${suffix}`;
+}

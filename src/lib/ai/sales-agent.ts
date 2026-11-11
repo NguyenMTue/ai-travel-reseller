@@ -6,6 +6,7 @@ import {
 } from "@langchain/core/prompts";
 import { z } from "zod";
 
+import { appendVoucherParam } from "./checkout-url.ts";
 import {
   buildSafeFallbackReply,
   guardSalesReply,
@@ -53,7 +54,50 @@ export type SalesReply = {
   reply: string;
   intentDetected: SalesIntent;
   purchaseIntent: boolean;
+  voucherCode?: string | null;
+  checkoutUrl?: string | null;
 };
+
+export const VOUCHER_PATTERN = /\b([A-Z0-9]{3,6}-[A-Z0-9]{3,6})\b/i;
+
+const IGNORED_CODE_PREFIXES = /^(ORD|TXN|REF|INV)-/i;
+const VOUCHER_CONTEXT_BEFORE =
+  /(?:mã|voucher|code|coupon|ưu\s*đãi|khuyến\s*mãi|nhập|áp\s*dụng|dùng)\s*(?:giảm\s*giá\s*)?(?:là|:|=)?\s*$/i;
+
+/**
+ * Extract a reseller tracking voucher code (e.g., `BANA-A1B2`, `BANA-R12`) from customer chat,
+ * while ignoring URL slugs, UUIDs, booking/txn references, and plain hyphenated words like `half-day`.
+ */
+export function extractVoucherCode(message: string): string | null {
+  if (!message?.trim()) return null;
+
+  const sanitized = message
+    .replace(/https?:\/\/\S+/gi, " ")
+    .replace(/www\.\S+/gi, " ")
+    .replace(/[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}/gi, " ");
+
+  const matcher = new RegExp(VOUCHER_PATTERN.source, "gi");
+  for (const match of sanitized.matchAll(matcher)) {
+    const candidate = match[1];
+    if (!candidate) continue;
+    if (IGNORED_CODE_PREFIXES.test(candidate)) continue;
+    if (!/[A-Za-z]/.test(candidate)) continue;
+
+    const preceding = sanitized.slice(
+      Math.max(0, (match.index ?? 0) - 32),
+      match.index ?? 0,
+    );
+    const hasDigit = /\d/.test(candidate);
+    const isAllCaps = candidate === candidate.toUpperCase();
+    const hasVoucherKeyword = VOUCHER_CONTEXT_BEFORE.test(preceding);
+
+    if (hasDigit || isAllCaps || hasVoucherKeyword) {
+      return candidate.toUpperCase();
+    }
+  }
+
+  return null;
+}
 
 export const salesAgentResponseSchema = z
   .object({
@@ -106,6 +150,9 @@ const INTENT_PATTERNS: Array<[SalesIntent, RegExp]> = [
 
 export function detectSalesIntent(message: string): SalesIntent {
   const normalized = message.trim();
+  if (extractVoucherCode(normalized)) {
+    return "INTENT_PURCHASE_READY";
+  }
   return INTENT_PATTERNS.find(([, pattern]) => pattern.test(normalized))?.[0] ??
     "INTENT_OUT_OF_SCOPE";
 }
@@ -266,6 +313,19 @@ function tryExtractKBFromContext(
   };
 }
 
+function extractHistoryVoucherCode(
+  history: SalesConversationMessage[],
+): string | null {
+  for (let i = history.length - 1; i >= 0; i--) {
+    const msg = history[i];
+    if (msg?.role === "user") {
+      const code = extractVoucherCode(msg.content);
+      if (code) return code;
+    }
+  }
+  return null;
+}
+
 export async function generateSalesReply({
   question,
   history,
@@ -275,17 +335,44 @@ export async function generateSalesReply({
   invokeModelFn,
 }: GenerateSalesReplyInput): Promise<SalesReply> {
   const intentHint = detectSalesIntent(question);
-  const kb = knowledgeBase ?? tryExtractKBFromContext(context);
+  const questionVoucher = extractVoucherCode(question);
+  const historyVoucher = extractHistoryVoucherCode(history);
+  const activeVoucher = questionVoucher ?? historyVoucher;
+
+  const baseKb = knowledgeBase ?? tryExtractKBFromContext(context);
+  const kb: VerifiedSalesKnowledgeBase | undefined =
+    baseKb && activeVoucher
+      ? {
+          ...baseKb,
+          allowed_promo_codes: Array.from(
+            new Set([...(baseKb.allowed_promo_codes ?? []), activeVoucher]),
+          ),
+        }
+      : baseKb;
+
+  const checkoutUrlWithVoucher = kb?.official_checkout_url
+    ? appendVoucherParam(kb.official_checkout_url, activeVoucher)
+    : null;
 
   if (!context.trim() && !kb) {
     const purchaseIntent =
       intentHint === "INTENT_PURCHASE_READY" && checkoutAvailable;
+    let offlineReply = purchaseIntent
+      ? "Dạ em đã ghi nhận nhu cầu đặt dịch vụ. Anh/chị vui lòng sử dụng link thanh toán chính thức bên dưới ạ."
+      : "Dạ hiện tại em chưa tìm thấy thông tin chính thức phù hợp để trả lời câu hỏi này.";
+
+    if (questionVoucher) {
+      offlineReply = purchaseIntent
+        ? `Dạ mã ưu đãi ${questionVoucher} đã được ghi nhận thành công cho đơn đặt dịch vụ của anh/chị ạ! Anh/chị vui lòng sử dụng link thanh toán chính thức bên dưới ạ.`
+        : `Dạ mã ưu đãi ${questionVoucher} đã được ghi nhận cho anh/chị ạ. Hiện tại tính năng thanh toán trực tuyến cho dịch vụ này chưa khả dụng.`;
+    }
+
     return {
-      reply: purchaseIntent
-        ? "Dạ em đã ghi nhận nhu cầu đặt dịch vụ. Anh/chị vui lòng sử dụng link thanh toán chính thức bên dưới ạ."
-        : "Dạ hiện tại em chưa tìm thấy thông tin chính thức phù hợp để trả lời câu hỏi này.",
+      reply: offlineReply,
       intentDetected: intentHint,
       purchaseIntent,
+      voucherCode: activeVoucher,
+      checkoutUrl: purchaseIntent ? checkoutUrlWithVoucher : null,
     };
   }
 
@@ -296,6 +383,9 @@ export async function generateSalesReply({
   );
 
   const intentTemperature = getRecommendedTemperatureForIntent(intentHint);
+  const promptIntentHint = questionVoucher
+    ? `INTENT_PURCHASE_READY (khách vừa cung cấp mã voucher Reseller hợp lệ: ${questionVoucher}; hãy xác nhận lịch sự mã ${questionVoucher} đã được ghi nhận, không tự bịa phần trăm giảm ngoài dữ liệu KB)`
+    : intentHint;
 
   async function invokeModel(modelName: string, temp = intentTemperature) {
     if (invokeModelFn) {
@@ -312,7 +402,7 @@ export async function generateSalesReply({
         history: historyMessages,
         context,
         checkoutAvailability: checkoutAvailable ? "AVAILABLE" : "UNAVAILABLE",
-        intentHint,
+        intentHint: promptIntentHint,
       },
       { signal: AbortSignal.timeout(SALES_AGENT_TIMEOUT_MS) },
     );
@@ -400,9 +490,25 @@ export async function generateSalesReply({
     finalIntent === "INTENT_PURCHASE_READY" &&
     checkoutAvailable;
 
+  let finalReply = guarded.reply;
+  if (questionVoucher && guarded.guardrailValidation.isValid) {
+    if (!finalReply.toUpperCase().includes(questionVoucher)) {
+      finalReply = `Dạ mã ưu đãi ${questionVoucher} đã được ghi nhận thành công cho đơn đặt vé của anh/chị ạ! ${finalReply}`;
+    }
+    if (
+      isPurchase &&
+      checkoutUrlWithVoucher &&
+      !finalReply.includes("voucher=")
+    ) {
+      finalReply = `${finalReply}\n\nAnh/chị có thể thanh toán kèm mã ${questionVoucher} tại đây: ${checkoutUrlWithVoucher}`;
+    }
+  }
+
   return {
-    reply: guarded.reply,
+    reply: finalReply,
     intentDetected: finalIntent,
     purchaseIntent: isPurchase,
+    voucherCode: activeVoucher,
+    checkoutUrl: isPurchase ? checkoutUrlWithVoucher : null,
   };
 }
