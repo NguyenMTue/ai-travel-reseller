@@ -260,14 +260,14 @@ test("Suite 1: Chặn tham số không hợp lệ (UUID sai, duration vượt ng
     /UUID/
   );
 
-  // Thời lượng < 15s
+  // Thời lượng < 5s
   assert.throws(
     () =>
       videoGenerateRequestSchema.parse({
         ...validReqSample,
-        target_duration_sec: 10,
+        target_duration_sec: 3,
       }),
-    /15 giây/
+    /5 giây/
   );
 
   // Thời lượng > 60s

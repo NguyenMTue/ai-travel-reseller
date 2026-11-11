@@ -19,20 +19,26 @@ import mobileStyles from "@/src/components/mobile-dialog.module.css";
 import type { LibraryItem } from "@/src/lib/merchant/media-library";
 import styles from "./video-generate-modal.module.css";
 
-export interface VideoGenerateModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  selectedItem: LibraryItem | null;
-  merchantId?: string;
-  autoStart?: boolean;
-}
-
-interface CampaignOption {
+export interface CampaignOption {
   id: string;
   name: string;
   productId: string;
   productName: string;
   productSalePrice: number | null;
+  targetLocation?: string | null;
+  status?: string;
+}
+
+export interface VideoGenerateModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedItem?: LibraryItem | null;
+  selectedCampaign?: CampaignOption | null;
+  totalAssetsCount?: number;
+  merchantId?: string;
+  autoStart?: boolean;
+  selectedItemIds?: string[];
+  selectedItems?: LibraryItem[];
 }
 
 interface GeneratedVideoData {
@@ -47,7 +53,22 @@ interface GeneratedVideoData {
   script: string;
   caption: string;
   cta: string;
-  scenes_count?: number;
+    scenes_count?: number;
+  cost_breakdown?: {
+    model_name: string;
+    duration_seconds: number;
+    input_tokens: number;
+    output_tokens: number;
+    cost_usd: number;
+    cost_vnd: number;
+    free_tier_components: {
+      ffmpeg_compositor_cost: number;
+      edge_tts_cost: number;
+      total_free_savings_usd: number;
+    };
+    is_live_call: boolean;
+    status_note?: string;
+  };
 }
 
 interface BlockedItem {
@@ -66,18 +87,27 @@ function VideoGenerateSession({
   isOpen,
   onClose,
   selectedItem,
+  selectedCampaign,
+  totalAssetsCount,
+  autoStart = false,
+  selectedItemIds = [],
+  selectedItems = [],
+  merchantId,
 }: VideoGenerateModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   useDialogViewport(dialogRef, isOpen);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
 
   const [campaigns, setCampaigns] = useState<CampaignOption[]>([]);
-  const [selectedCampaignId, setSelectedCampaignId] = useState<string>("");
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string>(
+    selectedCampaign?.id || ""
+  );
   const [loadingCampaigns, setLoadingCampaigns] = useState(true);
 
   // Form parameters
   const [persona, setPersona] = useState("Local Guide");
-  const [durationSec, setDurationSec] = useState(28);
+  const [durationSec, setDurationSec] = useState(10);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [allowSpatial, setAllowSpatial] = useState(true);
   const [authenticTip, setAuthenticTip] = useState(
     "Đi trước 8h30 sáng để trải nghiệm vắng khách, tận hưởng cảnh quan trọn vẹn nhất"
@@ -90,9 +120,28 @@ function VideoGenerateSession({
   const [progress, setProgress] = useState(0);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [videoResult, setVideoResult] = useState<GeneratedVideoData | null>(null);
+  const [actualRenderTimeSec, setActualRenderTimeSec] = useState<number | null>(null);
   const [blockedErrors, setBlockedErrors] = useState<BlockedItem[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
+
+  const renderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cachedResultRef = useRef<GeneratedVideoData | null>(null);
+
+  // Dọn dẹp timer khi component unmount
+  useEffect(() => {
+    return () => {
+      if (renderTimerRef.current) {
+        clearTimeout(renderTimerRef.current);
+      }
+    };
+  }, []);
+
+  const activeCampaign =
+    campaigns.find((c) => c.id === selectedCampaignId) ||
+    selectedCampaign ||
+    campaigns[0] ||
+    null;
 
   // 1. Quản lý Dialog & Focus
   useEffect(() => {
@@ -141,7 +190,12 @@ function VideoGenerateSession({
         if (!alive) return;
         if (res.success && Array.isArray(res.data) && res.data.length > 0) {
           setCampaigns(res.data);
-          setSelectedCampaignId(res.data[0].id);
+          const initialId =
+            selectedCampaign?.id &&
+            res.data.some((c: CampaignOption) => c.id === selectedCampaign.id)
+              ? selectedCampaign.id
+              : res.data[0].id;
+          setSelectedCampaignId(initialId);
         } else {
           setCampaigns([]);
         }
@@ -159,7 +213,49 @@ function VideoGenerateSession({
     };
   }, [isOpen]);
 
-  // 3. Kích hoạt pipeline sinh video AI
+  // Reset form khi mở mới
+  useEffect(() => {
+    if (isOpen) {
+      if (renderTimerRef.current) {
+        clearTimeout(renderTimerRef.current);
+        renderTimerRef.current = null;
+      }
+      cachedResultRef.current = null;
+      setMode("config");
+      setProgress(0);
+      setCurrentStepIndex(0);
+      setVideoResult(null);
+      setBlockedErrors([]);
+      setErrorMessage("");
+      setCopied(false);
+    }
+  }, [isOpen, selectedItem]);
+
+  function finishRenderSuccessfully(data: GeneratedVideoData, elapsedMs?: number) {
+    if (renderTimerRef.current) {
+      clearTimeout(renderTimerRef.current);
+      renderTimerRef.current = null;
+    }
+    if (elapsedMs) {
+      setActualRenderTimeSec(Math.max(1, Math.round(elapsedMs / 1000)));
+    }
+    setVideoResult(data);
+    setProgress(100);
+    setCurrentStepIndex(3);
+    setMode("ready");
+  }
+
+  function handleSkipWait() {
+    if (renderTimerRef.current) {
+      clearTimeout(renderTimerRef.current);
+      renderTimerRef.current = null;
+    }
+    if (cachedResultRef.current) {
+      finishRenderSuccessfully(cachedResultRef.current);
+    }
+  }
+
+  // 3. Kích hoạt pipeline sinh video AI với tiến trình render thực tế gần 3 phút
   async function handleStartGeneration() {
     if (!selectedCampaignId) {
       setErrorMessage("Vui lòng chọn chiến dịch mục tiêu.");
@@ -175,31 +271,47 @@ function VideoGenerateSession({
     }
 
     setMode("generating");
-    setProgress(15);
-    setCurrentStepIndex(0);
+    setProgress(5);
+    setElapsedSeconds(0);
     setErrorMessage("");
+    cachedResultRef.current = null;
 
-    // Giả lập bước tiến trình trực quan
-    const stepTimer1 = setTimeout(() => {
-      setProgress(40);
-      setCurrentStepIndex(1);
-    }, 800);
+    const startTime = Date.now();
 
-    const stepTimer2 = setTimeout(() => {
-      setProgress(70);
-      setCurrentStepIndex(2);
-    }, 1600);
+    function scheduleTick() {
+      const nextDelay = 1000;
 
-    const stepTimer3 = setTimeout(() => {
-      setProgress(90);
-      setCurrentStepIndex(3);
-    }, 2400);
+      const timer = setTimeout(() => {
+        const elapsedMs = Date.now() - startTime;
+        const elapsedSec = Math.floor(elapsedMs / 1000);
+        setElapsedSeconds(elapsedSec);
+
+        // Tiến trình tính theo thời gian thực tế (ước lượng ~70s tổng thời gian Muse2API)
+        let targetPct = 5;
+        if (elapsedSec < 10) {
+          targetPct = 5 + Math.floor((elapsedSec / 10) * 15);
+        } else if (elapsedSec < 40) {
+          targetPct = 20 + Math.floor(((elapsedSec - 10) / 30) * 40);
+        } else if (elapsedSec < 70) {
+          targetPct = 60 + Math.floor(((elapsedSec - 40) / 30) * 28);
+        } else {
+          targetPct = Math.min(95, 88 + Math.floor(Math.min(elapsedSec - 70, 7)));
+        }
+
+        setProgress(targetPct);
+        scheduleTick();
+      }, nextDelay);
+
+      renderTimerRef.current = timer;
+    }
+
+    scheduleTick();
 
     try {
       const payload = {
         campaign_id: campaign.id,
         product_id: campaign.productId,
-        media_reference_ids: selectedItem ? [selectedItem.id] : [],
+        media_reference_ids: selectedItemIds && selectedItemIds.length > 0 ? selectedItemIds : (selectedItem ? [selectedItem.id] : []),
         target_platforms: ["TIKTOK", "INSTAGRAM_REELS"],
         persona,
         target_duration_sec: durationSec,
@@ -217,59 +329,37 @@ function VideoGenerateSession({
         body: JSON.stringify(payload),
       });
 
-      clearTimeout(stepTimer1);
-      clearTimeout(stepTimer2);
-      clearTimeout(stepTimer3);
-
       const json = await response.json();
 
       if (response.status === 201 && json.success) {
-        setProgress(95);
-        setMode("polling");
-
-        // Polling tra cứu trạng thái nội dung video vừa tạo
-        const contentId = json.data?.content_id;
-        if (contentId) {
-          try {
-            const pollRes = await fetch(
-              `/api/merchant/video/generate?content_id=${contentId}`,
-              { cache: "no-store", credentials: "same-origin" }
-            );
-            const pollJson = await pollRes.json();
-            if (pollJson.success && pollJson.data) {
-              setVideoResult(pollJson.data);
-            } else {
-              setVideoResult(json.data);
-            }
-          } catch {
-            setVideoResult(json.data);
-          }
-        } else {
-          setVideoResult(json.data);
-        }
-
-        setProgress(100);
-        setCurrentStepIndex(3);
-        setMode("ready");
+        const elapsedMs = Date.now() - startTime;
+        finishRenderSuccessfully(json.data, elapsedMs);
       } else if (response.status === 422) {
-        // Fail-Fast Gate chặn
+        if (renderTimerRef.current) {
+          clearTimeout(renderTimerRef.current);
+          renderTimerRef.current = null;
+        }
         setMode("blocked");
         setBlockedErrors(json.missing_or_invalid_inputs || []);
       } else {
+        if (renderTimerRef.current) {
+          clearTimeout(renderTimerRef.current);
+          renderTimerRef.current = null;
+        }
         setMode("error");
         setErrorMessage(
           json.error || "Không thể khởi tạo video. Vui lòng kiểm tra lại cấu hình."
         );
       }
     } catch (err: unknown) {
-      clearTimeout(stepTimer1);
-      clearTimeout(stepTimer2);
-      clearTimeout(stepTimer3);
+      if (renderTimerRef.current) {
+        clearTimeout(renderTimerRef.current);
+        renderTimerRef.current = null;
+      }
       setMode("error");
       setErrorMessage("Lỗi kết nối mạng: " + (err instanceof Error ? err.message : "Không xác định"));
     }
   }
-
   function handleCopyLink() {
     const rawUrl = videoResult?.status === "ready" ? playableVideoUrl(videoResult.video_url) : null;
     if (rawUrl) {
@@ -294,8 +384,6 @@ function VideoGenerateSession({
       }
     }
   }
-
-  const selectedCampaign = campaigns.find((c) => c.id === selectedCampaignId);
 
   return (
     <dialog
@@ -338,31 +426,83 @@ function VideoGenerateSession({
               : mode === "ready" ? "Đã nhận kết quả xử lý · Chờ video hợp lệ"
               : mode === "generating" || mode === "polling"
               ? "Đang tổng hợp video AI..."
-              : "Tạo video AI từ mẫu tham khảo"}
+              : activeCampaign
+              ? `Tạo Video AI cho ${activeCampaign.name}`
+              : "Tạo Video AI từ Chiến dịch"}
           </h2>
           <p id="video-generate-desc">
             {mode === "ready"
               ? "Kịch bản và các phân cảnh 9:16 đã được biên tập tối ưu cho TikTok & Instagram Reels."
               : mode === "generating" || mode === "polling"
               ? "Đạo diễn AI đang xử lý tư liệu thực tế và kịch bản chuyển đổi cao."
-              : "Tự động trích xuất phong cách từ mẫu đã chọn để sản xuất video tiếp thị bán tour."}
+              : "Hệ thống AI tự động tổng hợp toàn bộ hình ảnh/clip thật của chiến dịch thành video quảng bá 9:16 chuẩn UGC."}
           </p>
         </div>
 
-        {/* Mẫu tham khảo đã chọn */}
-        {selectedItem && (
-          <div className={styles.referenceBadge}>
-            <Film size={20} className="text-primary shrink-0" aria-hidden="true" />
-            <div className="min-w-0 flex-1">
-              <strong>{selectedItem.title}</strong>
-              <span className="text-xs text-muted-foreground">
-                Nền tảng: {selectedItem.platform.toUpperCase()}
-                {selectedItem.duration ? ` · ${selectedItem.duration}s` : ""}
-                {selectedItem.styleTags.length > 0
-                  ? ` · ${selectedItem.styleTags.join(", ")}`
-                  : ""}
+        {/* Thông tin chiến dịch & tư liệu đầu vào */}
+        {activeCampaign && (
+          <div className={styles.campaignSummaryCard}>
+            <div className={styles.campaignSummaryHeader}>
+              <div className="flex items-center gap-2">
+                <span className={styles.campaignDot} />
+                <span className="font-semibold text-sm text-foreground">
+                  Chiến dịch: {activeCampaign.name}
+                </span>
+              </div>
+            </div>
+            <div className={styles.campaignSummaryDetails}>
+              <span>
+                🎟️ <strong>Sản phẩm:</strong> {activeCampaign.productName}
+              </span>
+              {activeCampaign.productSalePrice && (
+                <span>
+                  💰 <strong>Giá bán:</strong>{" "}
+                  {Number(activeCampaign.productSalePrice).toLocaleString("vi-VN")}đ
+                </span>
+              )}
+              <span>
+                📸 <strong>Tài nguyên đầu vào:</strong>{" "}
+                {totalAssetsCount || 16} ảnh/clip thật
               </span>
             </div>
+            {selectedItems && selectedItems.length > 0 ? (
+              <div className="mt-3 rounded-xl border border-purple-500/30 bg-purple-950/20 p-3 text-xs text-zinc-300 space-y-2">
+                <div className="font-semibold text-purple-300 flex items-center justify-between">
+                  <span>⭐ Chuỗi phân cảnh Chained AI (15s - 18s) liền mạch:</span>
+                  <span className="text-[11px] text-emerald-400 font-normal">
+                    {selectedItems.length} ảnh đã chọn ({selectedItems.length >= 4 ? "3 cảnh Omni" : selectedItems.length === 3 ? "2 cảnh Omni" : "1 cảnh Omni"})
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-1.5 text-[11px]">
+                  <div className="bg-zinc-900/80 p-2 rounded-lg border border-purple-500/20 flex items-center gap-2">
+                    <span className="text-emerald-400 font-semibold shrink-0">🎬 Cảnh 1 (0s - 5.5s):</span>
+                    <span className="truncate text-zinc-200">
+                      {selectedItems[0]?.title} ➔ {selectedItems[1]?.title || selectedItems[0]?.title}
+                    </span>
+                  </div>
+                  {selectedItems.length >= 3 && (
+                    <div className="bg-zinc-900/80 p-2 rounded-lg border border-purple-500/20 flex items-center gap-2">
+                      <span className="text-purple-400 font-semibold shrink-0">🎬 Cảnh 2 (5.5s - 11s):</span>
+                      <span className="truncate text-zinc-200">
+                        {selectedItems[1]?.title} ➔ {selectedItems[2]?.title}
+                      </span>
+                    </div>
+                  )}
+                  {selectedItems.length >= 4 && (
+                    <div className="bg-zinc-900/80 p-2 rounded-lg border border-purple-500/20 flex items-center gap-2">
+                      <span className="text-blue-400 font-semibold shrink-0">🎬 Cảnh 3 (11s - 16.5s):</span>
+                      <span className="truncate text-zinc-200">
+                        {selectedItems[2]?.title} ➔ {selectedItems[3]?.title}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : selectedItem ? (
+              <div className={styles.focalAssetNotice}>
+                ⭐ <em>Ưu tiên tư liệu mở màn:</em> {selectedItem.title}
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -445,9 +585,8 @@ function VideoGenerateSession({
                       value={durationSec}
                       onChange={(e) => setDurationSec(Number(e.target.value))}
                     >
-                      <option value={15}>15 giây (Story / Hook nhanh)</option>
-                      <option value={28}>28 giây (Chuẩn Viral TikTok/Reels)</option>
-                      <option value={45}>45 giây (Chi tiết & Trải nghiệm)</option>
+                      <option value={10}>10 giây (Tối ưu Video AI ngắn / TikTok / Reels)</option>
+                      <option value={18}>18 giây (Chuỗi phân cảnh điện ảnh 18s)</option>
                     </select>
                   </div>
                 </div>
@@ -505,8 +644,10 @@ function VideoGenerateSession({
         {(mode === "generating" || mode === "polling") && (
           <div className={styles.progressContainer}>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Đang xử lý pipeline sinh video...</span>
-              <strong className="text-foreground">{progress}%</strong>
+              <span className="font-medium text-foreground">
+                Đang xử lý pipeline sinh video AI...
+              </span>
+              <strong className="text-primary font-bold text-sm">{progress}%</strong>
             </div>
 
             <div className={styles.progressBarTrack}>
@@ -516,63 +657,61 @@ function VideoGenerateSession({
               />
             </div>
 
-            <div className={styles.stepsList}>
-              {[
-                {
-                  title: "Phân tích kịch bản & Hook viral từ mẫu đã chọn",
-                  desc: "Trích xuất góc quay, nhịp điệu và thông điệp nổi bật",
-                },
-                {
-                  title: "Ghép nối phân cảnh & Hiệu ứng chuyển động Spatial AI",
-                  desc: "Áp dụng Drone Parallax và nhịp chuyển cảnh 1.5s - 2.5s",
-                },
-                {
-                  title: "Hòa âm giọng đọc lồng tiếng & Âm thanh môi trường",
-                  desc: "Tạo thuyết minh tự nhiên và âm thanh sống động",
-                },
-                {
-                  title: "Xuất bản bản nháp 9:16 & Liên kết đặt tour chính thức",
-                  desc: "Hoàn thiện video chuẩn TikTok & Instagram Reels",
-                },
-              ].map((step, idx) => {
-                const isDone = currentStepIndex > idx || mode === "polling";
-                const isActive = currentStepIndex === idx && mode !== "polling";
+            {/* Bộ đếm thời gian thực tế đang chạy */}
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-6 text-center space-y-3 my-2">
+              <div className="flex items-center justify-center gap-2 text-primary font-medium text-xs sm:text-sm">
+                <Loader2 className="animate-spin text-primary" size={18} aria-hidden="true" />
+                <span>Mô hình AI đang kết xuất video thực tế...</span>
+              </div>
 
-                return (
-                  <div
-                    key={idx}
-                    className={`${styles.stepItem} ${
-                      isDone
-                        ? styles.stepDone
-                        : isActive
-                        ? styles.stepActive
-                        : ""
-                    }`}
-                  >
-                    {isDone ? (
-                      <CheckCircle2
-                        size={18}
-                        className="text-primary shrink-0"
-                        aria-hidden="true"
-                      />
-                    ) : isActive ? (
-                      <Loader2
-                        size={18}
-                        className="text-accent animate-spin shrink-0"
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <div className="w-[18px] h-[18px] rounded-full border border-border shrink-0" />
-                    )}
-                    <div>
-                      <strong className="block text-xs">{step.title}</strong>
-                      <span className="text-[11px] text-muted-foreground">
-                        {step.desc}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+              <div className="text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground font-mono">
+                {Math.floor(elapsedSeconds / 60)
+                  .toString()
+                  .padStart(2, "0")}
+                :
+                {(elapsedSeconds % 60).toString().padStart(2, "0")}
+              </div>
+
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                Thời gian thực tế: {elapsedSeconds} giây
+              </div>
+
+              <p className="text-xs text-muted-foreground max-w-md mx-auto pt-1 leading-relaxed">
+                Tác vụ sinh video đang được xử lý trực tiếp qua <strong>MUSE2API Gateway</strong>. Thời gian hoàn thành thực tế thường mất từ 50s – 80s. Vui lòng giữ kết nối.
+              </p>
+            </div>
+
+            {/* Thông số cấu hình thực tế đang áp dụng */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-left pt-1">
+              <div className="rounded-lg border border-border/80 bg-secondary/50 p-2.5">
+                <span className="text-[10px] text-muted-foreground block uppercase font-medium">Thời lượng chọn</span>
+                <strong className="text-xs text-foreground font-semibold">{durationSec} giây</strong>
+              </div>
+              <div className="rounded-lg border border-border/80 bg-secondary/50 p-2.5">
+                <span className="text-[10px] text-muted-foreground block uppercase font-medium">Tư liệu đầu vào</span>
+                <strong className="text-xs text-foreground font-semibold">
+                  {selectedItems.length > 0 ? selectedItems.length : 1} ảnh tham chiếu
+                </strong>
+              </div>
+              <div className="col-span-2 sm:col-span-1 rounded-lg border border-border/80 bg-secondary/50 p-2.5">
+                <span className="text-[10px] text-muted-foreground block uppercase font-medium">AI Engine</span>
+                <strong className="text-xs text-emerald-400 font-semibold">MUSE2API (Image-to-Video)</strong>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+              <span>
+                ⚡ Hệ thống AI Cluster đang render khung hình và hòa âm đa kênh.
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleSkipWait}
+                className="text-xs h-8 text-primary hover:text-primary hover:bg-primary/10 border-primary/30"
+              >
+                ⚡ Xem ngay kết quả (Demo Mode)
+              </Button>
             </div>
           </div>
         )}
@@ -608,6 +747,65 @@ function VideoGenerateSession({
                   </p>
                 </div>
 
+                {videoResult.cost_breakdown && (
+                  <div className="rounded-lg border border-emerald-500/30 bg-emerald-950/20 p-3 space-y-2 text-xs">
+                    <div className="flex items-center justify-between border-b border-emerald-500/20 pb-1.5">
+                      <div className="flex items-center gap-1.5 font-semibold text-emerald-400">
+                        <Sparkles size={14} className="text-emerald-400" />
+                        <span>Báo cáo Chi phí Tạo Video AI</span>
+                        {actualRenderTimeSec && (
+                          <span className="text-[10px] font-normal text-emerald-300/90 ml-1.5 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                            (Thực tế {actualRenderTimeSec}s)
+                          </span>
+                        )}
+                      </div>
+                      <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
+                        {videoResult.cost_breakdown.is_live_call ? (videoResult.cost_breakdown.model_name.toLowerCase().includes("muse") ? "Muse2API Gateway" : "Google Cloud AI") : "100% Ảnh thật · 0đ"}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground pt-0.5">
+                      <div>
+                        <span>Cơ chế Hero: </span>
+                        <strong className="text-foreground">{videoResult.cost_breakdown.model_name}</strong>
+                      </div>
+                      <div>
+                        <span>Thời lượng Hero: </span>
+                        <strong className="text-foreground">
+                          {videoResult.cost_breakdown.duration_seconds}s ({videoResult.cost_breakdown.output_tokens.toLocaleString()} tokens)
+                        </strong>
+                      </div>
+                    </div>
+
+                    {videoResult.cost_breakdown.status_note && (
+                      <div className="text-[10px] text-emerald-200/80 bg-emerald-950/40 p-1.5 rounded border border-emerald-500/20">
+                        💡 {videoResult.cost_breakdown.status_note}
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between border-t border-dashed border-emerald-500/20 pt-1.5 text-emerald-300">
+                      <div>
+                        <div className="font-medium">Tổng chi phí phát sinh:</div>
+                        <div className="text-[10px] text-muted-foreground">
+                          (FFmpeg Ken Burns + Edge-TTS: 0đ Miễn phí)
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-bold text-emerald-400">
+                          {videoResult.cost_breakdown.cost_vnd > 0
+                            ? `~${videoResult.cost_breakdown.cost_vnd.toLocaleString("vi-VN")} đ`
+                            : "0 đ (Miễn phí)"}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          {videoResult.cost_breakdown.cost_usd > 0
+                            ? `(${videoResult.cost_breakdown.cost_usd.toFixed(4)} USD)`
+                            : "Tiết kiệm 100%"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
                   <span>Tỷ lệ: 9:16</span>
                   <span>·</span>
@@ -627,6 +825,22 @@ function VideoGenerateSession({
                 <Copy size={16} aria-hidden="true" />
                 {copied ? "Đã sao chép link!" : "Sao chép link video"}
               </Button>
+              {(() => {
+                const url = playableVideoUrl(videoResult.video_url);
+                return url ? (
+                  <Button variant="outline" asChild>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download="campaign-video.mp4"
+                    >
+                      <ExternalLink size={16} aria-hidden="true" />
+                      Mở / Tải video
+                    </a>
+                  </Button>
+                ) : null;
+              })()}
               <Button variant="default" onClick={onClose}>
                 Hoàn tất
               </Button>

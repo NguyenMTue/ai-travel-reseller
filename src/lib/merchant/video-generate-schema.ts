@@ -72,9 +72,9 @@ export const videoGenerateRequestSchema = z.preprocess(
 
       target_duration_sec: z
         .number()
-        .min(15, "Thời lượng video tối thiểu là 15 giây")
+        .min(5, "Thời lượng video tối thiểu là 5 giây")
         .max(60, "Thời lượng video tối đa là 60 giây")
-        .default(28),
+        .default(10),
 
       media_reference_ids: z
         .array(
@@ -120,6 +120,21 @@ export const videoGenerateSuccessDataSchema = z
     cta: z.string(),
     scenes_count: z.number().int().positive(),
     created_at: z.string(),
+    cost_breakdown: z.object({
+      model_name: z.string(),
+      duration_seconds: z.number(),
+      input_tokens: z.number(),
+      output_tokens: z.number(),
+      cost_usd: z.number(),
+      cost_vnd: z.number(),
+      free_tier_components: z.object({
+        ffmpeg_compositor_cost: z.number(),
+        edge_tts_cost: z.number(),
+        total_free_savings_usd: z.number(),
+      }),
+      is_live_call: z.boolean(),
+      status_note: z.string().optional(),
+    }).optional(),
   })
   .strict();
 

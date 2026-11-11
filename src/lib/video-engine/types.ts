@@ -150,7 +150,7 @@ export const videoEngineInputSchema = z
     target_platforms: z.array(z.enum(TARGET_PLATFORMS)).min(1),
     content_type: z.enum(CONTENT_TYPES),
     persona: z.string().trim().min(1).max(100),
-    target_duration_sec: z.number().min(15).max(60),
+    target_duration_sec: z.number().min(5).max(60),
 
     // Nhóm 3 & 4: Tài nguyên hình ảnh thật & Cấu hình Spatial AI
     media_assets: z.array(mediaAssetItemSchema),
@@ -222,7 +222,7 @@ export const campaignMetadataSchema = z
     persona: z.string().trim().min(1),
     content_type: z.enum(CONTENT_TYPES),
     target_platforms: z.array(z.enum(TARGET_PLATFORMS)).min(1),
-    total_duration_sec: z.number().min(15).max(60),
+    total_duration_sec: z.number().min(5).max(60),
     aspect_ratio: z.literal("9:16"),
     safe_zone_enforced: z.literal(true),
   })

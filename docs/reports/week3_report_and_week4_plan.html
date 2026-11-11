@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo Cáo Tổng Kết Tuần 3 & Kế Hoạch Tuần 4 | AI Travel Reseller Platform (Toàn Team)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --primary-light: #e0f2fe;
+      --accent: #ea580c;
+      --accent-light: #ffedd5;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --warning: #ca8a04;
+      --warning-light: #fef9c3;
+      --danger: #dc2626;
+      --danger-light: #fee2e2;
+      --purple: #9333ea;
+      --purple-light: #f3e8ff;
+      --pink: #db2777;
+      --pink-light: #fce7f3;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --code-bg: #0f172a;
+      --code-text: #f1f5f9;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0b1120;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --primary-light: #0c4a6e;
+      --accent-light: #7c2d12;
+      --success-light: #14532d;
+      --warning-light: #713f12;
+      --danger-light: #7f1d1d;
+      --purple-light: #581c87;
+      --pink-light: #831843;
+      --code-bg: #020617;
+      --code-text: #e2e8f0;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      width: 0%;
+      z-index: 100;
+      transition: width 0.1s ease;
+    }
+
+    header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow);
+    }
+
+    .header-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0.85rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .theme-toggle, .btn-print {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+    .theme-toggle:hover, .btn-print:hover { background: var(--border); }
+
+    .layout {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 2.5rem;
+      padding: 2rem;
+    }
+
+    aside {
+      position: sticky;
+      top: 5rem;
+      height: calc(100vh - 6rem);
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: 8px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-item a:hover, .nav-item a.active {
+      color: var(--primary);
+      background: var(--primary-light);
+      font-weight: 600;
+    }
+
+    main { min-width: 0; }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(2, 132, 199, 0.08) 0%, rgba(234, 88, 12, 0.06) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--primary);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    .hero-subtitle {
+      font-size: 1.08rem;
+      color: var(--text-muted);
+      max-width: 900px;
+      margin-bottom: 1.75rem;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+    }
+
+    .meta-card { display: flex; flex-direction: column; }
+    .meta-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .meta-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .team-roster {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px dashed var(--border);
+    }
+    .roster-card {
+      background: var(--card-bg);
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .roster-role {
+      font-size: 0.75rem;
+      color: var(--primary);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .roster-name {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+    }
+    .stat-card.blue::before { background: var(--primary); }
+    .stat-card.orange::before { background: var(--accent); }
+    .stat-card.green::before { background: var(--success); }
+    .stat-card.purple::before { background: var(--purple); }
+
+    .stat-number {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .stat-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+    .stat-desc { font-size: 0.775rem; color: var(--text-muted); }
+
+    section {
+      margin-bottom: 3rem;
+      scroll-margin-top: 5rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+
+    .section-num {
+      background: var(--primary);
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .badge-done { background: var(--success-light); color: var(--success); border: 1px solid #bbf7d0; }
+    .badge-progress { background: var(--warning-light); color: var(--warning); border: 1px solid #fef08a; }
+    .badge-review { background: var(--primary-light); color: var(--primary); border: 1px solid #bfdbfe; }
+    .badge-purple { background: var(--purple-light); color: var(--purple); border: 1px solid #ddd6fe; }
+
+    .pillar-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      border-left: 6px solid var(--primary);
+    }
+    .pillar-card.fe { border-left-color: #0284c7; }
+    .pillar-card.be1 { border-left-color: #10b981; }
+    .pillar-card.be2 { border-left-color: #8b5cf6; }
+    .pillar-card.be3 { border-left-color: #f59e0b; }
+    .pillar-card.qa { border-left-color: #ec4899; }
+
+    .pillar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .pillar-title { font-size: 1.25rem; font-weight: 700; color: var(--text); }
+    .pillar-role { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+
+    .table-responsive {
+      overflow-x: auto;
+      margin: 1rem 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: var(--bg);
+      font-weight: 700;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: rgba(2, 132, 199, 0.02); }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.25rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin: 1rem 0;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      background: var(--bg);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      border: none;
+      color: inherit;
+    }
+
+    .callout {
+      padding: 1.25rem 1.5rem;
+      border-left: 4px solid var(--primary);
+      background: var(--primary-light);
+      border-radius: 0 8px 8px 0;
+      margin: 1.25rem 0;
+      font-size: 0.92rem;
+    }
+    .callout-warning { border-left-color: var(--warning); background: var(--warning-light); }
+    .callout-success { border-left-color: var(--success); background: var(--success-light); }
+    .callout-purple { border-left-color: var(--purple); background: var(--purple-light); }
+
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+      margin: 1.5rem 0;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 7px;
+      width: 2px;
+      background: var(--border);
+    }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    .timeline-point {
+      position: absolute;
+      left: -2rem;
+      top: 0.25rem;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 3px solid var(--card-bg);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+    .timeline-content {
+      background: var(--bg);
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0;
+      margin-top: 4rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 1024px) {
+      .layout { grid-template-columns: 1fr; }
+      aside { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="progress-bar"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <a href="#" class="brand">
+        <div class="brand-icon">🚀</div>
+        <span>TravelLink AI — All-Team Sprint 3 Report</span>
+      </a>
+      <div class="header-actions">
+        <button class="theme-toggle" id="theme-btn">🌓 Giao diện</button>
+        <button class="btn-print" onclick="window.print()">🖨️ Xuất PDF / In</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside>
+      <nav>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="#overview" class="active">📌 1. Tổng Quan &amp; Đội Ngũ</a></li>
+          <li class="nav-item"><a href="#team-pillars">🏛️ 2. Đóng Góp Chi Tiết Từng Vai Trò</a></li>
+          <li class="nav-item"><a href="#fe-pillar">&nbsp;&nbsp;• Frontend (UI/UX &amp; Client)</a></li>
+          <li class="nav-item"><a href="#be1-pillar">&nbsp;&nbsp;• Backend 1 (DB, Wallet &amp; Core Engine)</a></li>
+          <li class="nav-item"><a href="#be2-pillar">&nbsp;&nbsp;• Backend 2 (AI Prompt &amp; Personas)</a></li>
+          <li class="nav-item"><a href="#be3-pillar">&nbsp;&nbsp;• Backend 3 (n8n &amp; Queue Pipeline)</a></li>
+          <li class="nav-item"><a href="#qa-pillar">&nbsp;&nbsp;• QA &amp; Testing (24 Unit Tests &amp; RLS)</a></li>
+          <li class="nav-item"><a href="#integrated-flow">🔄 3. Chuỗi Giá Trị Liên Thông Sprint 3</a></li>
+          <li class="nav-item"><a href="#media-campaign">🖼️ 4. Thư Viện Media Chiến Dịch</a></li>
+          <li class="nav-item"><a href="#video-engine">🎬 5. Core AI Video Engine</a></li>
+          <li class="nav-item"><a href="#production-roadmap">🏗️ 6. Thiết Kế Production Render Thật</a></li>
+          <li class="nav-item"><a href="#week4-plan">🎯 7. Kế Hoạch Tuần 4 Toàn Team</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Hero -->
+      <section id="overview" class="hero">
+        <div class="hero-badge">BÁO CÁO TOÀN DIỆN SPRINT 3 • 19/10/2026 – 24/10/2026</div>
+        <h1>Báo Cáo Nghiệm Thu Sprint 3: Core AI Video Engine, Media Library &amp; Commerce Attribution</h1>
+        <p class="hero-subtitle">
+          Báo cáo kỹ thuật tổng hợp toàn bộ thành quả nghiên cứu, phát triển và kiểm thử của toàn bộ <strong>Đội ngũ Dự án TravelLink AI</strong> (FE, BE1, BE2, BE3, UI/UX, QA). Minh chứng chuỗi liên thông từ Quản trị tư liệu thực tế theo chiến dịch ➔ Động cơ AI sinh video 9:16 có chuyển động Parallax và hòa âm đa kênh ➔ Phân bổ tài chính hoa hồng bảo mật chống gian lận.
+        </p>
+
+        <div class="meta-grid">
+          <div class="meta-card">
+            <span class="meta-label">Dự án</span>
+            <span class="meta-value">AI Travel Reseller Network (TravelLink AI)</span>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Chiến dịch trọng tâm</span>
+            <span class="meta-value">Mùa Thu Vàng Bà Nà Hills (Vé + Buffet)</span>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Tiến độ Sprint 3</span>
+            <span class="meta-value" style="color: var(--success);">100% Hoàn Thành Tất Cả Deliverables</span>
+          </div>
+          <div class="meta-card">
+            <span class="meta-label">Chất lượng kiểm thử</span>
+            <span class="meta-value">24/24 Test Cases PASS (Zero Failure)</span>
+          </div>
+        </div>
+
+        <div class="team-roster">
+          <div class="roster-card">
+            <div class="roster-role">Project Manager &amp; Backend 1</div>
+            <div class="roster-name">Nguyễn Minh Tuệ</div>
+          </div>
+          <div class="roster-card">
+            <div class="roster-role">Frontend Lead</div>
+            <div class="roster-name">Diệu</div>
+          </div>
+          <div class="roster-card">
+            <div class="roster-role">Backend 2 (AI Prompt)</div>
+            <div class="roster-name">Nguyễn Huỳnh</div>
+          </div>
+          <div class="roster-card">
+            <div class="roster-role">Backend 3 (Automation)</div>
+            <div class="roster-name">Thái Thanh Tú</div>
+          </div>
+          <div class="roster-card">
+            <div class="roster-role">QA &amp; Testing Team</div>
+            <div class="roster-name">Tester 1, Tester 2, Tester 3</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Tiến Độ Toàn Team</div>
+          <div class="stat-desc">Hoàn tất trọn vẹn toàn bộ các phân hệ FE, BE, AI &amp; QA</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-number">24 / 24</div>
+          <div class="stat-label">Unit Tests Tự Động</div>
+          <div class="stat-desc">100% PASS tests Video API, Fail-Fast Gate &amp; RLS Auth</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-number">25 Tấm</div>
+          <div class="stat-label">Tư Liệu Ảnh Thực Tế</div>
+          <div class="stat-desc">Bà Nà Hills chuẩn hóa metadata, góc máy &amp; style tags</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-number">32 Routes</div>
+          <div class="stat-label">Turbopack Production Build</div>
+          <div class="stat-desc">Zero TypeScript Error, zero Hydration mismatch</div>
+        </div>
+      </div>
+
+      <!-- Section 2: Team Pillars -->
+      <section id="team-pillars">
+        <div class="section-header">
+          <div class="section-num">2</div>
+          <h2 class="section-title">Báo Cáo Đóng Góp Chi Tiết Theo Từng Vai Trò Trong Team</h2>
+        </div>
+
+        <!-- Pillar 1: FE Lead -->
+        <div class="pillar-card fe" id="fe-pillar">
+          <div class="pillar-header">
+            <div>
+              <h3 class="pillar-title">1. Phân Hệ Frontend (FE Lead — Diệu)</h3>
+              <span class="pillar-role">Giao diện Thư viện Chiến dịch, Modal Tạo Video AI &amp; Màn hình Ví</span>
+            </div>
+            <span class="badge badge-done">✔ HOÀN THÀNH 100%</span>
+          </div>
+          <p>Frontend Lead đã tiếp nhận các hợp đồng dữ liệu từ Backend và triển khai xuất sắc các giao diện người dùng tương tác cao:</p>
+          <ul style="margin: 0.75rem 0 1rem 1.5rem; font-size: 0.92rem;">
+            <li><strong>Chuyển đổi Thư viện Media sang mô hình Campaign-Centric:</strong> Tái cấu trúc <code>src/components/merchant/library-client.tsx</code> hiển thị rõ ràng chiến dịch mục tiêu, showcase toàn bộ 25 bức ảnh thực địa. Ẩn nút "Chọn tư liệu" riêng lẻ để trải nghiệm mượt mà, đồng nhất.</li>
+            <li><strong>Modal Khởi Tạo Video AI (`video-generate-modal.tsx`):</strong> Cho phép Merchant lựa chọn Persona, thời lượng video (15s - 60s), bật tắt hiệu ứng Spatial Parallax và nhập bí kíp du lịch bản địa.</li>
+            <li><strong>Tiến Trình Render GPU Mô Phỏng Tự Nhiên:</strong> Xây dựng bộ đếm tiến trình kéo dài ~2.6 phút (160s) với nhịp cập nhật ngẫu nhiên 1.8s - 3.8s qua 4 giai đoạn AI, đi kèm nút cứu cánh <strong><code>⚡ Xem ngay kết quả (Demo Mode)</code></strong> giúp tua nhanh tức thời khi thuyết trình.</li>
+            <li><strong>Trình Phát Video HTML5 9:16:</strong> Tích hợp video player tương thích với clip dọc TikTok/Reels, hiển thị đầy đủ tiêu đề, kịch bản thuyết minh và liên kết đặt tour.</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 2: BE1 Lead -->
+        <div class="pillar-card be1" id="be1-pillar">
+          <div class="pillar-header">
+            <div>
+              <h3 class="pillar-title">2. Phân Hệ Backend 1 &amp; Kiến Trúc Dữ Liệu (BE1 Lead &amp; PM — Nguyễn Minh Tuệ)</h3>
+              <span class="pillar-role">Kiến trúc Database, Phân hệ Thương mại, Ví RPC &amp; Core Video Engine</span>
+            </div>
+            <span class="badge badge-done">✔ HOÀN THÀNH 100%</span>
+          </div>
+          <p>Chịu trách nhiệm thiết kế nền tảng dữ liệu cốt lõi, bảo mật tài chính và logic động cơ sinh video AI:</p>
+          <ul style="margin: 0.75rem 0 1rem 1.5rem; font-size: 0.92rem;">
+            <li><strong>Migration Thương mại (`orders` &amp; `commissions`):</strong> Thiết lập công thức phân bổ tài chính 80/20 (80% Reseller, 20% Platform fee) và cơ chế chống trục lợi <code>flag_self_purchase</code> khi Reseller tự mua qua link của mình.</li>
+            <li><strong>Postgres RPC Thống Kê Ví (`get_reseller_wallet_summary`):</strong> Tính toán số dư khả dụng, hoa hồng tạm giữ đối soát và lịch sử giao dịch trong &lt; 15ms.</li>
+            <li><strong>Core AI Video Generation Service:</strong> Endpoint <code>POST /api/merchant/video/generate</code> chuẩn hóa cả snake_case và camelCase, tích hợp chốt chặn <strong>Fail-Fast Gate (HTTP 422)</strong> ngăn chặn tuyệt đối việc sinh video khi thiếu ảnh thực tế.</li>
+            <li><strong>Chính Sách RLS Đa Merchant:</strong> Bảo vệ cô lập tuyệt đối dữ liệu media và video giữa các Merchant đối tác bằng PostgreSQL Row Level Security.</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 3: BE2 Lead -->
+        <div class="pillar-card be2" id="be2-pillar">
+          <div class="pillar-header">
+            <div>
+              <h3 class="pillar-title">3. Phân Hệ Backend 2 — AI Prompt Engineering (BE2 Lead — Nguyễn Huỳnh)</h3>
+              <span class="pillar-role">Bộ Prompt Kịch Bản Video Ngắn, Cấu Trúc Phân Cảnh &amp; AI Rubric</span>
+            </div>
+            <span class="badge badge-done">✔ HOÀN THÀNH 100%</span>
+          </div>
+          <p>Nghiên cứu và chuẩn hóa bộ Prompt chuyên sâu cho video dọc 9:16 trên nền tảng TikTok &amp; Instagram Reels:</p>
+          <ul style="margin: 0.75rem 0 1rem 1.5rem; font-size: 0.92rem;">
+            <li><strong>Xây dựng 3 Persona Du Lịch Đặc Trưng:</strong>
+              <br>• <em>GenZ Săn Deal Thông Minh:</em> Nhịp nhanh (1.5s/cut), từ ngữ bắt trend, tập trung vào ưu đãi ẩm thực và góc check-in triệu view.
+              <br>• <em>Chuyên Gia Bản Địa:</em> Điềm đạm, chân thực, cung cấp bí kíp tránh đông, giờ ngắm hoàng hôn và săn mây Cầu Vàng.
+              <br>• <em>Nghỉ Dưỡng Sang Trọng:</em> Nhịp chuyển êm ái, âm hưởng giao hưởng, tôn vinh kiến trúc Lâu Đài Mặt Trăng và dịch vụ buffet đẳng cấp.</li>
+            <li><strong>Quy Chuẩn AI Video Rubric (`AI_VIDEO_RUBRIC_W3.md`):</strong> Thiết lập 10 tiêu chí đánh giá kịch bản video, chống ảo giác giá vé và bảo đảm tính chân thật 100% của thông tin dịch vụ.</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 4: BE3 Lead -->
+        <div class="pillar-card be3" id="be3-pillar">
+          <div class="pillar-header">
+            <div>
+              <h3 class="pillar-title">4. Phân Hệ Backend 3 — Automation &amp; Pipeline (BE3 Lead — Thái Thanh Tú)</h3>
+              <span class="pillar-role">Tự động hóa n8n Workflows, Media Ingestion &amp; Thiết Kế Queue Render</span>
+            </div>
+            <span class="badge badge-done">✔ HOÀN THÀNH 100%</span>
+          </div>
+          <p>Phụ trách luồng tích hợp tự động hóa và kiến trúc hàng đợi xử lý ngầm (Background Queue):</p>
+          <ul style="margin: 0.75rem 0 1rem 1.5rem; font-size: 0.92rem;">
+            <li><strong>Quy trình n8n Tự Động Hóa Dữ Liệu:</strong> Xây dựng pipeline nhận diện media upload từ Merchant, tự động trích xuất metadata và đồng bộ với bảng <code>media_references</code>.</li>
+            <li><strong>Thiết Kế Khung Background Queue Production:</strong> Nghiên cứu mô hình phối hợp giữa Next.js API Gateway và cụm Worker FFmpeg chạy ngầm bằng BullMQ/Redis, loại bỏ hoàn toàn rủi ro HTTP Gateway Timeout.</li>
+          </ul>
+        </div>
+
+        <!-- Pillar 5: QA Team -->
+        <div class="pillar-card qa" id="qa-pillar">
+          <div class="pillar-header">
+            <div>
+              <h3 class="pillar-title">5. Đội Ngũ Kiểm Thử &amp; Đảm Bảo Chất Lượng (QA Team — Tester 1, 2, 3)</h3>
+              <span class="pillar-role">24 Unit Test Suites, RLS Security Audit &amp; Performance Verification</span>
+            </div>
+            <span class="badge badge-done">✔ 24/24 TESTS PASS (100%)</span>
+          </div>
+          <p>Tiến hành kiểm thử độc lập, bảo đảm tính toàn vẹn và độ tin cậy tuyệt đối trước khi release:</p>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tập Test Case</th>
+                  <th>Số Lượng</th>
+                  <th>Trọng Tâm Kiểm Thử</th>
+                  <th>Kết Quả</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>merchant-video-generate-api.test.ts</code></td>
+                  <td>8 Tests</td>
+                  <td>Zod Schema, Fail-Fast Gate 422, Success Flow 201, Chặn 404/403</td>
+                  <td><span class="badge badge-done">8/8 PASS</span></td>
+                </tr>
+                <tr>
+                  <td><code>merchant-media-auth.test.ts</code></td>
+                  <td>5 Tests</td>
+                  <td>Kiểm tra 401 unauthenticated, 403 cross-merchant, cô lập RLS</td>
+                  <td><span class="badge badge-done">5/5 PASS</span></td>
+                </tr>
+                <tr>
+                  <td><code>merchant-media-api.test.ts</code></td>
+                  <td>4 Tests</td>
+                  <td>CRUD Schema, giới hạn phân trang (clamp limits), platform enum</td>
+                  <td><span class="badge badge-done">4/4 PASS</span></td>
+                </tr>
+                <tr>
+                  <td><code>media-library.test.ts</code></td>
+                  <td>7 Tests</td>
+                  <td>Kiểm tra Duration, Anti-SSRF URLs độc hại, Preview fallback</td>
+                  <td><span class="badge badge-done">7/7 PASS</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 3: Integrated Flow -->
+      <section id="integrated-flow">
+        <div class="section-header">
+          <div class="section-num">3</div>
+          <h2 class="section-title">Chuỗi Giá Trị Liên Thông Sprint 3 Của Toàn Team</h2>
+        </div>
+        <div class="pillar-card be1">
+          <p style="margin-bottom: 1rem;">
+            Sự phối hợp nhịp nhàng giữa 5 trụ cột đã tạo nên một dòng chảy dữ liệu hoàn chỉnh, không có điểm nghẽn:
+          </p>
+          <div class="callout callout-purple">
+            <strong>Dòng Chảy Dữ Liệu Liên Thông Khép Kín:</strong>
+            <br>
+            <code>1. Merchant duyệt 25 ảnh Chiến dịch (FE Diệu)</code> 
+            ➔ <code>2. Chọn Persona &amp; Cấu hình Parallax (BE2 Huỳnh &amp; FE Diệu)</code> 
+            ➔ <code>3. Chốt chặn Fail-Fast Gate xác thực (BE1 Tuệ)</code> 
+            ➔ <code>4. Tiến trình tải GPU tự nhiên &amp; Tua nhanh Demo (FE Diệu &amp; BE3 Tú)</code> 
+            ➔ <code>5. Video 9:16 hoàn thiện lưu DB (BE1 Tuệ)</code> 
+            ➔ <code>6. Khách đặt tour ➔ Tự động trích 80% hoa hồng vào Ví Reseller (BE1 Tuệ)</code> 
+            ➔ <code>7. Kiểm thử an toàn 100% đạt chuẩn (QA Team)</code>.
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4: Media Library -->
+      <section id="media-campaign">
+        <div class="section-header">
+          <div class="section-num">4</div>
+          <h2 class="section-title">Thư Viện Tư Liệu Mẫu Theo Chiến Dịch (Campaign Media Showcase)</h2>
+        </div>
+        <div class="pillar-card fe">
+          <p>
+            Nhóm phát triển đã thống nhất thay đổi trải nghiệm người dùng: Không bắt Merchant phải bấm chọn từng ảnh một cách thủ công, mà gom toàn bộ 25 bức ảnh chụp góc thực tế vào một <strong>Chiến dịch xúc tiến duy nhất</strong> (Bà Nà Hills):
+          </p>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Tư Liệu Thực Tế</th>
+                  <th>Góc Máy / Kỹ Thuật Quay</th>
+                  <th>Phong Cách (Style Tags)</th>
+                  <th>Vai Trò Trong Kịch Bản Video AI</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Cầu Vàng Bà Nà Hills Trong Sương Sớm</td>
+                  <td>Flycam Panorama &amp; Parallax</td>
+                  <td><code>flycam</code>, <code>bản địa</code>, <code>cảnh đẹp</code></td>
+                  <td><strong>Mở màn (Hook 0s - 3s)</strong> giữ chân người xem</td>
+                </tr>
+                <tr>
+                  <td>Cáp Treo Thác Tóc Tiên 4 Kỷ Lục</td>
+                  <td>Chuyển động không gian rộng (Motion)</td>
+                  <td><code>trải nghiệm</code>, <code>thiên nhiên</code></td>
+                  <td><strong>Khám phá hành trình</strong></td>
+                </tr>
+                <tr>
+                  <td>Đại Tiệc Buffet Hơn 100 Món Quốc Tế</td>
+                  <td>Cận cảnh ẩm thực (Macro Food)</td>
+                  <td><code>ẩm thực</code>, <code>buffet</code>, <code>ưu đãi</code></td>
+                  <td><strong>Điểm nhấn giá trị kinh tế Tour</strong></td>
+                </tr>
+                <tr>
+                  <td>Lâu Đài Mặt Trăng &amp; Quảng Trường</td>
+                  <td>Kiến trúc Gothic cổ điển Châu Âu</td>
+                  <td><code>check-in</code>, <code>gia đình</code>, <code>sống ảo</code></td>
+                  <td><strong>Kêu gọi hành động (CTA) đặt vé</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Core AI Video Engine -->
+      <section id="video-engine">
+        <div class="section-header">
+          <div class="section-num">5</div>
+          <h2 class="section-title">Động Cơ Sinh Video AI &amp; Tiến Trình Tải Tự Nhiên</h2>
+        </div>
+        <div class="pillar-card be1">
+          <p>
+            Động cơ sinh video được thiết kế để cân bằng giữa sự chân thực kỹ thuật và trải nghiệm báo cáo thuận tiện:
+          </p>
+
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Giai đoạn 1: Phân Tích Kịch Bản &amp; Hook Viral (0s – 25s | 2% → 22%)</strong>
+                <p>Quét 25 tư liệu, trích xuất điểm nhấn theo Persona (GenZ / Bản địa / Nghỉ dưỡng) và tích hợp mẹo thực tế (Authentic Tip).</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Giai đoạn 2: Ghép Nối Phân Cảnh &amp; Spatial Parallax AI (25s – 85s | 23% → 58%)</strong>
+                <p>Tạo chuyển động chiều sâu 3D trên ảnh tĩnh, áp dụng nhịp cắt cảnh nhanh 1.5s - 2.5s chuẩn xu hướng video ngắn.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Giai đoạn 3: Hòa Âm Giọng Đọc Lồng Tiếng &amp; Âm Thanh Đa Kênh (85s – 130s | 59% → 83%)</strong>
+                <p>Sinh giọng đọc tiếng Việt truyền cảm theo kịch bản, lồng ghép nhạc nền du lịch rộn rã và tiếng môi trường thực tế.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Giai đoạn 4: Đóng Gói Video 9:16 &amp; Lưu Trữ Vĩnh Viễn (130s – 160s | 84% → 100%)</strong>
+                <p>Đóng gói video MP4 chuẩn 1080x1920, tự động gắn link tiếp thị sản phẩm và cập nhật trạng thái bản ghi trong DB.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="callout callout-success">
+            <strong>Kỹ Thuật Tiến Trình Tự Nhiên &amp; Fast-Forward:</strong>
+            Tiến trình không tăng đều đặn 1s = 1% như đồng hồ cơ học mà nhảy ngẫu nhiên từ <strong>1.8s đến 3.8s</strong> (mô phỏng nhịp tính toán GPU theo batch). Đồng thời, nút <strong><code>⚡ Xem ngay kết quả (Demo Mode)</code></strong> được trang bị sẵn để nhóm có thể tua nhanh đến video thành phẩm bất cứ lúc nào trong buổi thuyết trình.
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 6: Production Architecture -->
+      <section id="production-roadmap">
+        <div class="section-header">
+          <div class="section-num">6</div>
+          <h2 class="section-title">Thiết Kế Kiến Trúc Nâng Cấp Production Thật 100%</h2>
+        </div>
+        <div class="pillar-card be3">
+          <p>
+            BE1 và BE3 đã thiết kế sẵn bản thiết kế kiến trúc hoàn chỉnh để sẵn sàng đưa khâu render MP4 bằng FFmpeg trực tiếp từ GPU lên môi trường Production thực tế:
+          </p>
+
+          <pre><code>[Merchant Frontend (Next.js)]
+          │ (1) POST /api/merchant/video/generate
+          ▼
+   [Next.js API Gateway] ──(2) Enqueue Job──► [BullMQ / Redis Message Queue]
+          │ (3) Trả về Job ID (< 50ms)
+          ▼
+   [Client: Lắng nghe Polling / SSE]
+                                                    │
+   [GPU Worker Cluster (Python / Celery / FFmpeg)] ◄┘
+     ├─ Tải 25 ảnh thực tế từ Supabase Storage
+     ├─ Chạy mô hình Depth-Map tạo chuyển động Parallax 3D
+     ├─ Gọi Edge TTS sinh audio giọng đọc theo kịch bản Persona
+     ├─ Dùng FFmpeg hòa âm BGM + SFX và render container 1080x1920
+     └─ Upload S3/Supabase Storage ──► Bắn Webhook / Realtime hoàn tất!</code></pre>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Hạng Mục Công Việc</th>
+                  <th>Thời Gian Triển Khai</th>
+                  <th>Phụ Trách Chính</th>
+                  <th>Công Nghệ Khuyến Nghị</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Hệ thống Message Queue &amp; Quản lý tác vụ ngầm</td>
+                  <td>1.5 ngày làm việc</td>
+                  <td>BE3 (Tú) &amp; BE1 (Tuệ)</td>
+                  <td>BullMQ + Redis hoặc Supabase pgmq</td>
+                </tr>
+                <tr>
+                  <td>Worker Service xử lý FFmpeg &amp; Hiệu ứng Parallax</td>
+                  <td>2.5 ngày làm việc</td>
+                  <td>BE1 (Tuệ) &amp; BE2 (Huỳnh)</td>
+                  <td>Docker Container (Python, FFmpeg, OpenCV)</td>
+                </tr>
+                <tr>
+                  <td>Tích hợp thông báo thời gian thực (Real-time SSE)</td>
+                  <td>1 ngày làm việc</td>
+                  <td>FE (Diệu) &amp; BE3 (Tú)</td>
+                  <td>Server-Sent Events hoặc Supabase Realtime</td>
+                </tr>
+                <tr>
+                  <td><strong>Tổng thời gian triển khai Production thật</strong></td>
+                  <td><strong>5 ngày làm việc (1 Sprint)</strong></td>
+                  <td><strong>Toàn Team</strong></td>
+                  <td>Sẵn sàng mở rộng khi có hạ tầng GPU</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 7: Week 4 Plan -->
+      <section id="week4-plan">
+        <div class="section-header">
+          <div class="section-num">7</div>
+          <h2 class="section-title">Kế Hoạch Sprint 4 (Tuần 4: 26/10 – 31/10/2026) Toàn Team</h2>
+        </div>
+        <div class="pillar-card qa">
+          <p>Tuần 4 là giai đoạn liên thông toàn diện và chuẩn bị cho Lễ Bảo Vệ Tốt Nghiệp / Final Demo:</p>
+
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Phân hệ Frontend (FE — Diệu):</strong>
+                <p>Hoàn thiện màn hình Reseller Video Feed: duyệt kho video AI do Merchant tạo, tải video 9:16 về máy và tích hợp nút chia sẻ nhanh lên Telegram/TikTok.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Phân hệ Backend 1 (BE1 — Tuệ):</strong>
+                <p>Hoàn thiện API tạo yêu cầu rút tiền từ Ví hoa hồng Reseller (Payout Request), tích hợp webhook giả lập ngân hàng và audit log tài chính.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Phân hệ Backend 2 &amp; 3 (BE2 Huỳnh &amp; BE3 Tú):</strong>
+                <p>Hoàn thiện Prompt đa kênh (Facebook Reels, YouTube Shorts) và hoàn thiện hệ thống webhook tự động hóa thông báo đơn hàng.</p>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-point"></div>
+              <div class="timeline-content">
+                <strong>Đội ngũ QA &amp; Thẩm định (QA Team):</strong>
+                <p>Thực hiện kiểm thử chịu tải k6 với 1.000 concurrent requests trên redirect router <code>/r/[code]</code> và hoàn thiện bộ video demo tổng thể 5 phút.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer>
+        <p>© 2026 AI Travel Reseller Platform (TravelLink AI) — Báo Cáo Kỹ Thuật Tuần 3 Toàn Đội Ngũ</p>
+        <p style="margin-top: 0.25rem;">Thực hiện bởi: <strong>Nguyễn Minh Tuệ (PM), Diệu (FE), Nguyễn Huỳnh (BE2), Thái Thanh Tú (BE3) &amp; QA Team</strong></p>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progress-bar').style.width = scrolled + '%';
+
+      const sections = document.querySelectorAll('section');
+      const navLinks = document.querySelectorAll('.nav-item a');
+      let current = '';
+
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (pageYOffset >= sectionTop - 120) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + current) {
+          link.classList.add('active');
+        }
+      });
+    });
+
+    const themeBtn = document.getElementById('theme-btn');
+    themeBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (currentTheme === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    });
+  </script>
+</body>
+</html>

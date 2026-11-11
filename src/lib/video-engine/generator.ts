@@ -351,6 +351,24 @@ function formatVnd(amount: number): string {
  * chèn Text Hook Safe Zone và âm thanh 3 lớp.
  * Hỗ trợ DIRECT SCENE-LEVEL INGESTION từ 14 scenes của BE2.
  */
+const EXPERIENTIAL_VOICEOVERS = [
+  "chiêm ngưỡng kiến trúc tráng lệ giữa làn mây bồng bềnh,",
+  "thưởng thức không khí trong lành cùng những góc check-in tuyệt đẹp,",
+  "trải nghiệm ẩm thực phong phú với thực đơn hấp dẫn chuẩn vị,",
+  "tận hưởng những khoảnh khắc giải trí đỉnh cao vô cùng sôi động,",
+  "lưu giữ trọn vẹn từng kỷ niệm đáng nhớ cùng người thân,",
+  "dịch vụ chuyên nghiệp tận tâm luôn sẵn sàng đồng hành cùng bạn,",
+];
+
+const EXPERIENTIAL_CAPTIONS = [
+  "Kiến trúc tráng lệ giữa biển mây",
+  "Góc check-in tuyệt đẹp khó quên",
+  "Đại tiệc ẩm thực phong phú chuẩn vị",
+  "Giải trí đỉnh cao bất tận cảm xúc",
+  "Khoảnh khắc kỷ niệm trọn vẹn",
+  "Dịch vụ chuyên nghiệp tận tâm",
+];
+
 function composeTimelineScenes(input: VideoEngineInput): TimelineScene[] {
   // TRƯỜNG HỢP 1: DIRECT SCENE-LEVEL INGESTION (Tiêu thụ trực tiếp 14 approved scenes từ BE2)
   if (input.scenes && input.scenes.length === 14) {
@@ -539,12 +557,14 @@ function composeTimelineScenes(input: VideoEngineInput): TimelineScene[] {
   // TRƯỜNG HỢP 2: STANDALONE BE1 ASSET-BASED GENERATION (Tương thích ngược khi không có approved scenes từ BE2)
   const totalDuration = input.target_duration_sec;
   const assets = input.media_assets;
-  const numScenes = Math.max(
-    calculateMinRequiredAssets(totalDuration),
-    assets.length
+  const minRequired = calculateMinRequiredAssets(totalDuration);
+  const maxAllowedScenes = Math.max(minRequired, Math.floor(totalDuration / 1.5));
+  const numScenes = Math.min(
+    Math.max(minRequired, assets.length),
+    maxAllowedScenes
   );
 
-  // Phân bổ thời lượng từng cảnh trong khoảng 1.8s - 2.2s sao cho tổng bằng totalDuration
+  // Phân bổ thời lượng từng cảnh trong khoảng 1.5s - 2.5s sao cho tổng bằng totalDuration
   const baseDuration = Number((totalDuration / numScenes).toFixed(1));
   const sceneDurations: number[] = [];
   let accumulated = 0;
@@ -552,7 +572,7 @@ function composeTimelineScenes(input: VideoEngineInput): TimelineScene[] {
   for (let i = 0; i < numScenes; i++) {
     if (i === numScenes - 1) {
       const remaining = Number((totalDuration - accumulated).toFixed(1));
-      sceneDurations.push(Math.max(1.5, remaining));
+      sceneDurations.push(Math.max(1.2, remaining));
     } else {
       sceneDurations.push(baseDuration);
       accumulated += baseDuration;
@@ -682,14 +702,15 @@ function composeTimelineScenes(input: VideoEngineInput): TimelineScene[] {
       };
       voiceoverSegment = `[breath] Lưu ý thực tế là ${tipText.toLowerCase()},`;
     } else {
+      const phraseIdx = (sceneIndex - 2) % EXPERIENTIAL_VOICEOVERS.length;
       onScreenText = {
         type: "DYNAMIC_CAPTION",
-        text: `Trải nghiệm ${input.product_name} tuyệt vời`,
+        text: EXPERIENTIAL_CAPTIONS[phraseIdx],
         font: "Montserrat Bold",
         position: "LOWER_MIDDLE_SAFE_ZONE",
         animation: "WORD_BY_WORD_HIGHLIGHT",
       };
-      voiceoverSegment = `cảnh đẹp mãn nhãn và dịch vụ cực kỳ chu đáo.`;
+      voiceoverSegment = EXPERIENTIAL_VOICEOVERS[phraseIdx];
     }
 
     // Âm thanh hiện trường (Ambient SFX)
