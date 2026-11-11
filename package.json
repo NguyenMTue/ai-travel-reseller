@@ -23,6 +23,8 @@
     "test:tester2:hallucination:node": "node --experimental-strip-types --test tests/hallucination/test_sales_agent_hallucination.ts",
     "test:be1:w5": "node --env-file=.env.local --experimental-strip-types --test tests/be1-w5-production-verification.test.ts",
     "test:be1:sprint": "node --env-file=.env.local --experimental-strip-types --test tests/be1-final-sprint.test.ts",
+    "test:be2:sprint": "node --env-file=.env.local --experimental-strip-types --test tests/be2-final-sprint.test.ts",
+    "test:final-sprint": "node --env-file=.env.local --experimental-strip-types --test tests/be1-final-sprint.test.ts tests/be2-final-sprint.test.ts",
     "benchmark:wallet": "node --env-file=.env.local scripts/benchmark-reseller-wallet.mjs",
     "verify:production": "node --env-file=.env.local scripts/verify-production-readiness.mjs"
   },
