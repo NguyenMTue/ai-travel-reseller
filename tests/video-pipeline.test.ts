@@ -1156,10 +1156,12 @@ test("DefaultVideoUploadTransport times out when stream stalls or body is never 
   let streamDestroyed = false;
   let uploadCalled = false;
 
+  let resolveStall: (() => void) | undefined;
   async function* stallingStream() {
     yield new Uint8Array([1, 2, 3]);
     // Stalls indefinitely; test timeout of 50ms will fire
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
+      resolveStall = resolve;
       const t = setTimeout(resolve, 300);
       t.unref?.();
     });
@@ -1174,6 +1176,7 @@ test("DefaultVideoUploadTransport times out when stream stalls or body is never 
         body: stallingStream(),
         destroy: () => {
           streamDestroyed = true;
+          resolveStall?.();
         },
       };
     },
