@@ -557,12 +557,14 @@ function composeTimelineScenes(input: VideoEngineInput): TimelineScene[] {
   // TRƯỜNG HỢP 2: STANDALONE BE1 ASSET-BASED GENERATION (Tương thích ngược khi không có approved scenes từ BE2)
   const totalDuration = input.target_duration_sec;
   const assets = input.media_assets;
-  const numScenes = Math.max(
-    calculateMinRequiredAssets(totalDuration),
-    assets.length
+  const minRequired = calculateMinRequiredAssets(totalDuration);
+  const maxAllowedScenes = Math.max(minRequired, Math.floor(totalDuration / 1.5));
+  const numScenes = Math.min(
+    Math.max(minRequired, assets.length),
+    maxAllowedScenes
   );
 
-  // Phân bổ thời lượng từng cảnh trong khoảng 1.8s - 2.2s sao cho tổng bằng totalDuration
+  // Phân bổ thời lượng từng cảnh trong khoảng 1.5s - 2.5s sao cho tổng bằng totalDuration
   const baseDuration = Number((totalDuration / numScenes).toFixed(1));
   const sceneDurations: number[] = [];
   let accumulated = 0;
@@ -570,7 +572,7 @@ function composeTimelineScenes(input: VideoEngineInput): TimelineScene[] {
   for (let i = 0; i < numScenes; i++) {
     if (i === numScenes - 1) {
       const remaining = Number((totalDuration - accumulated).toFixed(1));
-      sceneDurations.push(Math.max(1.5, remaining));
+      sceneDurations.push(Math.max(1.2, remaining));
     } else {
       sceneDurations.push(baseDuration);
       accumulated += baseDuration;

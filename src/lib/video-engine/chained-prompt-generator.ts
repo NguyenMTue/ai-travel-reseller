@@ -2,13 +2,15 @@
  * CHAINED PROMPT GENERATOR FOR 10s & 18s CINEMATIC TRAVEL VIDEOS
  * 
  * Tích hợp chuẩn hóa theo 2 System Prompts chính thức:
- * 1. 10-Second Specialist: docs/be1/prompts/system_prompt_ai_tourism_video_10s.md
- *    - Tối ưu cho nhịp độ nhanh, bắt mắt, chuyển đổi cao trên TikTok, Reels, Shorts.
+ * 1. 10-Second I2V Specialist: docs/be1/prompts/system_prompt_ai_tourism_video_10s.md
+ *    - Tối ưu cho Image-to-Video nhịp độ nhanh, bắt mắt, chuyển đổi cao trên TikTok, Reels, Shorts.
  *    - Cấu trúc 4 hồi: Hook (0-2s), Experience (2-5s), Tour Info (5-8s), CTA (8-10s).
+ *    - Nguyên tắc: Zero Spatial Hallucination, cấm fast zoom/push-in 2D gắt, giữ nguyên hình khối thật.
  *    - Voiceover tiếng Việt súc tích ~20-25 từ.
  * 2. 18-Second Storytelling Specialist: docs/be1/prompts/system_prompt_ai_tourism_video_18s.md
- *    - Nghệ thuật kể chuyện hình ảnh (Visual Storytelling) có chiều sâu cảm xúc.
+ *    - Nghệ thuật kể chuyện hình ảnh (Visual Storytelling I2V) có chiều sâu cảm xúc.
  *    - Cấu trúc 5 hồi: Hook (0-3s), Destination (3-7s), Experience (7-11s), Tour Info (11-15s), CTA (15-18s).
+ *    - Nguyên tắc: Chuyển cảnh tự nhiên, nhất quán ánh sáng ban mai 5600K, tách biệt Text Safe Zone 35-65%.
  *    - Voiceover tiếng Việt giàu cảm xúc ~40-50 từ.
  */
 
@@ -128,15 +130,15 @@ export function buildSegmentOmniPrompt(params: {
     case "OPENING_HOOK":
       momentumInstruction =
         profile === "10s"
-          ? "Camera initiates with dynamic forward flight acceleration, gliding dynamically forward towards Frame 2."
-          : "Camera initiates with smooth forward flight acceleration, gliding dynamically forward through the scene towards Frame 2.";
+          ? "Camera initiates with dynamic forward flight acceleration, gliding dynamically forward towards Frame 2. Slow forward dolly tracking, perfectly steady camera without violent push-ins or rapid zoom."
+          : "Camera initiates with smooth forward flight acceleration, gliding dynamically forward through the scene towards Frame 2. High-altitude cinematic drone tracking, smooth continuous movement, perfectly stable frame, absolutely no violent push-ins.";
       terminalInstruction =
         "In the final 0.5s, camera smoothly decelerates and locks stably into the exact composition and perspective of Frame 2 without rotational overshoot.";
       break;
 
     case "JOURNEY_TRAVERSE":
       momentumInstruction =
-        "Directly inheriting the forward momentum from Frame 1, camera continues a seamless sweeping forward-tracking glide transitioning across the terrain towards Frame 2.";
+        "Directly inheriting the forward momentum from Frame 1, camera continues a seamless sweeping forward-tracking glide transitioning across the terrain towards Frame 2 with smooth orbital rotation and eye-level tracking.";
       terminalInstruction =
         "In the final 0.5s, camera eases smoothly into the exact perspective of Frame 2, maintaining uniform altitude and zero horizontal tilt drift.";
       break;
@@ -144,7 +146,7 @@ export function buildSegmentOmniPrompt(params: {
     case "CLIMAX_PANORAMA":
     default:
       momentumInstruction =
-        "Continuing forward flight momentum from Frame 1, camera performs an elegant ascending reveal flight, gracefully elevating to capture the sweeping panoramic vista of Frame 2.";
+        "Continuing forward flight momentum from Frame 1, camera performs an elegant ascending reveal flight, gracefully elevating to capture the sweeping panoramic vista of Frame 2 with subtle lateral parallax.";
       terminalInstruction =
         "Camera gradually settles into a majestic, rock-solid stable wide vista composition in the final 0.8s, creating a breathtaking finish.";
       break;
@@ -152,13 +154,13 @@ export function buildSegmentOmniPrompt(params: {
 
   const landmarkConstraint =
     profile === "10s"
-      ? "Strictly preserve original landmarks, facial features, and natural geometry from input images."
-      : "Maintain 100% geographic, architectural, and facial fidelity from source images.";
+      ? "Zero spatial hallucination: strictly preserve original landmarks, facial features, and natural geometry from input images."
+      : "Zero spatial hallucination: maintain 100% geographic, architectural, and facial fidelity from source images.";
 
   const negativeInstruction =
     profile === "10s"
-      ? "Negative prompt: morphing, distorted faces, deformed bodies, unnatural movement, hallucinated landmarks, altered architecture, shaky camera, abrupt jarring cuts, low resolution, blurry."
-      : "Negative prompt: morphing, distorted faces, extra limbs, deformed anatomy, hallucinated landmarks, altered architecture, unnatural physics, shaky camera, abrupt jump cuts, low quality, pixelation.";
+      ? "Negative prompt: morphing, rapid camera movement, fast zoom-in, whip pan, perspective distortion, warping, sliding feet, human face mutation, motion smear, blending textures, hallucinated bridges, altered architecture, sudden time jumps, midday harsh light, abrupt jarring cuts, low quality, artifact, shaky cam, text artifacts, broken font glyphs, oversaturated, blurry."
+      : "Negative prompt: morphing, fast zoom, rapid push-in, whip pan, distorted geometry, warped perspective, blurred textures, melting buildings, human disfiguration, sliding feet, smeared limbs, erratic camera movements, abrupt hard cuts, abrupt jump cuts, unnatural physics, harsh midday lighting, mismatched color grading, fluctuating weather, oversaturation, CGI plasticity, cartoonish, low quality, pixelation, font artifacts, gibberish watermark.";
 
   return [
     `Frame 1 (Start): ${startLabel}.`,
@@ -166,7 +168,7 @@ export function buildSegmentOmniPrompt(params: {
     `Action: Cinematic 4K 30fps drone video transition seamlessly flying from Frame 1 to Frame 2 at ${location} in ${durationSeconds} seconds.`,
     `Momentum: ${momentumInstruction}`,
     `Boundary Continuity: ${terminalInstruction}`,
-    `Atmospheric Anchor: Consistent natural 5600K golden-hour daylight, vertical 9:16 portrait framing (1080x1920).`,
+    `Atmospheric Anchor: Consistent natural 5600K golden-hour daylight, warm ambient sunrise glow, soft atmospheric mist, realistic wind and vegetation physics, vertical 9:16 portrait framing (1080x1920), 24fps.`,
     landmarkConstraint,
     `Preserve authentic physical landmarks without artificial morphing or warping.`,
     negativeInstruction,
@@ -196,14 +198,16 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
     const tipShort = condenseTip(rawTip, 7);
 
     const negativePrompt =
-      "morphing, distorted faces, deformed bodies, unnatural movement, hallucinated landmarks, altered architecture, shaky camera, abrupt jarring cuts, gibberish text, misspelled words, fake watermarks, fake logos, fabricated prices, oversaturated, cartoon, CGI look, low resolution, blurry.";
+      "morphing, rapid camera movement, fast zoom-in, whip pan, perspective distortion, warping, sliding feet, human face mutation, motion smear, blending textures, hallucinated bridges, altered architecture, sudden time jumps, midday harsh light, abrupt jarring cuts, low quality, artifact, shaky cam, text artifacts, broken font glyphs, oversaturated.";
 
     const masterPrompt = [
       `Role: AI Tourism Video Advertising Prompt Designer (10-Second Specialist).`,
+      `Style Anchor: Cinematic travel commercial, photorealistic 4K, consistent golden hour early morning lighting, warm ambient sunrise glow, soft atmospheric mist, realistic physics, 24fps.`,
       `Action: 10-second high-energy dynamic vertical travel commercial (9:16 portrait) at ${input.location} for ${input.productName}.`,
       `Pacing: Fast-paced dynamic editing, punchy transitions, 4K photorealistic clarity, natural 5600K daylight.`,
       `Structure: 0-2s opening hook, 2-5s immersive experience, 5-8s tour highlights at ${formattedPrice} VND, 8-10s decisive call-to-action.`,
-      `Landmark Integrity: Strictly preserve original landmarks, facial features, and natural geometry from input images.`,
+      `Landmark Integrity: Zero spatial hallucination. Strictly preserve original landmarks, facial features, and natural geometry from input images.`,
+      `Camera Rule: Cinematic camera movement only, strictly no rapid zoom, no whip pan, no 2D warping.`,
       `Negative Prompt: ${negativePrompt}`,
     ].join(" ");
 
@@ -309,14 +313,16 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
   const tipShort = condenseTip(rawTip, 10);
 
   const negativePrompt =
-    "morphing, distorted faces, extra limbs, deformed anatomy, hallucinated landmarks, altered architecture, unnatural physics, shaky camera, abrupt jump cuts, illegible text, misspelled typography, fake watermarks, fake logos, invented prices, oversaturated colors, artificial CGI look, low quality, pixelation.";
+    "morphing, fast zoom, rapid push-in, whip pan, distorted geometry, warped perspective, blurred textures, melting buildings, human disfiguration, sliding feet, smeared limbs, erratic camera movements, abrupt hard cuts, abrupt jump cuts, unnatural physics, harsh midday lighting, mismatched color grading, fluctuating weather, oversaturation, CGI plasticity, cartoonish, low resolution, font artifacts, gibberish watermark.";
 
   const masterPrompt = [
     `Role: AI Tourism Video Advertising Prompt Designer (18-Second Storytelling Specialist).`,
+    `Master Reference: Master cinematic reference: 4K resolution, 24fps travel documentary, consistent golden hour sunrise palette, soft directional morning sunlight, atmospheric light rays, realistic wind and cloud physics, zero CGI artifacts, preserved architectural authenticity.`,
     `Action: 18-second cinematic travel visual storytelling commercial (9:16 portrait) at ${input.location} for ${input.productName}.`,
     `Pacing: Emotional cinematic pacing with smooth musical momentum, photorealistic 4K, natural 5600K lighting.`,
     `Structure: 0-3s hook reveal, 3-7s panoramic destination beauty, 7-11s immersive activity experience, 11-15s package highlights at ${formattedPrice} VND, 15-18s official booking call-to-action.`,
-    `Landmark Integrity: Maintain 100% geographic, architectural, and facial fidelity from source images.`,
+    `Landmark Integrity: Zero spatial hallucination. Maintain 100% geographic, architectural, and facial fidelity from source images without artificial bridges or jumps.`,
+    `Camera Rule: Diverse cinematic camera language, smooth drone tracking and orbits, absolutely no whip pan or aggressive push-ins.`,
     `Negative Prompt: ${negativePrompt}`,
   ].join(" ");
 

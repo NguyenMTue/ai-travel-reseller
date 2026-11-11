@@ -72,9 +72,9 @@ export const videoGenerateRequestSchema = z.preprocess(
 
       target_duration_sec: z
         .number()
-        .min(15, "Thời lượng video tối thiểu là 15 giây")
+        .min(5, "Thời lượng video tối thiểu là 5 giây")
         .max(60, "Thời lượng video tối đa là 60 giây")
-        .default(28),
+        .default(10),
 
       media_reference_ids: z
         .array(
