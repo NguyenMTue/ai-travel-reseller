@@ -1,0 +1,41 @@
+.shell { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
+.header { border-bottom: 1px solid var(--border); padding: 0 24px; min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 20px; background: var(--white); }
+.headerLeft { display: flex; align-items: center; gap: 20px; }
+.workspace { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted-foreground); }
+.main { flex: 1; max-width: 1280px; width: 100%; margin: 0 auto; padding: 32px 24px 64px; }
+.nav { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; font-size: 14px; }
+.nav a { display: inline-flex; align-items: center; gap: 6px; color: var(--muted-foreground); }
+.nav a:hover { color: var(--foreground); }
+.nav a[aria-current="page"] { color: var(--foreground); font-weight: 500; }
+.heading { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px; margin-bottom: 32px; }
+.heading h1 { font: 500 clamp(28px, 4vw, 42px)/1.2 var(--font-display); margin: 8px 0; }
+.heading p { color: var(--muted-foreground); margin: 0; font-size: 15px; }
+.controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+.searchBox { display: flex; align-items: center; gap: 10px; background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 0 14px; min-height: 44px; width: 320px; max-width: 100%; }
+.searchBox input { border: none; background: transparent; outline: none; width: 100%; font-size: 14px; }
+.filterSelect { min-height: 44px; border: 1px solid var(--border); border-radius: 8px; padding: 0 14px; background: var(--white); font-size: 14px; outline: none; }
+.tableContainer { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow-x: auto; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+.table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+.table th { background: var(--secondary); padding: 14px 18px; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; color: var(--muted-foreground); border-bottom: 1px solid var(--border); }
+.table td { padding: 18px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.table tr:last-child td { border-bottom: none; }
+.campaignName { font-weight: 600; font-size: 15px; color: var(--foreground); display: block; }
+.productName { font-size: 13px; color: var(--muted-foreground); margin-top: 4px; display: block; }
+.rate { font-weight: 600; color: var(--primary); }
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; }
+.badgeActive { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+.badgePaused { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+.badgeExpired { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
+.dot { width: 6px; height: 6px; border-radius: 50%; }
+.dotActive { background: #10b981; }
+.dotPaused { background: #f59e0b; }
+.dotExpired { background: #9ca3af; }
+.toggleBtn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; border: 1px solid var(--border); }
+.btnPause { background: var(--white); color: #b45309; border-color: #fde68a; }
+.btnPause:hover { background: #fffbeb; }
+.btnActivate { background: #0284c7; color: #ffffff; border-color: #0284c7; }
+.btnActivate:hover { background: #0369a1; }
+.btnLoading { opacity: 0.6; cursor: wait; }
+.emptyState { padding: 60px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: var(--muted-foreground); }
+.emptyState h3 { font: 500 20px var(--font-display); color: var(--foreground); margin: 0; }
+.footer { border-top: 1px solid var(--border); padding: 24px; text-align: center; font-size: 13px; color: var(--muted-foreground); }

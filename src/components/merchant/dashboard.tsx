@@ -21,24 +21,63 @@ import { Input } from "@/src/components/ui/input";
 import { demoProducts, demoMetrics } from "@/src/lib/merchant-demo";
 import { logout } from "@/app/actions/auth";
 import { CampaignCreatedNotice } from "./campaign-created-notice";
-export function Dashboard({ preview = false }: { preview?: boolean }) {
+
+export interface DashboardMetricProp {
+  label: string;
+  value: string;
+  unit: string;
+  detail: string;
+}
+
+export interface DashboardProductProp {
+  id: string;
+  name: string;
+  category: string;
+  status: string;
+  tone: string;
+  detail: string;
+  salePrice?: number | null;
+  originalPrice?: number | null;
+}
+
+export function Dashboard({
+  preview = false,
+  initialMetrics,
+  initialProducts,
+}: {
+  preview?: boolean;
+  initialMetrics?: DashboardMetricProp[];
+  initialProducts?: DashboardProductProp[];
+}) {
   const [tab, setTab] = useState("overview");
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
   const [menu, setMenu] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [view, setView] = useState("sample");
+
+  const effectiveProducts: DashboardProductProp[] = preview
+    ? demoProducts
+    : (initialProducts ?? demoProducts);
+
+  const effectiveMetrics: DashboardMetricProp[] = preview
+    ? demoMetrics
+    : (initialMetrics ?? demoMetrics);
+
   const products =
-    view === "empty"
+    preview && view === "empty"
       ? []
-      : demoProducts.filter(
+      : effectiveProducts.filter(
           (p) =>
             p.name
               .toLocaleLowerCase("vi")
               .includes(query.toLocaleLowerCase("vi")) &&
-            (status === "all" || p.status === status),
+            (status === "all" ||
+              p.status.toLocaleLowerCase("vi") === status.toLocaleLowerCase("vi") ||
+              (status === "Đang hoạt động" && (p.status === "Đang hoạt động" || p.status === "active")) ||
+              (status === "Bản nháp" && (p.status === "Bản nháp" || p.status === "draft"))),
         );
-  const product = demoProducts.find((p) => p.id === selected);
+  const product = effectiveProducts.find((p) => p.id === selected);
   return (
     <div className="dashboard-shell">
       <aside className={`sidebar ${menu ? "sidebar-open" : ""}`}>
@@ -79,8 +118,12 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
             }}
           >
             <Package size={19} />
-            Sản phẩm<span className="nav-count">{demoProducts.length}</span>
+            Sản phẩm<span className="nav-count">{effectiveProducts.length}</span>
           </button>
+          <Link prefetch={false} href={preview ? "/preview/merchant/campaigns" : "/merchant/campaigns"}>
+            <SlidersHorizontal size={19} />
+            Chiến dịch
+          </Link>
           <Link prefetch={false} href={preview ? "/preview/merchant/library" : "/merchant/library"}>
             <Film size={19} />
             Thư viện media
@@ -144,26 +187,26 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
         </header>
         <main id="main-content" className="dashboard-main">
           <CampaignCreatedNotice preview={preview} />
-          <div className="preview-banner">
-            <span>
-              <span className="dot" />{" "}
-              {preview ? "BẢN XEM TRƯỚC" : "GIAO DIỆN MẪU"} · Toàn bộ số liệu
-              bên dưới là dữ liệu minh họa.
-            </span>
-            <label>
-              Trạng thái{" "}
-              <select
-                aria-label="Trạng thái giao diện"
-                value={view}
-                onChange={(e) => setView(e.target.value)}
-              >
-                <option value="sample">Có dữ liệu</option>
-                <option value="empty">Trống</option>
-                <option value="loading">Đang tải</option>
-                <option value="error">Lỗi</option>
-              </select>
-            </label>
-          </div>
+          {preview && (
+            <div className="preview-banner">
+              <span>
+                <span className="dot" /> BẢN XEM TRƯỚC · Toàn bộ số liệu bên dưới là dữ liệu minh họa.
+              </span>
+              <label>
+                Trạng thái{" "}
+                <select
+                  aria-label="Trạng thái giao diện"
+                  value={view}
+                  onChange={(e) => setView(e.target.value)}
+                >
+                  <option value="sample">Có dữ liệu</option>
+                  <option value="empty">Trống</option>
+                  <option value="loading">Đang tải</option>
+                  <option value="error">Lỗi</option>
+                </select>
+              </label>
+            </div>
+          )}
           <div className="dashboard-title">
             <div>
               <p className="eyebrow">MERCHANT PORTAL</p>
@@ -192,7 +235,7 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
               </Button>
             </div>
           </div>
-          {view === "loading" ? (
+          {preview && view === "loading" ? (
             <div
               role="status"
               aria-label="Đang tải Dashboard"
@@ -203,7 +246,7 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
               ))}
               <p>Đang tải dữ liệu…</p>
             </div>
-          ) : view === "error" ? (
+          ) : preview && view === "error" ? (
             <div className="empty-state" role="alert">
               <h2>Chưa tải được dữ liệu</h2>
               <p>Đây là trạng thái lỗi minh họa. Bạn có thể thử lại.</p>
@@ -214,7 +257,7 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
               {tab === "overview" && (
                 <>
                   <div className="metrics">
-                    {demoMetrics.map((m, i) => (
+                    {effectiveMetrics.map((m, i) => (
                       <article
                         key={m.label}
                         className={`metric ${i === 0 ? "metric-featured" : ""}`}
@@ -224,10 +267,10 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
                           <ArrowUpRight size={16} />
                         </span>
                         <h2>
-                          {view === "empty" ? "—" : m.value}{" "}
+                          {preview && view === "empty" ? "—" : m.value}{" "}
                           <small>{m.unit}</small>
                         </h2>
-                        <p>{view === "empty" ? "Chưa có dữ liệu" : m.detail}</p>
+                        <p>{preview && view === "empty" ? "Chưa có dữ liệu" : m.detail}</p>
                       </article>
                     ))}
                   </div>
@@ -260,8 +303,9 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
                         : "Danh sách sản phẩm"}
                     </h2>
                     <p>
-                      {products.length} sản phẩm minh họa · Chưa kết nối dữ liệu
-                      thật
+                      {preview
+                        ? `${products.length} sản phẩm minh họa · Dữ liệu mẫu`
+                        : `${products.length} sản phẩm thực tế từ hệ thống`}
                     </p>
                   </div>
                   <SlidersHorizontal size={20} />
@@ -282,8 +326,8 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
                     onChange={(e) => setStatus(e.target.value)}
                   >
                     <option value="all">Tất cả trạng thái</option>
-                    <option>Đang hoạt động</option>
-                    <option>Bản nháp</option>
+                    <option value="Đang hoạt động">Đang hoạt động</option>
+                    <option value="Bản nháp">Bản nháp</option>
                   </select>
                 </div>
                 {products.length ? (
@@ -315,10 +359,14 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
                               </div>
                             </td>
                             <td>{p.category}</td>
-                            <td>Chưa cung cấp</td>
+                            <td>
+                              {p.salePrice != null
+                                ? `${new Intl.NumberFormat("vi-VN").format(p.salePrice)} ₫`
+                                : "Chưa cung cấp"}
+                            </td>
                             <td>
                               <span
-                                className={`status-pill ${p.status === "Bản nháp" ? "draft" : ""}`}
+                                className={`status-pill ${p.status === "Bản nháp" || p.status === "draft" ? "draft" : ""}`}
                               >
                                 {p.status}
                               </span>
@@ -345,11 +393,11 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
                     <Package />
                     <h3>Chưa có sản phẩm phù hợp</h3>
                     <p>
-                      {view === "empty"
-                        ? "Sản phẩm sẽ xuất hiện tại đây sau khi doanh nghiệp cung cấp dữ liệu."
+                      {effectiveProducts.length === 0
+                        ? "Chưa có sản phẩm nào được tạo. Hãy tạo chiến dịch hoặc sản phẩm mới để bắt đầu."
                         : "Thử tên khác hoặc bỏ bộ lọc để xem lại danh sách."}
                     </p>
-                    {view !== "empty" && (
+                    {effectiveProducts.length > 0 && (
                       <Button
                         variant="outline"
                         onClick={() => {
@@ -372,8 +420,9 @@ export function Dashboard({ preview = false }: { preview?: boolean }) {
                       <h3>{product.name}</h3>
                       <p>{product.detail}</p>
                       <p>
-                        Giá, hoa hồng, lịch hoạt động: chưa có thông tin xác
-                        nhận.
+                        {product.salePrice != null
+                          ? `Giá ưu đãi: ${new Intl.NumberFormat("vi-VN").format(product.salePrice)} ₫`
+                          : "Giá, hoa hồng, lịch hoạt động: chưa có thông tin xác nhận."}
                       </p>
                     </div>
                     <Button
