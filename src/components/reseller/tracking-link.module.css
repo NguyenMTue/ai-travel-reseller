@@ -14,3 +14,10 @@
 .shareTitle { font-family: var(--font-display); font-size: 21px; line-height: 1.35; margin-bottom: 10px; }
 .poster { margin-top: 16px; }
 .poster img { display: block; width: min(100%, 360px); height: auto; margin-inline: auto; border: 1px solid var(--border); border-radius: 12px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.tab { padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: white; color: var(--foreground); font-size: 13px; font-weight: 500; cursor: pointer; transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease; }
+.tab:hover { background: var(--secondary); }
+.tabActive { border-color: var(--foreground); background: var(--foreground); color: var(--background); }
+.tabActive:hover { background: var(--foreground); color: var(--background); }
+.voucherPanel { margin-top: 16px; padding: 14px; border: 1px dashed var(--border); border-radius: 12px; background: white; }
+.voucherCode { display: block; width: 100%; min-width: 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--secondary); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 20px; font-weight: 700; letter-spacing: 0.08em; text-align: center; color: var(--foreground); }

@@ -1,14 +1,24 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/src/lib/supabase/server";
+import { createAdminClient } from "@/src/lib/supabase/admin";
 import {
   UUID_PATTERN,
   videoGenerateRequestSchema,
 } from "@/src/lib/merchant/video-generate-schema";
 import { generateMerchantCampaignVideo } from "@/src/lib/merchant/video-generate-service";
+import {
+  createAsyncVideoGenerationJob,
+  isAsyncVideoRequest,
+  mapContentStatusToPollingState,
+  stripAsyncFlag,
+} from "@/src/lib/merchant/video-generate-async";
+
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 /**
- * Hàm trợ giúp xác thực phiên Merchant an toàn
+ * Resolve authenticated Merchant ID from Supabase session cookie or non-production headers/query.
  */
 async function resolveMerchantId(request: Request): Promise<{
   merchantId: string | null;
@@ -18,7 +28,6 @@ async function resolveMerchantId(request: Request): Promise<{
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  // 1. Kiểm tra session cookie chuẩn
   try {
     const {
       data: { user },
@@ -36,10 +45,9 @@ async function resolveMerchantId(request: Request): Promise<{
       }
     }
   } catch {
-    // Bỏ qua lỗi cookie session
+    // Ignore cookie session read errors
   }
 
-  // 2. Chế độ phát triển / Kiểm thử tự động ngoài production: cho phép x-merchant-id header
   if (process.env.NODE_ENV !== "production") {
     const headerId = request.headers.get("x-merchant-id")?.trim();
     if (headerId && UUID_PATTERN.test(headerId)) {
@@ -56,9 +64,60 @@ async function resolveMerchantId(request: Request): Promise<{
   return { merchantId: null, supabase, isSession: false };
 }
 
+function resolveBackgroundDbClient(fallbackClient: ReturnType<typeof createClient>) {
+  if (
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() &&
+    (process.env.SUPABASE_SECRET_KEY?.trim() ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY?.trim())
+  ) {
+    return createAdminClient();
+  }
+  return fallbackClient;
+}
+
+function scheduleBackgroundJob(task: () => Promise<void>) {
+  try {
+    after(task);
+  } catch {
+    // Allow non-Next request unit test environments to still trigger background synthesis.
+    void task().catch((err) => {
+      console.error("Background video job error:", err);
+    });
+  }
+}
+
+function mapFailureResponse(result: {
+  errorType: "BLOCKED" | "NOT_FOUND" | "FORBIDDEN" | "INVALID_INPUT";
+  blockedData?: unknown;
+  error?: string;
+}) {
+  if (result.errorType === "BLOCKED") {
+    return NextResponse.json(result.blockedData, { status: 422 });
+  }
+  if (result.errorType === "NOT_FOUND") {
+    return NextResponse.json(
+      { success: false, error: result.error },
+      { status: 404 },
+    );
+  }
+  if (result.errorType === "FORBIDDEN") {
+    return NextResponse.json(
+      { success: false, error: result.error },
+      { status: 403 },
+    );
+  }
+  return NextResponse.json(
+    { success: false, error: result.error },
+    { status: 400 },
+  );
+}
+
 /**
  * POST /api/merchant/video/generate
- * Khởi tạo và tổng hợp kịch bản/video AI chuẩn 9:16 cho chiến dịch Merchant
+ * Start 9:16 AI video generation:
+ * - Async mode (`?async=true`, `body.async === true`, `Prefer: respond-async`, or `x-async-job: true`):
+ *   runs fail-fast preflight, queues `contents` job (`status: "pending"`), triggers non-blocking `after()`, returns HTTP 202.
+ * - Sync mode (legacy modal compatibility): awaits generation and returns HTTP 201.
  */
 export async function POST(request: Request) {
   try {
@@ -71,11 +130,10 @@ export async function POST(request: Request) {
           error:
             "Yêu cầu xác thực tài khoản Merchant hợp lệ để thực hiện tạo video.",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    // 1. Parse JSON body
     let body: unknown;
     try {
       body = await request.json();
@@ -85,12 +143,12 @@ export async function POST(request: Request) {
           success: false,
           error: "Dữ liệu gửi lên không đúng định dạng JSON.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // 2. Validate request qua Zod Schema
-    const parsed = videoGenerateRequestSchema.safeParse(body);
+    const asyncMode = isAsyncVideoRequest(request, body);
+    const parsed = videoGenerateRequestSchema.safeParse(stripAsyncFlag(body));
     if (!parsed.success) {
       const formattedErrors = parsed.error.issues.map((issue) => ({
         field: issue.path.join("."),
@@ -103,68 +161,73 @@ export async function POST(request: Request) {
           error: "Tham số yêu cầu không hợp lệ.",
           details: formattedErrors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // 3. Gọi Service Layer xử lý
+    if (asyncMode) {
+      const bgDb = resolveBackgroundDbClient(supabase);
+      const job = await createAsyncVideoGenerationJob({
+        db: supabase,
+        bgDb,
+        merchantId,
+        input: parsed.data,
+      });
+
+      if (!job.success) {
+        return mapFailureResponse(job);
+      }
+
+      scheduleBackgroundJob(job.backgroundTask);
+
+      return NextResponse.json(
+        {
+          success: true,
+          job_id: job.jobId,
+          content_id: job.jobId,
+          status: "processing",
+          message:
+            "Video đang được xử lý trong nền. Vui lòng polling trạng thái.",
+        },
+        { status: 202 },
+      );
+    }
+
     const result = await generateMerchantCampaignVideo(
       supabase,
       merchantId,
-      parsed.data
+      parsed.data,
     );
 
-    // 4. Xử lý các nhánh kết quả
     if (!result.success) {
-      if (result.errorType === "BLOCKED") {
-        // Bị chặn bởi Fail-Fast Gate: trả về HTTP 422 Unprocessable Entity
-        return NextResponse.json(result.blockedData, { status: 422 });
-      }
-
-      if (result.errorType === "NOT_FOUND") {
-        return NextResponse.json(
-          { success: false, error: result.error },
-          { status: 404 }
-        );
-      }
-
-      if (result.errorType === "FORBIDDEN") {
-        return NextResponse.json(
-          { success: false, error: result.error },
-          { status: 403 }
-        );
-      }
-
-      return NextResponse.json(
-        { success: false, error: result.error },
-        { status: 400 }
-      );
+      return mapFailureResponse(result);
     }
 
-    // 5. Trả về HTTP 201 Created khi tổng hợp video thành công
     return NextResponse.json(
       {
         success: true,
         message: "Khởi tạo và tổng hợp video chiến dịch thành công.",
         data: result.data,
       },
-      { status: 201 }
+      { status: 201 },
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Unknown error";
     console.error("API /api/merchant/video/generate Internal Error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Lỗi hệ thống trong quá trình tổng hợp video: " + error?.message,
+        error: "Lỗi hệ thống trong quá trình tổng hợp video: " + message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 /**
- * GET /api/merchant/video/generate
- * Tra cứu tiến độ hoặc thông tin video đã tạo theo content_id
+ * GET /api/merchant/video/generate?job_id=... (or ?content_id=...)
+ * Poll async video generation status (`processing` | `completed` | `failed`) and fetch video content.
  */
 export async function GET(request: Request) {
   try {
@@ -176,50 +239,61 @@ export async function GET(request: Request) {
           success: false,
           error: "Yêu cầu xác thực tài khoản Merchant hợp lệ.",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const { searchParams } = new URL(request.url);
-    const contentId = searchParams.get("content_id");
+    const jobId =
+      searchParams.get("job_id")?.trim() ||
+      searchParams.get("content_id")?.trim();
 
-    if (!contentId || !UUID_PATTERN.test(contentId)) {
+    if (!jobId || !UUID_PATTERN.test(jobId)) {
       return NextResponse.json(
         {
           success: false,
-          error: "Tham số content_id là bắt buộc và phải là định dạng UUID.",
+          error:
+            "Tham số job_id hoặc content_id là bắt buộc và phải là định dạng UUID.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     const { data: content, error } = await supabase
       .from("contents")
-      .select("id, campaign_id, product_id, video_url, status, hook, script, caption, cta, created_at")
-      .eq("id", contentId)
+      .select(
+        "id, campaign_id, product_id, video_url, status, hook, script, caption, cta, created_at",
+      )
+      .eq("id", jobId)
       .maybeSingle();
 
     if (error || !content) {
       return NextResponse.json(
         {
           success: false,
-          error: "Không tìm thấy nội dung video với content_id tương ứng.",
+          error: "Không tìm thấy tác vụ video với job_id/content_id tương ứng.",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
+    const polling = mapContentStatusToPollingState(content);
+
     return NextResponse.json({
       success: true,
+      ...polling,
+      content,
       data: content,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       {
         success: false,
-        error: "Lỗi tra cứu thông tin video: " + error?.message,
+        error: "Lỗi tra cứu thông tin video: " + message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
