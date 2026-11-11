@@ -68,12 +68,11 @@ export type VideoEngineBridgeResult = {
 /**
  * Ánh xạ dữ liệu giữa kịch bản BE2 đã được phê duyệt và cấu hình đầu vào Core Video Engine BE1.
  *
- * LƯU Ý KIẾN TRÚC & GIỚI HẠN HIỆN TẠI:
- * - BE1 Core Video Engine hiện tại tự dựng lại danh sách phân cảnh (timeline scenes) từ
- *   media_assets và merchant metadata. Các trường chi tiết phân cảnh của BE2 (visual_prompt,
- *   shot_instruction, narration, on_screen_text, verified_fact_refs) chưa được Core Video Engine
- *   tiêu thụ trực tiếp; script gốc được bảo toàn trong `VideoEngineBridgeResult.approvedScript`
- *   để renderer sau này sử dụng. Tích hợp phân cảnh ở tầng Scene-level là blocker cần BE1 owner phê duyệt.
+ * KIẾN TRÚC & LIÊN THÔNG DỮ LIỆU:
+ * - BE1 Core Video Engine trực tiếp tiếp nhận và tiêu thụ toàn bộ 14 approved scenes của BE2
+ *   vào timeline_scenes, ánh xạ các trường visual_prompt, shot_instruction, narration,
+ *   on_screen_text, verified_fact_refs và bảo toàn nguyên văn placeholder [LINK_MUA_VE].
+ * - Kịch bản gốc được bảo toàn trong `VideoEngineBridgeResult.approvedScript`.
  *
  * FIELD MAPPING:
  * - merchant_name            <- merchantMetadata.merchantName || campaign.campaignName
@@ -116,7 +115,14 @@ export function mapScriptToVideoEngineInput(
 
   const { script, campaign, mediaAssets, merchantMetadata } = request;
 
-  // 2. Kiểm tra giá bán thực tế: Không tự tiện fallback giá 1, bắt buộc số dương đã xác minh
+  // 2. Kiểm tra số lượng scenes: Bắt buộc đúng 14 scenes theo chuẩn kịch bản BE1 Video Engine
+  if (!script.scenes || script.scenes.length !== 14) {
+    throw new VideoEngineBridgeGateError(
+      `Cannot bridge script to Core Video Engine: script must contain exactly 14 scenes, but received ${script.scenes?.length ?? 0}.`,
+    );
+  }
+
+  // 3. Kiểm tra giá bán thực tế: Không tự tiện fallback giá 1, bắt buộc số dương đã xác minh
   if (
     campaign.salePrice === undefined ||
     campaign.salePrice === null ||
@@ -129,7 +135,7 @@ export function mapScriptToVideoEngineInput(
     );
   }
 
-  // 3. Kiểm tra địa điểm: Không tự tiện dùng default "Việt Nam", bắt buộc location xác thực
+  // 4. Kiểm tra địa điểm: Không tự tiện dùng default "Việt Nam", bắt buộc location xác thực
   const location = campaign.targetLocation?.trim();
   if (!location) {
     throw new VideoEngineBridgeGateError(
@@ -137,7 +143,7 @@ export function mapScriptToVideoEngineInput(
     );
   }
 
-  // 4. Kiểm tra authentic tips: Không tự sinh câu tip chung chung; fail-closed nếu thiếu
+  // 5. Kiểm tra authentic tips: Không tự sinh câu tip chung chung; fail-closed nếu thiếu
   const factTips = (campaign.verifiedFacts || [])
     .map((fact) => fact.text?.trim() || "")
     .filter((text) => text.length >= 5);
@@ -153,7 +159,7 @@ export function mapScriptToVideoEngineInput(
     );
   }
 
-  // 5. Kiểm tra Booking URL: Chỉ chấp nhận HTTPS hợp lệ, không echo URL thô vào log lỗi
+  // 6. Kiểm tra Booking URL: Chỉ chấp nhận HTTPS hợp lệ, không echo URL thô vào log lỗi
   if (
     !merchantMetadata.bookingUrl ||
     typeof merchantMetadata.bookingUrl !== "string"
@@ -176,14 +182,36 @@ export function mapScriptToVideoEngineInput(
     );
   }
 
-  // 6. CTA chuyển sang BE1: Bắt buộc giữ [LINK_MUA_VE]
-  let officialCta =
-    script.cta.on_screen_text?.trim() || script.cta.spoken_text?.trim() || "";
-  if (!officialCta.includes("[LINK_MUA_VE]")) {
-    officialCta = officialCta
-      ? `${officialCta} [LINK_MUA_VE]`
-      : "[LINK_MUA_VE]";
+  // 7. CTA chuyển sang BE1: Bắt buộc bảo toàn nguyên văn [LINK_MUA_VE], cấm URL ngoại lai và cấm âm thầm thay thế placeholder
+  const ctaOnScreen = script.cta.on_screen_text?.trim();
+  if (!ctaOnScreen || !ctaOnScreen.includes("[LINK_MUA_VE]")) {
+    throw new VideoEngineBridgeGateError(
+      "Cannot bridge script to Core Video Engine: CTA on_screen_text is missing required placeholder [LINK_MUA_VE]. Silent replacement or omission is strictly prohibited.",
+    );
   }
+
+  const urlPattern = /https?:\/\/[^\s]+/i;
+  if (
+    urlPattern.test(ctaOnScreen) ||
+    urlPattern.test(script.cta.spoken_text?.trim() || "")
+  ) {
+    throw new VideoEngineBridgeGateError(
+      "Cannot bridge script to Core Video Engine: CTA contains unauthorized foreign or generated URL. Only [LINK_MUA_VE] placeholder is allowed.",
+    );
+  }
+
+  for (const scene of script.scenes) {
+    if (
+      (scene.narration && urlPattern.test(scene.narration)) ||
+      (scene.on_screen_text && urlPattern.test(scene.on_screen_text))
+    ) {
+      throw new VideoEngineBridgeGateError(
+        `Cannot bridge script to Core Video Engine: Scene ${scene.index} contains unauthorized foreign URL.`,
+      );
+    }
+  }
+
+  const officialCta = ctaOnScreen;
 
   // 7. Chuẩn bị ambient sound tags từ script audio plan
   const ambientTags = [
@@ -220,6 +248,20 @@ export function mapScriptToVideoEngineInput(
         merchantMetadata.voicePersonaId?.trim() || "voice_vi_standard",
       ambient_sound_tags: ambientTags,
     },
+    verified_facts: campaign.verifiedFacts.map((f) => ({
+      id: f.id,
+      text: f.text,
+    })),
+    scenes: script.scenes.map((s) => ({
+      index: s.index,
+      start_seconds: s.start_seconds,
+      end_seconds: s.end_seconds,
+      visual_prompt: s.visual_prompt,
+      shot_instruction: s.shot_instruction,
+      narration: s.narration,
+      on_screen_text: s.on_screen_text,
+      verified_fact_refs: s.verified_fact_refs,
+    })),
   };
 
   return videoEngineInputSchema.parse(rawEngineInput);
@@ -233,7 +275,7 @@ export function mapScriptToVideoEngineInput(
  * Thực thi chuyển giao từ kịch bản BE2 sang Core Video Engine BE1
  *
  * Ghi chú: Preflight fail không được báo READY_FOR_RENDER.
- * Kết quả bảo toàn approvedScript của BE2 kèm sceneConsumptionNote rõ ràng.
+ * Kết quả bảo toàn approvedScript của BE2 và direct scene-level ingestion đã hoàn tất 100%.
  */
 export function bridgeToVideoEngine(
   request: VideoEngineBridgeRequest,
@@ -248,7 +290,7 @@ export function bridgeToVideoEngine(
     passedPreFlight: gateCheck.isValid,
     approvedScript: request.script,
     sceneConsumptionNote:
-      "BE1 Core Video Engine currently generates timeline scenes from media assets and preflight metadata; BE2 approved script scenes are preserved in bridge result for downstream renderers, with direct scene-level ingestion pending BE1 owner approval.",
+      "BE1 Core Video Engine directly ingested and consumed all 14 approved scenes from BE2 into timeline_scenes, preserving scene order, time ranges, narration, on-screen text, and [LINK_MUA_VE] CTA placeholder verbatim.",
   };
 }
 

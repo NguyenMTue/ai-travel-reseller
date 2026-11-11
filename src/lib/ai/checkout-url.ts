@@ -5,15 +5,17 @@ export type AttributionContext = {
 };
 
 export function buildCheckoutUrl(
-  paymentUrl: string | null,
+  paymentUrl: string | null | undefined,
   attribution: AttributionContext,
+  bookingUrl?: string | null | undefined,
 ): string | null {
-  if (!paymentUrl) {
+  const candidate = paymentUrl || bookingUrl;
+  if (!candidate) {
     return null;
   }
 
   try {
-    const checkoutUrl = new URL(paymentUrl);
+    const checkoutUrl = new URL(candidate);
 
     if (!["http:", "https:"].includes(checkoutUrl.protocol)) {
       return null;

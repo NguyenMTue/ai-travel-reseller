@@ -1,0 +1,312 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "catalog_version": "1.0.0",
+  "generated_at": "2026-10-28T18:55:00.000Z",
+  "description": "Danh mục sự thật đã xác minh (Verified Facts Catalog) Tuần 4 cho chiến dịch video marketing du lịch miền Trung (Bà Nà Hills & Nam Hội An)",
+  "products": [
+    {
+      "product_id": "33333333-3333-3333-3333-333333333333",
+      "product_name": "Vé Cáp Treo Bà Nà Hills + Buffet Trưa Quốc Tế",
+      "merchant_name": "Sun World Đà Nẵng",
+      "facts": [
+        {
+          "id": "fact_bana_entry",
+          "product_id": "33333333-3333-3333-3333-333333333333",
+          "text": "Vé vào cổng khu du lịch Bà Nà Hills",
+          "category": "inclusion",
+          "source_file": "tests/hallucination/test_sales_agent_hallucination.ts",
+          "source_locator": "VERIFIED_KNOWLEDGE_BASE.inclusions[0]",
+          "source_excerpt": "Vé vào cổng khu du lịch"
+        },
+        {
+          "id": "fact_bana_cable",
+          "product_id": "33333333-3333-3333-3333-333333333333",
+          "text": "Cáp treo khứ hồi Bà Nà Hills hai chiều",
+          "category": "inclusion",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 1 description (dòng 214)",
+          "source_excerpt": "cáp treo khứ hồi Bà Nà Hills"
+        },
+        {
+          "id": "fact_bana_golden_bridge",
+          "product_id": "33333333-3333-3333-3333-333333333333",
+          "text": "Tham quan Cầu Vàng",
+          "category": "landmark",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 1 description (dòng 214)",
+          "source_excerpt": "tham quan Cầu Vàng"
+        },
+        {
+          "id": "fact_bana_french_village",
+          "product_id": "33333333-3333-3333-3333-333333333333",
+          "text": "Tham quan Làng Pháp",
+          "category": "landmark",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 1 description (dòng 214)",
+          "source_excerpt": "Làng Pháp"
+        },
+        {
+          "id": "fact_bana_flower_garden",
+          "product_id": "33333333-3333-3333-3333-333333333333",
+          "text": "Tham quan Vườn Hoa Le Jardin D'Amour",
+          "category": "landmark",
+          "source_file": "tests/hallucination/test_sales_agent_hallucination.ts",
+          "source_locator": "VERIFIED_KNOWLEDGE_BASE.inclusions[2]",
+          "source_excerpt": "Vườn Hoa Le Jardin D'Amour"
+        },
+        {
+          "id": "fact_bana_buffet",
+          "product_id": "33333333-3333-3333-3333-333333333333",
+          "text": "Buffet trưa hơn 100 món tại nhà hàng Arapang hoặc Beer Plaza",
+          "category": "inclusion",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 1 description (dòng 214)",
+          "source_excerpt": "buffet trưa hơn 100 món tại nhà hàng Arapang hoặc Beer Plaza"
+        },
+        {
+          "id": "fact_bana_price",
+          "product_id": "33333333-3333-3333-3333-333333333333",
+          "text": "Giá bán ưu đãi chính thức 1.150.000 VNĐ",
+          "category": "price",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 1 sale_price (dòng 217)",
+          "source_excerpt": "1150000"
+        },
+        {
+          "id": "fact_bana_cta",
+          "product_id": "33333333-3333-3333-3333-333333333333",
+          "text": "Đặt dịch vụ chính thức qua liên kết [LINK_MUA_VE]",
+          "category": "cta",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 1 booking_url (dòng 220)",
+          "source_excerpt": "https://sunworld.vn/booking/ba-na-hills-buffet"
+        }
+      ]
+    },
+    {
+      "product_id": "33333333-3333-3333-3333-111111111111",
+      "product_name": "Vé Vào Cổng VinWonders Nam Hội An - River Safari & Trò Chơi",
+      "merchant_name": "VinWonders Nam Hội An",
+      "facts": [
+        {
+          "id": "fact_hoian_name",
+          "product_id": "33333333-3333-3333-3333-111111111111",
+          "text": "Vé Vào Cổng VinWonders Nam Hội An - River Safari & Trò Chơi",
+          "category": "landmark",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 3 name (dòng 243)",
+          "source_excerpt": "Vé Vào Cổng VinWonders Nam Hội An - River Safari & Trò Chơi"
+        },
+        {
+          "id": "fact_hoian_safari",
+          "product_id": "33333333-3333-3333-3333-111111111111",
+          "text": "River Safari duy nhất tại VN bằng thuyền",
+          "category": "inclusion",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 3 description (dòng 244)",
+          "source_excerpt": "River Safari duy nhất tại VN bằng thuyền"
+        },
+        {
+          "id": "fact_hoian_waterpark",
+          "product_id": "33333333-3333-3333-3333-111111111111",
+          "text": "Công viên nước",
+          "category": "inclusion",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 3 description (dòng 244)",
+          "source_excerpt": "công viên nước"
+        },
+        {
+          "id": "fact_hoian_folk_island",
+          "product_id": "33333333-3333-3333-3333-111111111111",
+          "text": "Đảo dân gian",
+          "category": "landmark",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 3 description (dòng 244)",
+          "source_excerpt": "đảo dân gian"
+        },
+        {
+          "id": "fact_hoian_show",
+          "product_id": "33333333-3333-3333-3333-111111111111",
+          "text": "Show diễn 3D Mapping Về Bến rực rỡ",
+          "category": "inclusion",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 3 description (dòng 244)",
+          "source_excerpt": "show diễn 3D Mapping Về Bến rực rỡ"
+        },
+        {
+          "id": "fact_hoian_original_price",
+          "product_id": "33333333-3333-3333-3333-111111111111",
+          "text": "Giá gốc 600.000 VNĐ",
+          "category": "price",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 3 original_price (dòng 246)",
+          "source_excerpt": "600000"
+        },
+        {
+          "id": "fact_hoian_sale_price",
+          "product_id": "33333333-3333-3333-3333-111111111111",
+          "text": "Giá bán 510.000 VNĐ",
+          "category": "price",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 3 sale_price (dòng 247)",
+          "source_excerpt": "510000"
+        },
+        {
+          "id": "fact_hoian_cta",
+          "product_id": "33333333-3333-3333-3333-111111111111",
+          "text": "Đặt vé chính thức tại [LINK_MUA_VE]",
+          "category": "cta",
+          "source_file": "supabase/seed.sql",
+          "source_locator": "Product 3 booking_url (dòng 250)",
+          "source_excerpt": "https://vinwonders.com/nam-hoi-an/all-in-one"
+        }
+      ]
+    }
+  ],
+  "facts": [
+    {
+      "id": "fact_bana_entry",
+      "product_id": "33333333-3333-3333-3333-333333333333",
+      "text": "Vé vào cổng khu du lịch Bà Nà Hills",
+      "category": "inclusion",
+      "source_file": "tests/hallucination/test_sales_agent_hallucination.ts",
+      "source_locator": "VERIFIED_KNOWLEDGE_BASE.inclusions[0]",
+      "source_excerpt": "Vé vào cổng khu du lịch"
+    },
+    {
+      "id": "fact_bana_cable",
+      "product_id": "33333333-3333-3333-3333-333333333333",
+      "text": "Cáp treo khứ hồi Bà Nà Hills hai chiều",
+      "category": "inclusion",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 1 description (dòng 214)",
+      "source_excerpt": "cáp treo khứ hồi Bà Nà Hills"
+    },
+    {
+      "id": "fact_bana_golden_bridge",
+      "product_id": "33333333-3333-3333-3333-333333333333",
+      "text": "Tham quan Cầu Vàng",
+      "category": "landmark",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 1 description (dòng 214)",
+      "source_excerpt": "tham quan Cầu Vàng"
+    },
+    {
+      "id": "fact_bana_french_village",
+      "product_id": "33333333-3333-3333-3333-333333333333",
+      "text": "Tham quan Làng Pháp",
+      "category": "landmark",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 1 description (dòng 214)",
+      "source_excerpt": "Làng Pháp"
+    },
+    {
+      "id": "fact_bana_flower_garden",
+      "product_id": "33333333-3333-3333-3333-333333333333",
+      "text": "Tham quan Vườn Hoa Le Jardin D'Amour",
+      "category": "landmark",
+      "source_file": "tests/hallucination/test_sales_agent_hallucination.ts",
+      "source_locator": "VERIFIED_KNOWLEDGE_BASE.inclusions[2]",
+      "source_excerpt": "Vườn Hoa Le Jardin D'Amour"
+    },
+    {
+      "id": "fact_bana_buffet",
+      "product_id": "33333333-3333-3333-3333-333333333333",
+      "text": "Buffet trưa hơn 100 món tại nhà hàng Arapang hoặc Beer Plaza",
+      "category": "inclusion",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 1 description (dòng 214)",
+      "source_excerpt": "buffet trưa hơn 100 món tại nhà hàng Arapang hoặc Beer Plaza"
+    },
+    {
+      "id": "fact_bana_price",
+      "product_id": "33333333-3333-3333-3333-333333333333",
+      "text": "Giá bán ưu đãi chính thức 1.150.000 VNĐ",
+      "category": "price",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 1 sale_price (dòng 217)",
+      "source_excerpt": "1150000"
+    },
+    {
+      "id": "fact_bana_cta",
+      "product_id": "33333333-3333-3333-3333-333333333333",
+      "text": "Đặt dịch vụ chính thức qua liên kết [LINK_MUA_VE]",
+      "category": "cta",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 1 booking_url (dòng 220)",
+      "source_excerpt": "https://sunworld.vn/booking/ba-na-hills-buffet"
+    },
+    {
+      "id": "fact_hoian_name",
+      "product_id": "33333333-3333-3333-3333-111111111111",
+      "text": "Vé Vào Cổng VinWonders Nam Hội An - River Safari & Trò Chơi",
+      "category": "landmark",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 3 name (dòng 243)",
+      "source_excerpt": "Vé Vào Cổng VinWonders Nam Hội An - River Safari & Trò Chơi"
+    },
+    {
+      "id": "fact_hoian_safari",
+      "product_id": "33333333-3333-3333-3333-111111111111",
+      "text": "River Safari duy nhất tại VN bằng thuyền",
+      "category": "inclusion",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 3 description (dòng 244)",
+      "source_excerpt": "River Safari duy nhất tại VN bằng thuyền"
+    },
+    {
+      "id": "fact_hoian_waterpark",
+      "product_id": "33333333-3333-3333-3333-111111111111",
+      "text": "Công viên nước",
+      "category": "inclusion",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 3 description (dòng 244)",
+      "source_excerpt": "công viên nước"
+    },
+    {
+      "id": "fact_hoian_folk_island",
+      "product_id": "33333333-3333-3333-3333-111111111111",
+      "text": "Đảo dân gian",
+      "category": "landmark",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 3 description (dòng 244)",
+      "source_excerpt": "đảo dân gian"
+    },
+    {
+      "id": "fact_hoian_show",
+      "product_id": "33333333-3333-3333-3333-111111111111",
+      "text": "Show diễn 3D Mapping Về Bến rực rỡ",
+      "category": "inclusion",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 3 description (dòng 244)",
+      "source_excerpt": "show diễn 3D Mapping Về Bến rực rỡ"
+    },
+    {
+      "id": "fact_hoian_original_price",
+      "product_id": "33333333-3333-3333-3333-111111111111",
+      "text": "Giá gốc 600.000 VNĐ",
+      "category": "price",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 3 original_price (dòng 246)",
+      "source_excerpt": "600000"
+    },
+    {
+      "id": "fact_hoian_sale_price",
+      "product_id": "33333333-3333-3333-3333-111111111111",
+      "text": "Giá bán 510.000 VNĐ",
+      "category": "price",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 3 sale_price (dòng 247)",
+      "source_excerpt": "510000"
+    },
+    {
+      "id": "fact_hoian_cta",
+      "product_id": "33333333-3333-3333-3333-111111111111",
+      "text": "Đặt vé chính thức tại [LINK_MUA_VE]",
+      "category": "cta",
+      "source_file": "supabase/seed.sql",
+      "source_locator": "Product 3 booking_url (dòng 250)",
+      "source_excerpt": "https://vinwonders.com/nam-hoi-an/all-in-one"
+    }
+  ]
+}

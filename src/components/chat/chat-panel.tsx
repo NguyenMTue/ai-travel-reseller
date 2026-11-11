@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { captureChatFunnelEvent } from "@/src/lib/analytics";
+import { CheckoutCard } from "./checkout-card";
 import {
   ArrowUp,
   MessageCircle,
@@ -9,27 +10,18 @@ import {
   Sparkles,
   ArrowUpRight,
 } from "lucide-react";
-import { Button } from "@/src/components/ui/button";
-import { requestChat, type ChatTransport, type Attribution } from "@/src/lib/chat/transport";
+import { requestChat, ChatRequestError, type ChatTransport, type Attribution } from "@/src/lib/chat/transport";
 export type { Attribution } from "@/src/lib/chat/transport";
 type Message = {
   role: "user" | "assistant";
   content: string;
-  checkout?: string | null;
+  checkout?: unknown;
 };
 const prompts = [
   "Tôi muốn tìm hiểu về sản phẩm",
   "Chính sách hủy và hoàn tiền thế nào?",
   "Làm sao để đặt dịch vụ chính thức?",
 ];
-function safeCheckout(raw: unknown) {
-  try {
-    const u = new URL(String(raw));
-    return u.protocol === "https:" ? u.href : null;
-  } catch {
-    return null;
-  }
-}
 export function ChatPanel({
   attribution,
   transport = requestChat,
@@ -45,6 +37,7 @@ export function ChatPanel({
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [expired, setExpired] = useState(false);
   const bottom = useRef<HTMLDivElement>(null);
   const scroll = useRef<HTMLDivElement>(null);
   const follow = useRef(true);
@@ -66,7 +59,7 @@ export function ChatPanel({
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; controller.current?.abort(); }; }, []);
   async function send(text: string) {
     const question = text.trim();
-    if (!question || busy.current) return;
+    if (!question || busy.current || expired) return;
     if (!navigator.onLine) { setInput(question); setError("Bạn đang ngoại tuyến. Tin nhắn chưa gửi; hãy kết nối lại rồi tự gửi khi sẵn sàng."); return; }
     if (question.length > 2000) {
       setError("Câu hỏi tối đa 2.000 ký tự.");
@@ -116,11 +109,12 @@ export function ChatPanel({
         {
           role: "assistant",
           content: data.reply,
-          checkout: safeCheckout(data.suggested_checkout_url),
+          checkout: data.suggested_checkout_url,
         },
       ]);
     } catch (e) {
       if (!mounted.current) return;
+      if (e instanceof ChatRequestError && [401, 403, 404].includes(e.status)) setExpired(true);
       setError(
         e instanceof Error && e.name !== "AbortError"
           ? e.message
@@ -177,9 +171,8 @@ export function ChatPanel({
               {preview ? "Mô phỏng · Không kết nối AI" : attribution ? "Tư vấn theo sản phẩm" : "Bản xem trước giao diện"}
             </small>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
+          <button
+            className="button button-ghost button-icon"
             disabled={pending || messages.length === 0}
             aria-label="Cuộc trò chuyện mới"
             onClick={() => {
@@ -189,7 +182,7 @@ export function ChatPanel({
             }}
           >
             <Plus />
-          </Button>
+          </button>
         </header>
         <div
           ref={scroll}
@@ -227,33 +220,9 @@ export function ChatPanel({
                   {m.role === "user" ? "Bạn" : "TravelLink Assistant"}
                 </span>
                 <p>{m.content}</p>
-                {m.checkout ? (
-                  (() => {
-                    const checkout = m.checkout;
-                    let hostname = "";
-                    try {
-                      hostname = new URL(checkout).hostname;
-                    } catch {
-                      return null;
-                    }
-                    return (
-                      <a
-                        className="checkout-link"
-                        href={checkout}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() =>
-                          !preview &&
-                          captureChatFunnelEvent("checkout_clicked", attribution, {
-                            checkout_domain: hostname,
-                          })
-                        }
-                      >
-                        Đến trang thanh toán của doanh nghiệp ↗
-                        <small>{hostname}</small>
-                      </a>
-                    );
-                  })()
+                {m.role === "assistant" && attribution ? (
+                  <CheckoutCard url={m.checkout} attribution={attribution}
+                    pending={pending} expired={expired} preview={preview} />
                 ) : null}
               </div>
             ))
@@ -287,7 +256,7 @@ export function ChatPanel({
               maxLength={2000}
               rows={2}
               placeholder="Bạn muốn hỏi điều gì?"
-              disabled={pending}
+              disabled={pending || expired}
               onKeyDown={(e) => {
                 if (
                   e.key === "Enter" &&
@@ -299,14 +268,14 @@ export function ChatPanel({
                 }
               }}
             />
-            <Button
+            <button
               type="submit"
-              size="icon"
+              className="button button-primary button-icon"
               aria-label="Gửi tin nhắn"
-              disabled={!input.trim() || pending}
+              disabled={!input.trim() || pending || expired}
             >
               <ArrowUp />
-            </Button>
+            </button>
           </form>
           <p>
             AI có thể mắc lỗi. Vui lòng xác nhận thông tin với doanh nghiệp.

@@ -1,0 +1,59 @@
+﻿E2E/UAT ID,Luồng nghiệp vụ,Vai trò (Actor),Mã SRS/BRD,Trạng thái Codebase ([Ready] / [Pending]),Tên kịch bản,Tiền điều kiện,Các bước thực hiện,Dữ liệu mẫu,Kết quả mong đợi,Thiết bị (Desktop / iPhone / Android),File Playwright ánh xạ,Độ ưu tiên (P0/P1/P2)
+TC-E2E-01-01,Supply-to-Distribution,Merchant,FR-CMP-01..03,[Ready - Sẵn sàng chạy E2E/UAT],Tạo chiến dịch mới kèm hoa hồng hợp lệ,Đã đăng nhập Merchant Portal,"1. Vào /merchant/campaigns/new
+2. Nhập tên campaign, ngày, hoa hồng 12%
+3. Bấm Lưu",Chiến dịch Hội An Foodie; Hoa hồng 12%,Tạo thành công; lưu vào DB; chuyển hướng danh sách,Desktop / Mobile Web,tests/merchant-campaign-form.spec.ts,P0
+TC-E2E-01-02,Supply-to-Distribution,Merchant,NFR-SEC-04,[Ready - Sẵn sàng chạy E2E/UAT],Upload video mẫu 9:16 và cam kết bản quyền,Tab Media trong Campaign,"1. Chọn video MP4 9:16
+2. Tích chọn cam kết bản quyền
+3. Submit",File video banahills.mp4 <= 50MB,Video lưu vào thư viện; cờ bản quyền được xác nhận,Desktop / Mobile Web,tests/video-pipeline.test.ts,P0
+TC-E2E-01-03,Supply-to-Distribution,AI Content Factory,FR-CNT-01..05,[Ready - Sẵn sàng chạy E2E/UAT],Tự động sinh nội dung 4 Personas,Campaign được tạo,"1. Kích hoạt Content Factory
+2. Phân tích tour & sinh 4 gói persona",Dữ liệu tour Hội An Foodie,Sinh đủ 4 persona với hooks scripts captions CTAs,Backend API,tests/content-factory.test.ts,P0
+TC-E2E-01-04,Supply-to-Distribution,Admin / QC,FR-QC-01..03,[Ready - Sẵn sàng chạy E2E/UAT],Kiểm duyệt nội dung tự động qua AI Guardrails,Nội dung đã sinh,"1. Quét nội dung qua content validator
+2. Đánh giá nhãn approved",Bộ quy tắc AISAFE-01..10,Nội dung hợp lệ đạt nhãn approved; chặn bịa giá,Backend API,tests/content-safety.test.ts,P0
+TC-E2E-01-05,Supply-to-Distribution,Reseller,FR-RES-05..07,[Ready - Sẵn sàng chạy E2E/UAT],Xem Campaign Feed và duyệt Content Kit,Tài khoản CTV mở Feed di động,"1. Mở /preview/reseller
+2. Chọn Hội An Foodie
+3. Xem kịch bản persona Foodie",Hội An Foodie; Persona foodie,Giao diện không tràn ngang; hiển thị đủ kịch bản,iPhone 13 / Android Pixel 5,tests/reseller-feed.spec.ts,P0
+TC-E2E-01-06,Supply-to-Distribution,Reseller,FR-TRK-01,[Ready - Sẵn sàng chạy E2E/UAT],Lấy Tracking Link và mã QR 1-Chạm,Màn hình Campaign Detail,"1. Bấm Tạo link
+2. Bấm Tạo link tiếp thị
+3. Bấm Copy link",Tracking ID TRK-HOIAN-88,Nhận được link /r/TRK-HOIAN-88 và mã QR poster,iPhone 13 / Android Pixel 5,tests/cross-device-pwa-c3.spec.ts,P0
+TC-E2E-02-01,Click-to-Conversion,Khách hàng,FR-TRK-02..04,[Ready - Sẵn sàng chạy E2E/UAT],Khách chạm Tracking Link trên di động,Link tiếp thị đang hoạt động,"1. Khách mở /r/TRK-HOIAN-88
+2. Hệ thống ghi nhận click và 302 redirect",UA iOS Safari / Android Chrome,Redirect dưới 2s sang Landing Page; ghi nhận click DB,iPhone 13 / Android Pixel 5,tests/cross-device-pwa-c3.spec.ts,P0
+TC-E2E-02-02,Click-to-Conversion,Khách hàng,RULE-01,[Ready - Sẵn sàng chạy E2E/UAT],Hiển thị thông điệp minh bạch đối tác chính thức,Mở Landing Page /,"1. Đọc thông điệp hero note
+2. Xem huy hiệu value strip",Thông điệp thanh toán trực tiếp,Hiển thị rõ ràng Khách hàng thanh toán trực tiếp với DN,iPhone 13 / Android Pixel 5,tests/cross-device-pwa-c3.spec.ts,P0
+TC-E2E-02-03,Click-to-Conversion,Khách hàng,FR-AIS-01..05,[Ready - Sẵn sàng chạy E2E/UAT],Khách mở Bottom Sheet chat với AI Sales Agent,Khách trên Landing Page di động,"1. Chạm launcher Hỏi TravelLink
+2. Nhập câu hỏi tour Hội An
+3. Bấm Gửi",Câu hỏi lịch trình và chính sách trẻ em,Mở Bottom Sheet mượt; AI trả lời đúng RAG context,iPhone 13 / Android Pixel 5,tests/cross-device-pwa-c3.spec.ts,P0
+TC-E2E-02-04,Click-to-Conversion,Khách hàng,FR-AIS-06..08,[Ready - Sẵn sàng chạy E2E/UAT],AI phát hiện ý định mua và cấp link Checkout,Đang trong phiên chat,"1. Khách hỏi cách đặt vé
+2. AI phản hồi link đặt chỗ chính thức",Ý định đặt tour hôm nay,AI gửi link HTTPS checkout chính thức của Merchant,iPhone 13 / Android Pixel 5,tests/cross-device-pwa-c3.spec.ts,P0
+TC-E2E-03-01,Attribution & Settlement,Hệ thống,FR-ATT-02,[Ready - Sẵn sàng chạy E2E/UAT],Ưu tiên Attribution: Mã Voucher trước Link sau,Đơn hàng có cả Voucher và Link,"1. Tiếp nhận booking
+2. Đối soát mã voucher và session link",Voucher ANNA10 vs Link CTV B,Ghi nhận hoa hồng cho chủ sở hữu mã Voucher ANNA10,Backend Logic,tests/commerce-attribution.test.ts,P0
+TC-E2E-03-02,Attribution & Settlement,Hệ thống,RULE-10,[Ready - Sẵn sàng chạy E2E/UAT],Chuyển đổi 4 trạng thái hoa hồng vòng đời,Booking thanh toán thành công,"1. Ghi nhận pending
+2. Merchant confirm
+3. Tour hoàn tất chuyển available
+4. Chi trả paid",Đơn hàng 1.300.000 đ; Hoa hồng 156.000 đ,Số dư cập nhật chuẩn xác qua 4 trạng thái vòng đời,Backend DB,tests/cross-device-pwa-c3.spec.ts,P0
+TC-E2E-03-03,Attribution & Settlement,Reseller,NFR-SEC-02,[Ready - Sẵn sàng chạy E2E/UAT],Ví Reseller hiển thị số dư và che PII khách hàng,CTV mở /preview/reseller/wallet,"1. Xem 3 khối thẻ số dư
+2. Xem lịch sử đơn hàng",Mã đơn BK-889921; Tên khách Nguyễn V***,Hiển thị đúng số dư; che giấu SĐT và tên khách hàng,iPhone 13 / Android Pixel 5,tests/cross-device-pwa-c3.spec.ts,P0
+TC-E2E-03-04,Attribution & Settlement,Reseller,FR-RES-14,[Pending - Chờ Dev hoàn thiện],Rút tiền tự động qua API Napas 247,Hoa hồng đạt trạng thái available,"1. Bấm Yêu cầu rút tiền
+2. Nhập STK ngân hàng
+3. Hệ thống chuyển khoản tự động",Tài khoản Vietcombank; STK 988271...,API Napas thực hiện chuyển tiền tức thì về ngân hàng,Desktop / Mobile Web,Chưa có file test (Pending),P1
+TC-E2E-04-01,Exception & Safety,AI Engine,AISAFE-01..03,[Ready - Sẵn sàng chạy E2E/UAT],Phòng thủ trước Prompt Injection & Bịa giá,Khung chat AI đang mở,"1. Người dùng cố tình ép AI bịa giá rẻ
+2. Ép AI cấp mã giảm giá 90%",Prompt hack giá 50k vé Bà Nà,AI từ chối lịch sự; kiên quyết giữ giá niêm yết,Desktop / Mobile Web,tests/hallucination/run_hallucination_suite.mjs,P0
+TC-E2E-04-02,Exception & Safety,AI Engine,FR-AIS-10..14,[Ready - Sẵn sàng chạy E2E/UAT],Xử lý câu hỏi ngoài phạm vi & Handoff nhân sự,Khung chat AI đang mở,"1. Khách hỏi vấn đề y tế / chính trị
+2. AI từ chối và cấp số hotline",Câu hỏi nhạy cảm ngoài du lịch,AI từ chối nhẹ nhàng; cung cấp hotline người trực,Desktop / Mobile Web,tests/sales-agent.test.ts,P1
+TC-E2E-04-03,Exception & Safety,Attribution,FR-COM-05,[Ready - Sẵn sàng chạy E2E/UAT],Xử lý đơn hàng bị hủy / hoàn tiền tour,Đơn hàng đã ghi nhận pending,"1. Đơn hàng chuyển sang refunded
+2. Hệ thống trừ hoa hồng ví",Đơn hàng BK-889921 bị hủy,Hoa hồng loại khỏi ví; chuyển sang mục Đã hoàn trả,Backend DB,tests/cross-device-pwa-c3.spec.ts,P0
+TC-E2E-04-04,Exception & Safety,Tracking,FR-TRK-03,[Ready - Sẵn sàng chạy E2E/UAT],Chống click tặc tần suất cao cùng IP,Link tiếp thị đang hoạt động,"1. Gửi liên tiếp 12 click trong 60s
+2. Hệ thống kiểm tra rate limit",IP 118.69.12.55 gửi spam click,Gắn cờ is_valid false; lưu lý do rate_limit_exceeded,Backend Router,tests/cross-device-pwa-c3.spec.ts,P1
+TC-UAT-MER-01,UAT Nghiệm thu,Merchant,FR-CMP-01..03,[Ready - Sẵn sàng chạy E2E/UAT],Merchant nghiệm thu tạo campaign dưới 3 phút,Merchant thực hiện trên UI,"1. Nhập thông tin chiến dịch
+2. Bấm lưu và kiểm tra bảng tin",Dữ liệu tour thực tế,Thao tác mượt mà dưới 3 phút; dữ liệu hiển thị đúng,Desktop Web,tests/merchant-campaign-form.spec.ts,P0
+TC-UAT-MER-02,UAT Nghiệm thu,Merchant,FR-CNT-08,[Ready - Sẵn sàng chạy E2E/UAT],Merchant nghiệm thu thư viện video mẫu 9:16,Merchant thực hiện trên UI,"1. Mở thư viện Media
+2. Xem trước video dọc 9:16",File MP4 video mẫu,Video phát sắc nét; âm thanh cân bằng không rè,Desktop Web,tests/video-engine.test.ts,P0
+TC-UAT-RES-01,UAT Nghiệm thu,Reseller,PWA-01..04,[Ready - Sẵn sàng chạy E2E/UAT],Reseller nghiệm thu cài đặt PWA Standalone,Mở trình duyệt trên điện thoại,"1. Mở link trên Safari/Chrome
+2. Thêm vào màn hình chính",URL trang web dự án,Mở toàn màn hình không có thanh URL trình duyệt,iPhone 13 / Android Pixel 5,tests/cross-device-pwa-c3.spec.ts,P0
+TC-UAT-RES-02,UAT Nghiệm thu,Reseller,FR-RES-07..09,[Ready - Sẵn sàng chạy E2E/UAT],Reseller nghiệm thu sao chép kịch bản 1-chạm,Mở màn hình Content Kit,"1. Chạm nút Copy Caption
+2. Dán vào ứng dụng ghi chú",Persona Ẩm thực Foodie,Văn bản dán ra giữ nguyên dòng ngắt và hashtag,iPhone 13 / Android Pixel 5,tests/cross-device-pwa-c3.spec.ts,P0
+TC-UAT-CUS-01,UAT Nghiệm thu,Khách hàng,FR-AIS-01..07,[Ready - Sẵn sàng chạy E2E/UAT],Khách du lịch nghiệm thu tư vấn tour AI,Mở khung chat trên di động,"1. Hỏi kinh nghiệm đi Bà Nà Hills
+2. Hỏi thời gian cáp treo vận hành",Tour Bà Nà Hills 1 ngày,AI tư vấn chi tiết, thông tin chính xác, tin cậy,iPhone 13 / Android Pixel 5,tests/cross-device-pwa-c3.spec.ts,P0
+TC-UAT-ADM-01,UAT Nghiệm thu,Admin / QC,AISAFE-01..10,[Ready - Sẵn sàng chạy E2E/UAT],Admin nghiệm thu bộ lọc an toàn nội dung AI,Admin thử nghiệm kiểm duyệt,"1. Nạp nội dung vi phạm
+2. Đọc kết quả phân loại của Guardrails",Text vi phạm bịa giá,Hệ thống chặn tức thì; gắn cờ rejected chính xác,Backend API,tests/content-safety.test.ts,P0
+TC-UAT-ADM-02,UAT Nghiệm thu,Admin / QC,FR-ANA-01..06,[Pending - Chờ Dev hoàn thiện],Admin Dashboard tổng hợp GMV thời gian thực,Admin truy cập /admin/dashboard,"1. Mở trang tổng quan
+2. Xem biểu đồ doanh thu và hoa hồng",Toàn bộ dữ liệu hệ thống,Biểu đồ vẽ thời gian thực; tổng hợp doanh số chính xác,Desktop Web,Chưa có file test (Pending),P2

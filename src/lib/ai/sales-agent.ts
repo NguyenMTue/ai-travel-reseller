@@ -6,6 +6,13 @@ import {
 } from "@langchain/core/prompts";
 import { z } from "zod";
 
+import {
+  buildSafeFallbackReply,
+  guardSalesReply,
+  parseMentionedPrices,
+  type VerifiedSalesKnowledgeBase,
+} from "./guardrails/sales-guardrails.ts";
+
 export const SALES_AGENT_MODEL =
   process.env.GEMINI_SALES_MODEL?.trim() || "gemini-3.5-flash-lite";
 const SALES_AGENT_TIMEOUT_MS = 30_000;
@@ -26,11 +33,20 @@ export type SalesConversationMessage = {
   content: string;
 };
 
-type GenerateSalesReplyInput = {
+export type GenerateSalesReplyInput = {
   question: string;
   history: SalesConversationMessage[];
   context: string;
   checkoutAvailable: boolean;
+  knowledgeBase?: VerifiedSalesKnowledgeBase;
+  invokeModelFn?: (
+    modelName: string,
+    temperature?: number,
+  ) => Promise<{
+    reply: string;
+    intent_detected: SalesIntent;
+    purchase_intent: boolean;
+  }>;
 };
 
 export type SalesReply = {
@@ -129,7 +145,76 @@ Quy tắc bắt buộc:
   ["human", "{question}"],
 ]);
 
-function createSalesModel(modelName = SALES_AGENT_MODEL) {
+export function getRecommendedTemperatureForIntent(intent: SalesIntent): number {
+  switch (intent) {
+    case "INTENT_PRICE_INQUIRY":
+    case "INTENT_POLICY_INQUIRY":
+    case "INTENT_PURCHASE_READY":
+      return 0.2;
+    case "INTENT_FACILITY_INQUIRY":
+      return 0.3;
+    case "INTENT_BARGAIN_SEEKING":
+      return 0.4;
+    case "INTENT_OUT_OF_SCOPE":
+    default:
+      return 0.5;
+  }
+}
+
+export class SalesAgentCircuitBreaker {
+  private failureCount = 0;
+  private lastFailureTime = 0;
+  private state: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED";
+  public readonly failureThreshold: number;
+  public readonly resetTimeoutMs: number;
+
+  constructor(options?: { failureThreshold?: number; resetTimeoutMs?: number }) {
+    this.failureThreshold = options?.failureThreshold ?? 3;
+    this.resetTimeoutMs = options?.resetTimeoutMs ?? 30_000;
+  }
+
+  public isOpen(): boolean {
+    if (this.state === "OPEN") {
+      if (Date.now() - this.lastFailureTime > this.resetTimeoutMs) {
+        this.state = "HALF_OPEN";
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  public recordSuccess(): void {
+    this.failureCount = 0;
+    this.state = "CLOSED";
+  }
+
+  public recordFailure(): void {
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+    if (this.failureCount >= this.failureThreshold) {
+      this.state = "OPEN";
+    }
+  }
+
+  public getState() {
+    return {
+      state: this.state,
+      failureCount: this.failureCount,
+      lastFailureTime: this.lastFailureTime,
+    };
+  }
+
+  public reset(): void {
+    this.failureCount = 0;
+    this.lastFailureTime = 0;
+    this.state = "CLOSED";
+  }
+}
+
+export const salesAgentCircuitBreaker = new SalesAgentCircuitBreaker();
+
+export function createSalesModel(modelName = SALES_AGENT_MODEL, temperature = 0.2) {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
 
   if (!apiKey) {
@@ -139,10 +224,46 @@ function createSalesModel(modelName = SALES_AGENT_MODEL) {
   return new ChatGoogleGenerativeAI({
     model: modelName,
     apiKey,
-    temperature: 0,
+    temperature,
     maxOutputTokens: 512,
     maxRetries: 2,
   });
+}
+
+function tryExtractKBFromContext(
+  context: string,
+): VerifiedSalesKnowledgeBase | undefined {
+  if (!context || !context.trim()) return undefined;
+  const prices = parseMentionedPrices(context);
+  const salePrice = prices.length > 0 ? prices[0] : 0;
+  if (salePrice <= 0) return undefined;
+
+  let productName = "sản phẩm du lịch";
+  const lines = context
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+  for (const line of lines) {
+    if (
+      line.includes("Vé ") ||
+      line.includes("Tour ") ||
+      line.includes("Combo ")
+    ) {
+      productName = line
+        .replace(/^[\[\]0-9a-zA-Z_|=\s-]+[:|]\s*/, "")
+        .slice(0, 80);
+      break;
+    }
+  }
+
+  return {
+    product_name: productName,
+    sale_price: salePrice,
+    allowed_prices: prices,
+    location: "Việt Nam",
+    inclusions: [context.slice(0, 300)],
+    cancellation_policy: "Theo chính sách hoàn hủy chính thức của đối tác",
+  };
 }
 
 export async function generateSalesReply({
@@ -150,10 +271,13 @@ export async function generateSalesReply({
   history,
   context,
   checkoutAvailable,
+  knowledgeBase,
+  invokeModelFn,
 }: GenerateSalesReplyInput): Promise<SalesReply> {
   const intentHint = detectSalesIntent(question);
+  const kb = knowledgeBase ?? tryExtractKBFromContext(context);
 
-  if (!context.trim()) {
+  if (!context.trim() && !kb) {
     const purchaseIntent =
       intentHint === "INTENT_PURCHASE_READY" && checkoutAvailable;
     return {
@@ -171,8 +295,13 @@ export async function generateSalesReply({
       : new AIMessage(message.content),
   );
 
-  async function invokeModel(modelName: string) {
-    const model = createSalesModel(modelName).withStructuredOutput(
+  const intentTemperature = getRecommendedTemperatureForIntent(intentHint);
+
+  async function invokeModel(modelName: string, temp = intentTemperature) {
+    if (invokeModelFn) {
+      return invokeModelFn(modelName, temp);
+    }
+    const model = createSalesModel(modelName, temp).withStructuredOutput(
       salesAgentResponseSchema,
       { name: "sales_agent_response" },
     );
@@ -189,32 +318,91 @@ export async function generateSalesReply({
     );
   }
 
-  try {
-    const result = await invokeModel(SALES_AGENT_MODEL);
-    return {
-      reply: result.reply,
-      intentDetected: result.intent_detected,
-      purchaseIntent:
-        result.purchase_intent &&
-        result.intent_detected === "INTENT_PURCHASE_READY" &&
-        checkoutAvailable,
-    };
-  } catch (err: unknown) {
-    // Tự động fallback sang gemini-3.5-flash-lite nếu model chính bị 503 Service Unavailable
-    if (SALES_AGENT_MODEL !== "gemini-3.5-flash-lite") {
+  let rawResult:
+    | {
+        reply: string;
+        intent_detected: SalesIntent;
+        purchase_intent: boolean;
+      }
+    | undefined;
+
+  if (!invokeModelFn && salesAgentCircuitBreaker.isOpen()) {
+    if (kb) {
       console.warn(
-        `Model ${SALES_AGENT_MODEL} gặp sự cố (có thể do 503 high demand), tự động chuyển sang gemini-3.5-flash-lite...`,
+        "Sales agent circuit breaker is OPEN. Fast failover to safe knowledge-base reply.",
       );
-      const fallbackResult = await invokeModel("gemini-3.5-flash-lite");
-      return {
-        reply: fallbackResult.reply,
-        intentDetected: fallbackResult.intent_detected,
-        purchaseIntent:
-          fallbackResult.purchase_intent &&
-          fallbackResult.intent_detected === "INTENT_PURCHASE_READY" &&
-          checkoutAvailable,
+      rawResult = {
+        reply: buildSafeFallbackReply(question, kb, intentHint),
+        intent_detected: intentHint,
+        purchase_intent: false,
       };
     }
-    throw err;
   }
+
+  if (!rawResult) {
+    try {
+    rawResult = await invokeModel(SALES_AGENT_MODEL);
+    salesAgentCircuitBreaker.recordSuccess();
+  } catch (err: unknown) {
+    salesAgentCircuitBreaker.recordFailure();
+    // Tự động fallback sang gemini-3.5-flash-lite nếu model chính bị 503 Service Unavailable
+    if (SALES_AGENT_MODEL !== "gemini-3.5-flash-lite" && !invokeModelFn) {
+      try {
+        console.warn(
+          `Model ${SALES_AGENT_MODEL} gặp sự cố (có thể do 503 high demand), tự động chuyển sang gemini-3.5-flash-lite...`,
+        );
+        rawResult = await invokeModel("gemini-3.5-flash-lite");
+      } catch (fallbackErr: unknown) {
+        if (kb) {
+          rawResult = {
+            reply: buildSafeFallbackReply(question, kb, intentHint),
+            intent_detected: intentHint,
+            purchase_intent: false,
+          };
+        } else {
+          throw fallbackErr;
+        }
+      }
+    } else {
+      if (kb && !invokeModelFn) {
+        rawResult = {
+          reply: buildSafeFallbackReply(question, kb, intentHint),
+          intent_detected: intentHint,
+          purchase_intent: false,
+        };
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  }
+
+  if (!rawResult) {
+    if (kb) {
+      rawResult = {
+        reply: buildSafeFallbackReply(question, kb, intentHint),
+        intent_detected: intentHint,
+        purchase_intent: false,
+      };
+    } else {
+      throw new Error("Unable to generate sales reply: model unavailable and no KB provided");
+    }
+  }
+
+  // TÍCH HỢP PRODUCTION ANTI-HALLUCINATION GUARDRAIL
+  // Mọi kết quả từ model đều phải đi qua chốt kiểm duyệt fail-closed
+  const guarded = guardSalesReply(rawResult.reply, question, kb);
+
+  const finalIntent = guarded.intentDetected ?? rawResult.intent_detected;
+  const isPurchase =
+    guarded.purchaseIntent &&
+    finalIntent === "INTENT_PURCHASE_READY" &&
+    checkoutAvailable;
+
+  return {
+    reply: guarded.reply,
+    intentDetected: finalIntent,
+    purchaseIntent: isPurchase,
+  };
 }

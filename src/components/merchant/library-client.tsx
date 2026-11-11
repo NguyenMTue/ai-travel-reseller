@@ -6,6 +6,7 @@ import {
   ChevronRight,
   CircleHelp,
   Layers,
+  Lightbulb,
   MapPin,
   RefreshCw,
   Search,
@@ -16,6 +17,7 @@ import {
 import { Button } from "@/src/components/ui/button";
 import { MediaCard as Card, MediaCardGrid as Grid } from "./media-card";
 import { VideoGuidelinesModal as Guidelines } from "./video-guidelines-modal";
+import { VideoPostingTipsModal } from "./video-posting-tips-modal";
 import { VideoGenerateModal, type CampaignOption } from "./video-generate-modal";
 import {
   initialLibraryQuery,
@@ -69,6 +71,7 @@ function LibraryRead({
   const [selected, setSelected] = useState<LibraryItem | null>(null);
   const [guide, setGuide] = useState(false);
   const [generateOpen, setGenerateOpen] = useState(false);
+  const [tipsOpen, setTipsOpen] = useState(false);
 
   // Danh sách ID các ảnh được Merchant chọn theo thứ tự ưu tiên
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -353,6 +356,10 @@ function LibraryRead({
             <CircleHelp size={16} aria-hidden="true" />
             Quy chuẩn
           </Button>
+          <Button variant="outline" size="sm" onClick={() => setTipsOpen(true)}>
+            <Lightbulb size={16} aria-hidden="true" />
+            Mẹo đăng video
+          </Button>
         </div>
       </div>
 
@@ -573,6 +580,7 @@ function LibraryRead({
       )}
 
       <Guidelines isOpen={guide} onClose={() => setGuide(false)} />
+      <VideoPostingTipsModal isOpen={tipsOpen} onClose={() => setTipsOpen(false)} />
       <VideoGenerateModal
         isOpen={generateOpen}
         onClose={() => setGenerateOpen(false)}

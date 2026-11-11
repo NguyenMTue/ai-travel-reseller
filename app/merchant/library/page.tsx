@@ -4,6 +4,7 @@ import { MerchantPortalAccessNotice } from "@/src/components/merchant/portal-acc
 import { LibraryShell } from "@/src/components/merchant/library-shell";
 import { MerchantLibraryLive } from "@/src/components/merchant/library-client";
 export const metadata={title:"Thư viện media Merchant"};
+export const viewport = { viewportFit: "cover" };
 export const dynamic="force-dynamic";
 export default async function MerchantLibraryPage(){
   const access=await getMerchantPortalAccess();

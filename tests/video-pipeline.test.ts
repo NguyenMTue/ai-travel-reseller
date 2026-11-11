@@ -19,6 +19,12 @@ import {
   videoAnalysisJsonSchema,
   videoAnalysisSchema,
 } from "../src/lib/ai/schemas/video-schema.ts";
+import {
+  FORBIDDEN_CLAIMS_BANA,
+  FORBIDDEN_CLAIMS_HOIAN,
+  validateVerifiedFactsCatalog,
+  validateVideoScriptArtifact,
+} from "../src/lib/video-engine/grounding-validator.ts";
 
 const videoInput: VideoAnalyzerInput = {
   mediaReferenceId: "11111111-1111-4111-8111-111111111111",
@@ -85,11 +91,11 @@ const campaignInput: VideoCampaignInput = {
   campaignName: "Khám phá Đà Nẵng",
   targetAudience: "Gia đình và nhóm bạn",
   targetLocation: "Đà Nẵng",
-  originalPrice: 1_000_000,
-  salePrice: 900_000,
+  originalPrice: 1_250_000,
+  salePrice: 1_150_000,
   confirmedPromoCodes: [],
   verifiedFacts: [
-    { id: "fact_price", text: "Giá bán chính thức 900.000 VNĐ" },
+    { id: "fact_price", text: "Giá bán chính thức 1.150.000 VNĐ" },
     { id: "fact_inclusion", text: "Bao gồm cáp treo hai chiều" },
     { id: "fact_landmark", text: "Bao gồm tham quan Cầu Vàng" },
   ],
@@ -99,39 +105,165 @@ const campaignInput: VideoCampaignInput = {
 const validScript = {
   format: "9:16" as const,
   duration_seconds: 30,
-  style_summary: "Nhịp nhanh, sáng tự nhiên và chuyển cảnh gọn.",
+  style_summary:
+    "Nhịp nhanh UGC CapCut 1.5s - 2.5s/cảnh, sáng tự nhiên và chuyển cảnh mượt.",
   hook: {
-    duration_seconds: 3,
-    text: "Chạm mây trên hành trình Bà Nà Hills",
+    duration_seconds: 2.2,
+    text: "Bí kíp vi vu Bà Nà Hills trọn vẹn trong 1 ngày",
   },
   scenes: [
     {
       index: 1,
       start_seconds: 0,
-      end_seconds: 3,
-      visual_prompt: "Toàn cảnh núi trong ánh sáng sớm, bố cục video dọc.",
-      shot_instruction: "Bay tiến nhẹ rồi cắt nhanh.",
-      narration: null,
-      on_screen_text: "Chạm mây Bà Nà",
-      verified_fact_refs: [],
+      end_seconds: 2.2,
+      visual_prompt:
+        "Góc nhìn từ trên cao bao trọn toàn cảnh Cầu Vàng Bà Nà Hills giữa biển mây trắng bồng bềnh.",
+      shot_instruction: "Flycam lia ngang góc rộng (Drone Truck Left) 2.5D Parallax.",
+      narration: "Trọn bộ trải nghiệm khám phá Sun World Bà Nà Hills với Cầu Vàng biểu tượng.",
+      on_screen_text: "KHÁM PHÁ SUN WORLD BÀ NÀ HILLS",
+      verified_fact_refs: ["fact_landmark"],
     },
     {
       index: 2,
-      start_seconds: 3,
-      end_seconds: 20,
-      visual_prompt: "Cận cảnh cabin cáp treo và khung cảnh núi rừng.",
-      shot_instruction: "Xen kẽ toàn cảnh và cận cảnh ổn định.",
-      narration: "Vé bao gồm cáp treo hai chiều và tham quan Cầu Vàng.",
-      on_screen_text: "Cáp treo hai chiều",
-      verified_fact_refs: ["fact_inclusion", "fact_landmark"],
+      start_seconds: 2.2,
+      end_seconds: 4.4,
+      visual_prompt:
+        "Trải nghiệm ngồi cabin cáp treo lướt qua cánh rừng nguyên sinh ngút ngàn tiến vào khu du lịch.",
+      shot_instruction: "Cầm tay POV từ bên trong cabin nhìn ra cửa kính.",
+      narration: "Vé trọn gói đã bao gồm tuyến cáp treo khứ hồi hai chiều ngắm cảnh thiên nhiên.",
+      on_screen_text: "Cáp treo khứ hồi hai chiều",
+      verified_fact_refs: ["fact_inclusion"],
     },
     {
       index: 3,
-      start_seconds: 20,
+      start_seconds: 4.4,
+      end_seconds: 6.6,
+      visual_prompt:
+        "Chiêm ngưỡng kiệt tác Cầu Vàng nâng đỡ bởi đôi bàn tay khổng lồ giữa mây trời.",
+      shot_instruction: "Góc trung cảnh lia nhẹ dọc theo lối đi Cầu Vàng rực rỡ.",
+      narration: "Dạo bước trên Cầu Vàng kiệt tác nổi tiếng thế giới trong khuôn viên khu du lịch.",
+      on_screen_text: "Cầu Vàng biểu tượng nổi tiếng",
+      verified_fact_refs: ["fact_landmark"],
+    },
+    {
+      index: 4,
+      start_seconds: 6.6,
+      end_seconds: 8.8,
+      visual_prompt:
+        "Chiêm ngưỡng các lâu đài cổ kính mang đậm phong cách kiến trúc châu Âu tại Làng Pháp.",
+      shot_instruction: "Ken Burns đẩy nhẹ vào trung tâm quần thể kiến trúc cổ kính.",
+      narration: "Khám phá không gian Làng Pháp với những tòa lâu đài đá cổ kính tráng lệ.",
+      on_screen_text: "Không gian Làng Pháp cổ kính",
+      verified_fact_refs: ["fact_landmark"],
+    },
+    {
+      index: 5,
+      start_seconds: 8.8,
+      end_seconds: 11,
+      visual_prompt:
+        "Không khí nhộn nhịp tại quảng trường trung tâm Làng Pháp với nhà thờ Gothic và bồn hoa rực rỡ.",
+      shot_instruction: "Lia máy ngang bao quát quảng trường Làng Pháp.",
+      narration: "Quảng trường Làng Pháp rộn ràng mang đậm phong vị châu Âu giữa lòng Đà Nẵng.",
+      on_screen_text: "Quảng trường Làng Pháp rực rỡ",
+      verified_fact_refs: ["fact_landmark"],
+    },
+    {
+      index: 6,
+      start_seconds: 11,
+      end_seconds: 13.2,
+      visual_prompt:
+        "Góc check-in tuyệt đẹp giữa không gian kiến trúc Làng Pháp dưới bầu trời trong xanh.",
+      shot_instruction: "Góc rộng nghiêng nhẹ ghi lại toàn cảnh kiến trúc đặc sắc.",
+      narration:
+        "Tận hưởng không gian tham quan và chụp hình kỷ niệm tại khu Làng Pháp.",
+      on_screen_text: "Check-in kiến trúc Làng Pháp",
+      verified_fact_refs: ["fact_landmark"],
+    },
+    {
+      index: 7,
+      start_seconds: 13.2,
+      end_seconds: 15.4,
+      visual_prompt:
+        "Đại tiệc buffet trưa quốc tế hơn 100 món Á Âu hấp dẫn tại nhà hàng Arapang hoặc Beer Plaza.",
+      shot_instruction: "Cận cảnh chậm các quầy ẩm thực tươi ngon phong phú.",
+      narration: "Thưởng thức tiệc buffet trưa quốc tế hơn 100 món tại nhà hàng Arapang hoặc Beer Plaza.",
+      on_screen_text: "Buffet trưa hơn 100 món Á Âu",
+      verified_fact_refs: ["fact_inclusion"],
+    },
+    {
+      index: 8,
+      start_seconds: 15.4,
+      end_seconds: 17.5,
+      visual_prompt:
+        "Du khách tự do dạo bước ngắm cảnh thiên nhiên trong khuôn viên khu du lịch rộng lớn.",
+      shot_instruction: "Góc nhìn POV theo bước chân du khách tham quan khuôn viên.",
+      narration: "Vé trọn gói đã bao gồm quyền vào cổng khu du lịch và tự do tham quan các điểm đến.",
+      on_screen_text: "Vé trọn gói vào cổng khu du lịch",
+      verified_fact_refs: ["fact_inclusion"],
+    },
+    {
+      index: 9,
+      start_seconds: 17.5,
+      end_seconds: 19.6,
+      visual_prompt:
+        "Check-in vườn hoa Le Jardin D Amour rực rỡ ngàn hoa khoe sắc giữa mây trời.",
+      shot_instruction: "Góc máy trung cảnh lia chậm qua những vòm hoa tươi thắm.",
+      narration: "Thả dáng check-in tại vườn hoa Le Jardin D'Amour lãng mạn giữa mây trời.",
+      on_screen_text: "Vườn hoa Le Jardin D'Amour",
+      verified_fact_refs: ["fact_landmark"],
+    },
+    {
+      index: 10,
+      start_seconds: 19.6,
+      end_seconds: 21.7,
+      visual_prompt:
+        "Khung cảnh Làng Pháp nhìn từ trên cao với vẻ đẹp yên bình và lãng mạn.",
+      shot_instruction: "Góc máy tĩnh ghi lại vẻ đẹp kiến trúc cổ kính trong ánh nắng mai.",
+      narration: "Lưu giữ những khoảnh khắc tuyệt đẹp tại quần thể Làng Pháp trên đỉnh núi.",
+      on_screen_text: "Chiêm ngưỡng vẻ đẹp Làng Pháp",
+      verified_fact_refs: ["fact_landmark"],
+    },
+    {
+      index: 11,
+      start_seconds: 21.7,
+      end_seconds: 23.8,
+      visual_prompt:
+        "Ngắm khung cảnh Cầu Vàng bồng bềnh giữa biển mây chiều tà tuyệt đẹp.",
+      shot_instruction: "Flycam bay lùi góc rộng từ đôi bàn tay nâng đỡ Cầu Vàng.",
+      narration: "Dạo bước trên Cầu Vàng bồng bềnh giữa biển mây chiều tà tuyệt đẹp.",
+      on_screen_text: "Cầu Vàng biểu tượng kiệt tác",
+      verified_fact_refs: ["fact_landmark"],
+    },
+    {
+      index: 12,
+      start_seconds: 23.8,
+      end_seconds: 25.9,
+      visual_prompt:
+        "Không gian ẩm thực tại nhà hàng Beer Plaza sôi động giữa trung tâm quảng trường.",
+      shot_instruction: "Trung cảnh không gian nhà hàng ẩm thực với phong cách lễ hội.",
+      narration: "Không gian ẩm thực rộng lớn tại nhà hàng Beer Plaza phục vụ buffet phong phú.",
+      on_screen_text: "Nhà hàng ẩm thực Beer Plaza",
+      verified_fact_refs: ["fact_inclusion"],
+    },
+    {
+      index: 13,
+      start_seconds: 25.9,
+      end_seconds: 28,
+      visual_prompt:
+        "Du khách rạng rỡ lưu lại khoảnh khắc gia đình với thông tin giá vé minh bạch.",
+      shot_instruction: "Góc nhìn POV tự nhiên nụ cười rạng rỡ của du khách.",
+      narration: "Giá bán chính thức 1.150.000 VNĐ một người.",
+      on_screen_text: "Giá bán chính thức 1.150.000 VNĐ",
+      verified_fact_refs: ["fact_price"],
+    },
+    {
+      index: 14,
+      start_seconds: 28,
       end_seconds: 30,
-      visual_prompt: "Khung hình kết thúc tối giản với tên sản phẩm.",
-      shot_instruction: "Giữ khung hình ổn định cho CTA.",
-      narration: "Giá bán chính thức 900.000 VNĐ. Xem thông tin để đặt dịch vụ.",
+      visual_prompt:
+        "Toàn cảnh đỉnh núi Chúa bồng bềnh mây trắng với logo nhận diện và thông tin ưu đãi.",
+      shot_instruction: "Khung hình ổn định kết thúc video chuẩn Safe Zone.",
+      narration: "Nhấp ngay vào liên kết bên dưới để đặt dịch vụ hôm nay.",
       on_screen_text: "Đặt dịch vụ tại [LINK_MUA_VE]",
       verified_fact_refs: ["fact_price"],
     },
@@ -141,7 +273,7 @@ const validScript = {
     voiceover_style: "Thân thiện và rõ ràng",
   },
   cta: {
-    spoken_text: "Xem thông tin chính thức và đặt dịch vụ ngay.",
+    spoken_text: "Xem thông tin chính thức và đặt dịch vụ ngay hôm nay.",
     on_screen_text: "Đặt dịch vụ tại [LINK_MUA_VE]",
     link_placeholder: "[LINK_MUA_VE]" as const,
   },
@@ -196,7 +328,11 @@ test("analysis adapter is injectable and its output is validated offline", async
 });
 
 test("BE2-W3-03 generated script contract enforces 9:16 and continuous time", () => {
-  assert.equal(campaignVideoScriptSchema.parse(validScript).format, "9:16");
+  const parsed = campaignVideoScriptSchema.parse(validScript);
+  assert.equal(parsed.format, "9:16");
+  assert.equal(parsed.scenes.length, 14);
+
+  // Throws when scenes are not continuous
   assert.throws(() =>
     campaignVideoScriptSchema.parse({
       ...validScript,
@@ -205,10 +341,62 @@ test("BE2-W3-03 generated script contract enforces 9:16 and continuous time", ()
       ),
     }),
   );
+
+  // Throws when link placeholder is altered
   assert.throws(() =>
     campaignVideoScriptSchema.parse({
       ...validScript,
       cta: { ...validScript.cta, link_placeholder: "https://unsafe.example" },
+    }),
+  );
+
+  // Throws when CTA on_screen_text loses [LINK_MUA_VE]
+  assert.throws(() =>
+    campaignVideoScriptSchema.parse({
+      ...validScript,
+      cta: { ...validScript.cta, on_screen_text: "Đặt vé ngay hôm nay" },
+    }),
+  );
+
+  // Throws when CTA contains foreign or external URL
+  assert.throws(() =>
+    campaignVideoScriptSchema.parse({
+      ...validScript,
+      cta: {
+        ...validScript.cta,
+        on_screen_text: "Đặt tại https://scam-tour.com [LINK_MUA_VE]",
+      },
+    }),
+  );
+
+  // Throws when scenes count is not 14 (e.g. 13 scenes)
+  assert.throws(() =>
+    campaignVideoScriptSchema.parse({
+      ...validScript,
+      scenes: validScript.scenes.slice(0, 13),
+    }),
+  );
+
+  // Throws when scene contains foreign URL
+  assert.throws(() =>
+    campaignVideoScriptSchema.parse({
+      ...validScript,
+      scenes: validScript.scenes.map((scene, idx) =>
+        idx === 5
+          ? {
+              ...scene,
+              narration: "Xem thêm tại http://external-site.vn",
+            }
+          : scene,
+      ),
+    }),
+  );
+
+  // Throws when extra unknown keys exist on strict schema
+  assert.throws(() =>
+    campaignVideoScriptSchema.parse({
+      ...validScript,
+      extra_unauthorized_field: "malicious_injection",
     }),
   );
 });
@@ -298,6 +486,44 @@ test("handoff samples satisfy their portable contracts", () => {
   );
   assert.ok(videoAnalysisSchema.parse(analysisSample));
   assert.ok(campaignVideoScriptSchema.parse(scriptSample));
+});
+
+test("verified-facts catalog and both campaign scripts pass deterministic grounding cross-validation", () => {
+  const factsCatalog = JSON.parse(
+    readFileSync(
+      new URL("../docs/be2/samples/video-verified-facts-w4.json", import.meta.url),
+      "utf8"
+    )
+  );
+  const banaScript = JSON.parse(
+    readFileSync(
+      new URL("../docs/be2/samples/video-script.sample.json", import.meta.url),
+      "utf8"
+    )
+  );
+  const hoianScript = JSON.parse(
+    readFileSync(
+      new URL("../docs/be2/samples/video-script-hoian.sample.json", import.meta.url),
+      "utf8"
+    )
+  );
+
+  const catRes = validateVerifiedFactsCatalog(factsCatalog);
+  assert.ok(catRes.isValid, `Facts catalog invalid: ${JSON.stringify(catRes.issues)}`);
+
+  const banaRes = validateVideoScriptArtifact(banaScript, factsCatalog, {
+    forbiddenTerms: FORBIDDEN_CLAIMS_BANA,
+    expectedProductId: "33333333-3333-3333-3333-333333333333",
+  });
+  assert.ok(banaRes.isValid, `Bà Nà validation failed: ${JSON.stringify(banaRes.issues)}`);
+  assert.equal(banaRes.checkedScenesCount, 14);
+
+  const hoianRes = validateVideoScriptArtifact(hoianScript, factsCatalog, {
+    forbiddenTerms: FORBIDDEN_CLAIMS_HOIAN,
+    expectedProductId: "33333333-3333-3333-3333-111111111111",
+  });
+  assert.ok(hoianRes.isValid, `Hội An validation failed: ${JSON.stringify(hoianRes.issues)}`);
+  assert.equal(hoianRes.checkedScenesCount, 14);
 });
 
 // ============================================================================
@@ -2464,9 +2690,10 @@ test("video-engine-bridge bridges approved BE2 metadata to BE1 VideoEngineInput,
   const engineInput = mapScriptToVideoEngineInput(bridgeRequest);
   assert.equal(engineInput.merchant_name, "Sun World Ba Na Hills");
   assert.equal(engineInput.product_name, "Vé Cáp Treo Bà Nà Hills");
-  assert.equal(engineInput.sale_price, 900_000);
+  assert.equal(engineInput.sale_price, 1_150_000);
   assert.equal(engineInput.target_duration_sec, 30);
   assert.ok(engineInput.media_assets.length >= 14);
+  assert.equal(engineInput.scenes?.length, 14);
   // Preserves [LINK_MUA_VE] in CTA
   assert.ok(engineInput.official_cta.includes("[LINK_MUA_VE]"));
 
@@ -2474,10 +2701,32 @@ test("video-engine-bridge bridges approved BE2 metadata to BE1 VideoEngineInput,
   assert.equal(bridgeResult.passedPreFlight, true);
   assert.equal(bridgeResult.videoEngineOutput.status, "READY_FOR_RENDER");
 
+  if (bridgeResult.videoEngineOutput.status === "READY_FOR_RENDER") {
+    // Assert downstream BE1 actually consumed 14 scenes directly!
+    assert.equal(bridgeResult.videoEngineOutput.timeline_scenes.length, 14);
+    assert.equal(
+      bridgeResult.videoEngineOutput.timeline_scenes[0].voiceover_segment,
+      validScript.scenes[0].narration,
+    );
+    assert.equal(
+      bridgeResult.videoEngineOutput.timeline_scenes[0].on_screen_text.text,
+      validScript.scenes[0].on_screen_text,
+    );
+    assert.ok(
+      bridgeResult.videoEngineOutput.timeline_scenes[13].on_screen_text.text.includes(
+        "[LINK_MUA_VE]",
+      ),
+    );
+  }
+
   // Script is preserved intact
   assert.deepEqual(bridgeResult.approvedScript, validScript);
-  // Scene consumption limitation is documented
-  assert.ok(bridgeResult.sceneConsumptionNote.includes("BE1 owner approval"));
+  // Direct scene consumption is confirmed
+  assert.ok(
+    bridgeResult.sceneConsumptionNote.includes(
+      "directly ingested and consumed all 14 approved scenes",
+    ),
+  );
 });
 
 test("video-engine-bridge does not report READY_FOR_RENDER if preflight fails", async () => {
@@ -2518,4 +2767,169 @@ test("video-engine-bridge does not report READY_FOR_RENDER if preflight fails", 
   assert.equal(bridgeResult.passedPreFlight, false);
   assert.notEqual(bridgeResult.videoEngineOutput.status, "READY_FOR_RENDER");
   assert.equal(bridgeResult.videoEngineOutput.status, "BLOCKED_MISSING_INPUT");
+});
+
+test("video-engine-bridge fails closed when script has invalid scene count (not 14 scenes)", async () => {
+  const { mapScriptToVideoEngineInput, VideoEngineBridgeGateError } =
+    await import("../src/lib/ai/video-engine-bridge.ts");
+
+  const approvedGuardrails = {
+    isValid: true,
+    flags: [],
+    recommendedStatus: "APPROVED" as const,
+  };
+
+  const validBaseRequest = {
+    script: validScript,
+    guardrails: approvedGuardrails,
+    campaign: campaignInput,
+    mediaAssets: [],
+    merchantMetadata: {
+      merchantName: "Sun World",
+      bookingUrl: "https://travellink.vn/book/bana",
+    },
+  };
+
+  // 13 scenes (< 14)
+  assert.throws(
+    () =>
+      mapScriptToVideoEngineInput({
+        ...validBaseRequest,
+        script: {
+          ...validScript,
+          scenes: validScript.scenes.slice(0, 13),
+        },
+      }),
+    VideoEngineBridgeGateError,
+  );
+
+  // 15 scenes (> 14)
+  assert.throws(
+    () =>
+      mapScriptToVideoEngineInput({
+        ...validBaseRequest,
+        script: {
+          ...validScript,
+          scenes: [
+            ...validScript.scenes,
+            {
+              index: 15,
+              start_seconds: 30,
+              end_seconds: 32,
+              visual_prompt: "Cảnh thừa ngoài hợp đồng.",
+              shot_instruction: "Góc máy tĩnh.",
+              narration: null,
+              on_screen_text: null,
+              verified_fact_refs: [],
+            },
+          ],
+        },
+      }),
+    VideoEngineBridgeGateError,
+  );
+});
+
+test("video-engine-bridge fails closed when CTA lacks [LINK_MUA_VE] or contains foreign URLs", async () => {
+  const { mapScriptToVideoEngineInput, VideoEngineBridgeGateError } =
+    await import("../src/lib/ai/video-engine-bridge.ts");
+
+  const approvedGuardrails = {
+    isValid: true,
+    flags: [],
+    recommendedStatus: "APPROVED" as const,
+  };
+
+  const validBaseRequest = {
+    script: validScript,
+    guardrails: approvedGuardrails,
+    campaign: campaignInput,
+    mediaAssets: [],
+    merchantMetadata: {
+      merchantName: "Sun World",
+      bookingUrl: "https://travellink.vn/book/bana",
+    },
+  };
+
+  // CTA missing [LINK_MUA_VE]
+  assert.throws(
+    () =>
+      mapScriptToVideoEngineInput({
+        ...validBaseRequest,
+        script: {
+          ...validScript,
+          cta: {
+            ...validScript.cta,
+            on_screen_text: "Đặt vé ngay trên trang đối tác!",
+          },
+        },
+      }),
+    VideoEngineBridgeGateError,
+  );
+
+  // CTA contains external/foreign URL
+  assert.throws(
+    () =>
+      mapScriptToVideoEngineInput({
+        ...validBaseRequest,
+        script: {
+          ...validScript,
+          cta: {
+            ...validScript.cta,
+            on_screen_text: "Đặt vé tại https://scam-booking.com [LINK_MUA_VE]",
+          },
+        },
+      }),
+    VideoEngineBridgeGateError,
+  );
+
+  // Scene contains foreign URL
+  assert.throws(
+    () =>
+      mapScriptToVideoEngineInput({
+        ...validBaseRequest,
+        script: {
+          ...validScript,
+          scenes: validScript.scenes.map((scene, idx) =>
+            idx === 3
+              ? {
+                  ...scene,
+                  on_screen_text: "Xem chi tiết: https://unauthorized.org",
+                }
+              : scene,
+          ),
+        },
+      }),
+    VideoEngineBridgeGateError,
+  );
+});
+
+test("video-engine-bridge preserves exact [LINK_MUA_VE] placeholder without silent replacement", async () => {
+  const { mapScriptToVideoEngineInput } = await import(
+    "../src/lib/ai/video-engine-bridge.ts"
+  );
+
+  const approvedGuardrails = {
+    isValid: true,
+    flags: [],
+    recommendedStatus: "APPROVED" as const,
+  };
+
+  const bridgeRequest = {
+    script: validScript,
+    guardrails: approvedGuardrails,
+    campaign: campaignInput,
+    mediaAssets: [],
+    merchantMetadata: {
+      merchantName: "Sun World Ba Na Hills",
+      bookingUrl: "https://travellink.vn/book/bana-official",
+    },
+  };
+
+  const engineInput = mapScriptToVideoEngineInput(bridgeRequest);
+  assert.equal(
+    engineInput.official_cta,
+    "Đặt dịch vụ tại [LINK_MUA_VE]",
+  );
+  assert.ok(engineInput.official_cta.includes("[LINK_MUA_VE]"));
+  assert.doesNotMatch(engineInput.official_cta, /https?:\/\//i);
 });

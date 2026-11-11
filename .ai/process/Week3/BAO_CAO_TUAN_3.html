@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Báo cáo Tuần 3 - AI Travel Reseller</title>
+  <style>
+    :root {
+      --navy: #17324d;
+      --blue: #2563eb;
+      --sky: #eaf2ff;
+      --ink: #1f2937;
+      --muted: #64748b;
+      --line: #dbe4ee;
+      --paper: #ffffff;
+      --page: #f4f7fb;
+      --amber: #b45309;
+      --amber-bg: #fff7ed;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font: 15px/1.55 "Segoe UI", Arial, sans-serif;
+    }
+
+    .report {
+      width: min(1080px, calc(100% - 32px));
+      margin: 32px auto;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 16px 45px rgba(23, 50, 77, 0.09);
+    }
+
+    header {
+      padding: 38px 42px 34px;
+      color: white;
+      background: linear-gradient(120deg, #17324d 0%, #1d4f91 62%, #2563eb 100%);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      opacity: .8;
+    }
+
+    h1 { margin: 0; font-size: clamp(28px, 5vw, 42px); line-height: 1.15; }
+    .subtitle { margin: 10px 0 0; max-width: 780px; font-size: 17px; opacity: .92; }
+
+    main { padding: 34px 42px 42px; }
+
+    h2 {
+      margin: 30px 0 14px;
+      color: var(--navy);
+      font-size: 21px;
+    }
+
+    h2:first-child { margin-top: 0; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .stat {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+    }
+
+    .stat strong { display: block; color: var(--blue); font-size: 28px; line-height: 1.1; }
+    .stat span { color: var(--muted); font-size: 13px; }
+
+    .note {
+      margin-top: 16px;
+      padding: 13px 16px;
+      border-left: 4px solid var(--amber);
+      border-radius: 8px;
+      color: #7c2d12;
+      background: var(--amber-bg);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .card {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    .card h3 { margin: 0 0 7px; color: var(--navy); font-size: 16px; }
+    .card p { margin: 0; color: #475569; }
+
+    .objective-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .objective-row {
+      display: grid;
+      grid-template-columns: 44px minmax(170px, 0.8fr) 1.7fr;
+      gap: 14px;
+      align-items: start;
+      padding: 15px 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+    }
+
+    .objective-number {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      background: var(--blue);
+      font-weight: 700;
+    }
+
+    .objective-row h3 { margin: 3px 0 0; color: var(--navy); font-size: 15px; }
+    .objective-row p { margin: 0; color: #475569; }
+    .objective-row strong { color: var(--ink); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    th, td { padding: 11px 13px; border-bottom: 1px solid var(--line); text-align: left; }
+    th { color: var(--navy); background: var(--sky); font-size: 13px; }
+    tr:last-child td { border-bottom: 0; }
+    td:last-child, th:last-child { text-align: center; }
+
+    .bar {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .day {
+      min-height: 92px;
+      padding: 11px 8px;
+      border-radius: 10px;
+      color: var(--navy);
+      text-align: center;
+      background: var(--sky);
+    }
+
+    .day b { display: block; font-size: 19px; }
+    .day small { display: block; margin-top: 4px; color: var(--muted); }
+
+    ul { margin: 8px 0 0; padding-left: 20px; }
+    li + li { margin-top: 6px; }
+
+    footer {
+      padding: 18px 42px;
+      color: var(--muted);
+      background: #f8fafc;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+    }
+
+    @media (max-width: 760px) {
+      .report { width: 100%; margin: 0; border: 0; border-radius: 0; }
+      header, main, footer { padding-left: 22px; padding-right: 22px; }
+      .stats, .grid { grid-template-columns: 1fr 1fr; }
+      .bar { grid-template-columns: repeat(3, 1fr); }
+      .table-wrap { overflow-x: auto; }
+      .objective-row { grid-template-columns: 44px 1fr; }
+      .objective-row p { grid-column: 2; }
+    }
+
+    @media (max-width: 480px) {
+      .stats, .grid { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      body { background: white; }
+      .report { width: 100%; margin: 0; border: 0; box-shadow: none; }
+      header { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <article class="report">
+    <header>
+      <p class="eyebrow">AI Travel Reseller MVP · Sprint 3</p>
+      <h1>Báo cáo kế hoạch Tuần 3</h1>
+      <p class="subtitle">Commerce Flow, AI Sales Agent, PWA Mobile và Merchant Video Generation · 19/10/2026 – 24/10/2026</p>
+    </header>
+
+    <main>
+      <h2>Tổng quan</h2>
+      <section class="stats" aria-label="Chỉ số tổng quan">
+        <div class="stat"><strong>58</strong><span>Tổng số task</span></div>
+        <div class="stat"><strong>9</strong><span>Thành viên phụ trách</span></div>
+        <div class="stat"><strong>6</strong><span>Ngày triển khai</span></div>
+        <div class="stat"><strong>0%</strong><span>Tiến độ ghi nhận đầu tuần</span></div>
+      </section>
+
+      <h2>Mục tiêu trọng tâm</h2>
+      <section class="grid">
+        <div class="card">
+          <h3>Commerce & hoa hồng</h3>
+          <p>Hoàn thiện dữ liệu đơn hàng, commission, attribution và API tổng hợp ví Reseller.</p>
+        </div>
+        <div class="card">
+          <h3>AI Sales Agent & Video AI</h3>
+          <p>Nhận diện buying intent, phân tích video mẫu và sinh kịch bản/video dọc 9:16.</p>
+        </div>
+        <div class="card">
+          <h3>PWA Mobile</h3>
+          <p>Cấu hình PWA, bottom navigation, Web Share, QR, chat mobile và màn hình ví hoa hồng.</p>
+        </div>
+        <div class="card">
+          <h3>Automation & Analytics</h3>
+          <p>Thiết lập workflow n8n thông báo và phễu chuyển đổi 5 bước trên PostHog.</p>
+        </div>
+        <div class="card">
+          <h3>Merchant Media Library</h3>
+          <p>Xây dựng kho video mẫu, API lưu trữ, MediaCard và pipeline sinh video bất đồng bộ.</p>
+        </div>
+        <div class="card">
+          <h3>QA & nghiệm thu</h3>
+          <p>Kiểm thử PWA, ví, video, an toàn AI; diễn tập demo C1/C3 và nghiệm thu Sprint 3.</p>
+        </div>
+      </section>
+
+      <h2>Làm rõ kết quả kỳ vọng theo 6 mục tiêu</h2>
+      <section class="objective-list" aria-label="Kết quả kỳ vọng theo mục tiêu">
+        <div class="objective-row">
+          <span class="objective-number">1</span>
+          <h3>Commerce & hoa hồng</h3>
+          <p><strong>Kết quả:</strong> Đơn hàng được liên kết đúng với click và Reseller; hệ thống tính commission, lưu dữ liệu và trả về số dư ví qua API.</p>
+        </div>
+        <div class="objective-row">
+          <span class="objective-number">2</span>
+          <h3>AI Sales Agent & Video AI</h3>
+          <p><strong>Kết quả:</strong> Agent nhận diện được ý định mua hàng để đưa link phù hợp; video mẫu được phân tích thành JSON và chuyển thành kịch bản/video mới chuẩn 9:16.</p>
+        </div>
+        <div class="objective-row">
+          <span class="objective-number">3</span>
+          <h3>PWA Mobile</h3>
+          <p><strong>Kết quả:</strong> Reseller có thể cài ứng dụng lên màn hình chính, điều hướng thuận tiện, chia sẻ nội dung kèm QR và xem ví trên thiết bị di động.</p>
+        </div>
+        <div class="objective-row">
+          <span class="objective-number">4</span>
+          <h3>Automation & Analytics</h3>
+          <p><strong>Kết quả:</strong> Click, đơn hàng và video hoàn tất tạo được thông báo tự động; phễu Click → Chat → Message → Checkout → Purchase được ghi nhận trên dashboard.</p>
+        </div>
+        <div class="objective-row">
+          <span class="objective-number">5</span>
+          <h3>Merchant Media Library</h3>
+          <p><strong>Kết quả:</strong> Merchant có thể thêm và quản lý video mẫu, kích hoạt job sinh video, theo dõi trạng thái và nhận URL video thành phẩm.</p>
+        </div>
+        <div class="objective-row">
+          <span class="objective-number">6</span>
+          <h3>QA & nghiệm thu</h3>
+          <p><strong>Kết quả:</strong> Các luồng PWA, ví, Media Library và AI vượt qua kiểm thử chính; không còn lỗi High/Critical và demo C1/C3 chạy thông suốt.</p>
+        </div>
+      </section>
+
+      <h2>Phân bổ công việc</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nhóm / Phụ trách</th><th>Phạm vi chính</th><th>Số task</th></tr></thead>
+          <tbody>
+            <tr><td>Business Analyst</td><td>Đặc tả, handoff, hỗ trợ QA và UAT</td><td>8</td></tr>
+            <tr><td>Backend 1</td><td>Database, attribution, wallet, video engine</td><td>8</td></tr>
+            <tr><td>Backend 2</td><td>AI Sales Agent, multimodal prompt</td><td>5</td></tr>
+            <tr><td>Backend 3</td><td>n8n, notification, analytics</td><td>5</td></tr>
+            <tr><td>Frontend</td><td>PWA, mobile UI, share, wallet, media library</td><td>8</td></tr>
+            <tr><td>PM / Toàn đội</td><td>Điều phối, integration, demo, review sprint</td><td>6</td></tr>
+            <tr><td>QA (Tester 1–3)</td><td>Kiểm thử PWA/AI và component UI tĩnh</td><td>13</td></tr>
+            <tr><td>UI/UX</td><td>Thiết kế mobile, chat và media library</td><td>5</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Phân bổ deadline</h2>
+      <section class="bar" aria-label="Số task theo ngày">
+        <div class="day"><span>19/10</span><b>5</b><small>Kick-off & chốt rule</small></div>
+        <div class="day"><span>20/10</span><b>11</b><small>Thiết kế & migration</small></div>
+        <div class="day"><span>21/10</span><b>11</b><small>API & giao diện</small></div>
+        <div class="day"><span>22/10</span><b>12</b><small>Tích hợp core</small></div>
+        <div class="day"><span>23/10</span><b>16</b><small>E2E & code freeze</small></div>
+        <div class="day"><span>24/10</span><b>3</b><small>Demo & tổng kết</small></div>
+      </section>
+
+      <h2>Mốc bàn giao chính</h2>
+      <ul>
+        <li><strong>20/10:</strong> Hoàn thành thiết kế nền tảng, business rules, migration chính và PWA core.</li>
+        <li><strong>21–22/10:</strong> Hoàn thiện API media, wallet, workflow thông báo, prompt AI và các màn hình mobile.</li>
+        <li><strong>23/10:</strong> Tích hợp toàn chuỗi, chạy QA/E2E, diễn tập demo C1/C3 và code freeze lúc 17:00.</li>
+        <li><strong>24/10:</strong> Demo nghiệm thu, báo cáo chất lượng và họp tổng kết Sprint 3.</li>
+      </ul>
+
+      <h2>Rủi ro và lưu ý</h2>
+      <ul>
+        <li>Nhiều task ngày 23/10 phụ thuộc đầu ra liên nhóm; chậm API, UI hoặc prompt có thể ảnh hưởng trực tiếp đến E2E.</li>
+        <li>Tester 3 chỉ thực hiện component UI tĩnh trên nhánh cô lập, bắt buộc review trước khi merge.</li>
+        <li>Cần chuẩn bị sớm Cloudflared và phương án demo C1 dự phòng để tránh rủi ro môi trường trình diễn.</li>
+        <li>Ưu tiên xử lý toàn bộ lỗi High/Critical trước thời điểm code freeze.</li>
+      </ul>
+    </main>
+
+    <footer>
+      Nguồn: PASTE_TO_TASKS_WEEK3.tsv và Week3.md · Báo cáo được lập ngày 19/10/2026.
+    </footer>
+  </article>
+</body>
+</html>

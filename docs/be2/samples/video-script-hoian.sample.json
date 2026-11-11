@@ -1,0 +1,192 @@
+{
+  "format": "9:16",
+  "duration_seconds": 30,
+  "style_summary": "Kịch bản nháp (DRAFT GROUNDED) 14 phân cảnh khám phá VinWonders Nam Hội An bám sát dữ liệu seed.sql.",
+  "hook": {
+    "duration_seconds": 2.2,
+    "text": "Khám phá VinWonders Nam Hội An với River Safari"
+  },
+  "scenes": [
+    {
+      "index": 1,
+      "start_seconds": 0,
+      "end_seconds": 2.2,
+      "visual_prompt": "Góc nhìn toàn cảnh khu vực cổng vào VinWonders Nam Hội An.",
+      "shot_instruction": "Flycam lia ngang góc rộng (Drone Truck Left) 2.5D Parallax.",
+      "narration": "Khám phá vé vào cổng VinWonders Nam Hội An với River Safari và trò chơi.",
+      "on_screen_text": "VINWONDERS NAM HỘI AN",
+      "verified_fact_refs": [
+        "fact_hoian_name"
+      ]
+    },
+    {
+      "index": 2,
+      "start_seconds": 2.2,
+      "end_seconds": 4.4,
+      "visual_prompt": "Góc quay thuyền di chuyển trong khu vực River Safari.",
+      "shot_instruction": "Cầm tay POV từ trên thuyền di chuyển theo lộ trình.",
+      "narration": "Trải nghiệm River Safari duy nhất tại Việt Nam bằng thuyền.",
+      "on_screen_text": "River Safari bằng thuyền",
+      "verified_fact_refs": [
+        "fact_hoian_safari"
+      ]
+    },
+    {
+      "index": 3,
+      "start_seconds": 4.4,
+      "end_seconds": 6.6,
+      "visual_prompt": "Góc nhìn từ mạn thuyền theo tuyến tham quan River Safari.",
+      "shot_instruction": "Trung cảnh góc nhìn từ mạn thuyền theo hướng di chuyển.",
+      "narration": "Khám phá hành trình River Safari bằng thuyền tại VinWonders Nam Hội An.",
+      "on_screen_text": "Khám phá River Safari",
+      "verified_fact_refs": [
+        "fact_hoian_safari"
+      ]
+    },
+    {
+      "index": 4,
+      "start_seconds": 6.6,
+      "end_seconds": 8.8,
+      "visual_prompt": "Góc quay toàn cảnh tuyến di chuyển bằng thuyền của River Safari.",
+      "shot_instruction": "Lia máy ngang bao quát lộ trình di chuyển của thuyền.",
+      "narration": "Tuyến tham quan River Safari duy nhất tại Việt Nam bằng thuyền.",
+      "on_screen_text": "River Safari duy nhất tại VN",
+      "verified_fact_refs": [
+        "fact_hoian_safari"
+      ]
+    },
+    {
+      "index": 5,
+      "start_seconds": 8.8,
+      "end_seconds": 11,
+      "visual_prompt": "Góc quay toàn cảnh khu vực đảo dân gian tại VinWonders Nam Hội An.",
+      "shot_instruction": "Ken Burns đẩy nhẹ vào trung tâm khu vực đảo dân gian.",
+      "narration": "Tham quan đảo dân gian tại VinWonders Nam Hội An.",
+      "on_screen_text": "Tham quan Đảo dân gian",
+      "verified_fact_refs": [
+        "fact_hoian_folk_island"
+      ]
+    },
+    {
+      "index": 6,
+      "start_seconds": 11,
+      "end_seconds": 13.2,
+      "visual_prompt": "Góc nhìn trung cảnh không gian tham quan đảo dân gian.",
+      "shot_instruction": "Góc máy trung cảnh lia chậm theo lối đi tham quan đảo dân gian.",
+      "narration": "Không gian đảo dân gian trong khuôn viên công viên.",
+      "on_screen_text": "Không gian Đảo dân gian",
+      "verified_fact_refs": [
+        "fact_hoian_folk_island"
+      ]
+    },
+    {
+      "index": 7,
+      "start_seconds": 13.2,
+      "end_seconds": 15.4,
+      "visual_prompt": "Góc quay toàn cảnh khu vực công viên nước VinWonders Nam Hội An.",
+      "shot_instruction": "Trung cảnh ghi lại toàn cảnh khu vực công viên nước.",
+      "narration": "Trải nghiệm công viên nước tại VinWonders Nam Hội An.",
+      "on_screen_text": "Công viên nước",
+      "verified_fact_refs": [
+        "fact_hoian_waterpark"
+      ]
+    },
+    {
+      "index": 8,
+      "start_seconds": 15.4,
+      "end_seconds": 17.5,
+      "visual_prompt": "Góc máy trung cảnh không gian khu vực công viên nước.",
+      "shot_instruction": "Góc rộng bao quát cảnh quan khu vực công viên nước.",
+      "narration": "Không gian vui chơi tại công viên nước VinWonders Nam Hội An.",
+      "on_screen_text": "Trải nghiệm Công viên nước",
+      "verified_fact_refs": [
+        "fact_hoian_waterpark"
+      ]
+    },
+    {
+      "index": 9,
+      "start_seconds": 17.5,
+      "end_seconds": 19.6,
+      "visual_prompt": "Góc nhìn cận cảnh các khu vực hoạt động tại công viên nước.",
+      "shot_instruction": "Góc máy trung cảnh lia ngang qua các phân khu công viên nước.",
+      "narration": "Khám phá khu vực công viên nước trong chương trình tham quan.",
+      "on_screen_text": "Khu vực Công viên nước",
+      "verified_fact_refs": [
+        "fact_hoian_waterpark"
+      ]
+    },
+    {
+      "index": 10,
+      "start_seconds": 19.6,
+      "end_seconds": 21.7,
+      "visual_prompt": "Góc quay toàn cảnh không gian trình chiếu show diễn 3D Mapping Về Bến.",
+      "shot_instruction": "Góc máy tĩnh ghi lại không gian trình chiếu show diễn 3D Mapping.",
+      "narration": "Show diễn 3D Mapping Về Bến rực rỡ tại VinWonders Nam Hội An.",
+      "on_screen_text": "Show 3D Mapping Về Bến",
+      "verified_fact_refs": [
+        "fact_hoian_show"
+      ]
+    },
+    {
+      "index": 11,
+      "start_seconds": 21.7,
+      "end_seconds": 23.8,
+      "visual_prompt": "Góc quay trung cảnh hiệu ứng hình ảnh show diễn 3D Mapping Về Bến.",
+      "shot_instruction": "Góc máy rộng ghi lại toàn cảnh show diễn 3D Mapping Về Bến.",
+      "narration": "Chiêm ngưỡng show diễn 3D Mapping Về Bến rực rỡ.",
+      "on_screen_text": "3D Mapping Về Bến rực rỡ",
+      "verified_fact_refs": [
+        "fact_hoian_show"
+      ]
+    },
+    {
+      "index": 12,
+      "start_seconds": 23.8,
+      "end_seconds": 25.9,
+      "visual_prompt": "Khung hình hiển thị mức giá gốc của vé vào cổng.",
+      "shot_instruction": "Trung cảnh hiển thị thông tin bảng giá niêm yết rõ ràng.",
+      "narration": "Giá gốc niêm yết 600.000 VNĐ.",
+      "on_screen_text": "Giá gốc 600.000 VNĐ",
+      "verified_fact_refs": [
+        "fact_hoian_original_price"
+      ]
+    },
+    {
+      "index": 13,
+      "start_seconds": 25.9,
+      "end_seconds": 28,
+      "visual_prompt": "Khung hình hiển thị giá bán ưu đãi 510.000 VNĐ của vé vào cổng.",
+      "shot_instruction": "Khung hình ổn định hiển thị thông tin giá bán ưu đãi chính thức.",
+      "narration": "Giá bán ưu đãi chính thức 510.000 VNĐ.",
+      "on_screen_text": "Giá bán ưu đãi 510.000 VNĐ",
+      "verified_fact_refs": [
+        "fact_hoian_sale_price"
+      ]
+    },
+    {
+      "index": 14,
+      "start_seconds": 28,
+      "end_seconds": 30,
+      "visual_prompt": "Góc quay khung hình kết thúc video chuẩn Safe Zone hiển thị liên kết đặt vé.",
+      "shot_instruction": "Khung hình ổn định kết thúc video chuẩn Safe Zone.",
+      "narration": "Nhấp ngay vào liên kết bên dưới để đặt vé chính thức.",
+      "on_screen_text": "Đặt vé tại [LINK_MUA_VE]",
+      "verified_fact_refs": [
+        "fact_hoian_cta"
+      ]
+    }
+  ],
+  "audio_plan": {
+    "music_mood": "Hào hứng, vui tươi",
+    "voiceover_style": "Truyền cảm và rõ ràng"
+  },
+  "cta": {
+    "spoken_text": "Xem thông tin chính thức và đặt dịch vụ ngay hôm nay.",
+    "on_screen_text": "Đặt vé tại [LINK_MUA_VE]",
+    "link_placeholder": "[LINK_MUA_VE]"
+  },
+  "safety": {
+    "uses_only_verified_facts": true,
+    "unsupported_claims": []
+  }
+}

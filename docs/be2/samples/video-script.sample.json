@@ -1,45 +1,178 @@
 {
   "format": "9:16",
   "duration_seconds": 30,
-  "style_summary": "Nhịp nhanh, sáng tự nhiên và chuyển cảnh gọn.",
+  "style_summary": "Nhịp nhanh UGC CapCut 1.5s - 2.5s/cảnh, sáng tự nhiên, chuyển cảnh mượt mà.",
   "hook": {
-    "duration_seconds": 3,
-    "text": "Chạm mây trên hành trình Bà Nà Hills"
+    "duration_seconds": 2.2,
+    "text": "Bí kíp vi vu Bà Nà Hills trọn vẹn trong 1 ngày"
   },
   "scenes": [
     {
       "index": 1,
       "start_seconds": 0,
-      "end_seconds": 3,
-      "visual_prompt": "Toàn cảnh núi trong ánh sáng sớm, bố cục video dọc.",
-      "shot_instruction": "Bay tiến nhẹ rồi cắt nhanh.",
-      "narration": null,
-      "on_screen_text": "Chạm mây Bà Nà",
-      "verified_fact_refs": []
+      "end_seconds": 2.2,
+      "visual_prompt": "Góc nhìn từ trên cao bao quát Cầu Vàng trong khuôn viên khu du lịch Bà Nà Hills.",
+      "shot_instruction": "Flycam lia ngang góc rộng (Drone Truck Left) 2.5D Parallax.",
+      "narration": "Trọn bộ trải nghiệm khám phá Sun World Bà Nà Hills với Cầu Vàng.",
+      "on_screen_text": "KHÁM PHÁ SUN WORLD BÀ NÀ HILLS",
+      "verified_fact_refs": [
+        "fact_bana_golden_bridge"
+      ]
     },
     {
       "index": 2,
-      "start_seconds": 3,
-      "end_seconds": 20,
-      "visual_prompt": "Cận cảnh cabin cáp treo và khung cảnh núi rừng.",
-      "shot_instruction": "Xen kẽ toàn cảnh và cận cảnh ổn định.",
-      "narration": "Vé bao gồm cáp treo hai chiều và tham quan Cầu Vàng.",
-      "on_screen_text": "Cáp treo hai chiều",
+      "start_seconds": 2.2,
+      "end_seconds": 4.4,
+      "visual_prompt": "Trải nghiệm ngồi cabin cáp treo di chuyển vào khu du lịch Bà Nà Hills.",
+      "shot_instruction": "Cầm tay POV từ bên trong cabin nhìn ra cửa kính.",
+      "narration": "Vé đã bao gồm tuyến cáp treo khứ hồi Bà Nà Hills hai chiều.",
+      "on_screen_text": "Cáp treo khứ hồi hai chiều",
       "verified_fact_refs": [
-        "fact_inclusion",
-        "fact_landmark"
+        "fact_bana_cable"
       ]
     },
     {
       "index": 3,
-      "start_seconds": 20,
+      "start_seconds": 4.4,
+      "end_seconds": 6.6,
+      "visual_prompt": "Góc nhìn Cầu Vàng nâng đỡ bởi đôi bàn tay trong khuôn viên khu du lịch.",
+      "shot_instruction": "Góc trung cảnh lia nhẹ dọc theo lối đi Cầu Vàng.",
+      "narration": "Dạo bước tham quan Cầu Vàng trong khuôn viên khu du lịch Bà Nà Hills.",
+      "on_screen_text": "Tham quan Cầu Vàng",
+      "verified_fact_refs": [
+        "fact_bana_golden_bridge"
+      ]
+    },
+    {
+      "index": 4,
+      "start_seconds": 6.6,
+      "end_seconds": 8.8,
+      "visual_prompt": "Góc nhìn khu Làng Pháp với các công trình kiến trúc đặc trưng.",
+      "shot_instruction": "Ken Burns đẩy nhẹ vào trung tâm khu Làng Pháp.",
+      "narration": "Khám phá không gian Làng Pháp trong quần thể khu du lịch Bà Nà Hills.",
+      "on_screen_text": "Tham quan Làng Pháp",
+      "verified_fact_refs": [
+        "fact_bana_french_village"
+      ]
+    },
+    {
+      "index": 5,
+      "start_seconds": 8.8,
+      "end_seconds": 11,
+      "visual_prompt": "Góc nhìn lối đi và không gian tham quan tại khu Làng Pháp.",
+      "shot_instruction": "Lia máy ngang bao quát không gian Làng Pháp.",
+      "narration": "Tham quan các góc nhìn kiến trúc tại khu Làng Pháp Bà Nà Hills.",
+      "on_screen_text": "Không gian Làng Pháp",
+      "verified_fact_refs": [
+        "fact_bana_french_village"
+      ]
+    },
+    {
+      "index": 6,
+      "start_seconds": 11,
+      "end_seconds": 13.2,
+      "visual_prompt": "Góc nhìn cận cảnh các công trình kiến trúc tại khu Làng Pháp.",
+      "shot_instruction": "Góc rộng nghiêng nhẹ ghi lại toàn cảnh kiến trúc Làng Pháp.",
+      "narration": "Tham quan và trải nghiệm không gian Làng Pháp trong chuyến đi.",
+      "on_screen_text": "Khám phá Làng Pháp",
+      "verified_fact_refs": [
+        "fact_bana_french_village"
+      ]
+    },
+    {
+      "index": 7,
+      "start_seconds": 13.2,
+      "end_seconds": 15.4,
+      "visual_prompt": "Khu vực quầy buffet trưa với các món ăn tại nhà hàng Arapang hoặc Beer Plaza.",
+      "shot_instruction": "Cận cảnh chậm các quầy ẩm thực tươi ngon phong phú.",
+      "narration": "Thưởng thức tiệc buffet trưa hơn 100 món tại nhà hàng Arapang hoặc Beer Plaza.",
+      "on_screen_text": "Buffet trưa hơn 100 món",
+      "verified_fact_refs": [
+        "fact_bana_buffet"
+      ]
+    },
+    {
+      "index": 8,
+      "start_seconds": 15.4,
+      "end_seconds": 17.5,
+      "visual_prompt": "Du khách cầm vé di chuyển qua cổng khu du lịch Bà Nà Hills.",
+      "shot_instruction": "Góc nhìn POV theo bước chân du khách vào cổng khu du lịch.",
+      "narration": "Vé trọn gói đã bao gồm vé vào cổng khu du lịch Bà Nà Hills.",
+      "on_screen_text": "Vé vào cổng khu du lịch",
+      "verified_fact_refs": [
+        "fact_bana_entry"
+      ]
+    },
+    {
+      "index": 9,
+      "start_seconds": 17.5,
+      "end_seconds": 19.6,
+      "visual_prompt": "Góc nhìn các luống hoa trong khuôn viên Vườn Hoa Le Jardin D'Amour.",
+      "shot_instruction": "Góc máy trung cảnh lia chậm qua khuôn viên Vườn Hoa Le Jardin D'Amour.",
+      "narration": "Tham quan Vườn Hoa Le Jardin D'Amour trong chương trình trải nghiệm.",
+      "on_screen_text": "Vườn Hoa Le Jardin D'Amour",
+      "verified_fact_refs": [
+        "fact_bana_flower_garden"
+      ]
+    },
+    {
+      "index": 10,
+      "start_seconds": 19.6,
+      "end_seconds": 21.7,
+      "visual_prompt": "Góc nhìn toàn cảnh khu Làng Pháp từ trên cao trong khuôn viên Bà Nà Hills.",
+      "shot_instruction": "Góc máy tĩnh ghi lại không gian Làng Pháp dưới ánh sáng ban ngày.",
+      "narration": "Khám phá không gian kiến trúc Làng Pháp trong chuyến tham quan.",
+      "on_screen_text": "Khám phá Làng Pháp",
+      "verified_fact_refs": [
+        "fact_bana_french_village"
+      ]
+    },
+    {
+      "index": 11,
+      "start_seconds": 21.7,
+      "end_seconds": 23.8,
+      "visual_prompt": "Góc quay Cầu Vàng với đôi bàn tay nâng đỡ từ góc nhìn ngang.",
+      "shot_instruction": "Flycam bay lùi góc rộng từ đôi bàn tay nâng đỡ Cầu Vàng.",
+      "narration": "Chiêm ngưỡng công trình Cầu Vàng trong khuôn viên khu du lịch.",
+      "on_screen_text": "Tham quan Cầu Vàng",
+      "verified_fact_refs": [
+        "fact_bana_golden_bridge"
+      ]
+    },
+    {
+      "index": 12,
+      "start_seconds": 23.8,
+      "end_seconds": 25.9,
+      "visual_prompt": "Góc nhìn khu vực ẩm thực tại nhà hàng Beer Plaza hoặc Arapang.",
+      "shot_instruction": "Trung cảnh không gian khu vực phục vụ buffet ẩm thực.",
+      "narration": "Thưởng thức buffet trưa hơn 100 món tại nhà hàng Arapang hoặc Beer Plaza.",
+      "on_screen_text": "Nhà hàng Arapang hoặc Beer Plaza",
+      "verified_fact_refs": [
+        "fact_bana_buffet"
+      ]
+    },
+    {
+      "index": 13,
+      "start_seconds": 25.9,
+      "end_seconds": 28,
+      "visual_prompt": "Khung hình hiển thị mức giá bán ưu đãi chính thức của sản phẩm.",
+      "shot_instruction": "Góc nhìn POV tự nhiên nụ cười rạng rỡ của du khách.",
+      "narration": "Giá bán ưu đãi chính thức 1.150.000 VNĐ một người.",
+      "on_screen_text": "Giá ưu đãi 1.150.000 VNĐ",
+      "verified_fact_refs": [
+        "fact_bana_price"
+      ]
+    },
+    {
+      "index": 14,
+      "start_seconds": 28,
       "end_seconds": 30,
-      "visual_prompt": "Khung hình kết thúc tối giản với tên sản phẩm.",
-      "shot_instruction": "Giữ khung hình ổn định cho CTA.",
-      "narration": "Giá bán chính thức 900.000 VNĐ. Xem thông tin để đặt dịch vụ.",
+      "visual_prompt": "Góc quay toàn cảnh khu du lịch Bà Nà Hills với khung hình kết thúc chuẩn Safe Zone.",
+      "shot_instruction": "Khung hình ổn định kết thúc video chuẩn Safe Zone.",
+      "narration": "Nhấp ngay vào liên kết bên dưới để đặt dịch vụ hôm nay.",
       "on_screen_text": "Đặt dịch vụ tại [LINK_MUA_VE]",
       "verified_fact_refs": [
-        "fact_price"
+        "fact_bana_cta"
       ]
     }
   ],
@@ -48,7 +181,7 @@
     "voiceover_style": "Thân thiện và rõ ràng"
   },
   "cta": {
-    "spoken_text": "Xem thông tin chính thức và đặt dịch vụ ngay.",
+    "spoken_text": "Xem thông tin chính thức và đặt dịch vụ ngay hôm nay.",
     "on_screen_text": "Đặt dịch vụ tại [LINK_MUA_VE]",
     "link_placeholder": "[LINK_MUA_VE]"
   },

@@ -15,10 +15,25 @@ Thư mục tài liệu kỹ thuật, hợp đồng bàn giao và mẫu dữ li�
 
 ---
 
-## Danh mục tài liệu Sprint 5 (Tuần 5)
+## Danh mục tài liệu Sprint 5 (Tuần 5 - Final Go-Live)
 
-1. **Tài liệu bàn giao tích hợp Checkout & Attribution cho Frontend:**
+1. **Báo cáo Kỹ thuật & Bàn giao Hạ tầng Production:**
+   - [`week5-be1-final-production-release.md`](./week5-be1-final-production-release.md): **(MỚI)** Báo cáo nghiệm thu toàn diện Production Release Vercel, Security Edge Headers (`vercel.json`), Route Health Check `/api/health`, Hotfix contract fallback checkout và kịch bản pre-flight tự động 8/8 PASS.
+   - [`week5-be1-production-deployment-and-perf.md`](./week5-be1-production-deployment-and-perf.md): Báo cáo hoàn tất nghiệm thu và bàn giao hạ tầng Database Supabase Cloud Production, Supavisor Connection Pooling cổng 6543, kết quả benchmark latency $p95 < 20\text{ ms}$ cho RPC ví hoa hồng và cấu hình Storage `campaign-videos`.
+   - [`week5-be1-fe-integration-qa.md`](./week5-be1-fe-integration-qa.md): Biên bản giải đáp kỹ thuật, đồng bộ contract đặt vé/checkout, cấu trúc ví hoa hồng và xác nhận tiêu chuẩn nghiệm thu First Load JS/Lighthouse Performance cho FE Lead.
    - [`checkout_integration_guide_for_fe.md`](./checkout_integration_guide_for_fe.md): Hướng dẫn chi tiết luồng tích hợp nút đặt vé từ chat sang checkout, quy chuẩn tham số URL tiếp thị (`ref`, `campaign`, `product`), domain hợp lệ, vòng đời đơn hàng, và script mô phỏng đơn hàng mẫu không tốn tiền thật (phục vụ task `FE-W5-01`).
+
+2. **Lệnh chạy kiểm thử và benchmark:**
+   ```powershell
+   # 1. Chạy kịch bản tiền kiểm định Production 8 bước
+   npm run verify:production
+
+   # 2. Chạy bộ kiểm thử tự động BE1 Tuần 5 (7/7 test cases)
+   npm run test:be1:w5
+
+   # 3. Chạy benchmark đo lường độ trễ RPC và Index Lookup
+   npm run benchmark:wallet
+   ```
 
 ---
 

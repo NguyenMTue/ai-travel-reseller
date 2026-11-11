@@ -7,14 +7,8 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_BUILD_DIR || ".next",
   // Cho phép origin 127.0.0.1 khi test tự động bằng Playwright / local browser
   allowedDevOrigins: ["127.0.0.1", "localhost"],
-  async rewrites() {
-    return [
-      {
-        source: "/campaign-videos/:path*",
-        destination: "/campaign-videos/banahills-remediated.mp4",
-      },
-    ];
-  },
+  // Serve physical public files at their exact URLs. Missing campaign videos
+  // must remain 404; demos explicitly select the named sample MP4 instead.
   async headers() {
     return [
       {

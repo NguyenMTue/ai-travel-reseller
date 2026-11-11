@@ -12,14 +12,14 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 ## 1. ACTIVE WORK
 | Task ID | Member | Role | Task | Status | Started | Deadline |
 |---|---|---|---|---|---|---|
-| BA-W3-01 | Business Analyst | BA | Bàn giao & Giải đáp Đặc tả Nghiệp vụ tại Kick-off Sprint 3 | READY | 19/10 | 19/10 10:30 |
-| BA-W3-02 | Business Analyst | BA | Khóa Business Rules cho BE1: Migration `orders`, `media_references` & RPC ví | READY | 19/10 | 19/10 14:00 |
-| BA-W3-03 | Business Analyst | BA | Khóa Kịch bản RAG, Buying Intent & Multimodal Prompt cho BE2 | READY | 19/10 | 19/10 17:00 |
-| BA-W3-04 | Business Analyst | BA | Handoff Yêu cầu Giao diện PWA Mobile & Merchant Library cho UI/UX | READY | 20/10 | 20/10 12:00 |
-| BA-W3-05 | Business Analyst | BA | Khóa Event Taxonomy & Webhook Schema cho BE3 | READY | 20/10 | 20/10 17:00 |
-| BA-W3-06 | Business Analyst | BA | Hỗ trợ FE Lead (Diệu) & Tester 3 (FE phụ) xác thực luồng giao diện | READY | 21/10 | 21/10 17:00 |
-| BA-W3-07 | Business Analyst | BA | Đồng hành cùng QA Team (Tester 1, 2) chạy Bộ Test Nghiệp Vụ | READY | 22/10 | 22/10 17:00 |
-| BA-W3-08 | Business Analyst | BA | Thực hiện Nghiệm thu Nghiệp vụ (Business UAT) & Đánh giá Demo Sprint 3 | READY | 23/10 | 23/10 17:30 |
+| BA-W3-01 | Business Analyst | BA | Bàn giao & Giải đáp Đặc tả Nghiệp vụ tại Kick-off Sprint 3 | DONE | 19/10 | 19/10 10:30 |
+| BA-W3-02 | Business Analyst | BA | Khóa Business Rules cho BE1: Migration `orders`, `media_references` & RPC ví | DONE | 19/10 | 19/10 14:00 |
+| BA-W3-03 | Business Analyst | BA | Khóa Kịch bản RAG, Buying Intent & Multimodal Prompt cho BE2 | DONE | 19/10 | 19/10 17:00 |
+| BA-W3-04 | Business Analyst | BA | Handoff Yêu cầu Giao diện PWA Mobile & Merchant Library cho UI/UX | DONE | 20/10 | 20/10 12:00 |
+| BA-W3-05 | Business Analyst | BA | Khóa Event Taxonomy & Webhook Schema cho BE3 | DONE | 20/10 | 20/10 17:00 |
+| BA-W3-06 | Business Analyst | BA | Hỗ trợ FE Lead (Diệu) & Tester 3 (FE phụ) xác thực luồng giao diện | DONE | 21/10 | 21/10 17:00 |
+| BA-W3-07 | Business Analyst | BA | Đồng hành cùng QA Team (Tester 1, 2) chạy Bộ Test Nghiệp Vụ | DONE | 22/10 | 22/10 17:00 |
+| BA-W3-08 | Business Analyst | BA | Thực hiện Nghiệm thu Nghiệp vụ (Business UAT) & Đánh giá Demo Sprint 3 | DONE | 23/10 | 23/10 17:30 |
 | BE1-W3-01 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Migration bảng `orders` & `commissions` (Attribution schema) | DONE | 19/10 | 20/10 12:00 |
 | BE1-W3-02 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Migration bảng `media_references` cho Merchant Video Library | DONE | 19/10 | 20/10 17:00 |
 | BE1-W3-03 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | API `POST /api/merchant/media` quản lý video mẫu | DONE | 20/10 | 21/10 12:00 |
@@ -27,29 +27,29 @@ Phạm vi nhật ký: Đồng bộ tiến độ toàn diện của các thành v
 | BE1-W3-05 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Gỡ bỏ nợ kỹ thuật trigger hòa giải tạm thời Tuần 2 | DONE | 19/10 | 19/10 12:00 |
 | BE1-W3-06 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Core AI Video Generation Engine (`generator.ts`) từ kịch bản BE2 & asset tour | DONE | 21/10 | 22/10 17:00 |
 | BE1-W3-07 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Video API `POST /api/merchant/video/generate` & Storage pipeline `campaign-videos` | DONE (MERGED DEV) | 21/10 | 23/10 12:00 |
-| BE1-W3-08 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Phối hợp E2E Integration & Demo kịch bản C3 (Cloudflared Tunnel) | IN PROGRESS | 22/10 | 23/10 17:00 |
+| BE1-W3-08 | Nguyễn Minh Tuệ | BE1 (Kiêm PM) | Phối hợp E2E Integration & Demo kịch bản C3 (Cloudflared Tunnel) | DONE | 22/10 | 23/10 17:00 |
 | BE2-W3-01 | Nguyễn Huỳnh | BE2 | System Prompt AI Sales Agent nhận diện Buying Intent | DONE | 20/10 | 20/10 17:00 |
-| BE2-W3-02 | Nguyễn Huỳnh | BE2 | Prompt Multimodal Gemini phân tích kịch bản video mẫu | OFFLINE DONE — LIVE PENDING | 20/10 | 21/10 12:00 |
-| BE2-W3-03 | Nguyễn Huỳnh | BE2 | Prompt sinh kịch bản video áp dụng thông tin chiến dịch (bàn giao BE1) | OFFLINE DONE — LIVE PENDING | 20/10 | 22/10 12:00 |
-| BE3-W3-01 | Thái Thanh Tú | BE3 | Workflow n8n thông báo đơn hàng / click mới qua Telegram/Zalo | READY | 20/10 | 21/10 17:00 |
-| BE3-W3-02 | Thái Thanh Tú | BE3 | Tích hợp PostHog Analytics Dashboard & Phễu chuyển đổi 5 bước | READY | 21/10 | 22/10 17:00 |
-| BE3-W3-03 | Thái Thanh Tú | BE3 | Workflow n8n thông báo thời gian thực khi Video sinh xong từ Core Engine | READY | 22/10 | 23/10 12:00 |
-| FE-W3-01 | Diệu | FE Lead | Cấu hình PWA Core (manifest, Service Worker, Meta) | ĐÃ TRIỂN KHAI — local PASS; chưa nghiệm thu thiết bị thật | 19/10 | 20/10 17:00 |
-| FE-W3-02 | Diệu | FE Lead | Bottom Navigation Bar & Responsive Safe Area cho Reseller | ĐÃ TRIỂN KHAI — chờ UIUX/QA thiết bị thật | 20/10 | 21/10 12:00 |
-| FE-W3-03 | Diệu | FE Lead | Tích hợp Web Share API 1 chạm & Canvas xuất ảnh QR | ĐÃ TRIỂN KHAI — fixture/PNG thủ công; chưa native Share/điện thoại thật | 21/10 | 21/10 17:00 |
-| FE-W3-04 | Diệu | FE Lead | Giao diện Chat AI Sales Agent Mobile (Bottom Sheet widget) | ĐÃ TRIỂN KHAI — mock PASS; chờ UIUX/QA, chưa AI thật | 21/10 | 22/10 17:00 |
-| FE-W3-05 | Diệu | FE Lead | Giao diện Màn hình Ví hoa hồng Reseller (`/reseller/wallet`) | ĐÃ TRIỂN KHAI — fixture/quan sát UI thật; chờ QA dữ liệu/quyền | 22/10 | 23/10 12:00 |
-| FE-W3-06 | Diệu | FE Lead | Tích hợp Media Library & Nối nút kích hoạt tạo Video qua API BE1 | DONE — Nối nút Tạo video AI, Modal đa bước, Polling status, Preview 9:16 & E2E PASS | 22/10 | 23/10 17:00 |
-| T3-FE-W3-01 | Tester 3 | FE Phụ | Cắt Component tĩnh `MediaCard` (`src/components/merchant/media-card.tsx`) | DONE (REVIEWED) | 20/10 | 21/10 12:00 |
-| T3-FE-W3-02 | Tester 3 | FE Phụ | Modal hướng dẫn quy chuẩn video 9:16 (`video-guidelines-modal.tsx`) | DONE (REVIEWED) | 21/10 | 21/10 17:00 |
-| UX-W3-01 | UI/UX Designer | UI/UX | Figma Hi-fi Reseller Mobile (Bottom Nav, Thẻ chạm, Ví) | READY | 19/10 | 20/10 12:00 |
-| UX-W3-02 | UI/UX Designer | UI/UX | Figma Hi-fi Customer Chat Widget di động | READY | 19/10 | 20/10 17:00 |
-| UX-W3-03 | UI/UX Designer | UI/UX | Figma Hi-fi Merchant Media Library & Video Template Grid | READY | 20/10 | 21/10 12:00 |
-| T1-W3-01 | Tester 1 | QA Lead | Kiểm thử tính năng PWA, Viewport mobile & Kịch bản demo C1/C3 | READY | 20/10 | 23/10 17:00 |
-| T1-W3-02 | Tester 1 | QA Lead | Kiểm thử chức năng Media Library & Luồng tải video mẫu | READY | 22/10 | 23/10 17:00 |
-| T2-W3-01 | Tester 2 | AI Safety QA | Test chống Hallucination & Buying Intent của AI Sales Agent | READY | 21/10 | 23/10 17:00 |
-| T2-W3-02 | Tester 2 | AI Safety QA | Đánh giá chất lượng kịch bản video AI bóc tách từ video mẫu | READY | 22/10 | 23/10 17:00 |
-| PM-W3-01/06 | Nguyễn Minh Tuệ | BE1 Kiêm PM | Điều phối Sprint 3, Code Review 2 cấp (Đã duyệt PR Tester 3), Diễn tập Demo nghiệm thu | IN PROGRESS | 19/10 | 24/10 17:30 |
+| BE2-W3-02 | Nguyễn Huỳnh | BE2 | Prompt Multimodal Gemini phân tích kịch bản video mẫu | DONE (PR #44) | 20/10 | 21/10 12:00 |
+| BE2-W3-03 | Nguyễn Huỳnh | BE2 | Prompt sinh kịch bản video áp dụng thông tin chiến dịch (bàn giao BE1) | DONE (PR #44) | 20/10 | 22/10 12:00 |
+| BE3-W3-01 | Thái Thanh Tú | BE3 | Workflow n8n thông báo đơn hàng / click mới qua Telegram/Zalo | DONE | 20/10 | 21/10 17:00 |
+| BE3-W3-02 | Thái Thanh Tú | BE3 | Tích hợp PostHog Analytics Dashboard & Phễu chuyển đổi 5 bước | DONE | 21/10 | 22/10 17:00 |
+| BE3-W3-03 | Thái Thanh Tú | BE3 | Workflow n8n thông báo thời gian thực khi Video sinh xong từ Core Engine | DONE | 22/10 | 23/10 12:00 |
+| FE-W3-01 | Diệu | FE Lead | Cấu hình PWA Core (manifest, Service Worker, Meta) | DONE (PR #46) | 19/10 | 20/10 17:00 |
+| FE-W3-02 | Diệu | FE Lead | Bottom Navigation Bar & Responsive Safe Area cho Reseller | DONE (PR #46) | 20/10 | 21/10 12:00 |
+| FE-W3-03 | Diệu | FE Lead | Tích hợp Web Share API 1 chạm & Canvas xuất ảnh QR | DONE (PR #46) | 21/10 | 21/10 17:00 |
+| FE-W3-04 | Diệu | FE Lead | Giao diện Chat AI Sales Agent Mobile (Bottom Sheet widget) | DONE (PR #46) | 21/10 | 22/10 17:00 |
+| FE-W3-05 | Diệu | FE Lead | Giao diện Màn hình Ví hoa hồng Reseller (`/reseller/wallet`) | DONE (PR #46) | 22/10 | 23/10 12:00 |
+| FE-W3-06 | Diệu | FE Lead | Tích hợp Media Library & Nối nút kích hoạt tạo Video qua API BE1 | DONE (PR #46, #47) | 22/10 | 23/10 17:00 |
+| T3-FE-W3-01 | Tester 3 | FE Phụ | Cắt Component tĩnh `MediaCard` (`src/components/merchant/media-card.tsx`) | DONE (MERGED DEV) | 20/10 | 21/10 12:00 |
+| T3-FE-W3-02 | Tester 3 | FE Phụ | Modal hướng dẫn quy chuẩn video 9:16 (`video-guidelines-modal.tsx`) | DONE (MERGED DEV) | 21/10 | 21/10 17:00 |
+| UX-W3-01 | UI/UX Designer | UI/UX | Figma Hi-fi Reseller Mobile (Bottom Nav, Thẻ chạm, Ví) | DONE | 19/10 | 20/10 12:00 |
+| UX-W3-02 | UI/UX Designer | UI/UX | Figma Hi-fi Customer Chat Widget di động | DONE | 19/10 | 20/10 17:00 |
+| UX-W3-03 | UI/UX Designer | UI/UX | Figma Hi-fi Merchant Media Library & Video Template Grid | DONE | 20/10 | 21/10 12:00 |
+| T1-W3-01 | Tester 1 | QA Lead | Kiểm thử tính năng PWA, Viewport mobile & Kịch bản demo C1/C3 | DONE | 20/10 | 23/10 17:00 |
+| T1-W3-02 | Tester 1 | QA Lead | Kiểm thử chức năng Media Library & Luồng tải video mẫu | DONE | 22/10 | 23/10 17:00 |
+| T2-W3-01 | Tester 2 | AI Safety QA | Test chống Hallucination & Buying Intent của AI Sales Agent | DONE | 21/10 | 23/10 17:00 |
+| T2-W3-02 | Tester 2 | AI Safety QA | Đánh giá chất lượng kịch bản video AI bóc tách từ video mẫu | DONE | 22/10 | 23/10 17:00 |
+| PM-W3-01/06 | Nguyễn Minh Tuệ | BE1 Kiêm PM | Điều phối Sprint 3, Code Review 2 cấp (Đã duyệt PR Tester 3), Diễn tập Demo nghiệm thu | DONE | 19/10 | 24/10 17:30 |
 
 ---
 

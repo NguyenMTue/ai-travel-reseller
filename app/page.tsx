@@ -61,7 +61,8 @@ export default function Home() {
             <Image
               src="/coast.svg"
               fill
-              priority
+              loading="eager"
+              fetchPriority="high"
               alt="Minh họa núi, biển và bờ cát miền Trung trong ánh nắng ấm"
               sizes="(max-width: 760px) 100vw, 50vw"
             />

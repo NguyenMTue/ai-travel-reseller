@@ -371,6 +371,7 @@ Tóm tắt từ [RULE_BOOK.md](.ai/role/RULE_BOOK.md) – **áp dụng cho cả 
 | [.ai/role/DATA_SCHEMA.md](.ai/role/DATA_SCHEMA.md) | Thiết kế 8 bảng dữ liệu | BE1, FE |
 | [.ai/role/ai_prompts.md](.ai/role/ai_prompts.md) | System prompt Content Factory & Sales Agent (anti-hallucination) | BE2, BE3, Tester 2 |
 | [.ai/process/ai_progress_evaluation_template.md](.ai/process/ai_progress_evaluation_template.md) | Template nhờ AI đánh giá tiến độ team hằng tuần | PM |
+| [docs/be3/README.md](docs/be3/README.md) | Mục lục BE3: runbook n8n, workflow exports, bằng chứng nghiệm thu và Funnel PostHog | BE3, PM, Tester |
 | [AGENTS.md](AGENTS.md) / [CLAUDE.md](CLAUDE.md) | Chỉ dẫn cho AI coding agent (Next.js 16 breaking changes) | Người dùng AI agent |
 | `.ai/skills/*`, `.agents/skills/*`, `.claude/skills/*`, `.kiro/skills/*`, `skills/*` | Bộ skill cho AI agent – xem mục 10 | Người dùng AI agent |
 
