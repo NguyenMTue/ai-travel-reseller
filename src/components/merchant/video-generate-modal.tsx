@@ -470,7 +470,7 @@ function VideoGenerateSession({
                 <div className="font-semibold text-purple-300 flex items-center justify-between">
                   <span>⭐ Chuỗi phân cảnh Chained AI (15s - 18s) liền mạch:</span>
                   <span className="text-[11px] text-emerald-400 font-normal">
-                    {selectedItems.length} ảnh đã chọn ({selectedItems.length >= 4 ? "3 cảnh Omni" : selectedItems.length === 3 ? "2 cảnh Omni" : "1 cảnh Omni"})
+                    {selectedItems.length} ảnh đã chọn ({selectedItems.length >= 4 ? "3 cảnh Muse AI" : selectedItems.length === 3 ? "2 cảnh Muse AI" : "1 cảnh Muse AI"})
                   </span>
                 </div>
                 <div className="grid grid-cols-1 gap-1.5 text-[11px]">
@@ -760,17 +760,17 @@ function VideoGenerateSession({
                         )}
                       </div>
                       <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-medium text-emerald-300">
-                        {videoResult.cost_breakdown.is_live_call ? (videoResult.cost_breakdown.model_name.toLowerCase().includes("muse") ? "Muse2API Gateway" : "Google Cloud AI") : "100% Ảnh thật · 0đ"}
+                        {videoResult.cost_breakdown.is_live_call ? "Muse AI Gateway" : "100% Ảnh thật · 0đ"}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground pt-0.5">
                       <div>
-                        <span>Cơ chế Hero: </span>
+                        <span>Cơ chế Video AI: </span>
                         <strong className="text-foreground">{videoResult.cost_breakdown.model_name}</strong>
                       </div>
                       <div>
-                        <span>Thời lượng Hero: </span>
+                        <span>Thời lượng Video AI: </span>
                         <strong className="text-foreground">
                           {videoResult.cost_breakdown.duration_seconds}s ({videoResult.cost_breakdown.output_tokens.toLocaleString()} tokens)
                         </strong>

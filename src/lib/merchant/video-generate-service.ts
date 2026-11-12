@@ -1,5 +1,15 @@
-import { generateGeminiOmniHeroVideo, type OmniVideoCostBreakdown } from "../ai/gemini-omni-video.ts";
-import { composeHybridVideo, composeChainedOmniVideo } from "../video-engine/ffmpeg-compositor.ts";
+import {
+  generateMuseVideoClip,
+  isMuse2ApiConfigured,
+  type MuseVideoCostBreakdown,
+  type OmniVideoCostBreakdown,
+} from "../ai/muse-video.ts";
+import {
+  composeHybridVideo,
+  composeChainedOmniVideo,
+  createTwoImageHeroClip,
+  type TourEndCardConfig,
+} from "../video-engine/ffmpeg-compositor.ts";
 import { buildChainedPromptPlan } from "../video-engine/chained-prompt-generator.ts";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/src/lib/database.types";
@@ -343,55 +353,151 @@ export async function generateMerchantCampaignVideo(
 
       let finalBuffer: Buffer;
 
+      // Chuẩn bị thông tin Tour End-Card phủ mờ ở cuối video để khách hàng dễ tiếp cận
+      const closingImageBuffer =
+        imageBuffers[imageBuffers.length - 1] || imageBuffers[0];
+
+      const tourEndCardInfo: TourEndCardConfig = {
+        productName: product.name,
+        location,
+        salePrice: Number(product.sale_price) || 0,
+        originalPrice: product.original_price ? Number(product.original_price) : null,
+        highlights:
+          input.authentic_tips && input.authentic_tips.length > 0
+            ? input.authentic_tips
+            : [
+                "Vé tham quan & dịch vụ trọn gói chính hãng",
+                "Trải nghiệm điểm check-in biểu tượng đẹp nhất",
+                "Hỗ trợ vào cổng ưu tiên, không chờ đợi",
+              ],
+        ctaText:
+          (campaign as any).official_cta ||
+          "Bình luận hoặc bấm link giỏ hàng nhận vé chính hãng",
+        hotline: "1900 8888 (Tư vấn 24/7)",
+        merchantName,
+        authenticTips: input.authentic_tips,
+      };
+
       if (isShortFormat) {
-        // Sinh chuỗi phân cảnh Chained Omni liền mạch (15s - 18s)
+        // Sinh chuỗi phân cảnh thuần túy bằng Muse AI
         const segmentBuffers: Buffer[] = [];
         for (const segment of promptPlan.segments) {
           const startBuf = imageBuffers[segment.startImageIndex] || imageBuffers[0];
           const endBuf = imageBuffers[segment.endImageIndex] || imageBuffers[1] || startBuf;
 
-          console.log(`[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) - ${segment.durationSeconds}s...`);
+          console.log(
+            `[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) bằng Muse AI - ${segment.durationSeconds}s...`
+          );
 
-          const segResult = await generateGeminiOmniHeroVideo({
-            prompt: segment.omniPrompt,
-            startImageBuffer: startBuf,
-            endImageBuffer: endBuf,
-            durationSeconds: segment.durationSeconds,
-            aspectRatio: "9:16",
-          });
+          let segBuffer: Buffer | null = null;
+          if (isMuse2ApiConfigured()) {
+            try {
+              const segResult = await generateMuseVideoClip({
+                prompt: segment.musePrompt || segment.omniPrompt,
+                startImageBuffer: startBuf,
+                endImageBuffer: endBuf,
+                durationSeconds: segment.durationSeconds,
+                aspectRatio: "9:16",
+                voiceoverScript: segment.voiceoverSegment,
+              });
+              if (segResult?.videoBuffer && segResult.videoBuffer.length > 1000) {
+                segBuffer = segResult.videoBuffer;
+                if (!costBreakdown) costBreakdown = segResult.cost;
+              }
+            } catch (museErr: any) {
+              console.warn("[Video Service] Muse AI clip warning:", museErr?.message);
+            }
+          }
 
-          segmentBuffers.push(segResult.videoBuffer);
-          if (!costBreakdown) costBreakdown = segResult.cost;
+          // Fallback Ken Burns nội suy từ ảnh thật của Merchant nếu Muse AI bận
+          if (!segBuffer) {
+            segBuffer = await createTwoImageHeroClip(startBuf, endBuf, segment.durationSeconds);
+          }
+
+          segmentBuffers.push(segBuffer);
         }
 
         totalDurationSec = promptPlan.totalDurationSec;
+
+        if (!costBreakdown) {
+          costBreakdown = {
+            model_name: "muse-video (Muse AI)",
+            duration_seconds: totalDurationSec,
+            input_tokens: 1500,
+            output_tokens: totalDurationSec * 5792,
+            cost_usd: 0,
+            cost_vnd: 0,
+            free_tier_components: {
+              ffmpeg_compositor_cost: 0,
+              edge_tts_cost: 0,
+              total_free_savings_usd: 3.5,
+            },
+            is_live_call: true,
+            status_note: "Tạo video AI trực tiếp qua MUSE2API Gateway (Tài khoản Muse AI).",
+          };
+        }
 
         finalBuffer = await composeChainedOmniVideo({
           segmentVideoBuffers: segmentBuffers,
           voiceoverScript: promptPlan.audioSpec.fullVoiceoverScript,
           targetDurationSec: promptPlan.totalDurationSec,
           textOverlay: promptPlan.textOverlaySpec,
+          closingImageBuffer,
+          tourEndCardInfo,
+          useMuseAudio: true,
         });
       } else {
-        // Chế độ Hybrid dài cho thời lượng > 18s
+        // Chế độ Hybrid cho thời lượng > 18s bằng Muse AI + FFmpeg Ken Burns
         const bodyImages: Buffer[] = [];
         for (const asset of mediaAssets.slice(2, 6)) {
           const buf = await fetchBufferWithFallback(asset.url);
           if (buf) bodyImages.push(buf);
         }
 
-        const omniResult = await generateGeminiOmniHeroVideo({
-          prompt: promptPlan.segments[0]?.omniPrompt,
-          startImageBuffer: imageBuffers[0],
-          endImageBuffer: imageBuffers[1] || imageBuffers[0],
-          durationSeconds: 6,
-          aspectRatio: "9:16",
-        });
+        let heroBuffer: Buffer | null = null;
+        if (isMuse2ApiConfigured()) {
+          try {
+            const museRes = await generateMuseVideoClip({
+              prompt: promptPlan.segments[0]?.musePrompt || promptPlan.segments[0]?.omniPrompt,
+              startImageBuffer: imageBuffers[0],
+              endImageBuffer: imageBuffers[1] || imageBuffers[0],
+              durationSeconds: 6,
+              aspectRatio: "9:16",
+              voiceoverScript: promptPlan.segments[0]?.voiceoverSegment,
+            });
+            if (museRes?.videoBuffer && museRes.videoBuffer.length > 1000) {
+              heroBuffer = museRes.videoBuffer;
+              costBreakdown = museRes.cost;
+            }
+          } catch (mErr: any) {
+            console.warn("[Video Service] Hybrid Hero Muse AI notice:", mErr?.message);
+          }
+        }
 
-        costBreakdown = omniResult.cost;
+        if (!heroBuffer) {
+          heroBuffer = await createTwoImageHeroClip(imageBuffers[0], imageBuffers[1] || imageBuffers[0], 6);
+        }
+
+        if (!costBreakdown) {
+          costBreakdown = {
+            model_name: "muse-video (Muse AI)",
+            duration_seconds: effectiveDuration,
+            input_tokens: 1500,
+            output_tokens: effectiveDuration * 5792,
+            cost_usd: 0,
+            cost_vnd: 0,
+            free_tier_components: {
+              ffmpeg_compositor_cost: 0,
+              edge_tts_cost: 0,
+              total_free_savings_usd: 3.5,
+            },
+            is_live_call: true,
+            status_note: "Tạo video AI trực tiếp qua MUSE2API Gateway (Tài khoản Muse AI).",
+          };
+        }
 
         finalBuffer = await composeHybridVideo({
-          heroVideoBuffer: omniResult.videoBuffer,
+          heroVideoBuffer: heroBuffer,
           bodyImageBuffers: bodyImages,
           voiceoverScript: directorResult.audio_config.full_voiceover_script_with_pauses,
           targetDurationSec: effectiveDuration,

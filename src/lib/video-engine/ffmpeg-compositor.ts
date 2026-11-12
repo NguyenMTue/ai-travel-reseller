@@ -400,15 +400,202 @@ export async function composeHybridVideo(
   }
 }
 
+export interface TourEndCardConfig {
+  productName: string;
+  location?: string;
+  salePrice: number;
+  originalPrice?: number | null;
+  highlights?: string[];
+  ctaText?: string;
+  hotline?: string;
+  merchantName?: string;
+  authenticTips?: string[];
+}
+
+export function getSystemFontPath(): string {
+  if (process.platform === "win32") {
+    return "C\\:/Windows/Fonts/arial.ttf";
+  }
+  return "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+}
+
+/**
+ * Kiểm tra xem một file media có chứa audio stream hay không
+ */
+export function hasAudioStream(filePath: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const executable = getResolvedFFmpegPath();
+    const proc = spawn(executable, ["-i", filePath, "-vn", "-c:a", "copy", "-f", "null", "-"], {
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    proc.on("close", (code) => {
+      resolve(code === 0);
+    });
+    proc.on("error", () => {
+      resolve(false);
+    });
+  });
+}
+
+/**
+ * Tạo clip hiển thị thông tin Tour ở cuối video:
+ * - Lấy một hình ảnh (thường là ảnh đại diện hoặc cảnh cuối của tour)
+ * - Phủ lớp mờ điện ảnh (Frosted Bokeh Blur qua boxblur)
+ * - Đặt khối card bán trong suốt (frosted glass) với viền cyan/gold sang trọng
+ * - Thể hiện đầy đủ và nổi bật: Tên tour, Địa điểm, Giá trọn gói, Ưu đãi, Điểm nổi bật, Hotline và CTA
+ * - Đồng bộ âm thanh voiceover CTA để khách hàng dễ dàng tiếp cận và ra quyết định
+ */
+export async function createBlurredTourInfoClip(params: {
+  imageBuffer: Buffer;
+  durationSec: number;
+  info: TourEndCardConfig;
+  voiceoverText?: string;
+}): Promise<Buffer> {
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "tour-endcard-"));
+
+  try {
+    const imgPath = path.join(tempDir, "card_bg.jpg");
+    await fs.writeFile(imgPath, params.imageBuffer);
+
+    // Tính toán tỷ lệ giảm giá nếu có
+    const discount =
+      params.info.originalPrice && params.info.originalPrice > params.info.salePrice
+        ? Math.round(
+            ((params.info.originalPrice - params.info.salePrice) / params.info.originalPrice) * 100
+          )
+        : 0;
+
+    const highlights =
+      params.info.highlights && params.info.highlights.length > 0
+        ? params.info.highlights.slice(0, 3)
+        : params.info.authenticTips && params.info.authenticTips.length > 0
+        ? params.info.authenticTips.slice(0, 3)
+        : [
+            "Vé tham quan & dịch vụ trọn gói chính hãng",
+            "Trải nghiệm điểm check-in biểu tượng đẹp nhất",
+            "Hỗ trợ vào cổng ưu tiên, không chờ đợi",
+          ];
+
+    const lines: string[] = [
+      "⭐ THÔNG TIN TOUR DU LỊCH CHÍNH HÃNG ⭐",
+      "",
+      params.info.productName.toUpperCase(),
+      `📍 Điểm đến: ${params.info.location || "Việt Nam"}`,
+      "",
+      `💰 GIÁ TRỌN GÓI: ${Number(params.info.salePrice).toLocaleString("vi-VN")} VNĐ`,
+      discount > 0
+        ? `🎁 Ưu đãi độc quyền: Giảm ${discount}% khi đặt sớm`
+        : "🎁 Ưu đãi độc quyền cho khách hàng đặt sớm",
+      "",
+      ...highlights.map((h) => `✨ ${h}`),
+      "",
+      `📞 Hotline hỗ trợ: ${params.info.hotline || "1900 8888 (Tư vấn 24/7)"}`,
+      `👉 ${params.info.ctaText || "Bình luận hoặc bấm link giỏ hàng để nhận vé ngay!"}`,
+      `🏢 Đơn vị cung cấp: ${params.info.merchantName || "Đối tác du lịch uy tín"}`,
+    ];
+
+    const textPath = path.join(tempDir, "card_info.txt");
+    await fs.writeFile(textPath, lines.join("\n"), "utf8");
+
+    // Sinh voiceover audio cho End-Card (hoặc fallback silence nếu lỗi)
+    const cardAudioPath = path.join(tempDir, "card_audio.mp3");
+    let hasVoice = false;
+    try {
+      const voiceText =
+        params.voiceoverText ||
+        params.info.ctaText ||
+        `Vé chính hãng chỉ ${Number(params.info.salePrice).toLocaleString("vi-VN")} đồng. Bình luận nhận ngay ưu đãi hôm nay!`;
+      await generateVoiceoverAudio(voiceText, cardAudioPath);
+      hasVoice = true;
+    } catch (e: any) {
+      console.warn(
+        "[FFmpeg Compositor] Không thể tạo TTS cho End-Card, dùng silent audio:",
+        e?.message
+      );
+    }
+
+    const fontPath = getSystemFontPath();
+    const duration = Math.max(2.0, Number(params.durationSec.toFixed(1)));
+    const outPath = path.join(tempDir, "endcard.mp4");
+
+    const vf = [
+      "scale=1080:1920:force_original_aspect_ratio=increase",
+      "crop=1080:1920",
+      "boxblur=18:5",
+      "drawbox=x=60:y=200:w=960:h=1520:color=0x0F172A@0.85:t=fill",
+      "drawbox=x=60:y=200:w=960:h=1520:color=0x38BDF8@0.8:t=4",
+      `drawtext=fontfile='${fontPath}':textfile=card_info.txt:fontcolor=white:fontsize=32:line_spacing=24:x=(w-text_w)/2:y=260`,
+    ].join(",");
+
+    const ffmpegArgs = ["-loop", "1", "-i", "card_bg.jpg"];
+
+    if (hasVoice) {
+      ffmpegArgs.push("-i", "card_audio.mp3");
+    } else {
+      ffmpegArgs.push("-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo");
+    }
+
+    ffmpegArgs.push(
+      "-vf",
+      vf,
+      "-t",
+      `${duration}`,
+      "-c:v",
+      "libx264",
+      "-preset",
+      "ultrafast",
+      "-pix_fmt",
+      "yuv420p",
+      "-c:a",
+      "aac",
+      "-ar",
+      "44100",
+      "-ac",
+      "2",
+      "-b:a",
+      "128k",
+      "-shortest",
+      "-y",
+      "endcard.mp4"
+    );
+
+    await new Promise<void>((resolve, reject) => {
+      const exec = getResolvedFFmpegPath();
+      const proc = spawn(exec, ffmpegArgs, {
+        cwd: tempDir,
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+      let errStr = "";
+      proc.stderr.on("data", (d) => {
+        errStr += d.toString();
+      });
+      proc.on("close", (code) => {
+        if (code === 0) resolve();
+        else reject(new Error(`Tạo End-Card thất bại (${code}): ${errStr.slice(-400)}`));
+      });
+      proc.on("error", reject);
+    });
+
+    return await fs.readFile(outPath);
+  } finally {
+    try {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    } catch {}
+  }
+}
+
 export interface ComposeChainedVideoInput {
   segmentVideoBuffers: Buffer[];
   voiceoverScript: string;
   textOverlay: TextOverlayConfig;
   targetDurationSec?: number;
+  closingImageBuffer?: Buffer;
+  tourEndCardInfo?: TourEndCardConfig;
+  useMuseAudio?: boolean;
 }
 
 /**
- * 4. Hợp nhất chuỗi phân cảnh AI Chained Omni (15s - 18s) + Voiceover + Text Overlays
+ * 4. Hợp nhất chuỗi phân cảnh AI Muse AI + Voiceover + Hình ảnh mờ hiển thị Tour Info ở cuối
  * Nối liền mạch N phân cảnh AI với độ phân giải đồng nhất 1080x1920 30fps.
  */
 export async function composeChainedOmniVideo(
@@ -417,34 +604,108 @@ export async function composeChainedOmniVideo(
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "chained-composition-"));
 
   try {
-    // 4.1. Sinh Voiceover audio bằng Edge-TTS
+    // 4.1. Sinh Voiceover audio bằng Edge-TTS làm dự phòng
     const voiceoverPath = path.join(tempDir, "voiceover.mp3");
-    await generateVoiceoverAudio(input.voiceoverScript, voiceoverPath);
+    let hasEdgeTts = false;
+    try {
+      await generateVoiceoverAudio(input.voiceoverScript, voiceoverPath);
+      hasEdgeTts = true;
+    } catch (ttsErr: any) {
+      console.warn("[FFmpeg Compositor] Notice: Edge-TTS generation:", ttsErr?.message);
+    }
 
-    // 4.2. Chuẩn hóa tất cả các phân cảnh video về cùng 1080x1920 30fps
+    const targetDuration = Number((input.targetDurationSec || 10).toFixed(1));
+    const is10s = targetDuration <= 12;
+
+    // Chuẩn bị danh sách buffer video các phân cảnh
+    const clipBuffers = [...input.segmentVideoBuffers];
+
+    // 4.2. Nếu có ảnh kết và thông tin tour -> Sinh clip End-Card phủ mờ
+    let hasEndCard = false;
+    if (input.closingImageBuffer && input.tourEndCardInfo) {
+      try {
+        const endCardDur = is10s ? 3.0 : 3.5;
+        console.log(
+          `[FFmpeg Compositor] Tạo phân cảnh kết thúc (End-Card) phủ mờ hiển thị thông tin tour (${endCardDur}s)...`
+        );
+        const cardBuffer = await createBlurredTourInfoClip({
+          imageBuffer: input.closingImageBuffer,
+          durationSec: endCardDur,
+          info: input.tourEndCardInfo,
+          voiceoverText: input.tourEndCardInfo.ctaText,
+        });
+        if (cardBuffer && cardBuffer.length > 1000) {
+          clipBuffers.push(cardBuffer);
+          hasEndCard = true;
+        }
+      } catch (cardErr: any) {
+        console.warn("[FFmpeg Compositor] End-Card creation notice:", cardErr?.message);
+      }
+    }
+
+    // 4.3. Chuẩn hóa tất cả các phân cảnh video về cùng 1080x1920 30fps và chuẩn âm thanh AAC
     const normalizedClipPaths: string[] = [];
-    for (let i = 0; i < input.segmentVideoBuffers.length; i++) {
+    let hasAnyNativeAudio = false;
+
+    for (let i = 0; i < clipBuffers.length; i++) {
       const rawPath = path.join(tempDir, `raw_seg_${i}.mp4`);
-      await fs.writeFile(rawPath, input.segmentVideoBuffers[i]);
+      await fs.writeFile(rawPath, clipBuffers[i]);
 
       const normPath = path.join(tempDir, `norm_seg_${i}.mp4`);
-      await runFFmpeg([
-        "-i",
-        rawPath,
-        "-vf",
-        "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,fps=30",
-        "-c:v",
-        "libx264",
-        "-preset",
-        "ultrafast",
-        "-an",
-        "-y",
-        normPath,
-      ]);
+      const hasAudio = await hasAudioStream(rawPath);
+      if (hasAudio) {
+        hasAnyNativeAudio = true;
+        await runFFmpeg([
+          "-i",
+          rawPath,
+          "-vf",
+          "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,fps=30",
+          "-c:v",
+          "libx264",
+          "-preset",
+          "ultrafast",
+          "-c:a",
+          "aac",
+          "-ar",
+          "44100",
+          "-ac",
+          "2",
+          "-b:a",
+          "128k",
+          "-y",
+          normPath,
+        ]);
+      } else {
+        await runFFmpeg([
+          "-i",
+          rawPath,
+          "-f",
+          "lavfi",
+          "-i",
+          "anullsrc=r=44100:cl=stereo",
+          "-vf",
+          "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,fps=30",
+          "-c:v",
+          "libx264",
+          "-preset",
+          "ultrafast",
+          "-c:a",
+          "aac",
+          "-ar",
+          "44100",
+          "-ac",
+          "2",
+          "-b:a",
+          "128k",
+          "-shortest",
+          "-y",
+          normPath,
+        ]);
+      }
       normalizedClipPaths.push(normPath);
     }
 
-    // 4.3. Nối các phân cảnh
+    // 4.4. Nối các phân cảnh
     const concatListPath = path.join(tempDir, "concat_list.txt");
     const concatContent = normalizedClipPaths
       .map((p) => `file '${p.replace(/\\/g, "/")}'`)
@@ -465,15 +726,21 @@ export async function composeChainedOmniVideo(
       "ultrafast",
       "-pix_fmt",
       "yuv420p",
+      "-c:a",
+      "aac",
+      "-ar",
+      "44100",
+      "-ac",
+      "2",
+      "-b:a",
+      "128k",
       "-y",
       mergedVisualPath,
     ]);
 
-    // 4.4. Áp dụng Text Overlay và chuẩn hóa thời lượng tuyệt đối
+    // 4.5. Áp dụng Text Overlay (nếu có End-Card, bỏ qua overlay CTA/badge đè lên card)
     const finalOutputPath = path.join(tempDir, "final_composition.mp4");
-    const fontPath = "C\\:/Windows/Fonts/arial.ttf";
-    const targetDuration = Number((input.targetDurationSec || 10).toFixed(1));
-    const is10s = targetDuration <= 12;
+    const fontPath = getSystemFontPath();
 
     const drawtextFilters: string[] = [];
 
@@ -500,27 +767,28 @@ export async function composeChainedOmniVideo(
       );
     }
 
-    // Badge giá vé: 5-8s (10s) hoặc 11-15s (18s+)
-    if (input.textOverlay.priceBadgeText) {
-      const escapedPrice = input.textOverlay.priceBadgeText
-        .replace(/'/g, "")
-        .replace(/:/g, "\\:");
-      const priceStart = is10s ? 5 : 11;
-      const priceEnd = is10s ? 8 : 15;
-      drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedPrice}':fontcolor=white:fontsize=28:box=1:boxcolor=black@0.6:boxborderw=10:x=(w-text_w)/2:y=120:enable='between(t,${priceStart},${priceEnd})'`
-      );
-    }
+    // Nếu KHÔNG có End-Card -> Áp dụng Badge giá vé & CTA như trước
+    if (!hasEndCard) {
+      if (input.textOverlay.priceBadgeText) {
+        const escapedPrice = input.textOverlay.priceBadgeText
+          .replace(/'/g, "")
+          .replace(/:/g, "\\:");
+        const priceStart = is10s ? 5 : 11;
+        const priceEnd = is10s ? 8 : 15;
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${escapedPrice}':fontcolor=white:fontsize=28:box=1:boxcolor=black@0.6:boxborderw=10:x=(w-text_w)/2:y=120:enable='between(t,${priceStart},${priceEnd})'`
+        );
+      }
 
-    // CTA & Link đặt vé: 8-10s (10s) hoặc 15-18s (18s+)
-    if (input.textOverlay.ctaText) {
-      const escapedCta = input.textOverlay.ctaText
-        .replace(/'/g, "")
-        .replace(/:/g, "\\:");
-      const ctaStart = is10s ? 8 : 15;
-      drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedCta}':fontcolor=0x00FFCC:fontsize=26:borderw=2:bordercolor=black:x=(w-text_w)/2:y=h-180:enable='gte(t,${ctaStart})'`
-      );
+      if (input.textOverlay.ctaText) {
+        const escapedCta = input.textOverlay.ctaText
+          .replace(/'/g, "")
+          .replace(/:/g, "\\:");
+        const ctaStart = is10s ? 8 : 15;
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${escapedCta}':fontcolor=0x00FFCC:fontsize=26:borderw=2:bordercolor=black:x=(w-text_w)/2:y=h-180:enable='gte(t,${ctaStart})'`
+        );
+      }
     }
 
     const vfFilters = [
@@ -528,33 +796,84 @@ export async function composeChainedOmniVideo(
       ...(drawtextFilters.length > 0 ? drawtextFilters : []),
     ].join(",");
 
-    // Ghép visual + voiceover audio chuẩn xác (cắt đúng targetDuration tuyệt đối)
-    await runFFmpeg([
-      "-i",
-      mergedVisualPath,
-      "-i",
-      voiceoverPath,
-      "-filter_complex",
-      `[0:v]${vfFilters}[vout];[1:a]apad=whole_dur=${targetDuration}[aout]`,
-      "-map",
-      "[vout]",
-      "-map",
-      "[aout]",
-      "-t",
-      `${targetDuration}`,
-      "-c:v",
-      "libx264",
-      "-preset",
-      "ultrafast",
-      "-c:a",
-      "aac",
-      "-b:a",
-      "128k",
-      "-movflags",
-      "+faststart",
-      "-y",
-      finalOutputPath,
-    ]);
+    // 4.6. Ghép visual + audio: Ưu tiên âm thanh từ Muse AI nếu có
+    const useNativeAudio = hasAnyNativeAudio && input.useMuseAudio !== false;
+
+    if (useNativeAudio) {
+      console.log("[FFmpeg Compositor] Giữ nguyên âm thanh giọng đọc & hiệu ứng từ Muse AI...");
+      await runFFmpeg([
+        "-i",
+        mergedVisualPath,
+        "-filter_complex",
+        `[0:v]${vfFilters}[vout]`,
+        "-map",
+        "[vout]",
+        "-map",
+        "0:a",
+        "-t",
+        `${targetDuration}`,
+        "-c:v",
+        "libx264",
+        "-preset",
+        "ultrafast",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "128k",
+        "-movflags",
+        "+faststart",
+        "-y",
+        finalOutputPath,
+      ]);
+    } else if (hasEdgeTts) {
+      console.log("[FFmpeg Compositor] Ghép âm thanh thuyết minh từ Edge-TTS...");
+      await runFFmpeg([
+        "-i",
+        mergedVisualPath,
+        "-i",
+        voiceoverPath,
+        "-filter_complex",
+        `[0:v]${vfFilters}[vout];[1:a]apad=whole_dur=${targetDuration}[aout]`,
+        "-map",
+        "[vout]",
+        "-map",
+        "[aout]",
+        "-t",
+        `${targetDuration}`,
+        "-c:v",
+        "libx264",
+        "-preset",
+        "ultrafast",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "128k",
+        "-movflags",
+        "+faststart",
+        "-y",
+        finalOutputPath,
+      ]);
+    } else {
+      await runFFmpeg([
+        "-i",
+        mergedVisualPath,
+        "-filter_complex",
+        `[0:v]${vfFilters}[vout]`,
+        "-map",
+        "[vout]",
+        "-t",
+        `${targetDuration}`,
+        "-c:v",
+        "libx264",
+        "-preset",
+        "ultrafast",
+        "-an",
+        "-movflags",
+        "+faststart",
+        "-y",
+        finalOutputPath,
+      ]);
+    }
 
     return await fs.readFile(finalOutputPath);
   } finally {
@@ -563,3 +882,5 @@ export async function composeChainedOmniVideo(
     } catch {}
   }
 }
+
+export const composeChainedMuseVideo = composeChainedOmniVideo;

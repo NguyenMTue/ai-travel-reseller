@@ -22,14 +22,27 @@ export interface ChainedAssetInput {
   shot_type?: string;
 }
 
+export interface TourEndCardSpec {
+  productName: string;
+  location: string;
+  salePrice: number;
+  originalPrice?: number | null;
+  highlights: string[];
+  ctaText: string;
+  hotline: string;
+  merchantName?: string;
+}
+
 export interface ChainedPromptPlanInput {
   productName: string;
   location: string;
   salePrice: number;
+  originalPrice?: number | null;
   officialCta: string;
   authenticTips?: string[];
   mediaAssets: ChainedAssetInput[];
   targetDurationSec?: number; // 10 hoặc 18 (mặc định 10s)
+  merchantName?: string;
 }
 
 export type ChainedSegmentRole = "OPENING_HOOK" | "JOURNEY_TRAVERSE" | "CLIMAX_PANORAMA";
@@ -44,7 +57,8 @@ export interface ChainedSegmentSpec {
   endAsset: ChainedAssetInput;
   durationSeconds: number;
   timeRangeSec: string;
-  omniPrompt: string;
+  musePrompt: string;
+  omniPrompt: string; // Giữ để tương thích ngược
   voiceoverSegment: string;
   captionText: string;
 }
@@ -68,6 +82,7 @@ export interface ChainedPromptPlanOutput {
     tipText?: string;
     destinationText?: string;
   };
+  tourEndCardSpec?: TourEndCardSpec;
 }
 
 /**
@@ -111,7 +126,7 @@ function condenseTip(rawTip: string, maxWords = 8): string {
  * 2. Terminal Stabilization: Khóa ổn định khung hình ở cuối cảnh để khớp 100% với đầu cảnh tiếp theo.
  * 3. Unified Lighting & Environment Anchor: Đồng nhất màu sắc và ánh sáng 5600K tự nhiên.
  */
-export function buildSegmentOmniPrompt(params: {
+export function buildSegmentMusePrompt(params: {
   role: ChainedSegmentRole;
   segmentIndex: number;
   totalSegments: number;
@@ -120,8 +135,19 @@ export function buildSegmentOmniPrompt(params: {
   location: string;
   durationSeconds: number;
   profile?: "10s" | "18s";
+  voiceoverSegment?: string;
+  ambientSounds?: string[];
 }): string {
-  const { role, startLabel, endLabel, location, durationSeconds, profile = "18s" } = params;
+  const {
+    role,
+    startLabel,
+    endLabel,
+    location,
+    durationSeconds,
+    profile = "18s",
+    voiceoverSegment,
+    ambientSounds,
+  } = params;
 
   let momentumInstruction = "";
   let terminalInstruction = "";
@@ -162,6 +188,21 @@ export function buildSegmentOmniPrompt(params: {
       ? "Negative prompt: morphing, rapid camera movement, fast zoom-in, whip pan, perspective distortion, warping, sliding feet, human face mutation, motion smear, blending textures, hallucinated bridges, altered architecture, sudden time jumps, midday harsh light, abrupt jarring cuts, low quality, artifact, shaky cam, text artifacts, broken font glyphs, oversaturated, blurry."
       : "Negative prompt: morphing, fast zoom, rapid push-in, whip pan, distorted geometry, warped perspective, blurred textures, melting buildings, human disfiguration, sliding feet, smeared limbs, erratic camera movements, abrupt hard cuts, abrupt jump cuts, unnatural physics, harsh midday lighting, mismatched color grading, fluctuating weather, oversaturation, CGI plasticity, cartoonish, low quality, pixelation, font artifacts, gibberish watermark.";
 
+  let audioInstruction = "";
+  if (voiceoverSegment && voiceoverSegment.trim()) {
+    const cleanVoice = voiceoverSegment
+      .replace(/\[pause\s*[\d\.]+s?\]/gi, " ")
+      .replace(/\[.*?\]/g, " ")
+      .trim();
+    if (cleanVoice) {
+      const ambients =
+        ambientSounds && ambientSounds.length > 0
+          ? ambientSounds.join(", ")
+          : "nature breeze, birds, cable car movement";
+      audioInstruction = `Audio & Voiceover Narration: Professional, warm, energetic Vietnamese travel commercial narrator says: "${cleanVoice}". Synchronized atmospheric sounds: ${ambients}.`;
+    }
+  }
+
   return [
     `Frame 1 (Start): ${startLabel}.`,
     `Frame 2 (End): ${endLabel}.`,
@@ -171,9 +212,12 @@ export function buildSegmentOmniPrompt(params: {
     `Atmospheric Anchor: Consistent natural 5600K golden-hour daylight, warm ambient sunrise glow, soft atmospheric mist, realistic wind and vegetation physics, vertical 9:16 portrait framing (1080x1920), 24fps.`,
     landmarkConstraint,
     `Preserve authentic physical landmarks without artificial morphing or warping.`,
+    ...(audioInstruction ? [audioInstruction] : []),
     negativeInstruction,
   ].join(" ");
 }
+
+export const buildSegmentOmniPrompt = buildSegmentMusePrompt;
 
 /**
  * Xây dựng toàn bộ Kế hoạch Prompt & Phân cảnh chuẩn 10s hoặc 18s
@@ -219,7 +263,11 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
     const seg2Start = numAssets >= 3 ? assets[1] : assets[1] || assets[0];
     const seg2End = numAssets >= 4 ? assets[3] : (numAssets >= 3 ? assets[2] : assets[0]);
 
-    const seg1OmniPrompt = buildSegmentOmniPrompt({
+    // Lời thoại chuẩn 20-25 từ cho video 10 giây
+    const seg1Voice = `Bí kíp khám phá ${input.location}! ${tipShort}.`;
+    const seg2Voice = `[pause 0.2s] Vé chính hãng chỉ ${formattedPrice}đ, comment ngay nhận ưu đãi!`;
+
+    const seg1OmniPrompt = buildSegmentMusePrompt({
       role: "OPENING_HOOK",
       profile: "10s",
       segmentIndex: 1,
@@ -228,9 +276,10 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
       endLabel: cleanAssetLabel(seg1End, `Trải nghiệm ${input.productName}`),
       location: input.location,
       durationSeconds: 5.0,
+      voiceoverSegment: seg1Voice,
     });
 
-    const seg2OmniPrompt = buildSegmentOmniPrompt({
+    const seg2OmniPrompt = buildSegmentMusePrompt({
       role: "CLIMAX_PANORAMA",
       profile: "10s",
       segmentIndex: 2,
@@ -239,11 +288,8 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
       endLabel: cleanAssetLabel(seg2End, `Toàn cảnh ${input.location}`),
       location: input.location,
       durationSeconds: 5.0,
+      voiceoverSegment: seg2Voice,
     });
-
-    // Lời thoại chuẩn 20-25 từ cho video 10 giây
-    const seg1Voice = `Bí kíp khám phá ${input.location}! ${tipShort}.`;
-    const seg2Voice = `[pause 0.2s] Vé chính hãng chỉ ${formattedPrice}đ, comment ngay nhận ưu đãi!`;
 
     const segments: ChainedSegmentSpec[] = [
       {
@@ -256,6 +302,7 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
         endAsset: seg1End,
         durationSeconds: 5.0,
         timeRangeSec: "0.0s - 5.0s",
+        musePrompt: seg1OmniPrompt,
         omniPrompt: seg1OmniPrompt,
         voiceoverSegment: seg1Voice,
         captionText: `SĂN MÂY ${input.location.toUpperCase()} VẮNG NGƯỜI`,
@@ -270,6 +317,7 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
         endAsset: seg2End,
         durationSeconds: 5.0,
         timeRangeSec: "5.0s - 10.0s",
+        musePrompt: seg2OmniPrompt,
         omniPrompt: seg2OmniPrompt,
         voiceoverSegment: seg2Voice,
         captionText: `VÉ CHÍNH HÃNG CHỈ ${formattedPrice}Đ`,
@@ -277,6 +325,23 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
     ];
 
     const fullVoiceoverScript = `${seg1Voice} ${seg2Voice}`.replace(/\s+/g, " ").trim();
+
+    const tourEndCardSpec: TourEndCardSpec = {
+      productName: input.productName,
+      location: input.location,
+      salePrice: input.salePrice,
+      originalPrice: input.originalPrice ?? null,
+      highlights: (input.authenticTips && input.authenticTips.length > 0)
+        ? input.authenticTips.slice(0, 3)
+        : [
+            "Vé tham quan & cáp treo trọn gói",
+            "Check-in điểm ngắm cảnh đẹp nhất",
+            "Hỗ trợ vào cổng ưu tiên, không chờ đợi",
+          ],
+      ctaText: input.officialCta || "Bình luận nhận link ưu đãi chính hãng",
+      hotline: "1900 8888 (Tư vấn 24/7)",
+      merchantName: input.merchantName,
+    };
 
     return {
       profile: "10s_advertising",
@@ -296,6 +361,7 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
         priceBadgeText: `Vé trọn gói chỉ: ${formattedPrice}đ`,
         ctaText: input.officialCta || "Bình luận nhận link ưu đãi chính hãng",
       },
+      tourEndCardSpec,
     };
   }
 
@@ -356,17 +422,6 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
     const endSec = Number((accumulatedTime + segDuration).toFixed(1));
     const timeRangeSec = `${accumulatedTime.toFixed(1)}s - ${endSec.toFixed(1)}s`;
 
-    const omniPrompt = buildSegmentOmniPrompt({
-      role,
-      profile: "18s",
-      segmentIndex: i + 1,
-      totalSegments: numSegments,
-      startLabel,
-      endLabel,
-      location: input.location,
-      durationSeconds: segDuration,
-    });
-
     let voiceoverSegment = "";
     let captionText = "";
 
@@ -382,6 +437,18 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
       captionText = `VÉ CHÍNH HÃNG CHỈ ${formattedPrice}Đ`;
     }
 
+    const musePrompt = buildSegmentMusePrompt({
+      role,
+      profile: "18s",
+      segmentIndex: i + 1,
+      totalSegments: numSegments,
+      startLabel,
+      endLabel,
+      location: input.location,
+      durationSeconds: segDuration,
+      voiceoverSegment,
+    });
+
     segments.push({
       segmentIndex: i + 1,
       totalSegments: numSegments,
@@ -392,7 +459,8 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
       endAsset,
       durationSeconds: segDuration,
       timeRangeSec,
-      omniPrompt,
+      musePrompt,
+      omniPrompt: musePrompt,
       voiceoverSegment,
       captionText,
     });
@@ -405,6 +473,23 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
     .join(" ")
     .replace(/\s+/g, " ")
     .trim();
+
+  const tourEndCardSpec: TourEndCardSpec = {
+    productName: input.productName,
+    location: input.location,
+    salePrice: input.salePrice,
+    originalPrice: input.originalPrice ?? null,
+    highlights: (input.authenticTips && input.authenticTips.length > 0)
+      ? input.authenticTips.slice(0, 3)
+      : [
+          "Vé tham quan & cáp treo trọn gói",
+          "Check-in điểm ngắm cảnh đẹp nhất",
+          "Hỗ trợ vào cổng ưu tiên, không chờ đợi",
+        ],
+    ctaText: input.officialCta || "Bình luận nhận ưu đãi đặt vé hôm nay",
+    hotline: "1900 8888 (Tư vấn 24/7)",
+    merchantName: input.merchantName,
+  };
 
   return {
     profile: "18s_storytelling",
@@ -425,5 +510,6 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
       priceBadgeText: `Vé trọn gói chỉ: ${formattedPrice}đ`,
       ctaText: input.officialCta || "Bình luận nhận ưu đãi đặt vé hôm nay",
     },
+    tourEndCardSpec,
   };
 }
