@@ -6,6 +6,7 @@ import {
   type ProductInput,
   type ProductPatch,
 } from "./product-schema.ts";
+import { triggerProductEmbeddingSync } from "../automation/database-webhooks.ts";
 
 export interface MerchantProductDetail {
   id: string;
@@ -156,6 +157,8 @@ export async function createMerchantProduct(
       campaignsCount: 0,
     };
 
+    triggerProductEmbeddingSync(inserted.id, inserted, "INSERT");
+
     return { success: true, data: detail };
   } catch (err: any) {
     return {
@@ -230,6 +233,8 @@ export async function updateMerchantProduct(
         code: updateError?.code,
       };
     }
+
+    triggerProductEmbeddingSync(updated.id, updated, "UPDATE");
 
     return {
       success: true,
