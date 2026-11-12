@@ -13,6 +13,7 @@ import {
   Search,
   ShieldCheck,
   SlidersHorizontal,
+  Sparkles,
 } from "lucide-react";
 import { Brand } from "@/src/components/brand";
 import { Button } from "@/src/components/ui/button";
@@ -165,6 +166,10 @@ export function CampaignList({
           <Link prefetch={false} href={`${root}/campaigns`} aria-current="page">
             <SlidersHorizontal size={17} aria-hidden="true" />
             Chiến dịch
+          </Link>
+          <Link prefetch={false} href={`${root}/contents`}>
+            <Sparkles size={17} aria-hidden="true" />
+            Kiểm duyệt AI
           </Link>
           <Link prefetch={false} href={`${root}/library`}>
             <Film size={17} aria-hidden="true" />

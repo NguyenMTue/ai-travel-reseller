@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Film,
   Plus,
+  Sparkles,
 } from "lucide-react";
 import { Brand } from "@/src/components/brand";
 import { Button } from "@/src/components/ui/button";
@@ -124,6 +125,10 @@ export function Dashboard({
           <Link prefetch={false} href={preview ? "/preview/merchant/campaigns" : "/merchant/campaigns"}>
             <SlidersHorizontal size={19} />
             Chiến dịch
+          </Link>
+          <Link prefetch={false} href={preview ? "/preview/merchant/contents" : "/merchant/contents"}>
+            <Sparkles size={19} />
+            Kiểm duyệt AI
           </Link>
           <Link prefetch={false} href={preview ? "/preview/merchant/library" : "/merchant/library"}>
             <Film size={19} />

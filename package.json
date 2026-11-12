@@ -25,6 +25,7 @@
     "test:be1:sprint": "node --env-file=.env.local --experimental-strip-types --test tests/be1-final-sprint.test.ts",
     "test:be2:sprint": "node --env-file=.env.local --experimental-strip-types --test tests/be2-final-sprint.test.ts",
     "test:merchant-products": "node --env-file=.env.local --experimental-strip-types --test tests/merchant-products.test.ts",
+    "test:merchant-content": "node --env-file=.env.local --experimental-strip-types --test tests/merchant-content-approval.test.ts",
     "test:payout-double-spend": "node --env-file=.env.local --experimental-strip-types --test tests/payout-double-spend.test.ts",
     "test:final-sprint": "node --env-file=.env.local --experimental-strip-types --test tests/be1-final-sprint.test.ts tests/be2-final-sprint.test.ts",
     "benchmark:wallet": "node --env-file=.env.local scripts/benchmark-reseller-wallet.mjs",
