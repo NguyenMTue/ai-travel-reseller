@@ -8,7 +8,8 @@ export function createPortalAccessSource(client: SupabaseClient): PortalAccessSo
       return { data: data.user, error, status: error?.status };
     },
     async getMembership(portal, userId) {
-      return client.from(portal === "merchant" ? "merchants" : "resellers").select("id").eq("id", userId).maybeSingle();
+      const table = portal === "merchant" ? "merchants" : portal === "reseller" ? "resellers" : "admins";
+      return client.from(table).select("id").eq("id", userId).maybeSingle();
     },
   };
 }

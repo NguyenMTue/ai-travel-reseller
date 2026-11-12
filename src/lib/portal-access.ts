@@ -3,7 +3,7 @@ import { databaseUuidSchema } from "./reseller/database-uuid";
 import { classifyDataFailure, type DataFailureKind } from "./reseller/data-failure";
 import { parseSafeNextPath } from "./auth-validation";
 
-export type Portal = "merchant" | "reseller";
+export type Portal = "merchant" | "reseller" | "admin";
 type Reply = { data: unknown; error: unknown; status?: number };
 export interface PortalAccessSource {
   getUser(): Promise<Reply>;
@@ -67,6 +67,6 @@ export async function resolveLoginDestination(source: PortalAccessSource, reques
 // Both portals now repeat getUser + membership at protected loaders/actions.
 // Auth transport failures may reach those loaders instead of faking expiry.
 export function canHandlePortalAuthFailure(pathname: string, status: number | undefined) {
-  return ["/merchant", "/reseller"].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
+  return ["/merchant", "/reseller", "/admin"].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
     && ![400, 401, 403].includes(status ?? -1);
 }
