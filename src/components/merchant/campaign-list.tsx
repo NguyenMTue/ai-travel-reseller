@@ -7,6 +7,7 @@ import {
   ArrowUpRight,
   Film,
   FolderPlus,
+  Package,
   PauseCircle,
   PlayCircle,
   Search,
@@ -156,6 +157,10 @@ export function CampaignList({
           <Link prefetch={false} href={root}>
             <ArrowLeft size={16} aria-hidden="true" />
             Tổng quan
+          </Link>
+          <Link prefetch={false} href={`${root}/products`}>
+            <Package size={17} aria-hidden="true" />
+            Sản phẩm
           </Link>
           <Link prefetch={false} href={`${root}/campaigns`} aria-current="page">
             <SlidersHorizontal size={17} aria-hidden="true" />

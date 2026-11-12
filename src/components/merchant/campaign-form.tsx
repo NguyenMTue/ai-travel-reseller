@@ -96,7 +96,14 @@ export function CampaignForm({ products, canSave, submitAction, preview = false 
       {noProducts && <section className={styles.empty} aria-labelledby="no-products-title">
         <h2 id="no-products-title">Chưa có sản phẩm để tạo chiến dịch</h2>
         <p>Sản phẩm thuộc doanh nghiệp của bạn sẽ xuất hiện tại đây khi có dữ liệu phù hợp.</p>
-        <CampaignReloadButton />
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "12px", flexWrap: "wrap" }}>
+          <Button asChild>
+            <Link href={preview ? "/preview/merchant/products/new" : "/merchant/products/new"}>
+              + Thêm sản phẩm mới
+            </Link>
+          </Button>
+          <CampaignReloadButton />
+        </div>
       </section>}
       {result && <div ref={resultRef} tabIndex={-1} className={`${styles.result} ${result.status === "success" ? styles.success : ""}`} role={result.status === "success" ? "status" : "alert"}>
         <p>{result.status === "success" ? (preview ? "Mô phỏng thành công — không tạo chiến dịch thật." : "Đã lưu chiến dịch. Đang về Dashboard…") : result.message}</p>

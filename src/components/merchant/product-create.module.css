@@ -1,0 +1,58 @@
+.shell { min-height: 100vh; display: flex; flex-direction: column; background: var(--background); }
+.header { border-bottom: 1px solid var(--border); padding: 0 24px; min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 20px; background: var(--white); }
+.headerLeft { display: flex; align-items: center; gap: 20px; }
+.workspace { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted-foreground); }
+.page { flex: 1; max-width: 1200px; width: 100%; margin: 0 auto; padding: 32px 24px 64px; }
+
+.back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted-foreground); font-size: 14px; text-decoration: none; margin-bottom: 24px; }
+.back:hover { color: var(--foreground); }
+
+.heading { margin-bottom: 32px; }
+.heading h1 { font: 500 clamp(28px, 4vw, 38px)/1.2 var(--font-display); margin: 8px 0; color: var(--foreground); }
+.heading p { color: var(--muted-foreground); margin: 0; font-size: 15px; }
+
+.layout { display: grid; grid-template-columns: 1fr 340px; gap: 32px; align-items: flex-start; }
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+.formCard { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+.form { display: flex; flex-direction: column; gap: 22px; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.fieldRow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 600px) {
+  .fieldRow { grid-template-columns: 1fr; }
+}
+
+.label { font-size: 14px; font-weight: 600; color: var(--foreground); display: flex; align-items: center; justify-content: space-between; }
+.labelRequired { color: #dc2626; margin-left: 4px; }
+.hint { font-size: 12px; color: var(--muted-foreground); margin: 0; }
+.fieldError { font-size: 12px; color: #dc2626; margin: 2px 0 0; font-weight: 500; }
+
+.input { width: 100%; min-height: 44px; padding: 0 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--white); outline: none; transition: border-color 0.15s; }
+.input:focus { border-color: var(--primary); ring: 2px var(--ring); }
+.input[aria-invalid="true"] { border-color: #dc2626; }
+
+.textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--white); outline: none; transition: border-color 0.15s; resize: vertical; min-height: 90px; }
+.textarea:focus { border-color: var(--primary); ring: 2px var(--ring); }
+.textarea[aria-invalid="true"] { border-color: #dc2626; }
+
+.select { width: 100%; min-height: 44px; padding: 0 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--white); outline: none; }
+
+.actions { display: flex; align-items: center; gap: 14px; margin-top: 12px; padding-top: 20px; border-top: 1px solid var(--border); }
+
+.guideCard { background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; position: sticky; top: 24px; }
+.guideCard h2 { font: 500 18px/1.3 var(--font-display); color: var(--foreground); margin: 12px 0 8px; }
+.guideCard p { font-size: 13px; color: var(--muted-foreground); line-height: 1.5; margin: 0 0 16px; }
+.guideList { padding-left: 18px; margin: 0 0 16px; font-size: 13px; color: var(--foreground); line-height: 1.6; }
+.guideList li { margin-bottom: 8px; }
+.guideNote { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #1e40af; line-height: 1.4; }
+
+.successState { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 48px 32px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.successIcon { width: 64px; height: 64px; border-radius: 50%; background: #ecfdf5; color: #059669; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+.successState h2 { font: 500 24px var(--font-display); color: var(--foreground); margin: 0; }
+.successState p { max-width: 460px; color: var(--muted-foreground); font-size: 14px; margin: 0; }
+.successActions { display: flex; align-items: center; gap: 12px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+
+.footer { border-top: 1px solid var(--border); padding: 24px; text-align: center; font-size: 13px; color: var(--muted-foreground); }
