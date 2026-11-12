@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { databaseUuidSchema } from "./database-uuid";
+import { databaseUuidSchema } from "./database-uuid.ts";
 
 export const personas = [
   { id: "local-guide", label: "Local Guide" },

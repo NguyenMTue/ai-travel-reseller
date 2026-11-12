@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, Film, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Film, ShieldCheck, Package, SlidersHorizontal, Sparkles } from "lucide-react";
 import { Brand } from "@/src/components/brand";
 import styles from "./library.module.css";
 
@@ -10,6 +10,9 @@ export function LibraryShell({children,preview=false}:{children:React.ReactNode;
     <main id="main-content" className={styles.main}>
       <nav aria-label="Điều hướng Merchant" className={styles.nav}>
         <Link prefetch={false} href={root}><ArrowLeft size={16} aria-hidden="true" />Tổng quan</Link>
+        <Link prefetch={false} href={`${root}/products`}><Package size={17} aria-hidden="true" />Sản phẩm</Link>
+        <Link prefetch={false} href={`${root}/campaigns`}><SlidersHorizontal size={17} aria-hidden="true" />Chiến dịch</Link>
+        <Link prefetch={false} href={`${root}/contents`}><Sparkles size={17} aria-hidden="true" />Kiểm duyệt AI</Link>
         <Link prefetch={false} href={`${root}/library`} aria-current="page"><Film size={17} aria-hidden="true" />Thư viện media</Link>
         <Link prefetch={false} href={`${root}/campaigns/new`}>Tạo chiến dịch<ArrowUpRight size={15} aria-hidden="true" /></Link>
       </nav>
