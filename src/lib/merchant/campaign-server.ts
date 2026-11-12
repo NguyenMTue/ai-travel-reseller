@@ -6,6 +6,7 @@ import { campaignFailureMessages, type CampaignFormLoadResult, type CampaignSave
 import { getConfirmedCampaignCreatePolicy } from "./campaign-policy";
 import { createMerchantCampaignSource } from "./campaign-source";
 import { loadMerchantCampaignForm, saveMerchantCampaign } from "./campaign-service";
+import { triggerCampaignContentGeneration } from "@/src/lib/automation/database-webhooks";
 
 export async function getMerchantCampaignForm(): Promise<CampaignFormLoadResult> {
   if (!hasSupabaseConfig) return { status: "error", reason: "configuration" };
@@ -21,7 +22,14 @@ export async function createMerchantCampaign(input: unknown): Promise<CampaignSa
   if (!hasSupabaseConfig) return { status: "error", reason: "configuration", message: campaignFailureMessages.configuration };
   try {
     const client = createClient(await cookies());
-    return await saveMerchantCampaign(createMerchantCampaignSource(client), input, getConfirmedCampaignCreatePolicy());
+    const result = await saveMerchantCampaign(createMerchantCampaignSource(client), input, getConfirmedCampaignCreatePolicy());
+
+    // Kích hoạt tự động n8n Webhook sinh Content Kit khi chiến dịch tạo thành công
+    if (result.status === "success" && "campaignId" in result && result.campaignId) {
+      triggerCampaignContentGeneration(result.campaignId, { id: result.campaignId });
+    }
+
+    return result;
   } catch {
     return { status: "error", reason: "configuration", message: campaignFailureMessages.configuration };
   }

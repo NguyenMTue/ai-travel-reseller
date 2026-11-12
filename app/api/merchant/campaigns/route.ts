@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/src/lib/supabase/server";
+import { triggerCampaignContentGeneration } from "@/src/lib/automation/database-webhooks";
 
 export const dynamic = "force-dynamic";
 
@@ -178,6 +179,118 @@ export async function PATCH(request: Request) {
     );
   } catch (err: any) {
     console.error("PATCH /api/merchant/campaigns catch error:", err);
+    return NextResponse.json(
+      { success: false, error: "Lỗi hệ thống: " + err?.message },
+      { status: 500, headers: { "Cache-Control": "private, no-store" } }
+    );
+  }
+}
+
+/**
+ * POST /api/merchant/campaigns
+ * Tạo mới một chiến dịch cho Merchant và kích hoạt sinh Content Kit tự động
+ */
+export async function POST(request: Request) {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    let merchantId = user?.id;
+
+    if (!merchantId && process.env.NODE_ENV !== "production") {
+      merchantId =
+        request.headers.get("x-merchant-id")?.trim() ||
+        new URL(request.url).searchParams.get("merchant_id")?.trim() ||
+        undefined;
+    }
+
+    if (!merchantId) {
+      return NextResponse.json(
+        { success: false, error: "Yêu cầu xác thực tài khoản Merchant hợp lệ." },
+        { status: 401, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+
+    const body = await request.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json(
+        { success: false, error: "Dữ liệu yêu cầu không hợp lệ." },
+        { status: 400, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+
+    const {
+      product_id,
+      name,
+      commission_rate,
+      start_date,
+      end_date,
+      target_audience,
+      target_location,
+    } = body;
+
+    if (!product_id || !name) {
+      return NextResponse.json(
+        { success: false, error: "Thiếu product_id hoặc name chiến dịch." },
+        { status: 400, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+
+    // Xác thực sản phẩm thuộc sở hữu của Merchant
+    const { data: product, error: prodError } = await (supabase as any)
+      .from("products")
+      .select("id, merchant_id, name")
+      .eq("id", product_id)
+      .eq("merchant_id", merchantId)
+      .maybeSingle();
+
+    if (prodError || !product) {
+      return NextResponse.json(
+        { success: false, error: "Sản phẩm không tồn tại hoặc không thuộc quyền quản lý của bạn." },
+        { status: 403, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+
+    const { data: inserted, error: insertError } = await (supabase as any)
+      .from("campaigns")
+      .insert({
+        merchant_id: merchantId,
+        product_id,
+        name: String(name).trim(),
+        commission_rate: commission_rate != null ? Number(commission_rate) : 10,
+        start_date: start_date || null,
+        end_date: end_date || null,
+        target_audience: target_audience ? String(target_audience).trim() : "Du khách đam mê khám phá",
+        target_location: target_location ? String(target_location).trim() : "Việt Nam",
+        status: "active",
+      })
+      .select()
+      .single();
+
+    if (insertError || !inserted) {
+      return NextResponse.json(
+        { success: false, error: "Không thể tạo chiến dịch: " + insertError?.message },
+        { status: 500, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+
+    // Kích hoạt webhook n8n sinh Content Kit (Non-blocking)
+    triggerCampaignContentGeneration(inserted.id, inserted);
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Tạo chiến dịch thành công và đã kích hoạt sinh Content Kit tự động.",
+        data: inserted,
+      },
+      { status: 201, headers: { "Cache-Control": "private, no-store" } }
+    );
+  } catch (err: any) {
+    console.error("POST /api/merchant/campaigns catch error:", err);
     return NextResponse.json(
       { success: false, error: "Lỗi hệ thống: " + err?.message },
       { status: 500, headers: { "Cache-Control": "private, no-store" } }

@@ -18,6 +18,11 @@ const UUID_PATTERN =
 
 type SyncRequest = {
   product_id?: unknown;
+  type?: string;
+  table?: string;
+  schema?: string;
+  record?: { id?: unknown; [key: string]: unknown };
+  old_record?: { id?: unknown; [key: string]: unknown };
 };
 
 function hashContent(content: string): string {
@@ -35,7 +40,21 @@ export async function POST(request: Request) {
       );
     }
 
-    if (request.headers.get("authorization") !== `Bearer ${syncSecret}`) {
+    const authHeader = request.headers.get("authorization");
+    const customSecretHeader = request.headers.get("x-embeddings-secret");
+    let urlSecret: string | null = null;
+    try {
+      urlSecret = new URL(request.url).searchParams.get("secret");
+    } catch {
+      // Ignored if URL parsing fails
+    }
+
+    const isAuthorized =
+      authHeader === `Bearer ${syncSecret}` ||
+      customSecretHeader === syncSecret ||
+      urlSecret === syncSecret;
+
+    if (!isAuthorized) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -47,8 +66,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
 
-    const productId =
-      typeof body.product_id === "string" ? body.product_id.trim() : "";
+    const eventType =
+      typeof body.type === "string" ? body.type.toUpperCase() : "SYNC";
+
+    let rawProductId = "";
+    if (typeof body.product_id === "string") {
+      rawProductId = body.product_id;
+    } else if (body.record && typeof body.record.id === "string") {
+      rawProductId = body.record.id;
+    } else if (body.old_record && typeof body.old_record.id === "string") {
+      rawProductId = body.old_record.id;
+    }
+
+    const productId = rawProductId.trim();
 
     if (!UUID_PATTERN.test(productId)) {
       return NextResponse.json(
@@ -58,6 +88,28 @@ export async function POST(request: Request) {
     }
 
     const supabase = createAdminClient();
+
+    // Xử lý sự kiện DELETE từ Supabase Webhook: Xóa sạch embeddings của sản phẩm bị xóa
+    if (eventType === "DELETE") {
+      const { data: deletedRows, error: deleteError } = await supabase
+        .from("product_embeddings")
+        .delete()
+        .eq("product_id", productId)
+        .select("id");
+
+      if (deleteError) {
+        throw new Error(
+          `Cannot remove embeddings on delete: ${deleteError.message}`,
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        event: "DELETE",
+        product_id: productId,
+        removed: deletedRows?.length ?? 0,
+      });
+    }
     const { data: product, error: productError } = await supabase
       .from("products")
       .select("id, name, description, category, original_price, sale_price")
@@ -146,6 +198,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
+      success: true,
+      event: eventType,
       product_id: product.id,
       model: EMBEDDING_MODEL,
       chunks: chunks.length,
