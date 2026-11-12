@@ -1,8 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ArrowDownLeft, Clock3, RefreshCw, Wallet } from "lucide-react";
-import { formatWalletDate, formatWalletMoney, walletStatus, type WalletSummary } from "@/src/lib/reseller/wallet";
+import {
+  formatWalletDate,
+  formatWalletMoney,
+  walletStatus,
+  payoutStatus,
+  type WalletSummary,
+  type PayoutRequestItem,
+} from "@/src/lib/reseller/wallet";
 import { PayoutModal } from "./payout-modal";
 import styles from "./wallet.module.css";
 
@@ -21,10 +28,40 @@ export function WalletLoading() {
   );
 }
 
-export function WalletDashboard({ wallet, refresh }: { wallet: WalletSummary; refresh: () => void }) {
+export function WalletDashboard({
+  wallet,
+  refresh,
+}: {
+  wallet: WalletSummary;
+  refresh: () => void;
+}) {
   const [isPayoutOpen, setIsPayoutOpen] = useState(false);
+  const [payouts, setPayouts] = useState<PayoutRequestItem[]>([]);
   const b = wallet.balances,
     m = wallet.order_metrics;
+
+  const loadPayouts = useCallback(async () => {
+    try {
+      const res = await fetch("/api/reseller/wallet/payout");
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data?.payouts) {
+          setPayouts(json.data.payouts);
+        }
+      }
+    } catch {
+      // Ignored in preview or offline
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPayouts();
+  }, [loadPayouts]);
+
+  const handleRefresh = () => {
+    refresh();
+    loadPayouts();
+  };
 
   return (
     <div className={styles.wallet}>
@@ -34,7 +71,7 @@ export function WalletDashboard({ wallet, refresh }: { wallet: WalletSummary; re
           <h1>Ví hoa hồng của bạn</h1>
           <p>Theo dõi thu nhập và các giao dịch hoa hồng được ghi nhận.</p>
         </div>
-        <button className={styles.refresh} onClick={refresh}>
+        <button className={styles.refresh} onClick={handleRefresh}>
           <RefreshCw size={17} aria-hidden="true" /> Tải lại ví
         </button>
       </header>
@@ -86,6 +123,12 @@ export function WalletDashboard({ wallet, refresh }: { wallet: WalletSummary; re
             {formatWalletMoney(b.available_balance)}
           </p>
           <p>Các khoản đã được xác nhận</p>
+          {b.pending_payout_balance && b.pending_payout_balance > 0 ? (
+            <div className={styles.payoutLockedNotice} role="status">
+              <Clock3 size={15} />
+              <span>Đang giữ chỗ rút: {formatWalletMoney(b.pending_payout_balance)}</span>
+            </div>
+          ) : null}
         </article>
 
         <article className={styles.pending}>
@@ -136,6 +179,70 @@ export function WalletDashboard({ wallet, refresh }: { wallet: WalletSummary; re
         </dl>
       </section>
 
+      {/* Lịch sử yêu cầu rút tiền của Reseller */}
+      <section aria-labelledby="payout-history-title" className={styles.payoutSection}>
+        <div className={styles.historyHeader}>
+          <div>
+            <p className="eyebrow">DÒNG TIỀN VỀ TÀI KHOẢN</p>
+            <h2 id="payout-history-title">Lịch sử yêu cầu rút tiền</h2>
+          </div>
+          <span>{payouts.length} yêu cầu được ghi nhận</span>
+        </div>
+        <p className={styles.historyHelp}>
+          Tiền hoa hồng sẽ được chuyển về tài khoản ngân hàng thụ hưởng sau khi đối soát thành công.
+        </p>
+        {payouts.length === 0 ? (
+          <div className={styles.empty}>
+            <Wallet size={28} aria-hidden="true" />
+            <h3>Chưa có yêu cầu rút tiền nào</h3>
+            <p>
+              Khi bạn tích lũy đủ từ 100.000 ₫ hoa hồng khả dụng, hãy bấm nút &quot;Rút tiền&quot; ở trên để tạo lệnh chuyển khoản.
+            </p>
+          </div>
+        ) : (
+          <ul className={styles.transactions}>
+            {payouts.map((item) => {
+              const status = payoutStatus(item.status);
+              return (
+                <li key={item.id} className={styles.transaction}>
+                  <div className={styles.transactionTitle}>
+                    <h3>{formatWalletMoney(item.amount)}</h3>
+                    <span className={styles.badge} data-tone={status.tone}>
+                      {status.label}
+                    </span>
+                  </div>
+                  <dl className={styles.transactionMeta}>
+                    <div>
+                      <dt>Mã yêu cầu</dt>
+                      <dd>
+                        <code>{item.id.slice(0, 8)}...</code>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Thời gian tạo (UTC+7)</dt>
+                      <dd>{formatWalletDate(item.created_at)}</dd>
+                    </div>
+                    <div>
+                      <dt>Ngân hàng & Số tài khoản</dt>
+                      <dd>
+                        {item.bank_name.split("(")[0].trim()} · {item.account_number}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div className={styles.commission}>
+                    <div>
+                      <span>Chủ tài khoản thụ hưởng</span>
+                      <strong>{item.account_name}</strong>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
+      {/* Lịch sử hoa hồng từ các đơn hàng */}
       <section aria-labelledby="wallet-history-title" className={styles.history}>
         <div className={styles.historyHeader}>
           <div>
@@ -208,7 +315,8 @@ export function WalletDashboard({ wallet, refresh }: { wallet: WalletSummary; re
         isOpen={isPayoutOpen}
         onClose={() => setIsPayoutOpen(false)}
         availableBalance={b.available_balance}
-        onSuccess={refresh}
+        pendingPayoutBalance={b.pending_payout_balance}
+        onSuccess={handleRefresh}
       />
     </div>
   );
