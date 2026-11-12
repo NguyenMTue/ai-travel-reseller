@@ -14,6 +14,7 @@ import {
   Menu,
   ShieldCheck,
   Film,
+  Plus,
 } from "lucide-react";
 import { Brand } from "@/src/components/brand";
 import { Button } from "@/src/components/ui/button";
@@ -308,7 +309,18 @@ export function Dashboard({
                         : `${products.length} sản phẩm thực tế từ hệ thống`}
                     </p>
                   </div>
-                  <SlidersHorizontal size={20} />
+                  <div className="flex items-center gap-2">
+                    <Button asChild size="sm">
+                      <Link href={preview ? "/preview/merchant/products/new" : "/merchant/products/new"}>
+                        <Plus size={15} /> Thêm sản phẩm
+                      </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={preview ? "/preview/merchant/products" : "/merchant/products"}>
+                        Quản lý chi tiết ↗
+                      </Link>
+                    </Button>
+                  </div>
                 </div>
                 <div className="product-filters">
                   <div className="search-input">
