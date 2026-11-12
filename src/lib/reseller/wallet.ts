@@ -11,6 +11,7 @@ export const walletViewSchema = resellerWalletSummarySchema.extend({
   balances: resellerWalletSummarySchema.shape.balances.extend({
     currency: z.literal("VND"), available_balance: money, pending_balance: money,
     paid_balance: money, refunded_balance: money, lifetime_earnings: money,
+    pending_payout_balance: money.optional(),
   }),
   order_metrics: z.object({ total_orders: count, confirmed_orders: count, pending_orders: count,
     total_gmv: money, flagged_self_purchase_orders: count }),
@@ -18,6 +19,7 @@ export const walletViewSchema = resellerWalletSummarySchema.extend({
     platform_fee: money, net_amount: money, order_amount: money })).max(10),
 });
 export type WalletSummary = z.infer<typeof walletViewSchema>;
+export type { PayoutRequestItem } from "../commerce/wallet-service.ts";
 export type WalletResult =
   | { status: "ready"; data: WalletSummary }
   | { status: "session" | "forbidden" | "error"; reason?: "network" | "schema" | "service" };
@@ -92,5 +94,15 @@ export function walletStatus(status: string): { label: string; tone: string } {
   const labels: Record<string, {label: string; tone: string}> = { pending: { label: "Chờ đối soát", tone: "pending" }, confirmed: { label: "Đã xác nhận", tone: "confirmed" },
     paid: { label: "Đã chi trả", tone: "paid" }, cancelled: { label: "Đã hủy", tone: "cancelled" },
     refunded: { label: "Đã hoàn trả", tone: "cancelled" } };
+  return Object.hasOwn(labels, status) ? labels[status] : { label: "Chưa xác định", tone: "unknown" };
+}
+
+export function payoutStatus(status: string): { label: string; tone: string } {
+  const labels: Record<string, { label: string; tone: string }> = {
+    pending: { label: "Chờ đối soát", tone: "pending" },
+    processing: { label: "Đang chuyển khoản", tone: "confirmed" },
+    completed: { label: "Đã chi trả", tone: "paid" },
+    rejected: { label: "Bị từ chối", tone: "cancelled" },
+  };
   return Object.hasOwn(labels, status) ? labels[status] : { label: "Chưa xác định", tone: "unknown" };
 }

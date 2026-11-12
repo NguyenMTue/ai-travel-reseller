@@ -34,6 +34,7 @@ export const resellerWalletSummarySchema = z.object({
     paid_balance: z.number(),
     refunded_balance: z.number(),
     lifetime_earnings: z.number(),
+    pending_payout_balance: z.number().optional(),
     currency: z.string().default("VND"),
   }),
   order_metrics: z.object({
@@ -52,6 +53,22 @@ export type ResellerWalletSummary = z.infer<typeof resellerWalletSummarySchema>;
 export type WalletServiceResult =
   | { success: true; data: ResellerWalletSummary }
   | { success: false; error: string; code: string };
+
+/**
+ * Schema kiểm tra dữ liệu yêu cầu rút tiền của Reseller
+ */
+export const payoutRequestItemSchema = z.object({
+  id: z.string(),
+  reseller_id: z.string().optional(),
+  amount: z.number(),
+  bank_name: z.string(),
+  account_number: z.string(),
+  account_name: z.string(),
+  status: z.enum(["pending", "processing", "completed", "rejected"]),
+  created_at: z.string(),
+});
+
+export type PayoutRequestItem = z.infer<typeof payoutRequestItemSchema>;
 
 /**
  * Gọi Stored Procedure RPC get_reseller_wallet_summary trong Database
@@ -92,9 +109,36 @@ export async function fetchResellerWalletSummary(
       };
     }
 
+    // Tự động kiểm tra và khấu trừ payout_requests đang pending/processing nếu RPC chưa khấu trừ
+    let adjustedAvailable = parsed.data.balances.available_balance;
+    let pendingPayoutsTotal = parsed.data.balances.pending_payout_balance || 0;
+
+    if (pendingPayoutsTotal === 0 && typeof (client as any)?.from === "function") {
+      try {
+        const { data: payouts } = await (client as any)
+          .from("payout_requests")
+          .select("amount")
+          .eq("reseller_id", resellerId)
+          .in("status", ["pending", "processing"]);
+        if (payouts && Array.isArray(payouts) && payouts.length > 0) {
+          pendingPayoutsTotal = payouts.reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0);
+          adjustedAvailable = Math.max(0, adjustedAvailable - pendingPayoutsTotal);
+        }
+      } catch {
+        // Fallback im lặng nếu client mock không hỗ trợ from
+      }
+    }
+
     return {
       success: true,
-      data: parsed.data,
+      data: {
+        ...parsed.data,
+        balances: {
+          ...parsed.data.balances,
+          available_balance: adjustedAvailable,
+          pending_payout_balance: pendingPayoutsTotal,
+        },
+      },
     };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Lỗi không xác định khi truy vấn ví";
@@ -103,5 +147,31 @@ export async function fetchResellerWalletSummary(
       error: message,
       code: "EXCEPTION",
     };
+  }
+}
+
+/**
+ * Lấy lịch sử yêu cầu rút tiền của Reseller
+ */
+export async function fetchResellerPayoutHistory(
+  client: SupabaseClient<Database>,
+  resellerId: string,
+  limit = 20,
+): Promise<{ success: boolean; data?: PayoutRequestItem[]; error?: string }> {
+  try {
+    const { data, error } = await (client as any)
+      .from("payout_requests")
+      .select("id, reseller_id, amount, bank_name, account_number, account_name, status, created_at")
+      .eq("reseller_id", resellerId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: (data || []) as PayoutRequestItem[] };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Lỗi truy vấn lịch sử rút tiền" };
   }
 }

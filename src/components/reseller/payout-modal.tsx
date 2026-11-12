@@ -9,6 +9,7 @@ export interface PayoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   availableBalance: number;
+  pendingPayoutBalance?: number;
   onSuccess?: () => void;
 }
 
@@ -32,6 +33,7 @@ export function PayoutModal({
   isOpen,
   onClose,
   availableBalance,
+  pendingPayoutBalance = 0,
   onSuccess,
 }: PayoutModalProps) {
   const [bankName, setBankName] = useState(VIETNAM_BANKS[0]);
@@ -156,10 +158,15 @@ export function PayoutModal({
         </div>
 
         <div className={styles.balanceCard}>
-          <span className={styles.balanceLabel}>Số dư khả dụng hiện tại</span>
+          <span className={styles.balanceLabel}>Số dư khả dụng có thể rút</span>
           <span className={styles.balanceValue}>
             {formatWalletMoney(availableBalance)}
           </span>
+          {pendingPayoutBalance > 0 && (
+            <span style={{ fontSize: "12px", color: "#b45309", marginTop: "4px" }}>
+              (Đang chờ xử lý rút: {formatWalletMoney(pendingPayoutBalance)})
+            </span>
+          )}
         </div>
 
         {errorMsg && (
