@@ -13,9 +13,11 @@ export async function GET(request: Request) {
 
     // 1. Xác định reseller_id từ session cookie (ưu tiên bảo mật)
     let sessionUserId: string | null = null;
+    let authClient: ReturnType<typeof createClient> | null = null;
     try {
       const cookieStore = await cookies();
       const supabaseAuth = createClient(cookieStore);
+      authClient = supabaseAuth;
       const {
         data: { user },
       } = await supabaseAuth.auth.getUser();
@@ -58,14 +60,21 @@ export async function GET(request: Request) {
       );
     }
 
-    const adminClient = createAdminClient();
+    const hasServiceRoleKey = Boolean(
+      process.env.SUPABASE_SECRET_KEY?.trim() ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+    );
+
+    const dbClient = (hasServiceRoleKey || !authClient)
+      ? createAdminClient()
+      : authClient;
 
     // 2. Thực thi đồng thời 4 hàm Postgres RPC tốc độ cao
     const [overviewRes, timeseriesRes, topCampaignsRes, devicesRes] = await Promise.all([
-      adminClient.rpc("get_reseller_overview_stats", { p_reseller_id: resellerId }),
-      adminClient.rpc("get_reseller_click_timeseries", { p_reseller_id: resellerId, p_days: days }),
-      adminClient.rpc("get_reseller_top_campaigns", { p_reseller_id: resellerId, p_limit: 5 }),
-      adminClient.rpc("get_reseller_device_stats", { p_reseller_id: resellerId }),
+      dbClient.rpc("get_reseller_overview_stats", { p_reseller_id: resellerId }),
+      dbClient.rpc("get_reseller_click_timeseries", { p_reseller_id: resellerId, p_days: days }),
+      dbClient.rpc("get_reseller_top_campaigns", { p_reseller_id: resellerId, p_limit: 5 }),
+      dbClient.rpc("get_reseller_device_stats", { p_reseller_id: resellerId }),
     ]);
 
     // Kiểm tra lỗi nếu có RPC function thất bại

@@ -14,9 +14,11 @@ export async function GET(request: Request) {
 
     // 1. Xác định reseller_id từ session cookie (ưu tiên bảo mật)
     let sessionUserId: string | null = null;
+    let authClient: ReturnType<typeof createClient> | null = null;
     try {
       const cookieStore = await cookies();
       const supabaseAuth = createClient(cookieStore);
+      authClient = supabaseAuth;
       const {
         data: { user },
       } = await supabaseAuth.auth.getUser();
@@ -59,10 +61,17 @@ export async function GET(request: Request) {
       );
     }
 
-    const adminClient = createAdminClient();
+    const hasServiceRoleKey = Boolean(
+      process.env.SUPABASE_SECRET_KEY?.trim() ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+    );
+
+    const dbClient = (hasServiceRoleKey || !authClient)
+      ? createAdminClient()
+      : authClient;
 
     // 2. Truy vấn danh sách link tiếp thị của Reseller kèm thông tin chiến dịch & sản phẩm
-    const { data: links, count, error } = await adminClient
+    const { data: links, count, error } = await dbClient
       .from("affiliate_links")
       .select(
         `
