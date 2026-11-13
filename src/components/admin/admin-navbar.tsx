@@ -57,7 +57,7 @@ export function AdminNavbar({
   ];
 
   return (
-    <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 text-slate-100">
+    <header className="bg-white border-b border-border sticky top-0 z-40 text-foreground shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo & Portal Badge */}
@@ -65,19 +65,19 @@ export function AdminNavbar({
             <div className="flex items-center gap-2">
               <Brand href={root} />
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
-              <Shield className="w-3.5 h-3.5" />
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold">
+              <Shield className="w-3.5 h-3.5 text-amber-600" />
               <span>Back-Office Super Admin</span>
             </div>
             {preview && (
-              <span className="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 font-mono">
+              <span className="text-xs px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 font-mono font-medium">
                 Preview Mode
               </span>
             )}
           </div>
 
           {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-1.5">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -86,14 +86,14 @@ export function AdminNavbar({
                   href={item.href}
                   className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
                     item.active
-                      ? "bg-slate-800 text-white shadow-sm"
-                      : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                      ? "bg-primary text-white shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
                   }`}
                 >
                   <Icon className="w-4 h-4" />
                   <span>{item.label}</span>
                   {item.badge !== undefined && (
-                    <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-red-500 text-white animate-pulse">
+                    <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-red-600 text-white animate-pulse">
                       {item.badge}
                     </span>
                   )}
@@ -105,10 +105,10 @@ export function AdminNavbar({
           {/* User profile & actions */}
           <div className="flex items-center gap-3">
             <div className="hidden lg:flex flex-col text-right">
-              <span className="text-xs font-medium text-slate-200 leading-tight">
+              <span className="text-xs font-semibold text-foreground leading-tight">
                 {adminName}
               </span>
-              <span className="text-[10px] text-amber-400 font-mono uppercase tracking-wider">
+              <span className="text-[10px] text-amber-700 font-mono font-bold uppercase tracking-wider">
                 {adminRole}
               </span>
             </div>
@@ -117,7 +117,7 @@ export function AdminNavbar({
               <Link
                 href="/merchant"
                 target="_blank"
-                className="text-xs text-slate-400 hover:text-slate-200 px-2.5 py-1.5 rounded border border-slate-800 hover:bg-slate-800 transition-colors hidden sm:flex items-center gap-1"
+                className="text-xs text-muted-foreground hover:text-foreground px-2.5 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors hidden sm:flex items-center gap-1"
                 title="Mở Merchant Portal trong tab mới"
               >
                 <span>Merchant</span>
@@ -126,7 +126,7 @@ export function AdminNavbar({
               <Link
                 href="/reseller"
                 target="_blank"
-                className="text-xs text-slate-400 hover:text-slate-200 px-2.5 py-1.5 rounded border border-slate-800 hover:bg-slate-800 transition-colors hidden sm:flex items-center gap-1"
+                className="text-xs text-muted-foreground hover:text-foreground px-2.5 py-1.5 rounded-lg border border-border hover:bg-muted transition-colors hidden sm:flex items-center gap-1"
                 title="Mở Reseller Portal trong tab mới"
               >
                 <span>Reseller</span>
@@ -141,7 +141,7 @@ export function AdminNavbar({
                 >
                   <button
                     type="submit"
-                    className="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
+                    className="p-2 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                     title="Đăng xuất khỏi Back-Office"
                   >
                     <LogOut className="w-4 h-4" />
@@ -153,7 +153,7 @@ export function AdminNavbar({
         </div>
 
         {/* Mobile Navigation */}
-        <div className="md:hidden flex items-center justify-between overflow-x-auto py-2.5 border-t border-slate-800/80 gap-2 scrollbar-none">
+        <div className="md:hidden flex items-center justify-between overflow-x-auto py-2.5 border-t border-border/80 gap-2 scrollbar-none">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -162,14 +162,14 @@ export function AdminNavbar({
                 href={item.href}
                 className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap ${
                   item.active
-                    ? "bg-slate-800 text-white"
-                    : "text-slate-400 hover:text-slate-200"
+                    ? "bg-primary text-white"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 <span>{item.label}</span>
                 {item.badge !== undefined && (
-                  <span className="px-1 py-0.2 text-[10px] font-bold rounded-full bg-red-500 text-white">
+                  <span className="px-1 py-0.2 text-[10px] font-bold rounded-full bg-red-600 text-white">
                     {item.badge}
                   </span>
                 )}
