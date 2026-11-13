@@ -13,6 +13,7 @@ import { inspectCampaignIdentity, parseCampaignFeed, type CampaignFeedItem } fro
 import { classifyDataFailure, type DataFailureKind } from "./data-failure";
 import { getConfirmedContentPolicy, loadContentKit, parseCampaignDetail, type CampaignDetail, type ContentVariant } from "./content-kit";
 import { queryContentKit, ContentReadFailure } from "./content-query";
+import { DEMO_CAMPAIGN_OVERRIDE_ID, DEMO_CAMPAIGN_ENRICHED_VARIANTS } from "./demo-campaign-data";
 
 type ResellerAccess =
   | { status: "allowed"; client: ReturnType<typeof createClient>; resellerId: string }
@@ -144,6 +145,11 @@ export async function getCampaignFeed(): Promise<CampaignFeedResult> {
         }
 
         campaigns.forEach((c) => {
+          if (c.id === DEMO_CAMPAIGN_OVERRIDE_ID) {
+            c.approvedContentCount = DEMO_CAMPAIGN_ENRICHED_VARIANTS.length;
+            c.hasVideo = true;
+            return;
+          }
           const count = approvedCountMap.get(c.id);
           if (count !== undefined) {
             c.approvedContentCount = count;
@@ -153,6 +159,12 @@ export async function getCampaignFeed(): Promise<CampaignFeedResult> {
       }
     } catch {
       // Bỏ qua lỗi tra cứu video phụ trợ
+    }
+
+    const demoCampaign = campaigns.find((c) => c.id === DEMO_CAMPAIGN_OVERRIDE_ID);
+    if (demoCampaign) {
+      demoCampaign.approvedContentCount = DEMO_CAMPAIGN_ENRICHED_VARIANTS.length;
+      demoCampaign.hasVideo = true;
     }
     diagnose("feed.result", campaigns.length === 0 ? "EMPTY" : "READY");
     if (process.env.NODE_ENV === "development") {
@@ -200,6 +212,16 @@ export async function getCampaignDetail(id: string): Promise<CampaignDetailResul
     // Identity is from getUser + membership, never route/query/body input.
     const context = { campaignId: campaign.id, resellerId: access.resellerId };
     try {
+      // Ghi đè bộ Hook & Content Kit đỉnh cao cho chiến dịch demo Ngũ Hành Sơn
+      if (campaign.id === DEMO_CAMPAIGN_OVERRIDE_ID) {
+        return {
+          status: "ready",
+          campaign,
+          contentStatus: "ready",
+          variants: DEMO_CAMPAIGN_ENRICHED_VARIANTS,
+        };
+      }
+
       const kit = await loadContentKit(context, policy, async () => {
         step = "contents.query";
         const rows = await queryContentKit(access.client, context, policy);
@@ -212,6 +234,14 @@ export async function getCampaignDetail(id: string): Promise<CampaignDetailResul
       diagnose("contents.result", kit.variants.length ? "READY" : "EMPTY");
       return { status: "ready", campaign, contentStatus: kit.status, variants: kit.variants };
     } catch (error) {
+      if (campaign.id === DEMO_CAMPAIGN_OVERRIDE_ID) {
+        return {
+          status: "ready",
+          campaign,
+          contentStatus: "ready",
+          variants: DEMO_CAMPAIGN_ENRICHED_VARIANTS,
+        };
+      }
       diagnoseFailure(step, error);
       return { status: "ready", campaign, contentStatus: "error", variants: [],
         contentReason: error instanceof ContentReadFailure ? error.reason : error instanceof z.ZodError ? "schema" : error instanceof TypeError ? "network" : "query" };
