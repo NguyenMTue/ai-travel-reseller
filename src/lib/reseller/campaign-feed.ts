@@ -20,6 +20,7 @@ export type CampaignFeedItem = {
   category: string | null;
   commissionRate: number | null;
   approvedContentCount: number | null;
+  hasVideo?: boolean;
 };
 
 export function parseCampaignFeed(data: unknown): CampaignFeedItem[] {

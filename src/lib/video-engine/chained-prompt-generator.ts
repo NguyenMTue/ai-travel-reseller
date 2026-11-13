@@ -98,15 +98,48 @@ export function countVoiceoverWords(text: string): number {
 }
 
 /**
- * Trích xuất nhãn súc tích của địa danh hoặc góc nhìn từ tiêu đề/mô tả ảnh
+ * Trích xuất nhãn súc tích của địa danh hoặc góc nhìn từ tiêu đề/mô tả ảnh.
+ * Chuyển đổi thông minh sang tiếng Anh thị giác để tối ưu hóa cho mô hình sinh video AI (CLIP/T5 Text Encoder).
  */
+export function cleanAssetVisualLabel(asset: ChainedAssetInput, fallback: string): string {
+  const raw = (asset.title || asset.description || fallback || "").toLowerCase();
+
+  if (raw.includes("cầu vàng") || raw.includes("golden bridge")) {
+    return "Golden Bridge resting on giant weathered stone hands, dramatic mountain mist";
+  }
+  if (raw.includes("làng pháp") || raw.includes("french village") || raw.includes("lâu đài") || raw.includes("mặt trăng")) {
+    return "French Gothic architectural castle plaza and cathedral square with cobblestone paths";
+  }
+  if (raw.includes("cáp treo") || raw.includes("cable car")) {
+    return "Scenic aerial cable car gliding smoothly over verdant mountain rainforest and clouds";
+  }
+  if (raw.includes("quảng trường") || raw.includes("nhật thực") || raw.includes("plaza")) {
+    return "Sun World vibrant central plaza with golden sun globe and flower gardens";
+  }
+  if (raw.includes("ngũ hành sơn") || raw.includes("marble")) {
+    return "Majestic Marble Mountains limestone peaks and mystical ancient caves";
+  }
+  if (raw.includes("hội an") || raw.includes("đèn lồng") || raw.includes("phố cổ")) {
+    return "Hoi An ancient lantern-lit river street and historic yellow houses";
+  }
+  if (raw.includes("mỹ khê") || raw.includes("biển") || raw.includes("beach")) {
+    return "Tropical pristine turquoise coastline and white sandy beach with gentle waves";
+  }
+  if (raw.includes("buffet") || raw.includes("ẩm thực") || raw.includes("món ăn") || raw.includes("food")) {
+    return "Lavish international buffet spread and gourmet culinary dining banquet";
+  }
+  if (raw.includes("chùa linh ứng") || raw.includes("phật bà") || raw.includes("sơn trà")) {
+    return "Linh Ung Pagoda with giant white Lady Buddha statue overlooking coastal ocean";
+  }
+
+  const clean = asset.title
+    ? asset.title.replace(/Flycam|Toàn cảnh|góc rộng|Toàn Cảnh|Góc Rộng/gi, "").trim()
+    : fallback;
+  return `Scenic landscape of ${clean || "the destination"}, natural golden morning lighting`;
+}
+
 function cleanAssetLabel(asset: ChainedAssetInput, fallback: string): string {
-  const raw = asset.title || asset.description || fallback;
-  return raw
-    .replace(/Flycam|Toàn cảnh|góc rộng|Toàn Cảnh|Góc Rộng/gi, "")
-    .split(/[,.\-–]/)[0]
-    .replace(/\s+/g, " ")
-    .trim() || fallback;
+  return cleanAssetVisualLabel(asset, fallback);
 }
 
 /**
@@ -137,6 +170,7 @@ export function buildSegmentMusePrompt(params: {
   profile?: "10s" | "18s";
   voiceoverSegment?: string;
   ambientSounds?: string[];
+  includeAudio?: boolean;
 }): string {
   const {
     role,
@@ -147,6 +181,7 @@ export function buildSegmentMusePrompt(params: {
     profile = "18s",
     voiceoverSegment,
     ambientSounds,
+    includeAudio = false, // Mặc định tắt audio trong prompt sinh video để tập trung tối ưu hình ảnh và tránh timeout
   } = params;
 
   let momentumInstruction = "";
@@ -189,7 +224,7 @@ export function buildSegmentMusePrompt(params: {
       : "Negative prompt: morphing, fast zoom, rapid push-in, whip pan, distorted geometry, warped perspective, blurred textures, melting buildings, human disfiguration, sliding feet, smeared limbs, erratic camera movements, abrupt hard cuts, abrupt jump cuts, unnatural physics, harsh midday lighting, mismatched color grading, fluctuating weather, oversaturation, CGI plasticity, cartoonish, low quality, pixelation, font artifacts, gibberish watermark.";
 
   let audioInstruction = "";
-  if (voiceoverSegment && voiceoverSegment.trim()) {
+  if (includeAudio && voiceoverSegment && voiceoverSegment.trim()) {
     const cleanVoice = voiceoverSegment
       .replace(/\[pause\s*[\d\.]+s?\]/gi, " ")
       .replace(/\[.*?\]/g, " ")

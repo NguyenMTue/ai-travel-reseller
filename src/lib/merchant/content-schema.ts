@@ -63,6 +63,9 @@ export function getContentStatusBadge(status?: string | null): {
       return { label: "Chờ phê duyệt", tone: "pending" };
     case "ready":
       return { label: "Sẵn sàng duyệt", tone: "pending" };
+    case "pending":
+    case "needs_review":
+      return { label: "Chờ phê duyệt", tone: "pending" };
     case "draft":
       return { label: "Bản nháp", tone: "unknown" };
     default:

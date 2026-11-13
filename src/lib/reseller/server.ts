@@ -122,6 +122,38 @@ export async function getCampaignFeed(): Promise<CampaignFeedResult> {
       // actually returned and stop only at an empty page, avoiding truncation.
       offset += page.length;
     }
+
+    // Tra cứu các chiến dịch đã có nội dung được duyệt & Video AI để hiển thị huy hiệu và số lượng trên feed
+    try {
+      const { data: approvedContents } = await access.client
+        .from("contents")
+        .select("campaign_id, video_url")
+        .eq("status", "approved");
+
+      if (approvedContents && approvedContents.length > 0) {
+        const approvedCountMap = new Map<string, number>();
+        const videoCampaignSet = new Set<string>();
+
+        for (const item of approvedContents as any[]) {
+          if (item.campaign_id) {
+            approvedCountMap.set(item.campaign_id, (approvedCountMap.get(item.campaign_id) || 0) + 1);
+            if (item.video_url && typeof item.video_url === "string" && item.video_url.trim().length > 0) {
+              videoCampaignSet.add(item.campaign_id);
+            }
+          }
+        }
+
+        campaigns.forEach((c) => {
+          const count = approvedCountMap.get(c.id);
+          if (count !== undefined) {
+            c.approvedContentCount = count;
+          }
+          c.hasVideo = videoCampaignSet.has(c.id);
+        });
+      }
+    } catch {
+      // Bỏ qua lỗi tra cứu video phụ trợ
+    }
     diagnose("feed.result", campaigns.length === 0 ? "EMPTY" : "READY");
     if (process.env.NODE_ENV === "development") {
       // Compare the reported duplicate cards internally; never log IDs or

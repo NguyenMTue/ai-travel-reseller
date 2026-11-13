@@ -28,13 +28,12 @@ export default async function MerchantContentsPage() {
   // Lấy danh sách chiến dịch để làm filter
   const { data: campaignsData } = await (supabase as any)
     .from("campaigns")
-    .select("id, title")
-    .eq("merchant_id", access.userId)
-    .order("created_at", { ascending: false });
+    .select("id, name")
+    .eq("merchant_id", access.userId);
 
   const campaigns = (campaignsData || []).map((c: any) => ({
     id: c.id,
-    title: c.title,
+    title: c.name || c.title || "Chiến dịch #" + String(c.id).slice(0, 8),
   }));
 
   // Lấy danh sách nội dung ban đầu

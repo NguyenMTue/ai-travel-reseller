@@ -6,7 +6,7 @@ export const loginSchema = z.object({
 export const signupSchema = loginSchema.extend({
   password: z.string().min(8).max(128),
   full_name: z.string().trim().min(1).max(100),
-  role: z.enum(["merchant", "reseller"]),
+  role: z.enum(["merchant", "reseller", "admin"]),
 });
 export function safeNextPath(value: unknown) {
   // Only explicit app destinations; rejects external URLs, backslashes and encoded redirects.
@@ -15,5 +15,5 @@ export function safeNextPath(value: unknown) {
 // Unlike the legacy string fallback, this preserves the absence of a requested
 // destination so login can resolve a default from verified memberships.
 export function parseSafeNextPath(value: unknown): string | null {
-  return typeof value === "string" && /^\/(merchant|reseller)(\/[a-zA-Z0-9_-]+)*$/.test(value) ? value : null;
+  return typeof value === "string" && /^\/(merchant|reseller|admin)(\/[a-zA-Z0-9_-]+)*$/.test(value) ? value : null;
 }

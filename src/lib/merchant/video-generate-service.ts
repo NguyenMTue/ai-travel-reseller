@@ -398,7 +398,7 @@ export async function generateMerchantCampaignVideo(
                 endImageBuffer: endBuf,
                 durationSeconds: segment.durationSeconds,
                 aspectRatio: "9:16",
-                voiceoverScript: segment.voiceoverSegment,
+                includeAudioPrompt: false, // Tạm thời loại bỏ âm thanh kịch bản, chỉ tập trung tối ưu hình ảnh
               });
               if (segResult?.videoBuffer && segResult.videoBuffer.length > 1000) {
                 segBuffer = segResult.videoBuffer;
@@ -417,7 +417,9 @@ export async function generateMerchantCampaignVideo(
           segmentBuffers.push(segBuffer);
         }
 
-        totalDurationSec = promptPlan.totalDurationSec;
+        // 10s Muse AI + 5s End-Card phủ mờ thông tin tour = 15s tổng
+        const hasEndCard = Boolean(closingImageBuffer && tourEndCardInfo);
+        totalDurationSec = promptPlan.totalDurationSec + (hasEndCard ? 5.0 : 0);
 
         if (!costBreakdown) {
           costBreakdown = {

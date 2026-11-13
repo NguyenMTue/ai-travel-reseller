@@ -87,7 +87,10 @@ export function ContentKit({ variants, contentStatus, contentReason, campaignId,
   variants: ContentVariant[]; contentStatus: "blocked" | "ready" | "error"; contentReason?: DataFailureKind;
   campaignId: string; campaignName?: string; productId: string | null; preview?: boolean;
 }) {
-  const [persona, setPersona] = useState<Persona>("local-guide");
+  const initialPersona: Persona = (variants.find((v) => v.persona === "local-guide")?.persona
+    ?? variants[0]?.persona
+    ?? "local-guide");
+  const [persona, setPersona] = useState<Persona>(initialPersona);
   const [variantId, setVariantId] = useState("");
   const selectId = useId();
   const available = contentStatus === "ready" ? variants.filter((variant) => variant.persona === persona) : [];
@@ -96,6 +99,11 @@ export function ContentKit({ variants, contentStatus, contentReason, campaignId,
   const [telegramState, setTelegramState] = useState<"idle" | "pending" | "success" | "error">("idle");
   const [telegramMessage, setTelegramMessage] = useState("");
   const posting = useRef(false);
+
+  const personaCountMap = new Map<Persona, number>();
+  for (const v of variants) {
+    personaCountMap.set(v.persona, (personaCountMap.get(v.persona) || 0) + 1);
+  }
 
   async function postToTelegram() {
     if (!selected || !link || !productId || posting.current) return;
@@ -122,11 +130,45 @@ export function ContentKit({ variants, contentStatus, contentReason, campaignId,
   }
   return (
     <section aria-labelledby="content-kit-heading" className="mt-8 min-w-0">
-      <h2 id="content-kit-heading" className="text-2xl [font-family:var(--font-display)]">Content Kit</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="content-kit-heading" className="text-2xl [font-family:var(--font-display)]">Content Kit</h2>
+        {variants.length > 0 && (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 border border-emerald-200">
+            ✨ {variants.length} nội dung đã duyệt
+          </span>
+        )}
+      </div>
+
       <div role="group" aria-label="Chọn persona" className="my-5 flex flex-wrap gap-2">
-        {personas.map((option) => <Button key={option.id} type="button" aria-pressed={persona === option.id}
-          variant={persona === option.id ? "default" : "outline"}
-          onClick={() => { setPersona(option.id); setVariantId(""); }}>{option.label}</Button>)}
+        {personas.map((option) => {
+          const count = personaCountMap.get(option.id) || 0;
+          return (
+            <Button
+              key={option.id}
+              type="button"
+              aria-pressed={persona === option.id}
+              variant={persona === option.id ? "default" : "outline"}
+              onClick={() => {
+                setPersona(option.id);
+                setVariantId("");
+              }}
+              className="gap-1.5"
+            >
+              <span>{option.label}</span>
+              <span
+                className={`rounded-full px-1.5 py-0.2 text-[11px] font-bold ${
+                  persona === option.id
+                    ? "bg-white/20 text-white"
+                    : count > 0
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {count}
+              </span>
+            </Button>
+          );
+        })}
       </div>
       {contentStatus === "blocked" ? (
         <FeedNotice title="Nội dung đang chờ xác nhận quyền hiển thị"
@@ -137,7 +179,25 @@ export function ContentKit({ variants, contentStatus, contentReason, campaignId,
         <FeedNotice title="Chưa có nội dung đủ điều kiện"
           description="Chưa có nội dung đã công bố phù hợp với chiến dịch và quyền truy cập của bạn trong bốn persona này." />
       ) : !selected ? (
-        <FeedNotice title="Persona này chưa có nội dung" description="Chưa có biến thể nội dung được phép hiển thị cho persona đã chọn." />
+        <div className="rounded-xl border border-border bg-white p-6 text-center">
+          <p className="text-sm font-medium mb-3">Nhóm đối tượng (Persona) này chưa có nội dung được duyệt.</p>
+          {variants.length > 0 && (
+            <Button
+              type="button"
+              size="sm"
+              variant="default"
+              onClick={() => {
+                const firstWithContent = variants[0]?.persona;
+                if (firstWithContent) {
+                  setPersona(firstWithContent);
+                  setVariantId("");
+                }
+              }}
+            >
+              Xem nhóm có sẵn ({personas.find((p) => p.id === variants[0]?.persona)?.label})
+            </Button>
+          )}
+        </div>
       ) : (
         <>
           {(["hook", "script", "caption", "cta"] as const).some((field) => selected[field]?.includes("[LINK_MUA_VE]")) && (

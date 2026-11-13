@@ -19,7 +19,16 @@ export async function login(formData: FormData) {
 
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
-  const next = formData.get("next");
+  let next = formData.get("next") as string | null;
+  const targetRole = formData.get("target_role") as string | null;
+
+  if (targetRole === "admin" && (!next || !next.startsWith("/admin"))) {
+    next = "/admin";
+  } else if (targetRole === "reseller" && (!next || !next.startsWith("/reseller"))) {
+    next = "/reseller/campaigns";
+  } else if (targetRole === "merchant" && (!next || !next.startsWith("/merchant"))) {
+    next = "/merchant";
+  }
   if (!loginSchema.safeParse({ email, password }).success)
     return { error: "Vui lòng nhập email và mật khẩu hợp lệ." };
 

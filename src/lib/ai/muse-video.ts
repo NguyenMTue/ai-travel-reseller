@@ -32,6 +32,7 @@ export interface MuseVideoGenerationInput {
   aspectRatio?: "9:16" | "16:9";
   voiceoverScript?: string;
   ambientSounds?: string[];
+  includeAudioPrompt?: boolean;
   signal?: AbortSignal;
 }
 
@@ -162,7 +163,7 @@ export async function generateMuseVideoClip(
   }
 
   let fullPrompt = input.prompt;
-  if (input.voiceoverScript && input.voiceoverScript.trim()) {
+  if (input.includeAudioPrompt !== false && input.voiceoverScript && input.voiceoverScript.trim()) {
     const cleanVoice = input.voiceoverScript
       .replace(/\[pause\s*[\d\.]+s?\]/gi, " ")
       .replace(/\[.*?\]/g, " ")

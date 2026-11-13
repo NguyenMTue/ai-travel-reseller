@@ -51,17 +51,44 @@ export async function resolveLoginDestination(source: PortalAccessSource, reques
   if (verified.status !== "allowed") return { status: "error", error: verified.status === "unauthenticated"
     ? "Phiên đăng nhập không còn hợp lệ. Vui lòng đăng nhập lại."
     : "Chưa thể xác minh phiên đăng nhập. Vui lòng thử lại khi kết nối ổn định." };
+
+  const next = parseSafeNextPath(requestedNext);
+
+  // Nếu người dùng có yêu cầu đích đến là Quản trị viên (/admin...)
+  if (next && (next === "/admin" || next.startsWith("/admin/"))) {
+    const admin = await membership(source, "admin", verified.userId);
+    if (admin.status === "allowed") {
+      return { status: "redirect", path: next };
+    }
+    if (admin.status === "unauthenticated") {
+      return { status: "error", error: "Phiên đăng nhập đã hết hạn khi kiểm tra quyền. Vui lòng đăng nhập lại." };
+    }
+    return {
+      status: "error",
+      error: "Tài khoản của bạn không có đặc quyền Quản trị viên (Super Admin). Vui lòng đăng nhập bằng tài khoản quản trị hoặc chuyển sang vai trò Doanh nghiệp / Cộng tác viên.",
+    };
+  }
+
   const [merchant, reseller] = await Promise.all([membership(source, "merchant", verified.userId), membership(source, "reseller", verified.userId)]);
   // An expired JWT during either read is not evidence of a usable session.
   if (merchant.status === "unauthenticated" || reseller.status === "unauthenticated") return { status: "error", error: "Phiên đăng nhập đã hết hạn khi kiểm tra quyền. Vui lòng đăng nhập lại." };
-  const next = parseSafeNextPath(requestedNext);
+
   if (next && ((next === "/merchant" || next.startsWith("/merchant/")) ? merchant : reseller).status === "allowed") return { status: "redirect", path: next };
   // Preserve the existing Merchant default only when that membership is proven;
   // when both exist this retains the existing default without inventing roles.
   if (merchant.status === "allowed") return { status: "redirect", path: "/merchant" };
   if (reseller.status === "allowed") return { status: "redirect", path: "/reseller/campaigns" };
-  if (merchant.status === "unavailable" || reseller.status === "unavailable") return { status: "error", error: "Đã xác thực tài khoản nhưng chưa đọc được hồ sơ quyền truy cập. Có lỗi truy vấn hoặc quyền đọc; vui lòng thử lại hoặc nhờ hỗ trợ đối chiếu." };
-  return { status: "error", error: "Đã xác thực tài khoản nhưng chưa tìm thấy hồ sơ Merchant hoặc Reseller trong dữ liệu được phép đọc. Vui lòng nhờ hỗ trợ đối chiếu hồ sơ và quyền truy cập." };
+
+  // Nếu không phải Merchant hoặc Reseller, kiểm tra thẩm quyền Quản trị viên (Super Admin)
+  const adminFallback = await membership(source, "admin", verified.userId);
+  if (adminFallback.status === "allowed") {
+    return { status: "redirect", path: next && (next === "/admin" || next.startsWith("/admin/")) ? next : "/admin" };
+  }
+
+  if (merchant.status === "unavailable" || reseller.status === "unavailable" || adminFallback.status === "unavailable") {
+    return { status: "error", error: "Đã xác thực tài khoản nhưng chưa đọc được hồ sơ quyền truy cập. Có lỗi truy vấn hoặc quyền đọc; vui lòng thử lại hoặc nhờ hỗ trợ đối chiếu." };
+  }
+  return { status: "error", error: "Đã xác thực tài khoản nhưng chưa tìm thấy hồ sơ Quản trị viên, Doanh nghiệp hoặc Cộng tác viên trong dữ liệu được phép đọc. Vui lòng nhờ hỗ trợ đối chiếu hồ sơ và quyền truy cập." };
 }
 
 // Both portals now repeat getUser + membership at protected loaders/actions.

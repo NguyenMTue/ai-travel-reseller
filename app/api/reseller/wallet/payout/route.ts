@@ -311,6 +311,20 @@ export async function POST(request: Request) {
 
     if (insertError) {
       console.error("[PAYOUT_API_ERROR] Lỗi chèn payout_requests:", insertError);
+      if (
+        insertError.code === "PGRST205" ||
+        insertError.code === "42P01" ||
+        (typeof insertError.message === "string" && insertError.message.includes("payout_requests"))
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Hệ thống đang đồng bộ cơ sở dữ liệu rút tiền (bảng payout_requests chưa hoàn tất migration trên Supabase). Vui lòng thử lại sau hoặc liên hệ Admin.",
+            code: "MIGRATION_PENDING",
+          },
+          { status: 503 }
+        );
+      }
       return NextResponse.json(
         {
           success: false,

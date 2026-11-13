@@ -36,11 +36,19 @@ function CampaignCard({ campaign, detailBasePath }: { campaign: CampaignFeedItem
       className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-white"
     >
       <div className="flex flex-1 flex-col p-5 sm:p-6">
-        <p className="mb-5 flex text-xs text-muted-foreground">
-          <span className="min-w-0 break-words rounded-md bg-muted px-3 py-1.5">
-            {campaign.category?.trim() ? campaign.category : "Chưa có danh mục"}
-          </span>
-        </p>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <p className="flex text-xs text-muted-foreground">
+            <span className="min-w-0 break-words rounded-md bg-muted px-3 py-1.5">
+              {campaign.category?.trim() ? campaign.category : "Chưa có danh mục"}
+            </span>
+          </p>
+          {campaign.hasVideo && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-800 border border-violet-200">
+              <span className="h-2 w-2 rounded-full bg-violet-600 animate-pulse" />
+              🎬 Có Video AI (9:16)
+            </span>
+          )}
+        </div>
         <h2 className="break-words text-xl font-medium leading-snug [font-family:var(--font-display)] sm:text-2xl">
           {campaign.name}
         </h2>
@@ -61,15 +69,32 @@ function CampaignCard({ campaign, detailBasePath }: { campaign: CampaignFeedItem
             <dt>Nội dung:</dt>
             <dd>
               {campaign.approvedContentCount === null
-                ? "Xem Content Kit"
+                ? (campaign.hasVideo ? "Có sẵn Video AI & Kịch bản" : "Xem Content Kit")
                 : `${campaign.approvedContentCount} nội dung khả dụng`}
             </dd>
           </div>
         </dl>
       </div>
-      <div className="border-t border-border bg-background px-5 py-3 sm:px-6">
-        <Button asChild variant="outline" size="sm"><Link prefetch={false}
-          href={`${detailBasePath}/${encodeURIComponent(campaign.id)}`} aria-label={`Xem chi tiết ${campaign.name}`}>Xem chi tiết</Link></Button>
+      <div className="border-t border-border bg-background px-5 py-3 sm:px-6 flex items-center justify-between gap-2">
+        <Button asChild variant="outline" size="sm">
+          <Link
+            prefetch={false}
+            href={`${detailBasePath}/${encodeURIComponent(campaign.id)}`}
+            aria-label={`Xem chi tiết ${campaign.name}`}
+          >
+            {campaign.approvedContentCount ? `Xem chi tiết & Kit (${campaign.approvedContentCount})` : "Xem chi tiết"}
+          </Link>
+        </Button>
+        {campaign.hasVideo && (
+          <Button asChild size="sm" variant="default" className="bg-violet-600 hover:bg-violet-700 text-white">
+            <Link
+              prefetch={false}
+              href={`${detailBasePath}/${encodeURIComponent(campaign.id)}#reseller-content-kit`}
+            >
+              Xem Video AI
+            </Link>
+          </Button>
+        )}
       </div>
     </article>
   );
@@ -99,6 +124,27 @@ export function CampaignFeed({ campaigns, detailBasePath = "/reseller/campaigns"
         <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
           Tìm chiến dịch phù hợp với cộng đồng của bạn theo danh mục, địa điểm và mức hoa hồng.
         </p>
+      </div>
+
+      {/* Thông báo hướng dẫn vị trí xem Video AI và Content Kit đã được Merchant phê duyệt */}
+      <div className="mb-6 rounded-xl border border-violet-200 bg-gradient-to-r from-violet-50 to-indigo-50 p-4 sm:p-5 text-violet-950">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h3 className="font-semibold text-base flex items-center gap-2 text-violet-900">
+              <span className="text-lg">🎬</span> Hướng dẫn kiểm tra Video AI & Nội dung đã phê duyệt
+            </h3>
+            <p className="text-xs sm:text-sm text-violet-800 leading-relaxed">
+              Các nội dung được Doanh nghiệp phê duyệt tại trang <strong>Merchant Contents</strong> sẽ lập tức xuất hiện trong mục <strong>Content Kit</strong> khi bạn bấm <strong>Xem chi tiết</strong> của chiến dịch tương ứng, hoặc xem toàn bộ video tại <strong>Thư viện Media</strong>.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button asChild size="sm" className="bg-violet-600 hover:bg-violet-700 text-white font-medium shadow-sm">
+              <Link href="/reseller/library">
+                Xem Thư viện Media ↗
+              </Link>
+            </Button>
+          </div>
+        </div>
       </div>
 
       <section
