@@ -151,3 +151,69 @@ test("SF-06: Accurate destination-specific asset allocation for Ngu Hanh Son vs 
   assert.ok(bnaTitles.includes("Cáp treo"));
   assert.equal(baNaData.product.salePrice, 950000);
 });
+
+test("SF-07: Instant order confirmation & Reseller commission calculation formula", async () => {
+  const { POST } = await import("../app/api/storefront/orders/confirm/route.ts");
+
+  const mockPayload = {
+    orderId: `TL-${Date.now().toString().slice(-6)}-TEST1`,
+    totalAmount: 320000,
+    customerName: "Khách Demo Test",
+    customerPhone: "0905999888",
+    packageName: "Tour Khám Phá Danh Thắng Ngũ Hành Sơn",
+    refCode: "22222222-2222-2222-2222-111111111111",
+    productId: "33333333-3333-3333-3333-666666666666",
+    merchantId: "11111111-1111-1111-1111-111111111111",
+  };
+
+  const request = new Request("http://localhost:3000/api/storefront/orders/confirm", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(mockPayload),
+  });
+
+  const response = await POST(request);
+  assert.equal(response.status, 200);
+
+  const json = await response.json();
+  assert.equal(json.success, true);
+  assert.equal(json.attributed, true);
+  assert.equal(json.orderId, mockPayload.orderId);
+  assert.equal(json.resellerId, "22222222-2222-2222-2222-111111111111");
+
+  assert.ok(json.commission);
+  assert.equal(json.commission.status, "confirmed");
+  assert.ok(Number.isInteger(json.commission.grossAmount));
+  assert.ok(Number.isInteger(json.commission.platformFee));
+  assert.ok(Number.isInteger(json.commission.netAmount));
+  assert.equal(
+    json.commission.netAmount,
+    json.commission.grossAmount - json.commission.platformFee,
+    "Net commission must equal gross commission minus platform fee (80% net)",
+  );
+  assert.ok(json.commission.netAmount > 0);
+});
+
+test("SF-08: createBookingOrder accepts packagePrice for accurate multi-tier package pricing", () => {
+  const customOrder = createBookingOrder({
+    packageId: "pkg-luxury",
+    packageName: "Combo Cáp Treo + Buffet Quốc Tế",
+    packagePrice: 1250000,
+    travelDate: "2026-11-25",
+    adultCount: 2,
+    childCount: 1,
+    customerName: "Trần VIP",
+    customerPhone: "0912345678",
+    customerEmail: "tranvip@example.com",
+    refCode: "22222222-2222-2222-2222-111111111111",
+  });
+
+  // Adult: 1.250.000 * 2 = 2.500.000
+  // Child: 1.250.000 * 0.75 = 937.500
+  // Base total: 3.437.500
+  // Discount 5%: 171.875
+  // Final total: 3.265.625
+  assert.equal(customOrder.originalTotal, 2 * 1250000 + Math.round(1250000 * 0.75));
+  assert.equal(customOrder.discountAmount, Math.round(customOrder.originalTotal * 0.05));
+  assert.equal(customOrder.totalAmount, customOrder.originalTotal - customOrder.discountAmount);
+});

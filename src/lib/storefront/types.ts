@@ -98,6 +98,7 @@ export type StorefrontData = {
 export type BookingRequest = {
   packageId: string;
   packageName: string;
+  packagePrice?: number;
   travelDate: string;
   adultCount: number;
   childCount: number;
@@ -109,6 +110,15 @@ export type BookingRequest = {
   campaignId?: string;
   productId?: string;
   merchantSlug?: string;
+};
+
+export type StorefrontCommissionInfo = {
+  grossAmount: number;
+  platformFee: number;
+  netAmount: number;
+  rate: number;
+  status: string;
+  resellerId?: string;
 };
 
 export type BookingOrderResult = {
@@ -131,4 +141,5 @@ export type BookingOrderResult = {
   adultCount: number;
   childCount: number;
   createdAt: string;
+  commission?: StorefrontCommissionInfo;
 };

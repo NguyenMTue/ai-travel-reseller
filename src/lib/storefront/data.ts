@@ -552,7 +552,10 @@ export async function resolveStorefrontData({
 }
 
 export function createBookingOrder(request: BookingRequest): BookingOrderResult {
-  const adultPrice = 320000;
+  const adultPrice =
+    typeof request.packagePrice === "number" && request.packagePrice > 0
+      ? request.packagePrice
+      : 320000;
   // Giá vé trẻ em được ưu đãi 75% giá vé người lớn
   const childPrice = Math.round(adultPrice * 0.75);
 

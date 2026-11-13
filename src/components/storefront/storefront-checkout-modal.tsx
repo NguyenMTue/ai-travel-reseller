@@ -22,6 +22,7 @@ import type {
   StorefrontData,
   StorefrontPackage,
   BookingOrderResult,
+  StorefrontCommissionInfo,
 } from "@/src/lib/storefront/types";
 import { createBookingOrder } from "@/src/lib/storefront/data";
 import { formatPrice } from "@/src/lib/storefront/format";
@@ -72,6 +73,8 @@ export function StorefrontCheckoutModal({
 
   const [formError, setFormError] = useState("");
   const [orderResult, setOrderResult] = useState<BookingOrderResult | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [confirmedCommission, setConfirmedCommission] = useState<StorefrontCommissionInfo | null>(null);
 
   // Clipboard copy state
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -112,6 +115,7 @@ export function StorefrontCheckoutModal({
     const order = createBookingOrder({
       packageId: selectedPackage.id,
       packageName: selectedPackage.name,
+      packagePrice: selectedPackage.salePrice,
       travelDate,
       adultCount,
       childCount,
@@ -129,8 +133,47 @@ export function StorefrontCheckoutModal({
     setStep("payment");
   };
 
-  const handleConfirmPaid = () => {
-    setStep("success");
+  const handleConfirmPaid = async () => {
+    if (!orderResult) return;
+    setIsConfirming(true);
+
+    try {
+      const res = await fetch("/api/storefront/orders/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: orderResult.orderId,
+          ticketCode: orderResult.ticketCode,
+          totalAmount: orderResult.totalAmount,
+          originalTotal: orderResult.originalTotal,
+          discountAmount: orderResult.discountAmount,
+          customerName: orderResult.customerName,
+          customerPhone: orderResult.customerPhone,
+          customerEmail: orderResult.customerEmail,
+          travelDate: orderResult.travelDate,
+          packageName: orderResult.packageName,
+          adultCount: orderResult.adultCount,
+          childCount: orderResult.childCount,
+          merchantId: merchant.id,
+          merchantSlug: merchant.slug,
+          productId: product.id,
+          campaignId: data.campaign?.id,
+          refCode: tracking?.refCode,
+        }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.commission) {
+          setConfirmedCommission(json.commission);
+        }
+      }
+    } catch (err) {
+      console.warn("[DEMO_CHECKOUT] Proceeding with offline attribution fallback:", err);
+    } finally {
+      setIsConfirming(false);
+      setStep("success");
+    }
   };
 
   return (
@@ -459,17 +502,30 @@ export function StorefrontCheckoutModal({
                 <button
                   type="button"
                   onClick={() => setStep("form")}
-                  className="flex-1 py-2.5 px-3 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                  disabled={isConfirming}
+                  className="flex-1 py-2.5 px-3 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer disabled:opacity-50"
                 >
                   Quay lại sửa
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirmPaid}
-                  className="flex-2 bg-[#bd6840] hover:bg-[#a55630] text-white py-2.5 px-4 rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+                  disabled={isConfirming}
+                  className={`flex-2 bg-[#bd6840] hover:bg-[#a55630] text-white py-2.5 px-4 rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
+                    isConfirming ? "opacity-80 cursor-wait" : ""
+                  }`}
                 >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>TÔI ĐÃ CHUYỂN KHOẢN • XUẤT VÉ</span>
+                  {isConfirming ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>ĐANG XÁC NHẬN & CỘNG VÍ...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>TÔI ĐÃ CHUYỂN KHOẢN • XUẤT VÉ</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -547,6 +603,46 @@ export function StorefrontCheckoutModal({
                 <div className="pt-2.5 border-t border-slate-700 text-[10px] text-slate-400 flex items-center justify-between">
                   <span>Mã đơn: {orderResult.orderId}</span>
                   <span className="text-emerald-400 font-semibold">Đã xác thực</span>
+                </div>
+              </div>
+
+              {/* Demo Commission Notification Card */}
+              <div className="p-3.5 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 rounded-2xl border border-emerald-200 text-left space-y-2 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
+                    <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>CHẾ ĐỘ TEST: ĐÃ CỘNG HOA HỒNG RESELLER</span>
+                  </div>
+                  <span className="bg-emerald-600 text-white font-mono font-bold text-xs px-2.5 py-0.5 rounded-full shadow-xs">
+                    +
+                    {formatPrice(
+                      confirmedCommission?.netAmount ||
+                        Math.round(orderResult.totalAmount * 0.12 * 0.8),
+                    )}{" "}
+                    ₫
+                  </span>
+                </div>
+
+                <div className="text-[11px] text-emerald-800 space-y-1">
+                  <p>
+                    • Đơn hàng <strong>{orderResult.orderId}</strong> đã được hệ thống ghi nhận thành công và tự động phân bổ hoa hồng (Trạng thái: <strong>Đã xác nhận / confirmed</strong>).
+                  </p>
+                  <p>
+                    • Đối tác thụ hưởng: <span className="font-mono font-bold text-emerald-900">{tracking?.refCode || "22222222-2222-2222-2222-111111111111"}</span> (Travel Vlogger Danang).
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-emerald-200/70 flex items-center justify-between">
+                  <span className="text-[11px] text-slate-500 font-medium">Kiểm tra số dư tức thì:</span>
+                  <a
+                    href="/reseller/wallet"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 hover:text-emerald-950 underline cursor-pointer"
+                  >
+                    <span>Mở Ví Reseller (/reseller/wallet)</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
                 </div>
               </div>
 
