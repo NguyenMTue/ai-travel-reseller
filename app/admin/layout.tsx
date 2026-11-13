@@ -36,7 +36,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans antialiased">
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans antialiased">
       <AdminNavbar
         adminName={access.admin.name}
         adminRole={access.admin.role}

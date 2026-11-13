@@ -115,7 +115,7 @@ test("CA-03: updateMerchantContentApproval verifies merchant ownership before up
           select: () => ({
             eq: () => ({
               maybeSingle: async () => ({
-                data: { id: campaignOfA, merchant_id: merchantA, title: "Chiến dịch A" },
+                data: { id: campaignOfA, merchant_id: merchantA, name: "Chiến dịch A", title: "Chiến dịch A" },
                 error: null,
               }),
             }),

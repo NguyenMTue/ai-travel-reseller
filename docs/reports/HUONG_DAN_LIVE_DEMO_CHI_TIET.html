@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sổ Tay Hướng Dẫn Live Demo Chi Tiết | AI Travel Reseller Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    
+  :root {
+    --primary: #0284c7;
+    --primary-dark: #0369a1;
+    --primary-light: #e0f2fe;
+    --accent: #f97316;
+    --accent-light: #ffedd5;
+    --success: #10b981;
+    --success-light: #d1fae5;
+    --warning: #f59e0b;
+    --warning-light: #fef3c7;
+    --danger: #ef4444;
+    --danger-light: #fee2e2;
+    --purple: #8b5cf6;
+    --purple-light: #ede9fe;
+    --cyan: #06b6d4;
+    --cyan-light: #cffafe;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --code-bg: #0f172a;
+    --code-text: #f1f5f9;
+    --radius: 14px;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.12), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+  }
+
+  [data-theme="dark"] {
+    --bg: #090d16;
+    --card-bg: #111827;
+    --text: #f8fafc;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --primary-light: #0c4a6e;
+    --accent-light: #7c2d12;
+    --success-light: #064e3b;
+    --warning-light: #78350f;
+    --danger-light: #7f1d1d;
+    --purple-light: #4c1d95;
+    --cyan-light: #164e63;
+    --code-bg: #030712;
+    --code-text: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.35);
+    --shadow-lg: 0 14px 28px -4px rgb(0 0 0 / 0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+  #progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0284c7, #8b5cf6, #f97316);
+    width: 0%;
+    z-index: 9999;
+    transition: width 0.1s ease;
+  }
+
+  .container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+  }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+    font-size: 0.88rem;
+  }
+  .top-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+  .top-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+  }
+  [data-theme="dark"] .top-badge { color: #7dd3fc; }
+
+  .theme-toggle-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+  .theme-toggle-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .switch-file-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: var(--shadow);
+    transition: transform 0.2s;
+  }
+  .switch-file-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .hero-header {
+    background: linear-gradient(135deg, #0369a1 0%, #1e1b4b 60%, #0f172a 100%);
+    color: white;
+    padding: 44px 38px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-pretitle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(2, 132, 199, 0.4);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    color: #bae6fd;
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 16px;
+  }
+  .hero-header h1 {
+    font-size: 2.3rem;
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 14px;
+  }
+  .hero-header h1 span {
+    background: linear-gradient(90deg, #38bdf8, #a78bfa, #fb923c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-subtitle {
+    font-size: 1.05rem;
+    color: #cbd5e1;
+    max-width: 980px;
+    line-height: 1.6;
+  }
+  .hero-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+    margin-top: 26px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    font-size: 0.9rem;
+  }
+  .hero-meta-item { display: flex; flex-direction: column; gap: 4px; }
+  .hero-meta-item span { color: #94a3b8; font-size: 0.75rem; text-transform: uppercase; font-weight: 700; }
+  .hero-meta-item strong { color: #ffffff; font-weight: 600; }
+
+  .sticky-nav {
+    position: sticky;
+    top: 12px;
+    z-index: 1000;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    padding: 8px 12px;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .sticky-nav::-webkit-scrollbar { display: none; }
+  .nav-link {
+    padding: 8px 16px;
+    border-radius: 9999px;
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-link:hover, .nav-link.active {
+    background: var(--primary);
+    color: white;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .alert {
+    padding: 16px 20px;
+    border-radius: 10px;
+    margin: 16px 0;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    border-left: 4px solid;
+  }
+  .alert-info { background: var(--primary-light); color: #0369a1; border-color: #0284c7; }
+  [data-theme="dark"] .alert-info { background: #082f49; color: #bae6fd; }
+  .alert-success { background: var(--success-light); color: #065f46; border-color: #10b981; }
+  [data-theme="dark"] .alert-success { background: #064e3b; color: #a7f3d0; }
+  .alert-warning { background: var(--warning-light); color: #92400e; border-color: #f59e0b; }
+  [data-theme="dark"] .alert-warning { background: #451a03; color: #fde68a; }
+
+  .compare-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+    margin: 18px 0;
+  }
+  .compare-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .compare-card.old { border-left: 4px solid var(--danger); }
+  .compare-card.new { border-left: 4px solid var(--success); background: rgba(16, 185, 129, 0.03); }
+  .compare-card h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 12px; }
+  .compare-card.old h4 { color: var(--danger); }
+  .compare-card.new h4 { color: var(--success); }
+  .compare-list { list-style: none; font-size: 0.9rem; }
+  .compare-list li { padding: 6px 0 6px 24px; position: relative; }
+  .compare-card.old .compare-list li::before { content: "✕"; position: absolute; left: 0; color: var(--danger); font-weight: bold; }
+  .compare-card.new .compare-list li::before { content: "✓"; position: absolute; left: 0; color: var(--success); font-weight: bold; }
+
+  .table-responsive { overflow-x: auto; margin: 16px 0; }
+  .styled-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+  .styled-table th, .styled-table td { padding: 12px 16px; border: 1px solid var(--border); text-align: left; }
+  .styled-table th { background: var(--bg); font-weight: 700; color: var(--text); }
+  .styled-table tr:hover { background: rgba(2, 132, 199, 0.04); }
+
+  .copyable-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1px dashed var(--border);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .copyable-pill:hover { border-color: var(--primary); background: var(--primary-light); }
+
+  .code-block {
+    background: var(--code-bg);
+    color: var(--code-text);
+    border-radius: 10px;
+    padding: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    margin: 14px 0;
+    position: relative;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+  }
+  .code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #334155;
+    font-size: 0.78rem;
+    color: #94a3b8;
+  }
+  .copy-btn {
+    background: #1e293b;
+    color: #f1f5f9;
+    border: 1px solid #475569;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.76rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { background: var(--primary); border-color: var(--primary); }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .badge-primary { background: var(--primary-light); color: var(--primary-dark); }
+  .badge-success { background: var(--success-light); color: #065f46; }
+  .badge-warning { background: var(--warning-light); color: #92400e; }
+  .badge-danger { background: var(--danger-light); color: #991b1b; }
+  .badge-purple { background: var(--purple-light); color: #5b21b6; }
+  .badge-cyan { background: var(--cyan-light); color: #0e7490; }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    margin-top: 48px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+  }
+
+    .step-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px;
+      margin-bottom: 22px;
+      box-shadow: var(--shadow);
+    }
+    .step-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    .step-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 12px; color: var(--text); }
+    .step-action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 14px;
+    }
+    @media (max-width: 860px) {
+      .step-action-grid { grid-template-columns: 1fr; }
+    }
+    .step-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .step-box h5 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .credential-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .credential-role { font-weight: 700; color: var(--text); font-size: 0.95rem; }
+    .credential-fields { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+    .speech-box {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e2e8f0;
+      border-left: 4px solid var(--accent);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 16px 0;
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+    .speech-speaker {
+      color: #fb923c;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div id="progress-bar"></div>
+
+  <div class="container">
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <span class="top-badge">Cẩm Nang Diễn Tập Live Demo</span>
+        <span>Dự án: <strong>AI Travel Reseller (TravelLink AI)</strong></span>
+        <span>•</span>
+        <span>Chuẩn bị cho: <strong>Hội Đồng Nghiệm Thu &amp; Khách Hàng</strong></span>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <a href="BAO_CAO_TONG_KET_2_TUAN_VIDEO_VA_RESELLER.html" class="switch-file-btn" style="background: linear-gradient(135deg, #10b981, #059669);">
+          <span>📑 Mở Báo Cáo Kỹ Thuật</span>
+        </a>
+        <button id="themeToggle" class="theme-toggle-btn" onclick="toggleTheme()">
+          <span id="themeIcon">🌙</span> <span id="themeText">Giao diện Tối</span>
+        </button>
+      </div>
+    </div>
+
+    <header class="hero-header" style="background: linear-gradient(135deg, #065f46 0%, #111827 60%, #042f2e 100%);">
+      <div class="hero-pretitle" style="background: rgba(16, 185, 129, 0.4); border-color: rgba(52, 211, 153, 0.5); color: #a7f3d0;">
+        Sổ Tay Vận Hành &amp; Thuyết Trình Trực Quan 3 Vai Trò
+      </div>
+      <h1>SỔ TAY <span>HƯỚNG DẪN LIVE DEMO</span> THỰC CHIẾN</h1>
+      <p class="hero-subtitle">
+        Cung cấp đầy đủ đường dẫn truy cập (Links), thông tin đăng nhập (Accounts/Passwords), thao tác bấm chuột từng bước, hiện tượng quan sát và kịch bản thuyết trình mẫu khép kín từ <strong>Tạo Video AI (10s + 5s End-Card)</strong> đến <strong>Rút Tiền Ví Reseller Chống Tiêu Kép</strong>.
+      </p>
+
+      <div class="hero-meta-grid">
+        <div class="hero-meta-item">
+          <span>Môi Trường Chạy Trình Diễn</span>
+          <strong>Localhost (<span class="copyable-pill" onclick="copyText('http://localhost:3000')">http://localhost:3000</span>)</strong>
+        </div>
+        <div class="hero-meta-item">
+          <span>AI Gateway Engine</span>
+          <strong>Muse2API Local Docker (<span class="copyable-pill" onclick="copyText('http://localhost:18610')">:18610</span>)</strong>
+        </div>
+        <div class="hero-meta-item">
+          <span>Thời Lượng Thuyết Trình Gợi Ý</span>
+          <strong>3 – 5 Phút (Bao gồm Q&amp;A)</strong>
+        </div>
+        <div class="hero-meta-item">
+          <span>Tỷ Lệ Thành Công Diễn Tập</span>
+          <strong>100% (80/80 Kịch Bản PASS)</strong>
+        </div>
+      </div>
+    </header>
+
+    <nav class="sticky-nav">
+      <a href="#accounts-table" class="nav-link active">🔑 Tài Khoản &amp; Links</a>
+      <a href="#demo-step-1" class="nav-link">🎬 Demo 1: Tạo Video AI (10s+5s)</a>
+      <a href="#demo-step-2" class="nav-link">✅ Demo 2: Merchant Duyệt Video</a>
+      <a href="#demo-step-3" class="nav-link">📱 Demo 3: Reseller Phân Phối</a>
+      <a href="#demo-step-4" class="nav-link">🤖 Demo 4: Chatbot Bán Tour</a>
+      <a href="#demo-step-5" class="nav-link">💰 Demo 5: Ví Chống Tiêu Kép</a>
+      <a href="#demo-step-6" class="nav-link">🛡️ Demo 6: Super Admin Duyệt Payout</a>
+      <a href="#pitch-script" class="nav-link">🎤 Lời Thoại Thuyết Trình</a>
+      <a href="#qa-defense" class="nav-link">🛡️ Đáp Án Phản Biện</a>
+    </nav>
+
+    <!-- 1. Accounts & Links Table -->
+    <section id="accounts-table" style="margin-bottom: 40px;">
+      <div class="card">
+        <div class="card-title">
+          <span>1. Bảng Thông Tin Đăng Nhập &amp; Các Đường Dẫn Demo Trực Tiếp</span>
+          <span class="badge badge-primary">Credentials Hub</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Vai Trò (Role)</th>
+                <th>Tài Khoản (Email)</th>
+                <th>Mật Khẩu (Password)</th>
+                <th>Đường Dẫn Đăng Nhập / Trực Tiếp</th>
+                <th>Tính Năng Trình Diễn</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1. Merchant (Sun World Bà Nà)</strong></td>
+                <td><span class="copyable-pill" onclick="copyText('merchant@example.com')">merchant@example.com</span></td>
+                <td><span class="copyable-pill" onclick="copyText('password123')">password123</span></td>
+                <td>
+                  <a href="http://localhost:3000/merchant/library" target="_blank" style="color: var(--primary); font-weight: 700;">/merchant/library</a>
+                  <br><a href="http://localhost:3000/merchant/contents" target="_blank" style="color: var(--text-muted); font-size: 0.82rem;">/merchant/contents (Duyệt AI)</a>
+                  <br><a href="http://localhost:3000/merchant/products" target="_blank" style="color: var(--text-muted); font-size: 0.82rem;">/merchant/products (Quản lý Tour)</a>
+                </td>
+                <td>Tạo Video AI với Muse2API, Live Timer, sinh 10s clip + 5s End-Card thông tin tour, duyệt bài phát hành.</td>
+              </tr>
+              <tr>
+                <td><strong>2. Reseller (Cộng Tác Viên)</strong></td>
+                <td><span class="copyable-pill" onclick="copyText('reseller@example.com')">reseller@example.com</span></td>
+                <td><span class="copyable-pill" onclick="copyText('password123')">password123</span></td>
+                <td>
+                  <a href="http://localhost:3000/reseller/library" target="_blank" style="color: var(--primary); font-weight: 700;">/reseller/library</a>
+                  <br><a href="http://localhost:3000/reseller/wallet" target="_blank" style="color: var(--text-muted); font-size: 0.82rem;">/reseller/wallet (Ví hoa hồng)</a>
+                </td>
+                <td>Xem video mobile, mở Mẹo đăng TikTok, copy link rút gọn, mã QR, mã voucher Livestream, rút tiền ví chống tiêu kép.</td>
+              </tr>
+              <tr>
+                <td><strong>3. Super Admin (Quản Trị Sàn)</strong></td>
+                <td><span class="copyable-pill" onclick="copyText('admin@example.com')">admin@example.com</span></td>
+                <td><span class="copyable-pill" onclick="copyText('password123')">password123</span></td>
+                <td>
+                  <a href="http://localhost:3000/admin/payouts" target="_blank" style="color: var(--primary); font-weight: 700;">/admin/payouts</a>
+                  <br><a href="http://localhost:3000/admin/fraud" target="_blank" style="color: var(--text-muted); font-size: 0.82rem;">/admin/fraud (Chống gian lận)</a>
+                  <br><a href="http://localhost:3000/preview/admin" target="_blank" style="color: var(--text-muted); font-size: 0.82rem;">/preview/admin (Xem trước)</a>
+                </td>
+                <td>Phê duyệt lệnh rút tiền Payout của Reseller, xác nhận chuyển khoản ngân hàng, giám sát click bot.</td>
+              </tr>
+              <tr>
+                <td><strong>4. Khách Du Lịch (Customer)</strong></td>
+                <td><em>Không cần đăng nhập</em></td>
+                <td><em>Không có</em></td>
+                <td>
+                  <a href="http://localhost:3000" target="_blank" style="color: var(--primary); font-weight: 700;">/ (Trang chủ &amp; Chatbot)</a>
+                </td>
+                <td>Tương tác với AI Sales Chatbot, kiểm tra chống bịa giá, nhập mã voucher và nhận link đặt vé.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo 1: Video Generation -->
+    <section id="demo-step-1" class="step-card">
+      <span class="step-badge">Kịch Bản 1 (Trọng Tâm Tạo Video AI)</span>
+      <h3 class="step-title">Merchant Tạo Video AI: 10s Muse AI + 5s FFmpeg Blurred End-Card (Tổng 15s)</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 12px;">
+        Mục tiêu: Chứng minh tốc độ tạo video Muse AI mượt mà, không bị timeout, và cuối video có 5s End-Card phủ mờ thông tin tour độc quyền.
+      </p>
+
+      <div class="step-action-grid">
+        <div class="step-box">
+          <h5>Các Bước Thao Tác</h5>
+          <ol style="font-size: 0.88rem; padding-left: 20px; line-height: 1.6;">
+            <li>Truy cập <a href="http://localhost:3000/merchant/library" target="_blank" style="color: var(--primary); font-weight: 700;">/merchant/library</a> (đăng nhập: <code>merchant@example.com</code> / <code>password123</code>).</li>
+            <li>Bấm nút <strong>"Tạo Video AI Bằng Muse Engine"</strong> màu xanh.</li>
+            <li>Chọn Chiến dịch mẫu: <em>"Chiến dịch Hè 2026 - Kích cầu du lịch Bà Nà Hills"</em>.</li>
+            <li>Chọn <strong>2 đến 3 ảnh tài nguyên</strong> (Cầu Vàng, Làng Pháp).</li>
+            <li>Chọn Thời Lượng: <strong>"10 giây (Tối ưu Video AI ngắn / TikTok / Reels)"</strong>.</li>
+            <li>Bấm <strong>"Bắt đầu Kết xuất Video"</strong>.</li>
+          </ol>
+        </div>
+
+        <div class="step-box">
+          <h5>Hiện Tượng Quan Sát &amp; Điểm Nhấn Đắt Giá</h5>
+          <ul style="font-size: 0.88rem; padding-left: 20px; line-height: 1.6;">
+            <li><strong>Live Elapsed Timer:</strong> Đồng hồ số đếm giây <code>00:01, 00:02...</code> dạng thời gian thực.</li>
+            <li><strong>Tiến trình tăng đều:</strong> Thanh progress tăng mượt mà, không bị kẹt ở mốc 93%.</li>
+            <li><strong>Video thành phẩm 15s sắc nét &amp; đầy đủ thông tin:</strong>
+              <br>• <strong>10 giây đầu:</strong> 2 phân cảnh chuyển động flycam mượt mà do Muse AI sinh ra.
+              <br>• <strong>5 giây cuối:</strong> FFmpeg tự động gắn <strong>Blurred Tour Info End-Card</strong>: ảnh nền phủ mờ điện ảnh <code>boxblur</code>, với thiết kế thẻ đa tầng sang trọng: Header xanh Cyan, Khung giá vàng nổi bật <strong>950.000 VNĐ</strong> (kèm ưu đãi độc quyền đặt sớm), 3 tiện ích du lịch chính hãng kèm bullet <code>•</code>, Hotline hỗ trợ 1900 8888, cam kết vé điện tử 100% và Banner CTA xanh lục <em>"Bình luận nhận ngay vé ưu đãi hôm nay!"</em>.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo 2: Content Approval -->
+    <section id="demo-step-2" class="step-card">
+      <span class="step-badge">Kịch Bản 2 (Merchant Flow)</span>
+      <h3 class="step-title">Merchant Phê Duyệt Video AI Sang Sàn Phân Phối Reseller</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 12px;">
+        Mục tiêu: Chứng minh quy trình kiểm duyệt nội dung (Human-in-the-loop) trước khi phát hành cho CTV.
+      </p>
+
+      <div class="step-action-grid">
+        <div class="step-box">
+          <h5>Các Bước Thao Tác</h5>
+          <ol style="font-size: 0.88rem; padding-left: 20px; line-height: 1.6;">
+            <li>Truy cập <a href="http://localhost:3000/merchant/contents" target="_blank" style="color: var(--primary); font-weight: 700;">/merchant/contents</a>.</li>
+            <li>Màn hình hiển thị danh sách nội dung AI sinh ra đang ở trạng thái <code>pending_approval</code>.</li>
+            <li>Xem trước video 15s vừa tạo, kiểm tra kịch bản và hashtag.</li>
+            <li>Bấm nút <strong>"Phê duyệt &amp; Phát hành"</strong> (Approve).</li>
+          </ol>
+        </div>
+
+        <div class="step-box">
+          <h5>Kết Quả</h5>
+          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+            Trạng thái đổi ngay sang <code>approved</code> (Xanh lá). Video lập tức xuất hiện trên Bảng tin của toàn bộ Cộng tác viên (Reseller) trong hệ sinh thái.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo 3: Reseller Omnichannel -->
+    <section id="demo-step-3" class="step-card">
+      <span class="step-badge">Kịch Bản 3 (Reseller Distribution Flow)</span>
+      <h3 class="step-title">Reseller Xem Video Mobile &amp; Lấy Bộ Công Cụ Phân Phối Đa Kênh</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 12px;">
+        Mục tiêu: Trình diễn trải nghiệm xem video dọc chuẩn TikTok, copy caption 1-click và 3 kênh tiếp thị (Link, QR, Voucher Livestream).
+      </p>
+
+      <div class="step-action-grid">
+        <div class="step-box">
+          <h5>Các Bước Thao Tác</h5>
+          <ol style="font-size: 0.88rem; padding-left: 20px; line-height: 1.6;">
+            <li>Đăng nhập tài khoản Reseller: <code>reseller@example.com</code> / <code>password123</code>.</li>
+            <li>Truy cập <a href="http://localhost:3000/reseller/library" target="_blank" style="color: var(--primary); font-weight: 700;">/reseller/library</a>.</li>
+            <li>Bấm <strong>"Xem Video Mobile"</strong> &rarr; Trình phát dọc 9:16 có 5s End-Card rõ nét ở cuối.</li>
+            <li>Bấm <strong>"Mẹo Đăng Video AI"</strong> &rarr; Xem giờ vàng đăng bài, bấm nút Copy Caption mẫu.</li>
+            <li>Bấm <strong>"Lấy Link Tiếp Thị"</strong> &rarr; Modal phân phối hiện 3 tab:
+              <br>• <em>Tab 1:</em> Copy link rút gọn <span class="copyable-pill">/r/[code]</span>.
+              <br>• <em>Tab 2:</em> Tải ảnh mã QR đồ họa.
+              <br>• <em>Tab 3:</em> Copy <strong>Mã Voucher Ký Tự</strong> (VD: <span class="copyable-pill" onclick="copyText('BANA100K-TUAN88')">BANA100K-TUAN88</span>).
+            </li>
+            <li>Mở tab mới dán link <span class="copyable-pill">/r/[code]</span> &rarr; Chuyển hướng 302 sang trang tour tức thì (&lt; 900ms) nhờ Next.js <code>after()</code> non-blocking!</li>
+          </ol>
+        </div>
+
+        <div class="step-box">
+          <h5>Ý Nghĩa Thực Tiễn</h5>
+          <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
+            Reseller có thể bán tour trên mọi mặt trận: gắn link bio TikTok, in mã QR lên quầy lễ tân khách sạn, hoặc đọc mã voucher giảm giá trực tiếp khi Livestream mà không cần khách bấm link.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo 4: Chatbot Anti-Hallucination -->
+    <section id="demo-step-4" class="step-card">
+      <span class="step-badge">Kịch Bản 4 (Customer AI Chatbot)</span>
+      <h3 class="step-title">Khách Hàng Hỏi Trợ Lý AI &amp; Áp Dụng Mã Voucher Livestream</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 12px;">
+        Mục tiêu: Chứng minh AI Sales Agent không bịa giá (0% Hallucination) và tự động nhận diện voucher để gắn ref ID vào link thanh toán.
+      </p>
+
+      <div class="step-action-grid">
+        <div class="step-box">
+          <h5>Câu Hỏi Gửi Chatbot</h5>
+          <div class="code-block" style="margin: 6px 0;">
+            <code>"Tôi có mã voucher BANA100K-TUAN88, giá vé tour Bà Nà Hills trọn gói hôm nay thế nào?"</code>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">
+            Thử hỏi bẫy: <em>"Có giảm giá còn 200.000đ được không bạn?"</em>
+          </p>
+        </div>
+
+        <div class="step-box">
+          <h5>Kết Quả Phản Hồi Từ AI</h5>
+          <ul style="font-size: 0.88rem; padding-left: 20px; line-height: 1.6;">
+            <li><strong>Chống bịa giá (0% Hallucination):</strong> Báo giá niêm yết chính xác <strong>950.000 VNĐ</strong> (gồm buffet trưa và cáp treo khứ hồi), lịch sự từ chối mức giá vô lý.</li>
+            <li><strong>Nhận diện Voucher:</strong> Nhận diện mã <code>BANA100K-TUAN88</code> và sinh ra <strong>Thẻ Đặt Vé (Checkout Card)</strong> có gắn <code>&amp;voucher=BANA100K-TUAN88&amp;ref=...</code>, đảm bảo hoa hồng cho Reseller!</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo 5: Wallet Anti Double-Spend -->
+    <section id="demo-step-5" class="step-card">
+      <span class="step-badge">Kịch Bản 5 (Trọng Tâm Tài Chính Ví Reseller)</span>
+      <h3 class="step-title">Reseller Yêu Cầu Rút Tiền Ví &amp; Thử Nghiệm Tấn Công Tiêu Kép (Anti Double-Spend)</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 12px;">
+        Mục tiêu: Chứng minh thuật toán khóa số dư hiệu dụng bảo vệ 100% dòng tiền hoa hồng, không cho phép rút vượt quá số dư.
+      </p>
+
+      <div class="step-action-grid">
+        <div class="step-box">
+          <h5>Các Bước Rút Tiền Hợp Lệ</h5>
+          <ol style="font-size: 0.88rem; padding-left: 20px; line-height: 1.6;">
+            <li>Truy cập Ví: <a href="http://localhost:3000/reseller/wallet" target="_blank" style="color: var(--primary); font-weight: 700;">/reseller/wallet</a>.</li>
+            <li>Quan sát: Số dư khả dụng hiện có: <strong>1.000.000 VNĐ</strong>.</li>
+            <li>Bấm nút <strong>"Yêu Cầu Rút Tiền"</strong> màu xanh.</li>
+            <li>Nhập thông tin Payout:
+              <br>• Ngân hàng: <em>Vietcombank</em>.
+              <br>• Số Tài Khoản: <span class="copyable-pill" onclick="copyText('0123456789')">0123456789</span>.
+              <br>• Tên Chủ Tài Khoản: <span class="copyable-pill" onclick="copyText('NGUYEN VAN A')">NGUYEN VAN A</span>.
+              <br>• Số tiền rút: <span class="copyable-pill" onclick="copyText('600000')">600000</span> (600.000 VNĐ).
+            </li>
+            <li>Bấm <strong>"Xác nhận Rút tiền"</strong>.</li>
+          </ol>
+        </div>
+
+        <div class="step-box">
+          <h5>Thử Nghiệm Tấn Công Tiêu Kép (Double-Spend Demo)</h5>
+          <ol style="font-size: 0.88rem; padding-left: 20px; line-height: 1.6;">
+            <li>Sau khi lệnh rút 600.000đ được gửi, số dư khả dụng hiệu dụng lập tức bị khóa còn: <strong>400.000 VNĐ</strong>.</li>
+            <li>Bảng lịch sử rút tiền hiện lệnh 600.000đ với badge vàng <code>pending</code>.</li>
+            <li><strong>Bấm tiếp nút "Yêu cầu rút tiền" và nhập 500.000 VNĐ</strong> (vượt quá 400.000đ còn lại).</li>
+            <li><strong>KẾT QUẢ:</strong> Hệ thống kích hoạt cơ chế Row-level Lock và chặn đứng với thông báo lỗi: <em>"Số dư khả dụng không đủ"</em>! Dòng tiền được bảo toàn tuyệt đối.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo 6: Super Admin Payout Approval -->
+    <section id="demo-step-6" class="step-card">
+      <span class="step-badge">Kịch Bản 6 (Super Admin Back-Office)</span>
+      <h3 class="step-title">Super Admin Phê Duyệt Chi Trả Payout &amp; Giám Sát Gian Lận Click Bot</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 12px;">
+        Mục tiêu: Khép kín toàn bộ vòng lặp đối soát tài chính trên hệ sinh thái thực tế.
+      </p>
+
+      <div class="step-action-grid">
+        <div class="step-box">
+          <h5>Phê Duyệt Lệnh Rút Tiền</h5>
+          <ol style="font-size: 0.88rem; padding-left: 20px; line-height: 1.6;">
+            <li>Truy cập <a href="http://localhost:3000/admin/payouts" target="_blank" style="color: var(--primary); font-weight: 700;">/admin/payouts</a> (hoặc <a href="http://localhost:3000/preview/admin/payouts" target="_blank" style="color: var(--text-muted);">/preview/admin/payouts</a>).</li>
+            <li>Thấy lệnh rút 600.000 VNĐ của Reseller Nguyễn Văn A đang ở trạng thái <code>pending</code>.</li>
+            <li>Kiểm tra STK Vietcombank, bấm nút <strong>"Phê duyệt &amp; Xác nhận Đã Chuyển Khoản"</strong>.</li>
+            <li>Trạng thái đổi ngay sang <code>completed</code> (Xanh lá). Mã giao dịch ngân hàng được lưu vết kiểm toán.</li>
+          </ol>
+        </div>
+
+        <div class="step-box">
+          <h5>Kiểm Tra Trung Tâm Chống Gian Lận</h5>
+          <ol style="font-size: 0.88rem; padding-left: 20px; line-height: 1.6;">
+            <li>Bấm sang tab <strong>"Giám sát Gian lận"</strong> (<a href="http://localhost:3000/admin/fraud" target="_blank" style="color: var(--primary);">/admin/fraud</a>).</li>
+            <li>Xem biểu đồ các lượt click bot bị chặn đứng (Googlebot, spam crawlers).</li>
+            <li>Xem danh sách đơn hàng có cờ nghi vấn tự mua (Self-purchase flag) để kế toán rà soát trước khi xuất hóa đơn.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pitch Script -->
+    <section id="pitch-script" style="margin-bottom: 40px;">
+      <div class="card">
+        <div class="card-title">
+          <span>Kịch Bản Lời Thoại Thuyết Trình Mẫu (Pitch Script 3 Phút)</span>
+          <span class="badge badge-accent">Live Demo Script</span>
+        </div>
+
+        <div class="speech-box">
+          <span class="speech-speaker">PHÚT 1: ĐẶT VẤN ĐỀ &amp; GIẢI PHÁP TẠO VIDEO AI (10S + 5S END-CARD)</span>
+          "Kính thưa Thầy/Cô và Hội đồng, 2 tuần qua nhóm chúng em tập trung khép kín 2 bài toán then chốt: Động cơ Video AI và Dòng tiền Hoa hồng Reseller.
+          <br><br>
+          Đầu tiên, ở vai trò <strong>Merchant Sun World</strong>, em vào <code>/merchant/library</code>. Nhóm đã chuyển giao sang <strong>Muse AI Gateway chạy Docker Local với chi phí $0.00</strong>. Khi em bấm tạo video 10 giây cho tour Bà Nà Hills:
+          Đồng hồ đếm thời gian thực chạy từng giây mượt mà. Đặc biệt, video thành phẩm dài đúng <strong>15 giây</strong>: 10 giây đầu là chuyển động flycam điện ảnh do Muse AI sinh ra, và <strong>5 giây cuối là thẻ End-Card phủ mờ thông tin tour</strong> hiển thị giá vé ưu đãi 950.000đ và hotline đặt vé cực kỳ bắt mắt."
+        </div>
+
+        <div class="speech-box">
+          <span class="speech-speaker">PHÚT 2: PHÂN PHỐI ĐA KÊNH &amp; CHỐNG BỊA GIÁ CHATBOT AI</span>
+          "Sau khi Merchant duyệt video tại <code>/merchant/contents</code>, video lập tức xuất hiện trên kho tư liệu Reseller tại <code>/reseller/library</code>.
+          Reseller có ngay 3 công cụ tiếp thị: Link affiliate chuyển hướng tức thì trong &lt; 900ms, Mã QR đồ họa, và <strong>Mã Voucher ký tự độc quyền</strong> cho Livestream.
+          <br><br>
+          Khi khách hàng hỏi Chatbot du lịch kèm mã voucher, AI Sales Agent cam kết <strong>0% ảo giác</strong>, báo đúng giá 950.000đ và tự động sinh Thẻ Đặt Tour đính kèm voucher và ref của Reseller."
+        </div>
+
+        <div class="speech-box">
+          <span class="speech-speaker">PHÚT 3: VÍ HOA HỒNG RESELLER &amp; CHỐNG RÚT TIỀN KÉP</span>
+          "Khi đơn hàng thanh toán thành công qua Webhook, hoa hồng tự động ghi nhận vào Ví Reseller theo tỷ lệ 80/20. Em xin vào <code>/reseller/wallet</code> để trình diễn tính năng then chốt: <strong>Cơ chế Chống Tiêu Kép (Anti Double-Spend)</strong>.
+          <br><br>
+          Ví có 1.000.000đ khả dụng. Em tạo lệnh rút 600.000đ. Hệ thống lập tức áp dụng Row-level Lock, khóa số dư khả dụng hiệu dụng chỉ còn 400.000đ. Nếu em cố tình tạo tiếp lệnh rút 500.000đ, hệ thống chặn ngay lập tức. Sau đó, tại cổng <code>/admin/payouts</code>, Super Admin duyệt lệnh chuyển khoản chỉ trong 1 click.
+          <br><br>
+          Toàn bộ quy trình từ Tạo Video AI &rarr; Tiếp thị &rarr; Bán hàng &rarr; Hoa hồng &rarr; Rút tiền đã vận hành trơn tru 100% trên dữ liệu thật."
+        </div>
+      </div>
+    </section>
+
+    <!-- QA Defense -->
+    <section id="qa-defense" style="margin-bottom: 40px;">
+      <div class="card">
+        <div class="card-title">
+          <span>Bộ 5 Câu Hỏi Phản Biện Sắc Bén &amp; Đáp Án Kỹ Thuật (QA Defense)</span>
+          <span class="badge badge-purple">Exam Defense</span>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <h4 style="color: var(--primary); font-size: 1rem; margin-bottom: 6px;">1. Tại sao video lại là 10s Muse AI + 5s FFmpeg End-Card mà không để AI sinh luôn End-Card?</h4>
+          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
+            <strong>Đáp án:</strong> Các mô hình AI Video quốc tế (Muse, Sora, Kling...) không thể sinh chữ tiếng Việt có dấu chuẩn xác (thường bị méo font hoặc sinh chữ ma). Để phục vụ thương mại, thông tin giá vé (950.000đ), hotline và CTA bắt buộc phải sắc nét 100%. Do đó, 10s đầu dùng AI tạo chuyển động điện ảnh, và 5s cuối dùng FFmpeg phủ mờ ảnh thật (boxblur) và render chữ chuẩn vector, mang lại tỷ lệ chuyển đổi cao nhất.
+          </p>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <h4 style="color: var(--danger); font-size: 1rem; margin-bottom: 6px;">2. Cơ chế chống Double-Spend của ví hoa hồng hoạt động thế nào dưới góc độ SQL Database?</h4>
+          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
+            <strong>Đáp án:</strong> Áp dụng Row-Level Locking trong file migration <code>20261112160000_payout_atomic_double_spend_prevention.sql</code>. Khi có request rút tiền, hàm SQL khóa bản ghi ví bằng <code>SELECT ... FOR UPDATE</code>, tính toán <code>effective_available = confirmed_commissions - SUM(pending_payouts)</code>. Mọi request đồng thời sau đó đều bị chặn vì số dư khả dụng hiệu dụng đã bị trừ ngay trong transaction đầu tiên.
+          </p>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <h4 style="color: var(--cyan); font-size: 1rem; margin-bottom: 6px;">3. Làm sao link /r/[code] chịu tải được 1.000 người click cùng lúc mà không nghẽn DB?</h4>
+          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
+            <strong>Đáp án:</strong> Sử dụng Next.js <code>after()</code> API để trả về HTTP 302 Redirect ngay tức thì cho người dùng trong &lt; 900ms. Thao tác ghi log click vào database Supabase được đưa vào background execution, kết hợp Rate Limiting trượt 10 clicks/phút/IP và bộ lọc 26+ chữ ký bot crawler. Kiểm thử k6 đạt 486.2 RPS với 98.24% thành công.
+          </p>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <h4 style="color: var(--warning); font-size: 1rem; margin-bottom: 6px;">4. Chatbot AI làm cách nào để cam kết 0% bịa giá và gắn đúng voucher của CTV?</h4>
+          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
+            <strong>Đáp án:</strong> Sử dụng Dual-temperature routing (T=0.1 cho dữ liệu giá tour, T=0.7 cho đối thoại). Khi hỏi về giá, bot bắt buộc tra cứu cơ sở tri thức đã kiểm chứng (Verified Facts) từ bảng <code>products</code>. Bộ lọc regex nhận diện mã voucher (VD: <code>BANA100K-TUAN88</code>) và gọi hàm <code>buildCheckoutUrl()</code> để tự động gắn voucher và ref ID vào link đặt vé.
+          </p>
+        </div>
+
+        <div>
+          <h4 style="color: var(--success); font-size: 1rem; margin-bottom: 6px;">5. Cổng Webhook nhận kết quả đặt tour từ đối tác được bảo mật như thế nào?</h4>
+          <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
+            <strong>Đáp án:</strong> Endpoint <code>POST /api/webhooks/merchant/order</code> bắt buộc chữ ký số HMAC-SHA256 (<code>x-signature</code>) tính từ body với secret key của đối tác, tự động chia hoa hồng 80% cho Reseller và 20% phí sàn, đồng thời kiểm tra cờ tự mua (<code>flag_self_purchase = ref === customer_id</code>) để chống trục lợi.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p><strong>SỔ TAY HƯỚNG DẪN LIVE DEMO — DỰ ÁN AI TRAVEL RESELLER NETWORK (TRAVELLINK AI)</strong></p>
+      <p style="font-size: 0.82rem; margin-top: 6px; color: var(--text-muted);">
+        Xem báo cáo tổng hợp kỹ thuật tại: 
+        <a href="BAO_CAO_TONG_KET_2_TUAN_VIDEO_VA_RESELLER.html" style="color: var(--primary); font-weight: 700;">Báo Cáo Tổng Kết 2 Tuần</a>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+  window.addEventListener('scroll', () => {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    const bar = document.getElementById('progress-bar');
+    if (bar) bar.style.width = scrolled + '%';
+
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    let currentSection = '';
+
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop - 120;
+      if (winScroll >= sectionTop) {
+        currentSection = section.getAttribute('id');
+      }
+    });
+
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + currentSection) {
+        link.classList.add('active');
+      }
+    });
+  });
+
+  function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+
+    const icon = document.getElementById('themeIcon');
+    const text = document.getElementById('themeText');
+    if (newTheme === 'dark') {
+      if (icon) icon.textContent = '☀️';
+      if (text) text.textContent = 'Giao diện Sáng';
+    } else {
+      if (icon) icon.textContent = '🌙';
+      if (text) text.textContent = 'Giao diện Tối';
+    }
+  }
+
+  (function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const icon = document.getElementById('themeIcon');
+    const text = document.getElementById('themeText');
+    if (savedTheme === 'dark') {
+      if (icon) icon.textContent = '☀️';
+      if (text) text.textContent = 'Giao diện Sáng';
+    } else {
+      if (icon) icon.textContent = '🌙';
+      if (text) text.textContent = 'Giao diện Tối';
+    }
+  })();
+
+  function copyText(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('Đã sao chép: ' + text);
+    }).catch(err => {
+      console.error('Lỗi sao chép: ', err);
+    });
+  }
+
+  function showToast(message) {
+    let toast = document.getElementById('liveToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'liveToast';
+      toast.style.position = 'fixed';
+      toast.style.bottom = '24px';
+      toast.style.right = '24px';
+      toast.style.background = '#0f172a';
+      toast.style.color = '#f8fafc';
+      toast.style.padding = '10px 18px';
+      toast.style.borderRadius = '8px';
+      toast.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.3)';
+      toast.style.fontSize = '0.88rem';
+      toast.style.fontWeight = '600';
+      toast.style.zIndex = '99999';
+      toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+      toast.style.border = '1px solid #38bdf8';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = '✓ ' + message;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px)';
+    }, 2500);
+  }
+</script>
+</body>
+</html>

@@ -103,9 +103,11 @@ export async function POST(request: Request) {
 
     // Xác định reseller_id từ Supabase session hoặc từ request body (cho test/dev)
     let sessionUserId: string | null = null;
+    let authClient: ReturnType<typeof createClient> | null = null;
     try {
       const cookieStore = await cookies();
       const supabaseAuth = createClient(cookieStore);
+      authClient = supabaseAuth;
       const {
         data: { user },
       } = await supabaseAuth.auth.getUser();
@@ -152,10 +154,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const adminClient = createAdminClient();
+    const hasServiceRoleKey = Boolean(
+      process.env.SUPABASE_SECRET_KEY?.trim() ||
+      process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+    );
+
+    // Ưu tiên sử dụng client:
+    // 1. Service Role Client nếu có key server-side để bypass RLS
+    // 2. Client có session cookie của Reseller (authClient) để khớp hoàn toàn với chính sách RLS
+    // 3. Fallback dùng createAdminClient()
+    const dbClient = (hasServiceRoleKey || !authClient)
+      ? createAdminClient()
+      : authClient;
 
     // 1. Kiểm tra tài khoản Reseller hợp lệ và đang hoạt động
-    const { data: reseller, error: resErr } = await adminClient
+    const { data: reseller, error: resErr } = await dbClient
       .from("resellers")
       .select("id, status")
       .eq("id", resellerId)
@@ -176,7 +189,7 @@ export async function POST(request: Request) {
     }
 
     // 2. Kiểm tra Campaign tồn tại và đang active
-    const { data: campaign, error: campErr } = await adminClient
+    const { data: campaign, error: campErr } = await dbClient
       .from("campaigns")
       .select("id, merchant_id, product_id, status")
       .eq("id", campaignId)
@@ -205,7 +218,7 @@ export async function POST(request: Request) {
     }
 
     // 4. Kiểm tra Product tồn tại và đang active
-    const { data: product, error: prodErr } = await adminClient
+    const { data: product, error: prodErr } = await dbClient
       .from("products")
       .select("id, name, payment_url, booking_url, status")
       .eq("id", productId)
@@ -226,7 +239,7 @@ export async function POST(request: Request) {
     }
 
     // 5. Kiểm tra Idempotent & trạng thái link cũ
-    const { data: existingLink } = await adminClient
+    const { data: existingLink } = await dbClient
       .from("affiliate_links")
       .select("*")
       .eq("reseller_id", resellerId)
@@ -246,12 +259,12 @@ export async function POST(request: Request) {
       const currentShortUrl = `${baseUrl}/r/${existingLink.unique_code}`;
 
       // Tự động đồng bộ short_url mới trong DB nếu trước đó lưu localhost/domain khác
-      if (existingLink.short_url !== currentShortUrl) {
-        adminClient
+      if (hasServiceRoleKey && existingLink.short_url !== currentShortUrl) {
+        dbClient
           .from("affiliate_links")
           .update({ short_url: currentShortUrl, updated_at: new Date().toISOString() })
           .eq("id", existingLink.id)
-          .then();
+          .catch?.(() => {});
       }
 
       return NextResponse.json({
@@ -268,9 +281,17 @@ export async function POST(request: Request) {
       });
     }
 
-    // 6. Xác định Destination URL (Bắt buộc phải có URL thanh toán/đặt chỗ chính thức hợp lệ)
-    const targetUrl = product.payment_url?.trim() || product.booking_url?.trim();
-    if (!targetUrl || (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://"))) {
+    // 6. Xác định Destination URL (Ưu tiên Official Checkout hoặc Storefront của Doanh nghiệp)
+    const baseUrl = getBaseUrl(request);
+    let targetUrl = product.payment_url?.trim() || product.booking_url?.trim();
+
+    if (!targetUrl || targetUrl.includes("checkout.sunworld.vn")) {
+      // Tự động chuyển hướng về Storefront Tour chính thức của Doanh nghiệp
+      const productSlug = product.name?.toLowerCase().includes("ngũ hành sơn")
+        ? "nguhanhson-01"
+        : (product.name ? product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") : productId);
+      targetUrl = `${baseUrl}/storefront/sunworld/${productSlug}`;
+    } else if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
       return NextResponse.json(
         { error: "Product does not have a valid official payment or booking URL configured" },
         { status: 400 },
@@ -283,7 +304,7 @@ export async function POST(request: Request) {
     let uniqueCode = generateUniqueCode(8);
     let attempts = 0;
     while (attempts < 5) {
-      const { data: duplicate } = await adminClient
+      const { data: duplicate } = await dbClient
         .from("affiliate_links")
         .select("id")
         .eq("unique_code", uniqueCode)
@@ -295,11 +316,10 @@ export async function POST(request: Request) {
     }
 
     // 8. Tạo URL rút gọn chuẩn domain public
-    const baseUrl = getBaseUrl(request);
     const shortUrl = `${baseUrl}/r/${uniqueCode}`;
 
     // 9. Lưu vào bảng affiliate_links
-    const { data: newLink, error: insertErr } = await adminClient
+    const { data: newLink, error: insertErr } = await dbClient
       .from("affiliate_links")
       .insert({
         reseller_id: resellerId,

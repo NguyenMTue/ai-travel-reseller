@@ -195,4 +195,117 @@ test("Suite: MUSE2API - Luồng tạo tác vụ và thăm dò (Task Polling) mô
     assert.strictEqual(health.ok, true);
     assert(health.models?.includes("muse-video"));
   });
+
+  await t.test("generateMuseVideoClip() tự động nhúng voiceoverScript và ambientSounds vào prompt gửi Muse AI", async () => {
+    let capturedPrompt = "";
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/v1/videos") && init?.method === "POST") {
+        const body = JSON.parse(String(init.body));
+        capturedPrompt = body.prompt;
+        return new Response(
+          JSON.stringify({
+            id: "task_voice_789",
+            status: "queued",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      }
+      if (url.includes("/v1/videos/task_voice_789")) {
+        return new Response(
+          JSON.stringify({
+            id: "task_voice_789",
+            status: "completed",
+            url: "http://mock-muse.local/v1/media/voice_sample.mp4",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      }
+      if (url.includes("/v1/media/voice_sample.mp4")) {
+        return new Response(Buffer.from(new Uint8Array(2048).fill(99)), {
+          status: 200,
+          headers: { "Content-Type": "video/mp4" },
+        });
+      }
+      throw new Error("Unhandled URL: " + url);
+    };
+
+    const res = await generateMuseVideoClip({
+      prompt: "Cinematic drone flying over Bana Hills",
+      startImageBuffer: Buffer.from([0xff, 0xd8, 0xff]),
+      voiceoverScript: "Bí kíp săn mây vắng người tại Đà Nẵng cực chill!",
+      ambientSounds: ["tiếng gió rừng nguyên sinh", "tiếng cáp treo vận hành"],
+    });
+
+    assert(capturedPrompt.includes("Cinematic drone flying over Bana Hills"));
+    assert(capturedPrompt.includes("Audio & Voiceover Narration: Professional, warm, engaging Vietnamese travel host says: \"Bí kíp săn mây vắng người tại Đà Nẵng cực chill!\""));
+    assert(capturedPrompt.includes("Synchronized ambient soundscape: tiếng gió rừng nguyên sinh, tiếng cáp treo vận hành"));
+    assert.strictEqual(res.durationSeconds, 6);
+    assert.strictEqual(res.cost.cost_usd, 0);
+  });
+});
+
+test("Suite: End-Card phủ mờ hiển thị thông tin tour & Loại bỏ hoàn toàn Gemini Omni", async (t) => {
+  const {
+    createBlurredTourInfoClip,
+    composeChainedOmniVideo,
+  } = await import("../src/lib/video-engine/ffmpeg-compositor.ts");
+  const { generateGeminiOmniHeroVideo } = await import("../src/lib/ai/gemini-omni-video.ts");
+
+  // Giả lập một buffer ảnh JPEG hợp lệ (1x1 pixel)
+  const dummyJpegBuffer = Buffer.from([
+    0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01,
+    0x01, 0x01, 0x00, 0x48, 0x00, 0x48, 0x00, 0x00, 0xff, 0xdb, 0x00, 0x43,
+    0x00, 0x08, 0x06, 0x06, 0x07, 0x06, 0x05, 0x08, 0x07, 0x07, 0x07, 0x09,
+    0x09, 0x08, 0x0a, 0x0c, 0x14, 0x0d, 0x0c, 0x0b, 0x0b, 0x0c, 0x19, 0x12,
+    0x13, 0x0f, 0x14, 0x1d, 0x1a, 0x1f, 0x1e, 0x1d, 0x1a, 0x1c, 0x1c, 0x20,
+    0x24, 0x2e, 0x27, 0x20, 0x22, 0x2c, 0x23, 0x1c, 0x1c, 0x28, 0x37, 0x29,
+    0x2c, 0x30, 0x31, 0x34, 0x34, 0x34, 0x1f, 0x27, 0x39, 0x3d, 0x38, 0x32,
+    0x3c, 0x2e, 0x33, 0x34, 0x32, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x00, 0x01,
+    0x00, 0x01, 0x01, 0x01, 0x11, 0x00, 0xff, 0xc4, 0x00, 0x1f, 0x00, 0x00,
+    0x01, 0x05, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+    0x09, 0x0a, 0x0b, 0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3f,
+    0x00, 0xbf, 0x00, 0xff, 0xd9
+  ]);
+
+  await t.test("createBlurredTourInfoClip() tạo thành công video clip End-Card phủ mờ thông tin tour", async () => {
+    const endCardBuffer = await createBlurredTourInfoClip({
+      imageBuffer: dummyJpegBuffer,
+      durationSec: 2.0,
+      info: {
+        productName: "Tour Khám Phá Bà Nà Hills - Cầu Vàng",
+        location: "Đà Nẵng",
+        salePrice: 950000,
+        originalPrice: 1200000,
+        highlights: [
+          "Trọn gói cáp treo khứ hồi đạt nhiều kỷ lục",
+          "Check-in Cầu Vàng hùng vĩ và Làng Pháp",
+          "Vào cổng ưu tiên, không cần xếp hàng",
+        ],
+        ctaText: "Bình luận nhận ngay vé ưu đãi hôm nay!",
+        hotline: "1900 8888",
+        merchantName: "Sun World Ba Na Hills",
+      },
+    });
+
+    assert(endCardBuffer instanceof Buffer);
+    assert(endCardBuffer.length > 5000, "Clip End-Card phải là file MP4 hợp lệ có kích thước > 5KB");
+  });
+
+  await t.test("generateGeminiOmniHeroVideo() không gọi Gemini Omni 1.1, báo cáo 0đ (Muse AI)", async () => {
+    const heroResult = await generateGeminiOmniHeroVideo({
+      prompt: "Cinematic drone shot",
+      startImageBuffer: dummyJpegBuffer,
+      endImageBuffer: dummyJpegBuffer,
+      durationSeconds: 2,
+    });
+
+    assert(heroResult.videoBuffer instanceof Buffer);
+    assert.strictEqual(heroResult.cost.cost_usd, 0, "Chi phí phải là 0đ khi loại bỏ Gemini Omni");
+    assert(
+      heroResult.cost.model_name.includes("muse-video"),
+      "Mô hình sử dụng phải thuộc Muse AI"
+    );
+  });
 });

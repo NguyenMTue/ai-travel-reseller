@@ -12,7 +12,7 @@ export default function PreviewAdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans antialiased">
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans antialiased">
       <AdminNavbar
         preview={true}
         adminName="Super Admin (Demo)"

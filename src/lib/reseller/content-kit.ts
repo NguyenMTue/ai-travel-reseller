@@ -30,7 +30,19 @@ export type ContentPublicationPolicy = {
 // No browser/env input controls this policy or the current reseller identity.
 export const confirmedContentPolicy: ContentPublicationPolicy = {
   statuses: ["approved"], allowShared: true, allowOwned: true,
-  personaValues: { local_guide: "local-guide", family: "family", foodie: "foodie", budget_traveler: "budget-traveler" },
+  personaValues: {
+    local_guide: "local-guide",
+    "Local Guide": "local-guide",
+    "local-guide": "local-guide",
+    family: "family",
+    Family: "family",
+    foodie: "foodie",
+    Foodie: "foodie",
+    budget_traveler: "budget-traveler",
+    "budget-traveler": "budget-traveler",
+    "Budget Traveler": "budget-traveler",
+    general: "local-guide",
+  },
 };
 export function getConfirmedContentPolicy(): ContentPublicationPolicy { return confirmedContentPolicy; }
 

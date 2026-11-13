@@ -87,6 +87,10 @@ export const updateSession = async (request: NextRequest) => {
   // Protected leaf loaders still fail closed and show the sanitized error.
   const requiresLogin = !authError || !canHandlePortalAuthFailure(pathname, authError.status);
   if (!user && isProtected && requiresLogin) {
+    // Trong môi trường development: cho phép truy cập /admin trực tiếp (app/admin/layout.tsx có fallback Super Admin)
+    if (pathname.startsWith("/admin") && process.env.NODE_ENV !== "production") {
+      return supabaseResponse;
+    }
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", pathname);

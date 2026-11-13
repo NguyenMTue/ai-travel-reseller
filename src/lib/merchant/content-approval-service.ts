@@ -25,10 +25,10 @@ export async function getMerchantContentsList(
   filter?: ContentFilterOptions
 ): Promise<{ success: boolean; data?: MerchantContentsSummary; error?: string }> {
   try {
-    // 1. Lấy danh sách chiến dịch của Merchant
+    // 1. Lấy danh sách chiến dịch của Merchant (cột tên chiến dịch trong database là `name`)
     const { data: campaigns, error: cmpError } = await (client as any)
       .from("campaigns")
-      .select("id, title, product_id, status")
+      .select("id, name, product_id, status")
       .eq("merchant_id", merchantId);
 
     if (cmpError) {
@@ -50,7 +50,10 @@ export async function getMerchantContentsList(
 
     const campaignMap = new Map<string, { title: string; product_id?: string }>();
     campaigns.forEach((c: any) => {
-      campaignMap.set(c.id, { title: c.title, product_id: c.product_id });
+      campaignMap.set(c.id, {
+        title: c.name || c.title || "Chiến dịch #" + String(c.id).slice(0, 8),
+        product_id: c.product_id,
+      });
     });
 
     const campaignIds = campaigns.map((c: any) => c.id);
@@ -68,7 +71,7 @@ export async function getMerchantContentsList(
 
     if (filter?.status && filter.status !== "all") {
       if (filter.status === "pending_approval") {
-        query = query.in("status", ["pending_approval", "ready", "draft"]);
+        query = query.in("status", ["pending_approval", "ready", "draft", "pending", "needs_review"]);
       } else {
         query = query.eq("status", filter.status);
       }
@@ -190,7 +193,7 @@ export async function updateMerchantContentApproval(
 
     const { data: campaignRecord, error: cmpError } = await (client as any)
       .from("campaigns")
-      .select("id, merchant_id, title")
+      .select("id, merchant_id, name")
       .eq("id", contentRecord.campaign_id)
       .maybeSingle();
 

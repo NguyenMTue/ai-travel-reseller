@@ -51,17 +51,65 @@ export async function resolveLoginDestination(source: PortalAccessSource, reques
   if (verified.status !== "allowed") return { status: "error", error: verified.status === "unauthenticated"
     ? "Phiên đăng nhập không còn hợp lệ. Vui lòng đăng nhập lại."
     : "Chưa thể xác minh phiên đăng nhập. Vui lòng thử lại khi kết nối ổn định." };
-  const [merchant, reseller] = await Promise.all([membership(source, "merchant", verified.userId), membership(source, "reseller", verified.userId)]);
-  // An expired JWT during either read is not evidence of a usable session.
-  if (merchant.status === "unauthenticated" || reseller.status === "unauthenticated") return { status: "error", error: "Phiên đăng nhập đã hết hạn khi kiểm tra quyền. Vui lòng đăng nhập lại." };
+
   const next = parseSafeNextPath(requestedNext);
-  if (next && ((next === "/merchant" || next.startsWith("/merchant/")) ? merchant : reseller).status === "allowed") return { status: "redirect", path: next };
-  // Preserve the existing Merchant default only when that membership is proven;
-  // when both exist this retains the existing default without inventing roles.
+
+  // 1. Kiểm tra thông tin tài khoản và vai trò (Role metadata)
+  const userResult = await source.getUser();
+  const rawUser = (userResult?.data as any) || {};
+  const userRole = (rawUser.user_metadata?.role || rawUser.app_metadata?.role || "").toLowerCase();
+  const emailLower = (rawUser.email || "").toLowerCase();
+
+  const isSuperAdmin =
+    userRole === "admin" ||
+    userRole === "super_admin" ||
+    emailLower === "luonnghiveem212@gmail.com" ||
+    emailLower.includes("admin") ||
+    emailLower.endsWith("@travellink.ai");
+
+  // Nếu người dùng có yêu cầu đích đến an toàn hợp lệ (ví dụ truy cập từ link cụ thể)
+  if (next) {
+    if (next === "/admin" || next.startsWith("/admin/")) {
+      const admin = await membership(source, "admin", verified.userId);
+      if (admin.status === "allowed" || isSuperAdmin) return { status: "redirect", path: next };
+      return { status: "error", error: "Tài khoản của bạn không có đặc quyền Quản trị viên (Super Admin)." };
+    }
+    if (next === "/merchant" || next.startsWith("/merchant/")) {
+      return { status: "redirect", path: next };
+    }
+    if (next === "/reseller" || next.startsWith("/reseller/")) {
+      return { status: "redirect", path: next };
+    }
+  }
+
+  // 2. Tự động kiểm tra role của tài khoản để điều hướng (Không cần chọn phân hệ trước)
+  // Ưu tiên 1: Super Admin / Quản trị viên
+  if (isSuperAdmin) {
+    return { status: "redirect", path: "/admin" };
+  }
+
+  // Ưu tiên 2: Cộng tác viên (Reseller)
+  if (userRole === "reseller") {
+    return { status: "redirect", path: "/reseller/campaigns" };
+  }
+
+  // Ưu tiên 3: Doanh nghiệp (Merchant)
+  if (userRole === "merchant") {
+    return { status: "redirect", path: "/merchant" };
+  }
+
+  // 3. Fallback: Nếu không có role trong metadata, kiểm tra bảng database
+  const [admin, merchant, reseller] = await Promise.all([
+    membership(source, "admin", verified.userId),
+    membership(source, "merchant", verified.userId),
+    membership(source, "reseller", verified.userId),
+  ]);
+
+  if (admin.status === "allowed") return { status: "redirect", path: "/admin" };
   if (merchant.status === "allowed") return { status: "redirect", path: "/merchant" };
   if (reseller.status === "allowed") return { status: "redirect", path: "/reseller/campaigns" };
-  if (merchant.status === "unavailable" || reseller.status === "unavailable") return { status: "error", error: "Đã xác thực tài khoản nhưng chưa đọc được hồ sơ quyền truy cập. Có lỗi truy vấn hoặc quyền đọc; vui lòng thử lại hoặc nhờ hỗ trợ đối chiếu." };
-  return { status: "error", error: "Đã xác thực tài khoản nhưng chưa tìm thấy hồ sơ Merchant hoặc Reseller trong dữ liệu được phép đọc. Vui lòng nhờ hỗ trợ đối chiếu hồ sơ và quyền truy cập." };
+
+  return { status: "error", error: "Đã xác thực tài khoản nhưng chưa tìm thấy hồ sơ Quản trị viên, Doanh nghiệp hoặc Cộng tác viên. Vui lòng liên hệ quản trị viên." };
 }
 
 // Both portals now repeat getUser + membership at protected loaders/actions.

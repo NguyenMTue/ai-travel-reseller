@@ -96,7 +96,10 @@ function LibraryRead({
         if (!alive) return;
         if (res.success && Array.isArray(res.data) && res.data.length > 0) {
           setCampaigns(res.data);
-          setSelectedCampaignId(res.data[0].id);
+          const defaultBaNa = res.data.find((c: CampaignOption) =>
+            (c.name + " " + (c.targetLocation || "") + " " + c.productName).toLowerCase().includes("bà nà")
+          );
+          setSelectedCampaignId(defaultBaNa ? defaultBaNa.id : res.data[0].id);
         } else {
           setCampaigns([]);
         }
@@ -303,26 +306,26 @@ function LibraryRead({
           <div className="mt-2 rounded-xl border border-emerald-500/30 bg-emerald-950/15 p-4 text-xs">
             <div className="flex items-center gap-2 font-semibold text-emerald-400 text-sm pb-1.5">
               <Zap size={16} />
-              <span>Quy trình Tạo Video Du lịch Hybrid AI (Gemini Omni 1.1 Flash + FFmpeg)</span>
+              <span>Quy trình Tạo Video Du lịch AI Đỉnh cao (Muse AI + FFmpeg)</span>
             </div>
             <p className="text-muted-foreground leading-relaxed mb-3">
-              Tối ưu hóa chi phí bằng cách kết hợp AI thế hệ mới với hiệu ứng chuyển động ảnh thật:
+              Tối ưu hóa chất lượng và chi phí bằng cách kết hợp Muse AI Video với hiệu ứng điện ảnh và bảng thông tin tour ở cuối:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="rounded-lg border border-purple-500/20 bg-purple-950/20 p-2.5">
                 <span className="font-semibold text-purple-300 block mb-1">
-                  ⭐ Giai đoạn 1: Hero Hook (2 - 3 ảnh đầu)
+                  ⭐ Giai đoạn 1: Phân cảnh Muse AI & Lồng tiếng (Ảnh 1 - 3)
                 </span>
                 <span className="text-muted-foreground text-[11px] leading-relaxed">
-                  Đưa vào mô hình <strong>gemini-omni-1.1-flash</strong> sinh video chuyển cảnh điện ảnh 5s - 10s mượt mà giữ chân người xem trong 3 giây vàng.
+                  Đưa vào mô hình <strong>muse-video</strong> trực tiếp qua Muse AI Gateway sinh video chuyển cảnh điện ảnh mượt mà kèm âm thanh sống động.
                 </span>
               </div>
               <div className="rounded-lg border border-blue-500/20 bg-blue-950/20 p-2.5">
                 <span className="font-semibold text-blue-300 block mb-1">
-                  🎬 Giai đoạn 2: Body Slideshow (Các ảnh còn lại)
+                  🎬 Giai đoạn 2: Bảng thông tin Tour phủ mờ & CTA (Cuối video)
                 </span>
                 <span className="text-muted-foreground text-[11px] leading-relaxed">
-                  Dùng hiệu ứng <strong>Ken Burns (Zoom/Pan 2s/ảnh)</strong> + <strong>giọng đọc tiếng Việt (Edge-TTS)</strong> hoàn toàn miễn phí (0đ).
+                  Hiển thị hình ảnh phủ <strong>lớp mờ (frosted blur)</strong> nổi bật trọn gói giá vé, ưu đãi và hotline để khách hàng dễ dàng tiếp cận và đặt tour ngay.
                 </span>
               </div>
             </div>
@@ -336,7 +339,7 @@ function LibraryRead({
           <p className="eyebrow">CHỌN ẢNH TƯ LIỆU CHO CHIẾN DỊCH</p>
           <h2>Kho ảnh & video thực tế ({totalAssets})</h2>
           <p>
-            Click vào từng ảnh bên dưới để chọn thứ tự xuất hiện trong video (ảnh 1-2 làm Hero Omni, các ảnh sau làm Body).
+            Click vào từng ảnh bên dưới để chọn thứ tự xuất hiện trong video (ảnh 1-2 làm phân cảnh Muse AI, ảnh cuối hiển thị thông tin tour).
           </p>
         </div>
         <div className="flex items-center gap-2">

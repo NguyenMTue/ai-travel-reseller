@@ -1,4 +1,21 @@
-import type { OmniVideoCostBreakdown } from "./gemini-omni-video.ts";
+export interface MuseVideoCostBreakdown {
+  model_name: string;
+  duration_seconds: number;
+  input_tokens: number;
+  output_tokens: number;
+  cost_usd: number;
+  cost_vnd: number;
+  free_tier_components: {
+    ffmpeg_compositor_cost: number;
+    edge_tts_cost: number;
+    total_free_savings_usd: number;
+  };
+  is_live_call: boolean;
+  status_note?: string;
+}
+
+// Giữ lại type alias OmniVideoCostBreakdown để tương thích ngược các file gọi cũ
+export type OmniVideoCostBreakdown = MuseVideoCostBreakdown;
 
 export interface Muse2ApiConfig {
   apiKey: string;
@@ -13,13 +30,16 @@ export interface MuseVideoGenerationInput {
   endImageBuffer?: Buffer;
   durationSeconds?: number;
   aspectRatio?: "9:16" | "16:9";
+  voiceoverScript?: string;
+  ambientSounds?: string[];
+  includeAudioPrompt?: boolean;
   signal?: AbortSignal;
 }
 
 export interface MuseVideoGenerationResult {
   videoBuffer: Buffer;
   durationSeconds: number;
-  cost: OmniVideoCostBreakdown;
+  cost: MuseVideoCostBreakdown;
   taskId?: string;
   videoUrl?: string;
 }
@@ -142,12 +162,26 @@ export async function generateMuseVideoClip(
     imagePayload = `data:${mime};base64,${input.startImageBuffer.toString("base64")}`;
   }
 
+  let fullPrompt = input.prompt;
+  if (input.includeAudioPrompt !== false && input.voiceoverScript && input.voiceoverScript.trim()) {
+    const cleanVoice = input.voiceoverScript
+      .replace(/\[pause\s*[\d\.]+s?\]/gi, " ")
+      .replace(/\[.*?\]/g, " ")
+      .trim();
+    if (cleanVoice) {
+      fullPrompt += ` Audio & Voiceover Narration: Professional, warm, engaging Vietnamese travel host says: "${cleanVoice}".`;
+      if (input.ambientSounds && input.ambientSounds.length > 0) {
+        fullPrompt += ` Synchronized ambient soundscape: ${input.ambientSounds.join(", ")}.`;
+      }
+    }
+  }
+
   console.log(
     `[MUSE2API] Gửi yêu cầu sinh video (${duration}s, ${aspectRatio}, model: ${config.model}) tới ${config.baseUrl}/v1/videos...`
   );
 
   const requestBody: Record<string, unknown> = {
-    prompt: input.prompt,
+    prompt: fullPrompt,
     model: config.model,
     duration,
     aspect_ratio: aspectRatio,

@@ -101,24 +101,24 @@ export function AdminPartnersManagement({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white flex items-center gap-2.5">
-            <Users className="w-6 h-6 text-blue-400" />
+          <h1 className="text-2xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+            <Users className="w-6 h-6 text-primary" />
             <span>Quản Lý Hệ Sinh Thái Đối Tác (Partners)</span>
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Theo dõi danh sách Doanh nghiệp (Merchants) & Cộng tác viên (Resellers).
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300">
-            Tổng cộng: <strong className="text-white">{partners.length}</strong> đối tác
+          <span className="px-3 py-1.5 rounded-xl bg-white border border-border shadow-xs text-xs text-muted-foreground">
+            Tổng cộng: <strong className="text-foreground">{partners.length}</strong> đối tác
           </span>
         </div>
       </div>
 
       {message && (
-        <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs flex items-center justify-between">
+        <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 text-xs flex items-center justify-between shadow-xs">
           <span>{message}</span>
           <button onClick={() => setMessage(null)} className="underline hover:opacity-80">
             Đóng
@@ -127,58 +127,58 @@ export function AdminPartnersManagement({
       )}
 
       {/* Filter and Search */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-border shadow-xs">
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => setTypeFilter("all")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all border ${
               typeFilter === "all"
-                ? "bg-slate-800 text-white"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-secondary text-primary font-semibold border-primary/20 shadow-xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border-transparent font-medium"
             }`}
           >
             Tất cả ({partners.length})
           </button>
           <button
             onClick={() => setTypeFilter("merchant")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5 border ${
               typeFilter === "merchant"
-                ? "bg-slate-800 text-white"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-secondary text-primary font-semibold border-primary/20 shadow-xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border-transparent font-medium"
             }`}
           >
-            <Building2 className="w-3.5 h-3.5 text-blue-400" />
+            <Building2 className={`w-3.5 h-3.5 ${typeFilter === "merchant" ? "text-blue-700" : "text-blue-600"}`} />
             <span>Doanh nghiệp ({partners.filter((p) => p.type === "merchant").length})</span>
           </button>
           <button
             onClick={() => setTypeFilter("reseller")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5 border ${
               typeFilter === "reseller"
-                ? "bg-slate-800 text-white"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-secondary text-primary font-semibold border-primary/20 shadow-xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border-transparent font-medium"
             }`}
           >
-            <Users className="w-3.5 h-3.5 text-emerald-400" />
+            <Users className={`w-3.5 h-3.5 ${typeFilter === "reseller" ? "text-emerald-700" : "text-emerald-600"}`} />
             <span>Cộng tác viên ({partners.filter((p) => p.type === "reseller").length})</span>
           </button>
         </div>
 
         <div className="relative w-full sm:w-64">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm tên, email, SĐT đối tác..."
-            className="pl-9 h-9 bg-slate-950 border-slate-800 text-xs text-slate-200"
+            className="pl-9 h-9 bg-muted/30 border-border text-xs text-foreground placeholder:text-muted-foreground"
           />
         </div>
       </div>
 
       {/* Partners Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-slate-950/70 border-b border-slate-800 text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <table className="w-full text-left text-sm text-foreground">
+            <thead className="bg-muted/70 border-b border-border text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               <tr>
                 <th className="py-3.5 px-4">Tên Đối Tác</th>
                 <th className="py-3.5 px-4">Phân Loại</th>
@@ -188,60 +188,60 @@ export function AdminPartnersManagement({
                 <th className="py-3.5 px-4 text-right">Quản trị</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-border">
               {filteredPartners.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400">
+                  <td colSpan={6} className="py-12 text-center text-muted-foreground">
                     Không tìm thấy đối tác nào phù hợp.
                   </td>
                 </tr>
               ) : (
                 filteredPartners.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-800/30 transition-colors">
+                  <tr key={item.id} className="hover:bg-muted/30 transition-colors">
                     <td className="py-3.5 px-4">
-                      <div className="font-semibold text-white">{item.name}</div>
-                      <div className="text-[10px] font-mono text-slate-500">{item.id.slice(0, 8)}...</div>
+                      <div className="font-semibold text-foreground">{item.name}</div>
+                      <div className="text-[10px] font-mono text-muted-foreground">{item.id.slice(0, 8)}...</div>
                     </td>
 
                     <td className="py-3.5 px-4">
                       {item.type === "merchant" ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
                           <Building2 className="w-3 h-3" /> Doanh nghiệp
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
                           <Users className="w-3 h-3" /> Cộng tác viên
                         </span>
                       )}
                     </td>
 
-                    <td className="py-3.5 px-4 text-xs text-slate-300">
-                      <div>{item.email || "—"}</div>
-                      {item.phone && <div className="text-slate-500 text-[11px]">{item.phone}</div>}
+                    <td className="py-3.5 px-4 text-xs text-muted-foreground">
+                      <div className="text-foreground">{item.email || "—"}</div>
+                      {item.phone && <div className="text-muted-foreground text-[11px]">{item.phone}</div>}
                     </td>
 
                     <td className="py-3.5 px-4 text-xs">
                       {item.totalOrders !== undefined ? (
                         <div>
-                          <span className="font-semibold text-white">{item.totalOrders}</span> đơn hàng
+                          <span className="font-semibold text-foreground">{item.totalOrders}</span> đơn hàng
                           {item.totalVolume !== undefined && (
-                            <div className="text-emerald-400 font-mono text-[11px] mt-0.5">
+                            <div className="text-emerald-700 font-mono text-[11px] font-semibold mt-0.5">
                               {formatVND(item.totalVolume)}
                             </div>
                           )}
                         </div>
                       ) : (
-                        <span className="text-slate-500 italic">Đang hoạt động</span>
+                        <span className="text-muted-foreground italic">Đang hoạt động</span>
                       )}
                     </td>
 
                     <td className="py-3.5 px-4">
                       {item.status === "active" ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                           <CheckCircle2 className="w-3 h-3" /> Đang hoạt động
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
                           <Lock className="w-3 h-3" /> Tạm khóa
                         </span>
                       )}
@@ -255,8 +255,8 @@ export function AdminPartnersManagement({
                         onClick={() => handleToggleStatus(item.id, item.type, item.status)}
                         className={`text-xs h-7 px-2.5 ${
                           item.status === "active"
-                            ? "border-red-900/40 text-red-400 hover:bg-red-950/40"
-                            : "border-emerald-900/40 text-emerald-400 hover:bg-emerald-950/40"
+                            ? "border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+                            : "border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800"
                         }`}
                       >
                         {item.status === "active" ? (

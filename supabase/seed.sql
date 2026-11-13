@@ -206,18 +206,18 @@ INSERT INTO public.products (
   valid_from, valid_to, booking_url, payment_url, status
 )
 VALUES 
-  -- Product 1: Vé Bà Nà Hills (Khớp với ID cũ để giữ tương thích)
+  -- Product 1: Vé Sun World Bà Nà Hills
   (
     '33333333-3333-3333-3333-333333333333',
     '11111111-1111-1111-1111-111111111111',
-    'Vé Cáp Treo Bà Nà Hills + Buffet Trưa Quốc Tế',
-    'Vé trọn gói vào cổng, cáp treo khứ hồi Bà Nà Hills, tham quan Cầu Vàng, Làng Pháp và buffet trưa hơn 100 món tại nhà hàng Arapang hoặc Beer Plaza.',
-    'Vé tham quan & Ẩm thực',
+    'Vé Cáp Treo Sun World Ba Na Hills',
+    'Vé trọn gói cáp treo khứ hồi Sun World Ba Na Hills, tham quan Cầu Vàng, Làng Pháp và Quảng trường Nhật Thực.',
+    'Vé tham quan & Cáp treo',
     1250000,
-    1150000,
+    950000,
     7.5,
     now(), now() + interval '180 days',
-    'https://sunworld.vn/booking/ba-na-hills-buffet',
+    'https://sunworld.vn/booking/ba-na-hills',
     'https://sunworld.vn',
     'active'
   ),
@@ -317,15 +317,15 @@ INSERT INTO public.campaigns (
   commission_rate, status
 )
 VALUES 
-  -- Campaign 1: Hè 2026 - Kích cầu du lịch Bà Nà (Khớp ID cũ)
+  -- Campaign 1: Khám Phá Sun World Ba Na Hills 2026
   (
     '44444444-4444-4444-4444-444444444444',
     '11111111-1111-1111-1111-111111111111',
     '33333333-3333-3333-3333-333333333333',
-    'Chiến dịch Hè 2026 - Kích cầu du lịch Bà Nà Hills',
+    'Chiến dịch Khám Phá Sun World Ba Na Hills 2026',
     now() - interval '10 days', now() + interval '80 days',
     'Gia đình có trẻ nhỏ, nhóm bạn trẻ, sinh viên thích check-in sống ảo',
-    'Đà Nẵng, Hà Nội, TP.HCM',
+    'Bà Nà Hills, Đà Nẵng',
     8.0,
     'active'
   ),

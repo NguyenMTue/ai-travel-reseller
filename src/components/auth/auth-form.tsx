@@ -8,6 +8,7 @@ import {
   LoaderCircle,
   Building2,
   Users,
+  ShieldCheck,
 } from "lucide-react";
 import { login, signup } from "@/app/actions/auth";
 export function AuthForm({
@@ -41,6 +42,7 @@ export function AuthForm({
       if (result?.error) setError(result.error);
     });
   }
+
   return (
     <>
       <div className="auth-heading">
@@ -66,31 +68,46 @@ export function AuthForm({
           khoản trước khi đăng nhập.
         </div>
       )}
+      {next?.startsWith("/admin") && (
+        <div className="notice" role="status" style={{ borderLeftColor: "#2563eb", background: "#eff6ff", color: "#1d4ed8" }}>
+          🛡️ Đang đăng nhập vào Phân hệ Quản trị Vận hành (Back-Office Super Admin)
+        </div>
+      )}
       <form action={submit} className="auth-form">
-        <input type="hidden" name="next" value={next} />
+        <input type="hidden" name="next" value={next || ""} />
         {register && (
           <>
-            <fieldset className="role-options">
+            <fieldset className="role-options" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
               <legend>Bạn muốn tham gia với vai trò nào?</legend>
-              <label>
+              <label style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "4px", padding: "10px 4px" }}>
                 <input
                   type="radio"
                   name="role"
                   value="merchant"
-                  defaultChecked={initialRole !== "reseller"}
+                  defaultChecked={initialRole !== "reseller" && initialRole !== "admin"}
                 />
-                <Building2 size={19} />
+                <Building2 size={18} />
                 <span>Doanh nghiệp</span>
               </label>
-              <label>
+              <label style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "4px", padding: "10px 4px" }}>
                 <input
                   type="radio"
                   name="role"
                   value="reseller"
                   defaultChecked={initialRole === "reseller"}
                 />
-                <Users size={19} />
+                <Users size={18} />
                 <span>Cộng tác viên</span>
+              </label>
+              <label style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "4px", padding: "10px 4px" }}>
+                <input
+                  type="radio"
+                  name="role"
+                  value="admin"
+                  defaultChecked={initialRole === "admin"}
+                />
+                <ShieldCheck size={18} />
+                <span>Quản trị viên</span>
               </label>
             </fieldset>
             <label className="field" htmlFor="full_name">
