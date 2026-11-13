@@ -131,34 +131,34 @@ export function AdminPartnersManagement({
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => setTypeFilter("all")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all border ${
               typeFilter === "all"
-                ? "bg-primary text-white shadow-xs"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                ? "bg-secondary text-primary font-semibold border-primary/20 shadow-xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border-transparent font-medium"
             }`}
           >
             Tất cả ({partners.length})
           </button>
           <button
             onClick={() => setTypeFilter("merchant")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5 border ${
               typeFilter === "merchant"
-                ? "bg-primary text-white shadow-xs"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                ? "bg-secondary text-primary font-semibold border-primary/20 shadow-xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border-transparent font-medium"
             }`}
           >
-            <Building2 className={`w-3.5 h-3.5 ${typeFilter === "merchant" ? "text-white" : "text-blue-600"}`} />
+            <Building2 className={`w-3.5 h-3.5 ${typeFilter === "merchant" ? "text-blue-700" : "text-blue-600"}`} />
             <span>Doanh nghiệp ({partners.filter((p) => p.type === "merchant").length})</span>
           </button>
           <button
             onClick={() => setTypeFilter("reseller")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5 border ${
               typeFilter === "reseller"
-                ? "bg-primary text-white shadow-xs"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                ? "bg-secondary text-primary font-semibold border-primary/20 shadow-xs"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border-transparent font-medium"
             }`}
           >
-            <Users className={`w-3.5 h-3.5 ${typeFilter === "reseller" ? "text-white" : "text-emerald-600"}`} />
+            <Users className={`w-3.5 h-3.5 ${typeFilter === "reseller" ? "text-emerald-700" : "text-emerald-600"}`} />
             <span>Cộng tác viên ({partners.filter((p) => p.type === "reseller").length})</span>
           </button>
         </div>

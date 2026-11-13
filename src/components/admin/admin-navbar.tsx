@@ -84,16 +84,16 @@ export function AdminNavbar({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm transition-all border ${
                     item.active
-                      ? "bg-primary text-white shadow-xs"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
+                      ? "bg-secondary text-primary font-semibold border-primary/20 shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/70 border-transparent font-medium"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className={`w-4 h-4 ${item.active ? "text-primary" : "text-muted-foreground"}`} />
                   <span>{item.label}</span>
                   {item.badge !== undefined && (
-                    <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-red-600 text-white animate-pulse">
+                    <span className="ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full bg-rose-500 text-white animate-pulse">
                       {item.badge}
                     </span>
                   )}
@@ -160,16 +160,16 @@ export function AdminNavbar({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium whitespace-nowrap ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all whitespace-nowrap border ${
                   item.active
-                    ? "bg-primary text-white"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-secondary text-primary font-semibold border-primary/20 shadow-xs"
+                    : "text-muted-foreground hover:text-foreground border-transparent font-medium"
                 }`}
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className={`w-3.5 h-3.5 ${item.active ? "text-primary" : "text-muted-foreground"}`} />
                 <span>{item.label}</span>
                 {item.badge !== undefined && (
-                  <span className="px-1 py-0.2 text-[10px] font-bold rounded-full bg-red-600 text-white">
+                  <span className="px-1 py-0.2 text-[10px] font-bold rounded-full bg-rose-500 text-white">
                     {item.badge}
                   </span>
                 )}

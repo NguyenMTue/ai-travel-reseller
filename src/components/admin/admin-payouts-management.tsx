@@ -219,17 +219,17 @@ export function AdminPayoutsManagement({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer border ${
                 activeTab === tab.id
-                  ? "bg-primary text-white shadow-xs font-semibold"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  ? "bg-secondary text-primary border-primary/20 shadow-xs font-semibold"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted border-transparent font-medium"
               }`}
             >
               <span>{tab.label}</span>
               <span
                 className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
                   activeTab === tab.id
-                    ? "bg-white/20 text-white"
+                    ? "bg-primary/10 text-primary border border-primary/20"
                     : "bg-muted text-muted-foreground"
                 }`}
               >

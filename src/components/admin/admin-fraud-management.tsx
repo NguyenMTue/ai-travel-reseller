@@ -107,24 +107,24 @@ export function AdminFraudManagement({
       <div className="flex items-center gap-2 border-b border-border pb-2">
         <button
           onClick={() => setTab("orders")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all border ${
             tab === "orders"
-              ? "bg-primary text-white shadow-xs"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              ? "bg-secondary text-primary font-semibold border-primary/20 shadow-xs"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border-transparent font-medium"
           }`}
         >
-          <AlertTriangle className={`w-4 h-4 ${tab === "orders" ? "text-amber-200" : "text-rose-500"}`} />
+          <AlertTriangle className={`w-4 h-4 ${tab === "orders" ? "text-rose-600" : "text-rose-500"}`} />
           <span>Đơn Hàng Tự Mua ({orders.length})</span>
         </button>
         <button
           onClick={() => setTab("clicks")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all border ${
             tab === "clicks"
-              ? "bg-primary text-white shadow-xs"
-              : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              ? "bg-secondary text-primary font-semibold border-primary/20 shadow-xs"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/60 border-transparent font-medium"
           }`}
         >
-          <Bot className={`w-4 h-4 ${tab === "clicks" ? "text-purple-200" : "text-purple-600"}`} />
+          <Bot className={`w-4 h-4 ${tab === "clicks" ? "text-purple-700" : "text-purple-500"}`} />
           <span>Traffic Click Bot ({clicks.length})</span>
         </button>
       </div>
