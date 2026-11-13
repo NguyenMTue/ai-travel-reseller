@@ -25,12 +25,6 @@ export function AuthForm({
   initialRole?: string;
 }) {
   const register = mode === "register";
-  const initialRoleChoice = next?.startsWith("/admin")
-    ? "admin"
-    : next?.startsWith("/reseller") || initialRole === "reseller"
-      ? "reseller"
-      : "merchant";
-  const [selectedRole, setSelectedRole] = useState<"merchant" | "reseller" | "admin">(initialRoleChoice);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
@@ -48,12 +42,6 @@ export function AuthForm({
       if (result?.error) setError(result.error);
     });
   }
-
-  const effectiveNext = selectedRole === "admin"
-    ? "/admin"
-    : selectedRole === "reseller"
-      ? "/reseller/campaigns"
-      : (next?.startsWith("/merchant") ? next : "/merchant");
 
   return (
     <>
@@ -80,62 +68,13 @@ export function AuthForm({
           khoản trước khi đăng nhập.
         </div>
       )}
-      {selectedRole === "admin" && (
+      {next?.startsWith("/admin") && (
         <div className="notice" role="status" style={{ borderLeftColor: "#2563eb", background: "#eff6ff", color: "#1d4ed8" }}>
           🛡️ Đang đăng nhập vào Phân hệ Quản trị Vận hành (Back-Office Super Admin)
         </div>
       )}
-      {selectedRole === "reseller" && !register && (
-        <div className="notice" role="status" style={{ borderLeftColor: "#10b981", background: "#f0fdf4", color: "#15803d" }}>
-          🤝 Đang đăng nhập vào Phân hệ Cộng tác viên (Reseller Campaigns & Wallet)
-        </div>
-      )}
-      {selectedRole === "merchant" && !register && (
-        <div className="notice" role="status" style={{ borderLeftColor: "#f59e0b", background: "#fffbeb", color: "#b45309" }}>
-          🏢 Đang đăng nhập vào Phân hệ Doanh nghiệp (Merchant Dashboard & Content Approval)
-        </div>
-      )}
       <form action={submit} className="auth-form">
-        <input type="hidden" name="next" value={effectiveNext} />
-        <input type="hidden" name="target_role" value={selectedRole} />
-        {!register && (
-          <fieldset className="role-options" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: "1rem" }}>
-            <legend>Đăng nhập vào phân hệ:</legend>
-            <label style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "4px", padding: "10px 4px" }}>
-              <input
-                type="radio"
-                name="target_role"
-                value="merchant"
-                checked={selectedRole === "merchant"}
-                onChange={() => setSelectedRole("merchant")}
-              />
-              <Building2 size={18} />
-              <span>Doanh nghiệp</span>
-            </label>
-            <label style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "4px", padding: "10px 4px" }}>
-              <input
-                type="radio"
-                name="target_role"
-                value="reseller"
-                checked={selectedRole === "reseller"}
-                onChange={() => setSelectedRole("reseller")}
-              />
-              <Users size={18} />
-              <span>Cộng tác viên</span>
-            </label>
-            <label style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: "4px", padding: "10px 4px" }}>
-              <input
-                type="radio"
-                name="target_role"
-                value="admin"
-                checked={selectedRole === "admin"}
-                onChange={() => setSelectedRole("admin")}
-              />
-              <ShieldCheck size={18} />
-              <span>Super Admin</span>
-            </label>
-          </fieldset>
-        )}
+        <input type="hidden" name="next" value={next || ""} />
         {register && (
           <>
             <fieldset className="role-options" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
@@ -270,17 +209,6 @@ export function AuthForm({
           Xem thử Dashboard, không cần tài khoản ↗
         </Link>
       </div>
-      {!register && selectedRole !== "admin" && (
-        <div className="auth-preview" style={{ marginTop: "0.5rem" }}>
-          <button
-            type="button"
-            onClick={() => setSelectedRole("admin")}
-            style={{ background: "none", border: "none", color: "#2563eb", fontWeight: 500, cursor: "pointer", fontSize: "inherit" }}
-          >
-            Chuyển sang cổng Quản trị viên (Super Admin) ↗
-          </button>
-        </div>
-      )}
     </>
   );
 }
