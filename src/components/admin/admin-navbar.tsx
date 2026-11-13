@@ -62,9 +62,9 @@ export function AdminNavbar({
         <div className="flex items-center justify-between h-16">
           {/* Logo & Portal Badge */}
           <div className="flex items-center gap-4">
-            <Link href={root} className="flex items-center gap-2">
-              <Brand />
-            </Link>
+            <div className="flex items-center gap-2">
+              <Brand href={root} />
+            </div>
             <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
               <Shield className="w-3.5 h-3.5" />
               <span>Back-Office Super Admin</span>
