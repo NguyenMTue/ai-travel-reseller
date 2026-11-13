@@ -11,6 +11,7 @@ import {
   Info,
 } from "lucide-react";
 import type { StorefrontData, StorefrontPackage } from "@/src/lib/storefront/types";
+import { formatPrice } from "@/src/lib/storefront/format";
 
 type StorefrontTourContentProps = {
   data: StorefrontData;
@@ -96,10 +97,10 @@ export function StorefrontTourContent({ data, onSelectPackage }: StorefrontTourC
               <div className="shrink-0 flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-3 md:pt-0 border-slate-100">
                 <div className="text-left md:text-right">
                   <span className="text-xs text-slate-400 line-through">
-                    {pkg.originalPrice.toLocaleString()} ₫
+                    {formatPrice(pkg.originalPrice)} ₫
                   </span>
                   <div className="text-xl md:text-2xl font-extrabold text-[#bd6840]">
-                    {pkg.salePrice.toLocaleString()} ₫
+                    {formatPrice(pkg.salePrice)} ₫
                   </div>
                 </div>
 

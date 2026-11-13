@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { resolveStorefrontData } from "@/src/lib/storefront/data";
+import { formatPrice } from "@/src/lib/storefront/format";
 import { StorefrontView } from "@/src/components/storefront/storefront-view";
 
 type PageProps = {
@@ -16,7 +17,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   const data = await resolveStorefrontData({ tenant, slug, searchParams: search });
 
   const title = `${data.product.name} | ${data.merchant.name}`;
-  const description = `${data.product.subtitle} Đặt vé chính hãng ưu đãi chỉ từ ${data.product.salePrice.toLocaleString()} ₫. Quét mã QR vào cổng không xếp hàng.`;
+  const description = `${data.product.subtitle} Đặt vé chính hãng ưu đãi chỉ từ ${formatPrice(data.product.salePrice)} ₫. Quét mã QR vào cổng không xếp hàng.`;
 
   return {
     title,

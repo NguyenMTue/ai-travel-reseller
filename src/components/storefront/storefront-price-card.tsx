@@ -13,6 +13,7 @@ import {
   Clock,
 } from "lucide-react";
 import type { StorefrontData } from "@/src/lib/storefront/types";
+import { formatPrice, formatNumber } from "@/src/lib/storefront/format";
 
 type StorefrontPriceCardProps = {
   data: StorefrontData;
@@ -71,11 +72,11 @@ export function StorefrontPriceCard({ data, onOpenBooking }: StorefrontPriceCard
           <span>{product.rating}</span>
         </div>
         <span className="text-slate-500 underline decoration-slate-300">
-          {product.reviewCount.toLocaleString()} đánh giá
+          {formatNumber(product.reviewCount)} đánh giá
         </span>
         <span className="text-slate-300">•</span>
         <span className="text-emerald-700 font-medium">
-          Đã bán {product.soldCount.toLocaleString()} vé
+          Đã bán {formatNumber(product.soldCount)} vé
         </span>
       </div>
 
@@ -105,11 +106,11 @@ export function StorefrontPriceCard({ data, onOpenBooking }: StorefrontPriceCard
       <div className="flex items-baseline justify-between pt-1">
         <div>
           <span className="text-xs text-slate-400 line-through mr-2">
-            {product.originalPrice.toLocaleString()} ₫
+            {formatPrice(product.originalPrice)} ₫
           </span>
           <div className="flex items-baseline gap-1.5">
             <span className="text-2xl md:text-3xl font-extrabold text-[#bd6840]">
-              {product.salePrice.toLocaleString()} ₫
+              {formatPrice(product.salePrice)} ₫
             </span>
             <span className="text-xs text-slate-500">/ người</span>
           </div>

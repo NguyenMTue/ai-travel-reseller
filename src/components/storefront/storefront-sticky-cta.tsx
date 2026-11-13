@@ -3,6 +3,7 @@
 import React from "react";
 import { ArrowRight, Zap } from "lucide-react";
 import type { StorefrontData } from "@/src/lib/storefront/types";
+import { formatPrice } from "@/src/lib/storefront/format";
 
 type StorefrontStickyCtaProps = {
   product: StorefrontData["product"];
@@ -19,10 +20,10 @@ export function StorefrontStickyCta({ product, onOpenBooking }: StorefrontSticky
         </div>
         <div className="flex items-baseline gap-1">
           <span className="text-xl font-extrabold text-[#bd6840]">
-            {product.salePrice.toLocaleString()} ₫
+            {formatPrice(product.salePrice)} ₫
           </span>
           <span className="text-[10px] text-slate-400 line-through">
-            {product.originalPrice.toLocaleString()} ₫
+            {formatPrice(product.originalPrice)} ₫
           </span>
         </div>
       </div>

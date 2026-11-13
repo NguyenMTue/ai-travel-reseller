@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { resolveStorefrontData, createBookingOrder } from "../src/lib/storefront/data.ts";
+import { formatPrice, formatNumber } from "../src/lib/storefront/format.ts";
 
 test("SF-01: resolveStorefrontData returns rich data with merchant, product, packages and authentic tips", async () => {
   const data = await resolveStorefrontData({
@@ -119,4 +120,34 @@ test("SF-04: Mock destination URLs with checkout.sunworld.vn gracefully rewrite 
   assert.ok(targetDest.startsWith("http://localhost:3000/storefront/sunworld/nguhanhson-01"));
   assert.ok(targetDest.includes("ref=22222222-2222-2222-2222-111111111111"));
   assert.ok(targetDest.includes("campaign=44444444-4444-4444-4444-555555555555"));
+});
+
+test("SF-05: formatPrice & formatNumber produce exact dot separators preventing hydration mismatch", () => {
+  assert.equal(formatPrice(450000), "450.000");
+  assert.equal(formatPrice(320000), "320.000");
+  assert.equal(formatPrice(1250000), "1.250.000");
+  assert.equal(formatNumber(2840), "2.840");
+  assert.equal(formatNumber(1420), "1.420");
+});
+
+test("SF-06: Accurate destination-specific asset allocation for Ngu Hanh Son vs Ba Na Hills", async () => {
+  const nguHanhSonData = await resolveStorefrontData({
+    tenant: "sunworld",
+    slug: "nguhanhson-01",
+  });
+  // Ngũ Hành Sơn must contain Động Huyền Không & Chùa Linh Ứng images
+  const nhsTitles = nguHanhSonData.product.galleryImages.map((g) => g.title).join(" ");
+  assert.ok(nhsTitles.includes("Huyền Không"));
+  assert.ok(nhsTitles.includes("Ngũ Hành Sơn"));
+  assert.equal(nguHanhSonData.product.salePrice, 320000);
+
+  const baNaData = await resolveStorefrontData({
+    tenant: "sunworld",
+    slug: "ba-na-hills",
+  });
+  // Ba Na Hills must contain Cầu Vàng & Cáp treo images
+  const bnaTitles = baNaData.product.galleryImages.map((g) => g.title).join(" ");
+  assert.ok(bnaTitles.includes("Cầu Vàng"));
+  assert.ok(bnaTitles.includes("Cáp treo"));
+  assert.equal(baNaData.product.salePrice, 950000);
 });

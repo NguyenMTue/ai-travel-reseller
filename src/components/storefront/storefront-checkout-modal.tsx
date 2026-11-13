@@ -24,6 +24,7 @@ import type {
   BookingOrderResult,
 } from "@/src/lib/storefront/types";
 import { createBookingOrder } from "@/src/lib/storefront/data";
+import { formatPrice } from "@/src/lib/storefront/format";
 
 type StorefrontCheckoutModalProps = {
   isOpen: boolean;
@@ -193,10 +194,10 @@ export function StorefrontCheckoutModal({
                       </div>
                       <div className="text-right shrink-0">
                         <div className="font-bold text-sm text-[#bd6840]">
-                          {pkg.salePrice.toLocaleString()} ₫
+                          {formatPrice(pkg.salePrice)} ₫
                         </div>
                         <div className="text-[10px] text-slate-400 line-through">
-                          {pkg.originalPrice.toLocaleString()} ₫
+                          {formatPrice(pkg.originalPrice)} ₫
                         </div>
                       </div>
                     </div>
@@ -325,7 +326,7 @@ export function StorefrontCheckoutModal({
                     <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Đã áp dụng mã ưu đãi Đối tác:</span>
                   </div>
-                  <strong className="text-emerald-700">-5% (-{discountAmount.toLocaleString()} ₫)</strong>
+                  <strong className="text-emerald-700">-5% (-{formatPrice(discountAmount)} ₫)</strong>
                 </div>
               )}
 
@@ -333,23 +334,23 @@ export function StorefrontCheckoutModal({
               <div className="p-3 bg-slate-50 rounded-xl space-y-1.5 text-xs text-slate-600">
                 <div className="flex justify-between">
                   <span>Vé người lớn ({adultCount}x):</span>
-                  <span>{(adultCount * adultPrice).toLocaleString()} ₫</span>
+                  <span>{formatPrice(adultCount * adultPrice)} ₫</span>
                 </div>
                 {childCount > 0 && (
                   <div className="flex justify-between">
                     <span>Vé trẻ em ({childCount}x):</span>
-                    <span>{(childCount * childPrice).toLocaleString()} ₫</span>
+                    <span>{formatPrice(childCount * childPrice)} ₫</span>
                   </div>
                 )}
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-emerald-700 font-medium">
                     <span>Ưu đãi liên kết tiếp thị:</span>
-                    <span>-{discountAmount.toLocaleString()} ₫</span>
+                    <span>-{formatPrice(discountAmount)} ₫</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm font-extrabold text-slate-900 pt-1.5 border-t border-slate-200">
                   <span>Tổng tiền thanh toán:</span>
-                  <span className="text-[#bd6840] text-base">{finalTotal.toLocaleString()} ₫</span>
+                  <span className="text-[#bd6840] text-base">{formatPrice(finalTotal)} ₫</span>
                 </div>
               </div>
 
@@ -421,7 +422,7 @@ export function StorefrontCheckoutModal({
                     <span className="text-slate-500">Số tiền chính xác:</span>
                     <div className="flex items-center gap-1.5">
                       <strong className="text-[#bd6840] font-bold text-sm">
-                        {orderResult.totalAmount.toLocaleString()} ₫
+                        {formatPrice(orderResult.totalAmount)} ₫
                       </strong>
                       <button
                         type="button"

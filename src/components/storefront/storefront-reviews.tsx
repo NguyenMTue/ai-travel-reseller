@@ -1,6 +1,7 @@
 import React from "react";
 import { Star, ShieldCheck, ThumbsUp } from "lucide-react";
 import type { StorefrontReview } from "@/src/lib/storefront/types";
+import { formatNumber } from "@/src/lib/storefront/format";
 
 type StorefrontReviewsProps = {
   reviews: StorefrontReview[];
@@ -30,7 +31,7 @@ export function StorefrontReviews({ reviews, averageRating, totalReviews }: Stor
               ))}
             </div>
             <div className="text-xs text-slate-500 mt-0.5">
-              {totalReviews.toLocaleString()} lượt đánh giá
+              {formatNumber(totalReviews)} lượt đánh giá
             </div>
           </div>
         </div>

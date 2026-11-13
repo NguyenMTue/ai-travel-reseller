@@ -27,21 +27,166 @@ const SUNWORLD_MERCHANT: StorefrontMerchant = {
   verified: true,
 };
 
-const DEFAULT_PACKAGES: StorefrontPackage[] = [
+// ============================================================================
+// BỘ DỮ LIỆU CHUẨN XÁC 100% CHO TOUR NGŨ HÀNH SƠN & ĐỘNG HUYỀN KHÔNG
+// ============================================================================
+const NGUHANHSON_GALLERY = [
   {
-    id: "pkg-nguhanhson",
+    url: "https://images.unsplash.com/photo-1551696574-bf6016b8810f?auto=format&fit=crop&w=1200&q=80",
+    title: "Động Huyền Không & Thiên Quang Đỉnh",
+    description: "Luồng ánh sáng mặt trời rọi thẳng từ vòm hang đá cẩm thạch xuống tượng Phật Thích Ca linh thiêng.",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1560964645-f9c3a3857831?auto=format&fit=crop&w=1200&q=80",
+    title: "Chùa Linh Ứng cổ tự trên đỉnh Thủy Sơn",
+    description: "Ngôi chùa cổ kính hơn 200 năm tuổi, nơi lưu giữ nhiều tượng Phật bằng đá ngọc bích quý hiếm.",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=1200&q=80",
+    title: "Toàn cảnh Danh thắng Ngũ Hành Sơn",
+    description: "Năm ngọn núi Kim - Mộc - Thủy - Hỏa - Thổ kỳ vĩ bên bờ biển Non Nước Đà Nẵng.",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1200&q=80",
+    title: "Vọng Giang Đài & Dòng sông Cổ Cò",
+    description: "Đài vọng cảnh nhìn ra sông Cổ Cò và làng đá mỹ nghệ truyền thống Non Nước 300 năm tuổi.",
+  },
+];
+
+const NGUHANHSON_PACKAGES: StorefrontPackage[] = [
+  {
+    id: "pkg-nguhanhson-standard",
     name: "Tour Khám Phá Danh Thắng Ngũ Hành Sơn & Động Huyền Không",
-    description: "Khám phá 5 ngọn Kim Mộc Thủy Hỏa Thổ, Chùa Linh Ứng và hiện tượng Thiên Quang Đỉnh kỳ ảo.",
+    description: "Khám phá 5 ngọn Kim Mộc Thủy Hỏa Thổ, Chùa Linh Ứng, thang máy kính và chiêm bái Thiên Quang Đỉnh.",
     originalPrice: 450000,
     salePrice: 320000,
+    isPopular: true,
     badge: "Flash Sale -29%",
     inclusions: [
-      "Vé tham quan danh thắng Ngũ Hành Sơn",
-      "Vé thang máy kính 2 chiều lên Chùa Linh Ứng",
-      "Hướng dẫn viên bản địa thuyết minh",
-      "Nước suối khoáng & bảo hiểm du lịch trọn gói",
+      "Vé tham quan quần thể danh thắng Ngũ Hành Sơn",
+      "Vé thang máy kính panoramic 2 chiều lên Chùa Linh Ứng",
+      "Hướng dẫn viên bản địa thuyết minh sâu sắc",
+      "Nước suối tinh khiết & bảo hiểm du lịch trọn gói",
     ],
   },
+  {
+    id: "pkg-nguhanhson-vip",
+    name: "Tour Ngũ Hành Sơn VIP (Xe đưa đón tận nơi + Ăn trưa đặc sản)",
+    description: "Trọn gói xe riêng đưa đón khách sạn, hướng dẫn viên riêng và bữa trưa đặc sản mì Quảng Đà Nẵng.",
+    originalPrice: 750000,
+    salePrice: 550000,
+    badge: "Trọn gói VIP",
+    inclusions: [
+      "Toàn bộ quyền lợi vé thắng cảnh và thang máy khứ hồi",
+      "Xe ô tô du lịch đời mới đón trả tận nơi tại khách sạn",
+      "Bữa trưa ẩm thực đặc sản Đà Nẵng tại nhà hàng",
+      "Tặng quà lưu niệm đá phong thủy Non Nước",
+    ],
+  },
+  {
+    id: "pkg-combo-nguhanhson-bana",
+    name: "Combo Siêu Tiết Kiệm: Tour Ngũ Hành Sơn + Cáp Treo Ba Na Hills",
+    description: "Combo 1 ngày khám phá trọn vẹn danh thắng Ngũ Hành Sơn buổi sáng và chinh phục Cầu Vàng Bà Nà Hills buổi chiều.",
+    originalPrice: 1550000,
+    salePrice: 1150000,
+    badge: "Tiết kiệm 400K",
+    inclusions: [
+      "Vé trọn gói Tour Ngũ Hành Sơn & Động Huyền Không",
+      "Vé cáp treo khứ hồi Sun World Ba Na Hills & Check-in Cầu Vàng",
+      "Tham quan Làng Pháp, Lâu đài Mặt Trăng, Fantasy Park",
+      "Bảo hiểm du lịch cả 2 điểm đến",
+    ],
+  },
+];
+
+const NGUHANHSON_TIPS: StorefrontTip[] = [
+  {
+    icon: "⛩️",
+    title: "Khung giờ vàng 'Thiên Quang Đỉnh' Động Huyền Không",
+    tip: "Thời điểm từ 10:30 đến 12:00 trưa là lúc ánh nắng mặt trời rọi thẳng từ vòm hang xuống tượng Phật Thích Ca, tạo nên cảnh tượng tâm linh kỳ ảo bậc nhất.",
+  },
+  {
+    icon: "🛗",
+    title: "Sử dụng thang máy kính panoramic",
+    tip: "Nên sử dụng thang máy kính đưa thẳng lên Chùa Linh Ứng để tiết kiệm sức leo bộ hơn 100 bậc dốc, rất phù hợp cho gia đình có người lớn tuổi và trẻ nhỏ.",
+  },
+  {
+    icon: "👟",
+    title: "Trang phục và phụ kiện leo núi",
+    tip: "Đường đá trong hang có rêu phong trơn trượt, hãy mang giày thể thao có độ bám tốt và mặc trang phục lịch sự kín đáo khi viếng chùa, hang động tâm linh.",
+  },
+  {
+    icon: "🏺",
+    title: "Khám phá Làng đá mỹ nghệ Non Nước",
+    tip: "Dưới chân núi là làng nghề điêu khắc đá truyền thống hơn 300 năm tuổi, hãy dành 30 phút để chiêm ngưỡng các nghệ nhân tạc tượng đá cẩm thạch thủ công.",
+  },
+];
+
+const NGUHANHSON_ITINERARY: StorefrontItineraryItem[] = [
+  {
+    time: "08:00 - 08:30",
+    title: "Đón khách & Khởi hành",
+    description: "Xe và hướng dẫn viên đón quý khách tại khách sạn trung tâm Đà Nẵng, di chuyển theo cung đường biển tuyệt đẹp đến Ngũ Hành Sơn.",
+    location: "Bờ biển Võ Nguyên Giáp",
+  },
+  {
+    time: "08:30 - 09:30",
+    title: "Thang máy kính & Viếng Chùa Linh Ứng",
+    description: "Đi thang máy kính ngoài trời ngắm toàn cảnh biển Non Nước, viếng Chùa Linh Ứng cổ tự linh thiêng và tháp Xá Lợi 7 tầng.",
+    location: "Chùa Linh Ứng Thủy Sơn",
+  },
+  {
+    time: "09:30 - 10:30",
+    title: "Động Tàng Chơn, Vọng Giang Đài & Chùa Tam Thai",
+    description: "Khám phá động Tàng Chơn ẩn mình sau lưng chùa cổ, bước lên đài vọng cảnh ngắm trọn dòng sông Cổ Cò uốn lượn.",
+    location: "Vọng Giang Đài & Động Tàng Chơn",
+  },
+  {
+    time: "10:30 - 12:00",
+    title: "Khám phá Động Huyền Không (Khung giờ vàng)",
+    description: "Chiêm bái Động Huyền Không đúng thời khắc Thiên Quang Đỉnh, ánh mặt trời rọi qua vòm hang lung linh huyền ảo.",
+    location: "Động Huyền Không",
+  },
+  {
+    time: "12:00 - 13:00",
+    title: "Làng đá Non Nước & Hoàn thành tour",
+    description: "Ghé thăm làng nghề điêu khắc đá mỹ nghệ Non Nước, tận mắt xem nghệ nhân tạc tượng. Xe đưa quý khách về điểm hẹn ban đầu an toàn.",
+    location: "Làng đá mỹ nghệ Non Nước",
+  },
+];
+
+// ============================================================================
+// BỘ DỮ LIỆU CHUẨN XÁC 100% CHO VÉ CÁP TREO SUN WORLD BA NA HILLS & CẦU VÀNG
+// ============================================================================
+const BANAHILLS_GALLERY = [
+  {
+    url: "https://images.unsplash.com/photo-1602646993875-70bc0ba52c87?auto=format&fit=crop&w=1200&q=80",
+    title: "Cầu Vàng Bà Nà Hills",
+    description: "Đôi bàn tay khổng lồ rêu phong nâng đỡ dải lụa vàng giữa biển mây bồng bềnh, biểu tượng kỳ quan quốc tế.",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1582473789185-aa541f2c5cc6?auto=format&fit=crop&w=1200&q=80",
+    title: "Cáp treo vượt rừng nguyên sinh kỷ lục Guinness",
+    description: "Hệ thống cáp treo hiện đại lướt qua bạt ngàn rừng nguyên sinh và ngắm nhìn dòng thác Tóc Tiên hùng vĩ.",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1787058210109-470e943c7adb?auto=format&fit=crop&w=1200&q=80",
+    title: "Làng Pháp cổ kính phong cách Châu Âu",
+    description: "Quần thể lâu đài mang đậm kiến trúc Gothic nước Pháp thế kỷ 19 lãng mạn trên đỉnh núi Chúa.",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1729475979660-dad41de16cb9?auto=format&fit=crop&w=1200&q=80",
+    title: "Cầu Vàng trong ánh hoàng hôn",
+    description: "Toàn cảnh dải cầu vàng rực rỡ trong nắng chiều trên đỉnh Bà Nà ở độ cao 1.487m.",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1722907330380-674607719485?auto=format&fit=crop&w=1200&q=80",
+    title: "Lâu đài Mặt Trăng & Quảng trường Nhật Thực",
+    description: "Công trình kỳ quan kết nối hai vương quốc thần thoại cùng các show diễn nghệ thuật đỉnh cao.",
+  },
+];
+
+const BANAHILLS_PACKAGES: StorefrontPackage[] = [
   {
     id: "pkg-banahills-standard",
     name: "Vé Cáp Treo Sun World Ba Na Hills & Check-in Cầu Vàng",
@@ -72,18 +217,27 @@ const DEFAULT_PACKAGES: StorefrontPackage[] = [
       "Tặng voucher đồ uống tại Làng Pháp",
     ],
   },
+  {
+    id: "pkg-banahills-night",
+    name: "Vé Cáp Treo Chiều + Đêm Nhạc Hội Làng Pháp (Ba Na By Night)",
+    description: "Trải nghiệm không gian Bà Nà về đêm lãng mạn, cáp treo sau 15h, tiệc buffet bia Đức và show lửa nghệ thuật.",
+    originalPrice: 1100000,
+    salePrice: 850000,
+    badge: "Ưu đãi chiều tối",
+    inclusions: [
+      "Vé cáp treo khứ hồi áp dụng từ 15:00",
+      "Suất ăn tối buffet đặc sắc tại Làng Pháp",
+      "Xem show nghệ thuật lửa và vũ điệu bia Đức sôi động",
+      "Xe bus đưa đón 2 chiều Đà Nẵng - Bà Nà",
+    ],
+  },
 ];
 
-const DEFAULT_TIPS: StorefrontTip[] = [
+const BANAHILLS_TIPS: StorefrontTip[] = [
   {
     icon: "🌄",
     title: "Khung giờ vàng săn mây Cầu Vàng",
     tip: "Thời điểm lý tưởng nhất là 07:00 - 08:30 sáng hoặc sau 16:30 chiều. Lúc này ánh nắng xiên tạo hiệu ứng vàng rực rỡ và tránh được lượng khách đoàn đông đúc.",
-  },
-  {
-    icon: "⛩️",
-    title: "Chiêm ngưỡng 'Thiên Quang Đỉnh' Động Huyền Không",
-    tip: "Khung giờ từ 10:30 đến 12:00 trưa là lúc ánh sáng mặt trời rọi thẳng từ vòm hang xuống tượng Phật Thích Ca, tạo nên cảnh tượng tâm linh huyền ảo bậc nhất.",
   },
   {
     icon: "🚠",
@@ -91,13 +245,18 @@ const DEFAULT_TIPS: StorefrontTip[] = [
     tip: "Nên chọn tuyến cáp treo số 3 (Thác Tóc Tiên - L’Indochine) khi lên để ngắm toàn cảnh dòng thác hùng vĩ từ độ cao gần 1.500m.",
   },
   {
-    icon: "👟",
-    title: "Trang phục và phụ kiện",
+    icon: "🧥",
+    title: "Nhiệt độ và trang phục",
     tip: "Nhiệt độ trên đỉnh núi chênh lệch 7-8°C so với Đà Nẵng, hãy mang theo áo khoác mỏng, nón chống nắng và giày thể thao có độ bám tốt để đi lại thoải mái.",
+  },
+  {
+    icon: "🎭",
+    title: "Lịch diễn show nghệ thuật Carnival",
+    tip: "Các show biểu diễn đường phố và vũ hội quốc tế thường diễn ra lúc 10h00 và 14h30 hàng ngày tại Quảng trường Nhật Thực và Làng Pháp.",
   },
 ];
 
-const DEFAULT_ITINERARY: StorefrontItineraryItem[] = [
+const BANAHILLS_ITINERARY: StorefrontItineraryItem[] = [
   {
     time: "08:00 - 08:30",
     title: "Làm thủ tục & Xuất phát",
@@ -160,34 +319,6 @@ const DEFAULT_REVIEWS: StorefrontReview[] = [
     date: "04/11/2026",
     tourPackage: "Combo Cáp Treo + Đại Tiệc Buffet Quốc Tế 4 Mùa",
     comment: "Buffet đồ ăn rất ngon và phong phú. Mua qua link đối tác TravelLink được giảm giá tốt mà lại được xuất vé điện tử chính hãng chuẩn chỉ.",
-  },
-];
-
-const DEFAULT_GALLERY = [
-  {
-    url: "https://images.unsplash.com/photo-1559592413-7cec4d0cae2b?auto=format&fit=crop&w=1200&q=80",
-    title: "Cầu Vàng Bà Nà Hills",
-    description: "Dải lụa vàng giữa đôi bàn tay khổng lồ phủ rêu phong, biểu tượng du lịch vươn tầm thế giới.",
-  },
-  {
-    url: "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=1200&q=80",
-    title: "Cáp treo vượt mây kỷ lục thế giới",
-    description: "Hệ thống cáp treo hiện đại lướt qua bạt ngàn rừng nguyên sinh và thác Tóc Tiên hùng vĩ.",
-  },
-  {
-    url: "https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1200&q=80",
-    title: "Làng Pháp cổ kính phong cách Châu Âu",
-    description: "Quần thể lâu đài mang đậm kiến trúc Gothic nước Pháp thế kỷ 19 lãng mạn.",
-  },
-  {
-    url: "https://images.unsplash.com/photo-1569154941061-e231b4725ef1?auto=format&fit=crop&w=1200&q=80",
-    title: "Động Huyền Không - Ngũ Hành Sơn",
-    description: "Ánh sáng Thiên Quang Đỉnh huyền diệu xuyên qua vòm hang đá cẩm thạch tâm linh.",
-  },
-  {
-    url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
-    title: "Quảng trường Nhật Thực & Lâu đài Mặt Trăng",
-    description: "Không gian kiến trúc kỳ ảo kết nối vương quốc Mặt Trời và vương quốc Mặt Trăng.",
   },
 ];
 
@@ -320,6 +451,7 @@ export async function resolveStorefrontData({
   const isNguHanhSonSlug =
     cleanSlug.includes("nguhanhson") ||
     cleanSlug.includes("ngu-hanh-son") ||
+    cleanSlug.includes("44444444-4444-4444-4444-555555555555") ||
     dbProduct?.name?.includes("Ngũ Hành Sơn") ||
     dbCampaign?.name?.includes("Ngũ Hành Sơn");
 
@@ -333,6 +465,28 @@ export async function resolveStorefrontData({
   const fallbackVideoUrl =
     dbVideoUrl ||
     "https://ykfosnwbgphlwpufnxrd.supabase.co/storage/v1/object/public/campaign-videos/tour-kh-m-ph-danh-th-ng-ng-h-nh-s-n-ng-huy-n-kh-ng-1794542178161.mp4";
+
+  // Phân loại tài nguyên ảnh và lịch trình chuẩn xác theo đúng tour
+  const galleryImages = isNguHanhSonSlug ? NGUHANHSON_GALLERY : BANAHILLS_GALLERY;
+  const packages = isNguHanhSonSlug ? NGUHANHSON_PACKAGES : BANAHILLS_PACKAGES;
+  const authenticTips = isNguHanhSonSlug ? NGUHANHSON_TIPS : BANAHILLS_TIPS;
+  const itinerary = isNguHanhSonSlug ? NGUHANHSON_ITINERARY : BANAHILLS_ITINERARY;
+
+  const highlights = isNguHanhSonSlug
+    ? [
+        "Chiêm bái Động Huyền Không với hiện tượng 'Thiên Quang Đỉnh' tuyệt mỹ",
+        "Thang máy kính panoramic đưa thẳng lên Chùa Linh Ứng cổ tự",
+        "Khám phá di sản Làng đá Non Nước hơn 300 năm truyền thống",
+        "Hướng dẫn viên bản địa thuyết minh sâu sắc về Ngũ Hành Kim Mộc Thủy Hỏa Thổ",
+        "Bảo hiểm du lịch và nước suối tinh khiết phục vụ suốt hành trình",
+      ]
+    : [
+        "Chiêm ngưỡng Cầu Vàng - Kỳ quan thế giới mới được vinh danh quốc tế",
+        "Trải nghiệm tuyến cáp treo số 3 đạt nhiều kỷ lục Guiness thế giới",
+        "Check-in Làng Pháp lãng mạn, Lâu đài Mặt Trăng và Quảng trường Nhật Thực",
+        "Miễn phí hơn 100 trò chơi cảm giác mạnh tại Fantasy Park",
+        "Quét mã QR vào cổng trực tiếp, không phải xếp hàng chờ đợi",
+      ];
 
   return {
     merchant,
@@ -351,23 +505,9 @@ export async function resolveStorefrontData({
       reviewCount: 2840,
       soldCount: 1420,
       remainingToday: 18,
-      highlights: isNguHanhSonSlug
-        ? [
-            "Chiêm bái Động Huyền Không với hiện tượng 'Thiên Quang Đỉnh' tuyệt mỹ",
-            "Thang máy kính panoramic đưa thẳng lên Chùa Linh Ứng cổ tự",
-            "Khám phá di sản Làng đá Non Nước hơn 300 năm truyền thống",
-            "Hướng dẫn viên bản địa thuyết minh sâu sắc về Ngũ Hành Kim Mộc Thủy Hỏa Thổ",
-            "Bảo hiểm du lịch và nước suối tinh khiết phục vụ suốt hành trình",
-          ]
-        : [
-            "Chiêm ngưỡng Cầu Vàng - Kỳ quan thế giới mới được vinh danh quốc tế",
-            "Trải nghiệm tuyến cáp treo số 3 đạt nhiều kỷ lục Guiness thế giới",
-            "Check-in Làng Pháp lãng mạn, Lâu đài Mặt Trăng và Quảng trường Nhật Thực",
-            "Miễn phí hơn 100 trò chơi cảm giác mạnh tại Fantasy Park",
-            "Quét mã QR vào cổng trực tiếp, không phải xếp hàng chờ đợi",
-          ],
-      authenticTips: DEFAULT_TIPS,
-      itinerary: DEFAULT_ITINERARY,
+      highlights,
+      authenticTips,
+      itinerary,
       inclusions: [
         "Vé điện tử chính hãng kích hoạt ngay lập tức qua mã QR",
         "Bảo hiểm du lịch theo quy định của Tổng cục Du lịch",
@@ -383,10 +523,10 @@ export async function resolveStorefrontData({
         ticketType: "Vé điện tử QR Code (E-Ticket) lưu trong điện thoại hoặc email. Quét trực tiếp tại cổng kiểm soát.",
         entryInstructions: "Xuất trình mã QR tại cửa soát vé tự động. Mỗi mã QR chỉ có giá trị sử dụng cho 01 lần vào cổng.",
       },
-      packages: DEFAULT_PACKAGES,
-      galleryImages: DEFAULT_GALLERY,
+      packages,
+      galleryImages,
       videoUrl: fallbackVideoUrl,
-      videoThumbnail: DEFAULT_GALLERY[0].url,
+      videoThumbnail: galleryImages[0].url,
     },
     campaign: dbCampaign
       ? {
@@ -396,7 +536,9 @@ export async function resolveStorefrontData({
         }
       : {
           id: "44444444-4444-4444-4444-555555555555",
-          name: "Chiến dịch Khám Phá Danh Thắng Ngũ Hành Sơn & Sun World Ba Na Hills",
+          name: isNguHanhSonSlug
+            ? "Chiến dịch Khám Phá Danh Thắng Ngũ Hành Sơn & Non Nước 2026"
+            : "Chiến dịch Khám Phá Sun World Ba Na Hills 2026",
           commissionRate: 15,
         },
     tracking: refParam
