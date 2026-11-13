@@ -438,6 +438,44 @@ export function hasAudioStream(filePath: string): Promise<boolean> {
 }
 
 /**
+ * Loại bỏ ký tự emoji và ký hiệu đặc biệt gây lỗi font (▯ / tofu glyph) trong FFmpeg drawtext
+ */
+function sanitizeForDrawtext(text?: string): string {
+  if (!text) return "";
+  return text
+    .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F100}-\u{1F1FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}\u{2B50}\u{20E3}\u{FE0F}\u{FE0E}]/gu, "")
+    .replace(/[⚠️📍✨👉🎟️⚡👨‍👩‍👧‍👦💸🔥📸]/gu, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Tự động ngắt dòng thông minh cho tiêu đề End-Card để tránh tràn mép khung hình
+ */
+function wrapText(text: string, maxCharsPerLine = 24): string {
+  if (!text || text.length <= maxCharsPerLine) return text;
+  const words = text.split(/\s+/);
+  const lines: string[] = [];
+  let currentLine = "";
+
+  for (const word of words) {
+    if (!currentLine) {
+      currentLine = word;
+    } else if ((currentLine + " " + word).length <= maxCharsPerLine) {
+      currentLine += " " + word;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+      if (lines.length >= 2) break;
+    }
+  }
+  if (currentLine && lines.length < 2) {
+    lines.push(currentLine);
+  }
+  return lines.join("\n");
+}
+
+/**
  * Tạo clip hiển thị thông tin Tour ở cuối video:
  * - Lấy một hình ảnh (thường là ảnh đại diện hoặc cảnh cuối của tour)
  * - Phủ lớp mờ điện ảnh (Frosted Bokeh Blur qua boxblur)
@@ -491,10 +529,14 @@ export async function createBlurredTourInfoClip(params: {
     await fs.writeFile(headerPath, "THÔNG TIN TOUR DU LỊCH CHÍNH HÃNG", "utf8");
 
     const titlePath = path.join(tempDir, "title.txt");
-    await fs.writeFile(titlePath, (params.info.productName || "TOUR DU LỊCH").toUpperCase(), "utf8");
+    const rawTitle = sanitizeForDrawtext(params.info.productName || "TOUR DU LỊCH").toUpperCase();
+    const wrappedTitle = wrapText(rawTitle, 26);
+    const isMultiLineTitle = wrappedTitle.includes("\n");
+    await fs.writeFile(titlePath, wrappedTitle, "utf8");
 
     const locationPath = path.join(tempDir, "location.txt");
-    await fs.writeFile(locationPath, `Điểm đến: ${params.info.location || "Việt Nam"}`, "utf8");
+    const cleanLocation = sanitizeForDrawtext(params.info.location || "Việt Nam");
+    await fs.writeFile(locationPath, `Điểm đến: ${cleanLocation}`, "utf8");
 
     const pricePath = path.join(tempDir, "price.txt");
     await fs.writeFile(
@@ -516,23 +558,24 @@ export async function createBlurredTourInfoClip(params: {
     await fs.writeFile(hlTitlePath, "TRẢI NGHIỆM NỔI BẬT", "utf8");
 
     const hlContentPath = path.join(tempDir, "highlights.txt");
-    await fs.writeFile(hlContentPath, highlights.join("\n"), "utf8");
+    await fs.writeFile(hlContentPath, highlights.map((h) => sanitizeForDrawtext(h)).join("\n"), "utf8");
 
     const contactTitlePath = path.join(tempDir, "contact_title.txt");
     await fs.writeFile(contactTitlePath, "THÔNG TIN ĐƠN VỊ & HỖ TRỢ", "utf8");
 
     const contactContentPath = path.join(tempDir, "contact.txt");
-    await fs.writeFile(contactContentPath, contactLines.join("\n"), "utf8");
+    await fs.writeFile(contactContentPath, contactLines.map((c) => sanitizeForDrawtext(c)).join("\n"), "utf8");
 
     const cta1Path = path.join(tempDir, "cta1.txt");
-    await fs.writeFile(cta1Path, "BÌNH LUẬN HOẶC BẤM LINK GIỎ HÀNG", "utf8");
+    await fs.writeFile(cta1Path, "ĐẶT VÉ CHÍNH HÃNG - QUÉT MÃ VÀO CỔNG", "utf8");
 
     const cta2Path = path.join(tempDir, "cta2.txt");
+    const rawCta2 = params.info.ctaText && !params.info.ctaText.includes("giỏ hàng")
+      ? sanitizeForDrawtext(params.info.ctaText)
+      : "ĐIỀU HƯỚNG OFFICIAL CHECKOUT - GIỮ CHỖ NGAY";
     await fs.writeFile(
       cta2Path,
-      params.info.ctaText
-        ? params.info.ctaText
-        : "Nhận ngay mã giảm giá & vé ưu đãi hôm nay!",
+      rawCta2,
       "utf8"
     );
 
@@ -541,9 +584,8 @@ export async function createBlurredTourInfoClip(params: {
     let hasVoice = false;
     try {
       const voiceText =
-        params.voiceoverText ||
-        params.info.ctaText ||
-        `Vé chính hãng chỉ ${Number(params.info.salePrice).toLocaleString("vi-VN")} đồng. Bình luận nhận ngay ưu đãi hôm nay!`;
+        sanitizeForDrawtext(params.voiceoverText || params.info.ctaText) ||
+        `Vé chính hãng chỉ ${Number(params.info.salePrice).toLocaleString("vi-VN")} đồng. Quét mã vào cổng ngay hôm nay!`;
       await generateVoiceoverAudio(voiceText, cardAudioPath);
       hasVoice = true;
     } catch (e: any) {
@@ -554,17 +596,22 @@ export async function createBlurredTourInfoClip(params: {
     }
 
     const fontPath = getSystemFontPath();
-    const duration = Math.max(2.0, Number(params.durationSec.toFixed(1)));
+    // Giới hạn thời lượng End-Card chuẩn 2.0s để tối ưu tỷ lệ xem hết video (completion rate)
+    const duration = Math.min(2.5, Math.max(2.0, Number((params.durationSec || 2.0).toFixed(1))));
+    const totalFrames = Math.round(duration * 30);
     const outPath = path.join(tempDir, "endcard.mp4");
 
-    const titleLength = (params.info.productName || "").length;
-    const titleFontSize = titleLength > 35 ? 30 : titleLength > 24 ? 34 : 38;
-    const cta2Length = (params.info.ctaText || "").length;
-    const cta2FontSize = cta2Length > 40 ? 20 : 24;
+    const titleFontSize = isMultiLineTitle ? 28 : (rawTitle.length > 25 ? 32 : 36);
+    const titleY = isMultiLineTitle ? 350 : 370;
+    const locationY = isMultiLineTitle ? 435 : 430;
+
+    const cta2Length = rawCta2.length;
+    const cta2FontSize = cta2Length > 35 ? 20 : 24;
 
     const vf = [
-      "scale=1080:1920:force_original_aspect_ratio=increase",
-      "crop=1080:1920",
+      "scale=1280:2276:force_original_aspect_ratio=increase",
+      "crop=1280:2276",
+      `zoompan=z='min(zoom+0.0012,1.06)':d=${totalFrames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=30`,
       "boxblur=18:5",
       // 1. Khung card trung tâm với độ mờ sang trọng
       "drawbox=x=70:y=200:w=940:h=1520:color=0x0B132B@0.92:t=fill",
@@ -572,9 +619,9 @@ export async function createBlurredTourInfoClip(params: {
       // 2. Banner tiêu đề màu xanh lam
       "drawbox=x=70:y=200:w=940:h=120:color=0x0284C7@0.95:t=fill",
       `drawtext=fontfile='${fontPath}':textfile=header.txt:fontcolor=white:fontsize=34:x=(w-text_w)/2:y=242:expansion=none`,
-      // 3. Tên tour và địa điểm
-      `drawtext=fontfile='${fontPath}':textfile=title.txt:fontcolor=0x38BDF8:fontsize=${titleFontSize}:x=(w-text_w)/2:y=370:expansion=none`,
-      `drawtext=fontfile='${fontPath}':textfile=location.txt:fontcolor=0x94A3B8:fontsize=28:x=(w-text_w)/2:y=430:expansion=none`,
+      // 3. Tên tour và địa điểm (chống tràn chữ)
+      `drawtext=fontfile='${fontPath}':textfile=title.txt:fontcolor=0x38BDF8:fontsize=${titleFontSize}:line_spacing=10:x=(w-text_w)/2:y=${titleY}:expansion=none`,
+      `drawtext=fontfile='${fontPath}':textfile=location.txt:fontcolor=0x94A3B8:fontsize=28:x=(w-text_w)/2:y=${locationY}:expansion=none`,
       // 4. Khung giá vàng nổi bật
       "drawbox=x=120:y=500:w=840:h=170:color=0x1E293B@0.95:t=fill",
       "drawbox=x=120:y=500:w=840:h=170:color=0xF59E0B@0.85:t=3",
@@ -587,10 +634,10 @@ export async function createBlurredTourInfoClip(params: {
       "drawbox=x=120:y=1000:w=840:h=2:color=0x334155:t=fill",
       `drawtext=fontfile='${fontPath}':textfile=contact_title.txt:fontcolor=0xF8FAFC:fontsize=30:x=130:y=1040:expansion=none`,
       `drawtext=fontfile='${fontPath}':textfile=contact.txt:fontcolor=0xCBD5E1:fontsize=28:line_spacing=22:x=130:y=1100:expansion=none`,
-      // 7. Banner nút kêu gọi hành động (CTA)
+      // 7. Banner nút kêu gọi hành động (CTA Official Checkout)
       "drawbox=x=120:y=1320:w=840:h=160:color=0x059669@0.95:t=fill",
       "drawbox=x=120:y=1320:w=840:h=160:color=0x34D399:t=2",
-      `drawtext=fontfile='${fontPath}':textfile=cta1.txt:fontcolor=white:fontsize=32:x=(w-text_w)/2:y=1355:expansion=none`,
+      `drawtext=fontfile='${fontPath}':textfile=cta1.txt:fontcolor=white:fontsize=30:x=(w-text_w)/2:y=1355:expansion=none`,
       `drawtext=fontfile='${fontPath}':textfile=cta2.txt:fontcolor=0xDCFCE7:fontsize=${cta2FontSize}:x=(w-text_w)/2:y=1410:expansion=none`,
     ].join(",");
 
@@ -687,12 +734,12 @@ export async function composeChainedOmniVideo(
     // Chuẩn bị danh sách buffer video các phân cảnh
     const clipBuffers = [...input.segmentVideoBuffers];
 
-    // 4.2. Nếu có ảnh kết và thông tin tour -> Sinh clip End-Card phủ mờ (5s)
+    // 4.2. Nếu có ảnh kết và thông tin tour -> Sinh clip End-Card phủ mờ (2.0s)
     let hasEndCard = false;
     let endCardDur = 0;
     if (input.closingImageBuffer && input.tourEndCardInfo) {
       try {
-        endCardDur = 5.0; // Đúng yêu cầu: Muse gen 10s + FFmpeg bổ sung 5s End-Card = 15s tổng
+        endCardDur = 2.0; // Chuẩn 2.0s tối ưu tỷ lệ xem hết video (completion rate)
         console.log(
           `[FFmpeg Compositor] Tạo phân cảnh kết thúc (End-Card) phủ mờ hiển thị thông tin tour (${endCardDur}s)...`
         );
@@ -815,49 +862,53 @@ export async function composeChainedOmniVideo(
 
     const drawtextFilters: string[] = [];
 
-    // Hook: 0-2s (10s) hoặc 0-3s (18s+)
+    // Hook: 0-2s (10s) hoặc 0-3s (18s+) - cỡ chữ 44px rõ ràng, tương phản cao, loại bỏ emoji tránh lỗi font
     if (input.textOverlay.hookText) {
-      const escapedHook = input.textOverlay.hookText
+      const cleanHook = sanitizeForDrawtext(input.textOverlay.hookText);
+      const escapedHook = cleanHook
         .replace(/'/g, "")
         .replace(/:/g, "\\:");
       const hookEnd = is10s ? 2 : 3;
       drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedHook}':fontcolor=0xFFD700:fontsize=36:borderw=3:bordercolor=black:x=(w-text_w)/2:y=(h-text_h)/2-100:enable='between(t,0,${hookEnd})':expansion=none`
+        `drawtext=fontfile='${fontPath}':text='${escapedHook}':fontcolor=0xFFD700:fontsize=44:box=1:boxcolor=black@0.65:boxborderw=10:x=(w-text_w)/2:y=(h-text_h)/2-100:enable='between(t,0,${hookEnd})':expansion=none`
       );
     }
 
-    // Mẹo du lịch / Trải nghiệm thực tế
+    // Mẹo du lịch / Trải nghiệm thực tế - cỡ chữ 36px (nâng từ 26px) giúp dễ đọc trên điện thoại
     if (input.textOverlay.tipText) {
-      const escapedTip = input.textOverlay.tipText
+      const cleanTip = sanitizeForDrawtext(input.textOverlay.tipText);
+      const escapedTip = cleanTip
         .replace(/'/g, "")
         .replace(/:/g, "\\:");
       const tipStart = is10s ? 2 : 3;
       const tipEnd = is10s ? 5 : 7;
       drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedTip}':fontcolor=0x34C759:fontsize=26:borderw=2:bordercolor=black:x=(w-text_w)/2:y=h-240:enable='between(t,${tipStart},${tipEnd})':expansion=none`
+        `drawtext=fontfile='${fontPath}':text='${escapedTip}':fontcolor=0x34D399:fontsize=36:box=1:boxcolor=black@0.65:boxborderw=10:x=(w-text_w)/2:y=h-280:enable='between(t,${tipStart},${tipEnd})':expansion=none`
       );
     }
 
     // Nếu KHÔNG có End-Card -> Áp dụng Badge giá vé & CTA như trước
     if (!hasEndCard) {
       if (input.textOverlay.priceBadgeText) {
-        const escapedPrice = input.textOverlay.priceBadgeText
+        const cleanPrice = sanitizeForDrawtext(input.textOverlay.priceBadgeText);
+        const escapedPrice = cleanPrice
           .replace(/'/g, "")
           .replace(/:/g, "\\:");
         const priceStart = is10s ? 5 : 11;
         const priceEnd = is10s ? 8 : 15;
         drawtextFilters.push(
-          `drawtext=fontfile='${fontPath}':text='${escapedPrice}':fontcolor=white:fontsize=28:box=1:boxcolor=black@0.6:boxborderw=10:x=(w-text_w)/2:y=120:enable='between(t,${priceStart},${priceEnd})':expansion=none`
+          `drawtext=fontfile='${fontPath}':text='${escapedPrice}':fontcolor=white:fontsize=32:box=1:boxcolor=black@0.65:boxborderw=12:x=(w-text_w)/2:y=120:enable='between(t,${priceStart},${priceEnd})':expansion=none`
         );
       }
 
       if (input.textOverlay.ctaText) {
-        const escapedCta = input.textOverlay.ctaText
+        const cleanCta = sanitizeForDrawtext(input.textOverlay.ctaText || "ĐẶT VÉ CHÍNH HÃNG - QUÉT MÃ VÀO CỔNG");
+        const escapedCta = cleanCta
           .replace(/'/g, "")
           .replace(/:/g, "\\:");
         const ctaStart = is10s ? 8 : 15;
         drawtextFilters.push(
-          `drawtext=fontfile='${fontPath}':text='${escapedCta}':fontcolor=0x00FFCC:fontsize=26:borderw=2:bordercolor=black:x=(w-text_w)/2:y=h-180:enable='gte(t,${ctaStart})':expansion=none`
+          `drawtext=fontfile='${fontPath}':text='${escapedCta}':fontcolor=0x00FFCC:fontsize=32:box=1:boxcolor=black@0.65:boxborderw=10:x=(w-text_w)/2:y=h-180:enable='gte(t,${ctaStart})':expansion=none`
         );
       }
     }
@@ -866,8 +917,10 @@ export async function composeChainedOmniVideo(
       ? drawtextFilters.join(",")
       : "null";
 
-    // 4.6. Ghép visual + audio: Ưu tiên âm thanh từ Muse AI nếu có
-    const useNativeAudio = hasAnyNativeAudio && input.useMuseAudio !== false;
+    // 4.6. Ghép visual + audio: Mặc định ưu tiên 100% âm thanh thuyết minh tiếng Việt chuẩn từ Edge-TTS
+    // Chỉ dùng âm thanh gốc của Muse AI khi được chỉ định tường minh (useMuseAudio === true)
+    // để tránh hiện tượng Muse AI tự chèn giọng đọc tiếng Anh ngẫu nhiên vào giữa video
+    const useNativeAudio = hasAnyNativeAudio && input.useMuseAudio === true;
 
     if (useNativeAudio) {
       console.log("[FFmpeg Compositor] Giữ nguyên âm thanh giọng đọc & hiệu ứng từ Muse AI...");

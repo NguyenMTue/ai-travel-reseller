@@ -232,6 +232,42 @@ export async function generateMerchantCampaignVideo(
     mediaRows = defaultRows || [];
   }
 
+  // Ưu tiên xếp các tư liệu khớp chính xác với sản phẩm / địa danh lên hàng đầu (Grounding)
+  const productKeyword = (product.name + " " + ((campaign as any).target_location || "")).toLowerCase();
+  const isRowRelevant = (row: any) => {
+    const text = `${row.title || ""} ${(row.style_tags || []).join(" ")}`.toLowerCase();
+    if (
+      productKeyword.includes("ngũ hành sơn") ||
+      productKeyword.includes("huyền không") ||
+      productKeyword.includes("non nước")
+    ) {
+      return (
+        text.includes("ngũ hành sơn") ||
+        text.includes("huyền không") ||
+        text.includes("non nước") ||
+        text.includes("chùa") ||
+        text.includes("động")
+      );
+    }
+    if (productKeyword.includes("bà nà") || productKeyword.includes("bana")) {
+      return (
+        text.includes("bà nà") ||
+        text.includes("cầu vàng") ||
+        text.includes("cáp treo") ||
+        text.includes("làng pháp")
+      );
+    }
+    return false;
+  };
+
+  if (mediaRows && mediaRows.length > 1) {
+    mediaRows.sort((a, b) => {
+      const aRel = isRowRelevant(a) ? 1 : 0;
+      const bRel = isRowRelevant(b) ? 1 : 0;
+      return bRel - aRel;
+    });
+  }
+
   // Ánh xạ sang MediaAsset chuẩn của Video Engine
   const mediaAssets: MediaAsset[] = (mediaRows || []).map((row, index) => {
     const isVideo =
@@ -270,12 +306,20 @@ export async function generateMerchantCampaignVideo(
     authentic_tips: input.authentic_tips,
     audio_config: {
       voice_persona_id: "vn_danang_youth_female_energetic",
-      ambient_sound_tags: [
-        "tiếng gió đỉnh núi",
-        "tiếng cáp treo vận hành",
-        "tiếng xèo xèo buffet",
-        "tiếng bước chân",
-      ],
+      ambient_sound_tags: (product.name + " " + (campaign as any).target_location).toLowerCase().includes("ngũ hành sơn") ||
+        (product.name + " " + (campaign as any).target_location).toLowerCase().includes("huyền không")
+        ? [
+            "tiếng chuông chùa ngân vang",
+            "tiếng gió lùa qua hang đá",
+            "tiếng chim hót thanh tịnh",
+            "tiếng bước chân du khách",
+          ]
+        : [
+            "tiếng gió đỉnh núi",
+            "tiếng cáp treo vận hành",
+            "tiếng check-in rộn ràng",
+            "tiếng bước chân",
+          ],
     },
   };
 
@@ -357,6 +401,11 @@ export async function generateMerchantCampaignVideo(
       const closingImageBuffer =
         imageBuffers[imageBuffers.length - 1] || imageBuffers[0];
 
+      const isNguHanhSon =
+        `${product.name} ${location}`.toLowerCase().includes("ngũ hành sơn") ||
+        `${product.name} ${location}`.toLowerCase().includes("huyền không") ||
+        `${product.name} ${location}`.toLowerCase().includes("non nước");
+
       const tourEndCardInfo: TourEndCardConfig = {
         productName: product.name,
         location,
@@ -365,6 +414,12 @@ export async function generateMerchantCampaignVideo(
         highlights:
           input.authentic_tips && input.authentic_tips.length > 0
             ? input.authentic_tips
+            : isNguHanhSon
+            ? [
+                "Vé tham quan thắng cảnh & thang máy khứ hồi",
+                "Chiêm bái Động Huyền Không & Chùa Linh Ứng",
+                "Hỗ trợ vào cổng ưu tiên, không chờ đợi",
+              ]
             : [
                 "Vé tham quan & dịch vụ trọn gói chính hãng",
                 "Trải nghiệm điểm check-in biểu tượng đẹp nhất",
@@ -372,54 +427,95 @@ export async function generateMerchantCampaignVideo(
               ],
         ctaText:
           (campaign as any).official_cta ||
-          "Bình luận hoặc bấm link giỏ hàng nhận vé chính hãng",
+          "ĐẶT VÉ CHÍNH HÃNG - QUÉT MÃ VÀO CỔNG",
         hotline: "1900 8888 (Tư vấn 24/7)",
         merchantName,
         authenticTips: input.authentic_tips,
       };
 
       if (isShortFormat) {
-        // Sinh chuỗi phân cảnh thuần túy bằng Muse AI
         const segmentBuffers: Buffer[] = [];
-        for (const segment of promptPlan.segments) {
-          const startBuf = imageBuffers[segment.startImageIndex] || imageBuffers[0];
-          const endBuf = imageBuffers[segment.endImageIndex] || imageBuffers[1] || startBuf;
+        const isSingleShot = effectiveDuration <= 12;
+
+        if (isSingleShot) {
+          // Sinh 1 lần trực tiếp toàn bộ 10s video qua Muse AI (Single-shot generation)
+          // Không cắt đôi 5s + 5s rồi ghép thô, tạo chuyển động camera mượt mà, liên tục từ đầu đến cuối
+          const startBuf = imageBuffers[0];
+          const endBuf = imageBuffers[1] || imageBuffers[0];
+          const singleShotPrompt = promptPlan.singleShotPrompt || promptPlan.masterPrompt;
 
           console.log(
-            `[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) bằng Muse AI - ${segment.durationSeconds}s...`
+            `[Video Service] Sinh 1 lần trực tiếp video ${effectiveDuration}s bằng Muse AI (Single-shot mode)...`
           );
 
-          let segBuffer: Buffer | null = null;
+          let singleSegBuffer: Buffer | null = null;
           if (isMuse2ApiConfigured()) {
             try {
               const segResult = await generateMuseVideoClip({
-                prompt: segment.musePrompt || segment.omniPrompt,
+                prompt: singleShotPrompt,
                 startImageBuffer: startBuf,
                 endImageBuffer: endBuf,
-                durationSeconds: segment.durationSeconds,
+                durationSeconds: Math.round(effectiveDuration),
                 aspectRatio: "9:16",
-                includeAudioPrompt: false, // Tạm thời loại bỏ âm thanh kịch bản, chỉ tập trung tối ưu hình ảnh
+                includeAudioPrompt: false, // Tắt audio prompt của Muse AI để tránh sinh ra tiếng Anh ngẫu nhiên
               });
               if (segResult?.videoBuffer && segResult.videoBuffer.length > 1000) {
-                segBuffer = segResult.videoBuffer;
-                if (!costBreakdown) costBreakdown = segResult.cost;
+                singleSegBuffer = segResult.videoBuffer;
+                costBreakdown = segResult.cost;
               }
             } catch (museErr: any) {
-              console.warn("[Video Service] Muse AI clip warning:", museErr?.message);
+              console.warn("[Video Service] Muse AI single-shot clip warning:", museErr?.message);
             }
           }
 
           // Fallback Ken Burns nội suy từ ảnh thật của Merchant nếu Muse AI bận
-          if (!segBuffer) {
-            segBuffer = await createTwoImageHeroClip(startBuf, endBuf, segment.durationSeconds);
+          if (!singleSegBuffer) {
+            singleSegBuffer = await createTwoImageHeroClip(startBuf, endBuf, effectiveDuration);
           }
 
-          segmentBuffers.push(segBuffer);
+          segmentBuffers.push(singleSegBuffer);
+        } else {
+          // Luồng đa phân cảnh cho thời lượng dài hơn (18s Storytelling)
+          for (const segment of promptPlan.segments) {
+            const startBuf = imageBuffers[segment.startImageIndex] || imageBuffers[0];
+            const endBuf = imageBuffers[segment.endImageIndex] || imageBuffers[1] || startBuf;
+
+            console.log(
+              `[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) bằng Muse AI - ${segment.durationSeconds}s...`
+            );
+
+            let segBuffer: Buffer | null = null;
+            if (isMuse2ApiConfigured()) {
+              try {
+                const segResult = await generateMuseVideoClip({
+                  prompt: segment.musePrompt || segment.omniPrompt,
+                  startImageBuffer: startBuf,
+                  endImageBuffer: endBuf,
+                  durationSeconds: segment.durationSeconds,
+                  aspectRatio: "9:16",
+                  includeAudioPrompt: false,
+                });
+                if (segResult?.videoBuffer && segResult.videoBuffer.length > 1000) {
+                  segBuffer = segResult.videoBuffer;
+                  if (!costBreakdown) costBreakdown = segResult.cost;
+                }
+              } catch (museErr: any) {
+                console.warn("[Video Service] Muse AI clip warning:", museErr?.message);
+              }
+            }
+
+            if (!segBuffer) {
+              segBuffer = await createTwoImageHeroClip(startBuf, endBuf, segment.durationSeconds);
+            }
+
+            segmentBuffers.push(segBuffer);
+          }
         }
 
-        // 10s Muse AI + 5s End-Card phủ mờ thông tin tour = 15s tổng
+        // 10s Muse AI + 2.0s End-Card phủ mờ thông tin tour = 12s tổng (tối ưu completion rate)
         const hasEndCard = Boolean(closingImageBuffer && tourEndCardInfo);
-        totalDurationSec = promptPlan.totalDurationSec + (hasEndCard ? 5.0 : 0);
+        const endCardDuration = 2.0;
+        totalDurationSec = promptPlan.totalDurationSec + (hasEndCard ? endCardDuration : 0);
 
         if (!costBreakdown) {
           costBreakdown = {
@@ -446,7 +542,7 @@ export async function generateMerchantCampaignVideo(
           textOverlay: promptPlan.textOverlaySpec,
           closingImageBuffer,
           tourEndCardInfo,
-          useMuseAudio: true,
+          useMuseAudio: false, // Luôn dùng 100% Edge-TTS tiếng Việt chuẩn, triệt tiêu giọng đọc tiếng Anh của Muse
         });
       } else {
         // Chế độ Hybrid cho thời lượng > 18s bằng Muse AI + FFmpeg Ken Burns

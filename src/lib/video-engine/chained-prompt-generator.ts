@@ -70,6 +70,7 @@ export interface ChainedPromptPlanOutput {
   segments: ChainedSegmentSpec[];
   masterPrompt: string;
   negativePrompt: string;
+  singleShotPrompt?: string; // Prompt 10s tối ưu cho Muse AI sinh trực tiếp 1 lần (Single-shot)
   audioSpec: {
     targetDurationSec: number;
     voicePersonaId: string;
@@ -98,11 +99,52 @@ export function countVoiceoverWords(text: string): number {
 }
 
 /**
+ * Loại bỏ ký tự Emoji và ký hiệu đặc biệt gây lỗi font (▯ / tofu glyph) trong FFmpeg drawtext
+ */
+export function stripEmojis(str: string): string {
+  if (!str) return "";
+  return str
+    .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F100}-\u{1F1FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}\u{2B50}\u{20E3}\u{FE0F}\u{FE0E}]/gu, "")
+    .replace(/[⚠️📍✨👉🎟️⚡👨‍👩‍👧‍👦💸🔥📸deal]/gu, (m) => m === "deal" ? m : "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
  * Trích xuất nhãn súc tích của địa danh hoặc góc nhìn từ tiêu đề/mô tả ảnh.
  * Chuyển đổi thông minh sang tiếng Anh thị giác để tối ưu hóa cho mô hình sinh video AI (CLIP/T5 Text Encoder).
+ * Cố định cảnh quay (Grounding) chính xác theo sản phẩm, tuyệt đối không nhầm lẫn Bà Nà Hills với Ngũ Hành Sơn.
  */
-export function cleanAssetVisualLabel(asset: ChainedAssetInput, fallback: string): string {
+export function cleanAssetVisualLabel(
+  asset: ChainedAssetInput,
+  fallback: string,
+  context?: { productName?: string; location?: string }
+): string {
+  const combinedContext = `${context?.productName || ""} ${context?.location || ""}`.toLowerCase();
   const raw = (asset.title || asset.description || fallback || "").toLowerCase();
+
+  const isNguHanhSon =
+    combinedContext.includes("ngũ hành sơn") ||
+    combinedContext.includes("huyền không") ||
+    combinedContext.includes("non nước") ||
+    combinedContext.includes("marble") ||
+    raw.includes("ngũ hành sơn") ||
+    raw.includes("huyền không") ||
+    raw.includes("non nước") ||
+    raw.includes("marble");
+
+  if (isNguHanhSon) {
+    if (raw.includes("huyền không") || raw.includes("động") || raw.includes("hang")) {
+      return "Mystical Huyen Khong Cave with divine sunbeams illuminating ancient Buddha shrine in sacred limestone cavern";
+    }
+    if (raw.includes("chùa") || raw.includes("tam thai") || raw.includes("linh ứng")) {
+      return "Sacred ancient Buddhist pagoda on Thuy Son peak, traditional curved roofs amidst lush mountain foliage";
+    }
+    if (raw.includes("non nước") || raw.includes("làng đá") || raw.includes("điêu khắc")) {
+      return "Non Nuoc historic marble craft village and exquisite stone sculptures beneath coastal limestone peaks";
+    }
+    return "Majestic Marble Mountains limestone karst formations with sacred mountain grottoes and coastal panoramic view";
+  }
 
   if (raw.includes("cầu vàng") || raw.includes("golden bridge")) {
     return "Golden Bridge resting on giant weathered stone hands, dramatic mountain mist";
@@ -138,8 +180,12 @@ export function cleanAssetVisualLabel(asset: ChainedAssetInput, fallback: string
   return `Scenic landscape of ${clean || "the destination"}, natural golden morning lighting`;
 }
 
-function cleanAssetLabel(asset: ChainedAssetInput, fallback: string): string {
-  return cleanAssetVisualLabel(asset, fallback);
+function cleanAssetLabel(
+  asset: ChainedAssetInput,
+  fallback: string,
+  context?: { productName?: string; location?: string }
+): string {
+  return cleanAssetVisualLabel(asset, fallback, context);
 }
 
 /**
@@ -302,13 +348,24 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
     const seg1Voice = `Bí kíp khám phá ${input.location}! ${tipShort}.`;
     const seg2Voice = `[pause 0.2s] Vé chính hãng chỉ ${formattedPrice}đ, comment ngay nhận ưu đãi!`;
 
+    const isNguHanhSon =
+      `${input.productName} ${input.location}`.toLowerCase().includes("ngũ hành sơn") ||
+      `${input.productName} ${input.location}`.toLowerCase().includes("huyền không") ||
+      `${input.productName} ${input.location}`.toLowerCase().includes("non nước");
+
     const seg1OmniPrompt = buildSegmentMusePrompt({
       role: "OPENING_HOOK",
       profile: "10s",
       segmentIndex: 1,
       totalSegments: 2,
-      startLabel: cleanAssetLabel(seg1Start, `Khung cảnh mở đầu ${input.location}`),
-      endLabel: cleanAssetLabel(seg1End, `Trải nghiệm ${input.productName}`),
+      startLabel: cleanAssetLabel(seg1Start, `Khung cảnh mở đầu ${input.location}`, {
+        productName: input.productName,
+        location: input.location,
+      }),
+      endLabel: cleanAssetLabel(seg1End, `Trải nghiệm ${input.productName}`, {
+        productName: input.productName,
+        location: input.location,
+      }),
       location: input.location,
       durationSeconds: 5.0,
       voiceoverSegment: seg1Voice,
@@ -319,11 +376,37 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
       profile: "10s",
       segmentIndex: 2,
       totalSegments: 2,
-      startLabel: cleanAssetLabel(seg2Start, `Trải nghiệm ${input.productName}`),
-      endLabel: cleanAssetLabel(seg2End, `Toàn cảnh ${input.location}`),
+      startLabel: cleanAssetLabel(seg2Start, `Trải nghiệm ${input.productName}`, {
+        productName: input.productName,
+        location: input.location,
+      }),
+      endLabel: cleanAssetLabel(seg2End, `Toàn cảnh ${input.location}`, {
+        productName: input.productName,
+        location: input.location,
+      }),
       location: input.location,
       durationSeconds: 5.0,
       voiceoverSegment: seg2Voice,
+    });
+
+    // Prompt 10s trọn vẹn dành riêng cho Muse AI sinh trực tiếp 1 lần (Single-shot generation)
+    // Giữ camera bay liên tục, loại bỏ hiện tượng giật khi ghép nối 2 clip 5s
+    const singleShotPrompt = buildSegmentMusePrompt({
+      role: "OPENING_HOOK",
+      profile: "10s",
+      segmentIndex: 1,
+      totalSegments: 1,
+      startLabel: cleanAssetLabel(seg1Start, `Khung cảnh mở đầu ${input.location}`, {
+        productName: input.productName,
+        location: input.location,
+      }),
+      endLabel: cleanAssetLabel(seg2End, `Toàn cảnh ${input.productName}`, {
+        productName: input.productName,
+        location: input.location,
+      }),
+      location: input.location,
+      durationSeconds: 10.0,
+      voiceoverSegment: `${seg1Voice} ${seg2Voice}`.replace(/\s+/g, " ").trim(),
     });
 
     const segments: ChainedSegmentSpec[] = [
@@ -361,6 +444,18 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
 
     const fullVoiceoverScript = `${seg1Voice} ${seg2Voice}`.replace(/\s+/g, " ").trim();
 
+    const defaultHighlights = isNguHanhSon
+      ? [
+          "Vé tham quan thắng cảnh & thang máy khứ hồi",
+          "Chiêm bái Động Huyền Không & Chùa Linh Ứng",
+          "Hỗ trợ vào cổng ưu tiên, không chờ đợi",
+        ]
+      : [
+          "Vé tham quan & trải nghiệm trọn gói chính hãng",
+          "Check-in điểm ngắm cảnh đẹp nhất",
+          "Hỗ trợ vào cổng ưu tiên, không chờ đợi",
+        ];
+
     const tourEndCardSpec: TourEndCardSpec = {
       productName: input.productName,
       location: input.location,
@@ -368,12 +463,8 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
       originalPrice: input.originalPrice ?? null,
       highlights: (input.authenticTips && input.authenticTips.length > 0)
         ? input.authenticTips.slice(0, 3)
-        : [
-            "Vé tham quan & cáp treo trọn gói",
-            "Check-in điểm ngắm cảnh đẹp nhất",
-            "Hỗ trợ vào cổng ưu tiên, không chờ đợi",
-          ],
-      ctaText: input.officialCta || "Bình luận nhận link ưu đãi chính hãng",
+        : defaultHighlights,
+      ctaText: stripEmojis(input.officialCta || "ĐẶT VÉ CHÍNH HÃNG - QUÉT MÃ VÀO CỔNG"),
       hotline: "1900 8888 (Tư vấn 24/7)",
       merchantName: input.merchantName,
     };
@@ -385,16 +476,17 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
       segments,
       masterPrompt,
       negativePrompt,
+      singleShotPrompt,
       audioSpec: {
         targetDurationSec: totalDurationSec,
         voicePersonaId: "vi-VN-HoaiMyNeural",
         fullVoiceoverScript,
       },
       textOverlaySpec: {
-        hookText: `⚠️ BÍ MẬT ĐI ${input.location.toUpperCase()}!`,
-        tipText: `📍 Mẹo: ${tipShort}`,
+        hookText: stripEmojis(`BÍ MẬT ĐI ${input.location.toUpperCase()}!`),
+        tipText: stripEmojis(`Mẹo: ${tipShort}`),
         priceBadgeText: `Vé trọn gói chỉ: ${formattedPrice}đ`,
-        ctaText: input.officialCta || "Bình luận nhận link ưu đãi chính hãng",
+        ctaText: stripEmojis(input.officialCta || "ĐẶT VÉ CHÍNH HÃNG - QUÉT MÃ VÀO CỔNG"),
       },
       tourEndCardSpec,
     };
@@ -509,6 +601,23 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
     .replace(/\s+/g, " ")
     .trim();
 
+  const isNguHanhSon18s =
+    `${input.productName} ${input.location}`.toLowerCase().includes("ngũ hành sơn") ||
+    `${input.productName} ${input.location}`.toLowerCase().includes("huyền không") ||
+    `${input.productName} ${input.location}`.toLowerCase().includes("non nước");
+
+  const defaultHighlights18s = isNguHanhSon18s
+    ? [
+        "Vé tham quan thắng cảnh & thang máy khứ hồi",
+        "Chiêm bái Động Huyền Không & Chùa Linh Ứng",
+        "Hỗ trợ vào cổng ưu tiên, không chờ đợi",
+      ]
+    : [
+        "Vé tham quan & trải nghiệm trọn gói chính hãng",
+        "Check-in điểm ngắm cảnh đẹp nhất",
+        "Hỗ trợ vào cổng ưu tiên, không chờ đợi",
+      ];
+
   const tourEndCardSpec: TourEndCardSpec = {
     productName: input.productName,
     location: input.location,
@@ -516,12 +625,8 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
     originalPrice: input.originalPrice ?? null,
     highlights: (input.authenticTips && input.authenticTips.length > 0)
       ? input.authenticTips.slice(0, 3)
-      : [
-          "Vé tham quan & cáp treo trọn gói",
-          "Check-in điểm ngắm cảnh đẹp nhất",
-          "Hỗ trợ vào cổng ưu tiên, không chờ đợi",
-        ],
-    ctaText: input.officialCta || "Bình luận nhận ưu đãi đặt vé hôm nay",
+      : defaultHighlights18s,
+    ctaText: stripEmojis(input.officialCta || "ĐẶT VÉ CHÍNH HÃNG - QUÉT MÃ VÀO CỔNG"),
     hotline: "1900 8888 (Tư vấn 24/7)",
     merchantName: input.merchantName,
   };
@@ -539,11 +644,11 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
       fullVoiceoverScript,
     },
     textOverlaySpec: {
-      hookText: `⚠️ BÍ MẬT ĐI ${input.location.toUpperCase()}!`,
-      destinationText: `Khám phá vẻ đẹp kỳ vĩ tại ${input.productName}`,
-      tipText: `📍 Mẹo: ${tipShort}`,
+      hookText: stripEmojis(`BÍ MẬT ĐI ${input.location.toUpperCase()}!`),
+      destinationText: stripEmojis(`Khám phá vẻ đẹp kỳ vĩ tại ${input.productName}`),
+      tipText: stripEmojis(`Mẹo: ${tipShort}`),
       priceBadgeText: `Vé trọn gói chỉ: ${formattedPrice}đ`,
-      ctaText: input.officialCta || "Bình luận nhận ưu đãi đặt vé hôm nay",
+      ctaText: stripEmojis(input.officialCta || "ĐẶT VÉ CHÍNH HÃNG - QUÉT MÃ VÀO CỔNG"),
     },
     tourEndCardSpec,
   };
