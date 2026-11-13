@@ -71,6 +71,7 @@ export interface ChainedPromptPlanOutput {
   masterPrompt: string;
   negativePrompt: string;
   singleShotPrompt?: string; // Prompt 10s tối ưu cho Muse AI sinh trực tiếp 1 lần (Single-shot)
+  lightingAnchor?: string;
   audioSpec: {
     targetDurationSec: number;
     voicePersonaId: string;
@@ -82,6 +83,10 @@ export interface ChainedPromptPlanOutput {
     ctaText: string;
     tipText?: string;
     destinationText?: string;
+    act1Text?: string;
+    act2Text?: string;
+    act3Text?: string;
+    act4Text?: string;
   };
   tourEndCardSpec?: TourEndCardSpec;
 }
@@ -186,6 +191,61 @@ function cleanAssetLabel(
   context?: { productName?: string; location?: string }
 ): string {
   return cleanAssetVisualLabel(asset, fallback, context);
+}
+
+/**
+ * Phân bổ thông minh 4 ảnh đầu vào theo đúng 4 vai trò của cấu trúc 10s cố định:
+ * - Shot 1: Đại cảnh biểu tượng (Hook - 0-2.5s) -> Cầu Vàng / Toàn cảnh
+ * - Shot 2: Kiến trúc & Trải nghiệm (Experience - 2.5-5.0s) -> Làng Pháp / Điểm đến
+ * - Shot 3: Dịch vụ & Phương tiện (Tour Info - 5.0-7.5s) -> Cáp treo / Thang máy / Du thuyền
+ * - Shot 4: Biểu tượng kết & Kêu gọi (CTA - 7.5-10.0s) -> Quảng trường Nhật Thực / Điểm nhấn
+ */
+export function organizeAssetsFor10sShots(assets: ChainedAssetInput[]): {
+  hookAsset: ChainedAssetInput;
+  experienceAsset: ChainedAssetInput;
+  infoAsset: ChainedAssetInput;
+  ctaAsset: ChainedAssetInput;
+} {
+  if (assets.length === 0) {
+    const dummy: ChainedAssetInput = { asset_id: "0", url: "", title: "Destination" };
+    return { hookAsset: dummy, experienceAsset: dummy, infoAsset: dummy, ctaAsset: dummy };
+  }
+  if (assets.length < 4) {
+    return {
+      hookAsset: assets[0],
+      experienceAsset: assets[1] || assets[0],
+      infoAsset: assets[2] || assets[1] || assets[0],
+      ctaAsset: assets[3] || assets[0],
+    };
+  }
+
+  let hook = assets[0];
+  let experience = assets[2] || assets[1];
+  let info = assets[1] || assets[2];
+  let cta = assets[3] || assets[0];
+
+  const isExperience = (a: ChainedAssetInput) => {
+    const t = (a.title + " " + (a.description || "")).toLowerCase();
+    return t.includes("làng pháp") || t.includes("french village") || t.includes("lâu đài") || t.includes("kiến trúc") || t.includes("chùa");
+  };
+  const isInfo = (a: ChainedAssetInput) => {
+    const t = (a.title + " " + (a.description || "")).toLowerCase();
+    return t.includes("cáp treo") || t.includes("cable car") || t.includes("thang máy") || t.includes("xe") || t.includes("cano");
+  };
+  const isCta = (a: ChainedAssetInput) => {
+    const t = (a.title + " " + (a.description || "")).toLowerCase();
+    return t.includes("quảng trường") || t.includes("nhật thực") || t.includes("plaza") || t.includes("toàn cảnh");
+  };
+
+  const foundExp = assets.find(isExperience);
+  const foundInfo = assets.find(isInfo);
+  const foundCta = assets.find(isCta);
+
+  if (foundExp) experience = foundExp;
+  if (foundInfo) info = foundInfo;
+  if (foundCta) cta = foundCta;
+
+  return { hookAsset: hook, experienceAsset: experience, infoAsset: info, ctaAsset: cta };
 }
 
 /**
@@ -336,9 +396,185 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
       `Negative Prompt: ${negativePrompt}`,
     ].join(" ");
 
-    // Để tối ưu cho Muse2API (hỗ trợ duration 5s - 10s), ta chia đúng 2 phân cảnh:
-    // Cảnh 1 (5.0s, 0-5s): Mở đầu Hook + Trải nghiệm
-    // Cảnh 2 (5.0s, 5-10s): Thông tin tour + CTA chuyển đổi
+    const lightingAnchor =
+      "Consistent natural golden-hour early morning daylight with warm 5600K ambient glow";
+
+    const isNguHanhSon =
+      `${input.productName} ${input.location}`.toLowerCase().includes("ngũ hành sơn") ||
+      `${input.productName} ${input.location}`.toLowerCase().includes("huyền không") ||
+      `${input.productName} ${input.location}`.toLowerCase().includes("non nước");
+
+    const defaultHighlights = isNguHanhSon
+      ? [
+          "Vé tham quan thắng cảnh & thang máy khứ hồi",
+          "Chiêm bái Động Huyền Không & Chùa Linh Ứng",
+          "Hỗ trợ vào cổng ưu tiên, không chờ đợi",
+        ]
+      : [
+          "Vé tham quan & trải nghiệm trọn gói chính hãng",
+          "Check-in điểm ngắm cảnh đẹp nhất",
+          "Hỗ trợ vào cổng ưu tiên, không chờ đợi",
+        ];
+
+    // ========================================================================
+    // CHUẨN HÓA 4 SHOT ĐỘC LẬP THEO SYSTEM PROMPT 10S KHI ĐỦ 4 ẢNH ĐẦU VÀO
+    // docs/be1/prompts/system_prompt_ai_tourism_video_10s.md
+    // - Shot 1: Đại cảnh Hook (0 - 2.5s)
+    // - Shot 2: Kiến trúc Experience (2.5 - 5.0s)
+    // - Shot 3: Dịch vụ Tour Info (5.0 - 7.5s)
+    // - Shot 4: Điểm kết CTA (7.5 - 10.0s)
+    // ========================================================================
+    if (numAssets >= 4) {
+      const { hookAsset, experienceAsset, infoAsset, ctaAsset } =
+        organizeAssetsFor10sShots(assets);
+
+      const shot1Voice = `Bí kíp khám phá ${input.location}!`;
+      const shot2Voice = `[pause 0.2s] ${tipShort}.`;
+      const shot3Voice = `[pause 0.2s] Vé chính hãng chỉ ${formattedPrice} đồng.`;
+      const shot4Voice = `[pause 0.2s] Bình luận ngay nhận ưu đãi hôm nay!`;
+
+      const promptPrefix =
+        "Photorealistic travel commercial, cinematic 24fps look, realistic physics.";
+
+      const shot1Prompt = `${promptPrefix} Slow, smooth forward glide along ${cleanAssetLabel(
+        hookAsset,
+        input.location,
+        { productName: input.productName, location: input.location }
+      )}. Thin morning mist drifts upward from the valley below, clouds move gently across the sky. ${lightingAnchor}. Steady, continuous motion, stable perspective. ${negativePrompt}`;
+
+      const shot2Prompt = `${promptPrefix} Slow orbital camera arc around ${cleanAssetLabel(
+        experienceAsset,
+        input.productName,
+        { productName: input.productName, location: input.location }
+      )}. Sunlight slides softly across the facade, water ripples gently, leaves sway in a light breeze. ${lightingAnchor}. Rigid architecture, straight lines, consistent proportions. ${negativePrompt}`;
+
+      const shot3Prompt = `${promptPrefix} Locked-off camera. ${cleanAssetLabel(
+        infoAsset,
+        input.productName,
+        { productName: input.productName, location: input.location }
+      )} glides steadily through the frame while distant clouds drift slowly over the ridge. ${lightingAnchor}. Calm, clean composition with open space in the center. ${negativePrompt}`;
+
+      const shot4Prompt = `${promptPrefix} Very slow, subtle pull-back from ${cleanAssetLabel(
+        ctaAsset,
+        input.location,
+        { productName: input.productName, location: input.location }
+      )}. Soft mist drifts across the horizon. ${lightingAnchor}. Perfectly steady camera, sharp background. ${negativePrompt}`;
+
+      const act1 = `BÍ MẬT KHÁM PHÁ\n${input.location.toUpperCase()}`;
+      const act2 = `MẸO THỰC TẾ:\n${tipShort.toUpperCase()}`;
+      const act3 = `VÉ CHÍNH HÃNG: ${formattedPrice}Đ\nQUÉT MÃ VÀO CỔNG VIP`;
+      const act4 = `ĐẶT VÉ CHÍNH HÃNG\nOFFICIAL CHECKOUT: 1900 8888`;
+
+      const segments: ChainedSegmentSpec[] = [
+        {
+          segmentIndex: 1,
+          totalSegments: 4,
+          role: "OPENING_HOOK",
+          startImageIndex: assets.indexOf(hookAsset) >= 0 ? assets.indexOf(hookAsset) : 0,
+          endImageIndex: assets.indexOf(hookAsset) >= 0 ? assets.indexOf(hookAsset) : 0,
+          startAsset: hookAsset,
+          endAsset: hookAsset,
+          durationSeconds: 2.5,
+          timeRangeSec: "0.0s - 2.5s",
+          musePrompt: shot1Prompt,
+          omniPrompt: shot1Prompt,
+          voiceoverSegment: shot1Voice,
+          captionText: act1,
+        },
+        {
+          segmentIndex: 2,
+          totalSegments: 4,
+          role: "JOURNEY_TRAVERSE",
+          startImageIndex: assets.indexOf(experienceAsset) >= 0 ? assets.indexOf(experienceAsset) : 2,
+          endImageIndex: assets.indexOf(experienceAsset) >= 0 ? assets.indexOf(experienceAsset) : 2,
+          startAsset: experienceAsset,
+          endAsset: experienceAsset,
+          durationSeconds: 2.5,
+          timeRangeSec: "2.5s - 5.0s",
+          musePrompt: shot2Prompt,
+          omniPrompt: shot2Prompt,
+          voiceoverSegment: shot2Voice,
+          captionText: act2,
+        },
+        {
+          segmentIndex: 3,
+          totalSegments: 4,
+          role: "JOURNEY_TRAVERSE",
+          startImageIndex: assets.indexOf(infoAsset) >= 0 ? assets.indexOf(infoAsset) : 1,
+          endImageIndex: assets.indexOf(infoAsset) >= 0 ? assets.indexOf(infoAsset) : 1,
+          startAsset: infoAsset,
+          endAsset: infoAsset,
+          durationSeconds: 2.5,
+          timeRangeSec: "5.0s - 7.5s",
+          musePrompt: shot3Prompt,
+          omniPrompt: shot3Prompt,
+          voiceoverSegment: shot3Voice,
+          captionText: act3,
+        },
+        {
+          segmentIndex: 4,
+          totalSegments: 4,
+          role: "CLIMAX_PANORAMA",
+          startImageIndex: assets.indexOf(ctaAsset) >= 0 ? assets.indexOf(ctaAsset) : 3,
+          endImageIndex: assets.indexOf(ctaAsset) >= 0 ? assets.indexOf(ctaAsset) : 3,
+          startAsset: ctaAsset,
+          endAsset: ctaAsset,
+          durationSeconds: 2.5,
+          timeRangeSec: "7.5s - 10.0s",
+          musePrompt: shot4Prompt,
+          omniPrompt: shot4Prompt,
+          voiceoverSegment: shot4Voice,
+          captionText: act4,
+        },
+      ];
+
+      const fullVoiceoverScript =
+        `${shot1Voice} ${shot2Voice} ${shot3Voice} ${shot4Voice}`
+          .replace(/\s+/g, " ")
+          .trim();
+
+      const tourEndCardSpec: TourEndCardSpec = {
+        productName: input.productName,
+        location: input.location,
+        salePrice: input.salePrice,
+        originalPrice: input.originalPrice ?? null,
+        highlights:
+          input.authenticTips && input.authenticTips.length > 0
+            ? input.authenticTips.slice(0, 3)
+            : defaultHighlights,
+        ctaText: stripEmojis(input.officialCta || "ĐẶT VÉ CHÍNH HÃNG - QUÉT MÃ VÀO CỔNG"),
+        hotline: "1900 8888 (Tư vấn 24/7)",
+        merchantName: input.merchantName,
+      };
+
+      return {
+        profile: "10s_advertising",
+        totalDurationSec: 10.0,
+        segmentsCount: 4,
+        segments,
+        masterPrompt,
+        negativePrompt,
+        lightingAnchor,
+        audioSpec: {
+          targetDurationSec: 10.0,
+          voicePersonaId: "vi-VN-HoaiMyNeural",
+          fullVoiceoverScript,
+        },
+        textOverlaySpec: {
+          hookText: stripEmojis(act1),
+          tipText: stripEmojis(act2),
+          priceBadgeText: stripEmojis(act3),
+          ctaText: stripEmojis(act4),
+          act1Text: stripEmojis(act1),
+          act2Text: stripEmojis(act2),
+          act3Text: stripEmojis(act3),
+          act4Text: stripEmojis(act4),
+        },
+        tourEndCardSpec,
+      };
+    }
+
+    // Dự phòng 2 phân cảnh (5s + 5s) khi đầu vào < 4 ảnh
     const seg1Start = assets[0];
     const seg1End = assets[1] || assets[0];
     const seg2Start = numAssets >= 3 ? assets[1] : assets[1] || assets[0];
@@ -347,11 +583,6 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
     // Lời thoại chuẩn 20-25 từ cho video 10 giây
     const seg1Voice = `Bí kíp khám phá ${input.location}! ${tipShort}.`;
     const seg2Voice = `[pause 0.2s] Vé chính hãng chỉ ${formattedPrice}đ, comment ngay nhận ưu đãi!`;
-
-    const isNguHanhSon =
-      `${input.productName} ${input.location}`.toLowerCase().includes("ngũ hành sơn") ||
-      `${input.productName} ${input.location}`.toLowerCase().includes("huyền không") ||
-      `${input.productName} ${input.location}`.toLowerCase().includes("non nước");
 
     const seg1OmniPrompt = buildSegmentMusePrompt({
       role: "OPENING_HOOK",
@@ -444,7 +675,7 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
 
     const fullVoiceoverScript = `${seg1Voice} ${seg2Voice}`.replace(/\s+/g, " ").trim();
 
-    const defaultHighlights = isNguHanhSon
+    const fallbackTourEndCardHighlights = isNguHanhSon
       ? [
           "Vé tham quan thắng cảnh & thang máy khứ hồi",
           "Chiêm bái Động Huyền Không & Chùa Linh Ứng",
@@ -463,7 +694,7 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
       originalPrice: input.originalPrice ?? null,
       highlights: (input.authenticTips && input.authenticTips.length > 0)
         ? input.authenticTips.slice(0, 3)
-        : defaultHighlights,
+        : fallbackTourEndCardHighlights,
       ctaText: stripEmojis(input.officialCta || "ĐẶT VÉ CHÍNH HÃNG - QUÉT MÃ VÀO CỔNG"),
       hotline: "1900 8888 (Tư vấn 24/7)",
       merchantName: input.merchantName,

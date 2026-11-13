@@ -149,6 +149,88 @@ export async function createTwoImageHeroClip(
 }
 
 /**
+ * Cắt ngắn video buffer về đúng thời lượng yêu cầu (ví dụ 2.5s)
+ */
+export async function trimVideoBuffer(
+  videoBuffer: Buffer,
+  durationSec: number
+): Promise<Buffer> {
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "trim-clip-"));
+  try {
+    const inPath = path.join(tempDir, "input.mp4");
+    const outPath = path.join(tempDir, "trimmed.mp4");
+    await fs.writeFile(inPath, videoBuffer);
+    await runFFmpeg([
+      "-i", inPath,
+      "-t", String(durationSec),
+      "-vf", "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,fps=30",
+      "-c:v", "libx264",
+      "-preset", "ultrafast",
+      "-pix_fmt", "yuv420p",
+      "-c:a", "aac",
+      "-b:a", "128k",
+      "-y", outPath,
+    ]);
+    return await fs.readFile(outPath);
+  } finally {
+    try {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    } catch {}
+  }
+}
+
+/**
+ * Tạo clip chuyển động vi mô 2.5s từ 1 ảnh thật chuẩn Mục II.2:
+ * - OPENING_HOOK: Slow forward glide
+ * - EXPERIENCE: Slow orbital arc
+ * - TOUR_INFO: Locked-off camera
+ * - CLIMAX_PANORAMA / CTA: Very subtle pull-back
+ */
+export async function createSingleImageMotionClip(
+  imageBuffer: Buffer,
+  durationSec = 2.5,
+  role: "OPENING_HOOK" | "JOURNEY_TRAVERSE" | "CLIMAX_PANORAMA" = "OPENING_HOOK"
+): Promise<Buffer> {
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "single-motion-"));
+  try {
+    const imgPath = path.join(tempDir, "source.jpg");
+    await fs.writeFile(imgPath, imageBuffer);
+    const outPath = path.join(tempDir, "motion.mp4");
+
+    const fps = 30;
+    const totalFrames = Math.round(durationSec * fps);
+
+    let zoompanExpr = "";
+    if (role === "OPENING_HOOK") {
+      // Slow forward glide
+      zoompanExpr = `zoompan=z='min(zoom+0.0012,1.15)':d=${totalFrames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=${fps}`;
+    } else if (role === "CLIMAX_PANORAMA") {
+      // Very subtle pull-back (≤5% scale)
+      zoompanExpr = `zoompan=z='max(1.08-0.001*on,1.0)':d=${totalFrames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=${fps}`;
+    } else {
+      // Slow orbital arc / locked-off
+      zoompanExpr = `zoompan=z='1.04':d=${totalFrames}:x='iw/2-(iw/zoom/2)+10*sin(on*0.05)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=${fps}`;
+    }
+
+    await runFFmpeg([
+      "-loop", "1", "-i", imgPath,
+      "-vf", `scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840,${zoompanExpr},scale=1080:1920:flags=bicubic`,
+      "-t", String(durationSec),
+      "-pix_fmt", "yuv420p",
+      "-c:v", "libx264",
+      "-preset", "ultrafast",
+      "-y", outPath,
+    ]);
+
+    return await fs.readFile(outPath);
+  } finally {
+    try {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    } catch {}
+  }
+}
+
+/**
  * 1. Sinh file âm thanh thuyết minh tiếng Việt hoàn toàn miễn phí bằng Edge-TTS
  */
 export async function generateVoiceoverAudio(
@@ -734,12 +816,14 @@ export async function composeChainedOmniVideo(
     // Chuẩn bị danh sách buffer video các phân cảnh
     const clipBuffers = [...input.segmentVideoBuffers];
 
-    // 4.2. Nếu có ảnh kết và thông tin tour -> Sinh clip End-Card phủ mờ (2.0s)
+    // 4.2. Xử lý End-Card: Theo chuẩn 10s Specialist (docs/be1/prompts/system_prompt_ai_tourism_video_10s.md),
+    // video 10s cố định KHÔNG dùng poster tĩnh chèn thêm ở cuối mà dùng Shot 4 (Ảnh 4) làm CTA trực tiếp.
+    // Poster mờ chỉ áp dụng cho profile dài (>12s) khi có yêu cầu tường minh.
     let hasEndCard = false;
     let endCardDur = 0;
-    if (input.closingImageBuffer && input.tourEndCardInfo) {
+    if (!is10s && input.closingImageBuffer && input.tourEndCardInfo) {
       try {
-        endCardDur = 2.0; // Chuẩn 2.0s tối ưu tỷ lệ xem hết video (completion rate)
+        endCardDur = 2.0;
         console.log(
           `[FFmpeg Compositor] Tạo phân cảnh kết thúc (End-Card) phủ mờ hiển thị thông tin tour (${endCardDur}s)...`
         );
@@ -758,7 +842,7 @@ export async function composeChainedOmniVideo(
       }
     }
 
-    // Thời lượng tổng video thành phẩm: Thời lượng clip AI + thời lượng End-Card (nếu có)
+    // Thời lượng tổng video thành phẩm: Đối với video 10s là đúng 10.0s cố định
     const finalTotalDuration = Number((targetDuration + (hasEndCard ? endCardDur : 0)).toFixed(1));
 
     // 4.3. Chuẩn hóa tất cả các phân cảnh video về cùng 1080x1920 30fps và chuẩn âm thanh AAC
@@ -856,66 +940,83 @@ export async function composeChainedOmniVideo(
       mergedVisualPath,
     ]);
 
-    // 4.5. Áp dụng Text Overlay (nếu có End-Card, bỏ qua overlay CTA/badge đè lên card)
+    // 4.5. Áp dụng Text Overlay chuẩn 4 hồi (docs/be1/prompts/system_prompt_ai_tourism_video_10s.md)
+    // Safe Zone: tâm Y = 50%, dải 42%–58%, căn giữa X, pill nền mờ tương phản cao, tối đa 2 dòng
     const finalOutputPath = path.join(tempDir, "final_composition.mp4");
     const fontPath = getSystemFontPath();
 
     const drawtextFilters: string[] = [];
 
-    // Hook: 0-2s (10s) hoặc 0-3s (18s+) - cỡ chữ 44px rõ ràng, tương phản cao, loại bỏ emoji tránh lỗi font
-    if (input.textOverlay.hookText) {
-      const cleanHook = sanitizeForDrawtext(input.textOverlay.hookText);
-      const escapedHook = cleanHook
-        .replace(/'/g, "")
-        .replace(/:/g, "\\:");
-      const hookEnd = is10s ? 2 : 3;
-      drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedHook}':fontcolor=0xFFD700:fontsize=44:box=1:boxcolor=black@0.65:boxborderw=10:x=(w-text_w)/2:y=(h-text_h)/2-100:enable='between(t,0,${hookEnd})':expansion=none`
-      );
-    }
-
-    // Mẹo du lịch / Trải nghiệm thực tế - cỡ chữ 36px (nâng từ 26px) giúp dễ đọc trên điện thoại
-    if (input.textOverlay.tipText) {
-      const cleanTip = sanitizeForDrawtext(input.textOverlay.tipText);
-      const escapedTip = cleanTip
-        .replace(/'/g, "")
-        .replace(/:/g, "\\:");
-      const tipStart = is10s ? 2 : 3;
-      const tipEnd = is10s ? 5 : 7;
-      drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedTip}':fontcolor=0x34D399:fontsize=36:box=1:boxcolor=black@0.65:boxborderw=10:x=(w-text_w)/2:y=h-280:enable='between(t,${tipStart},${tipEnd})':expansion=none`
-      );
-    }
-
-    // Nếu KHÔNG có End-Card -> Áp dụng Badge giá vé & CTA như trước
-    if (!hasEndCard) {
-      if (input.textOverlay.priceBadgeText) {
-        const cleanPrice = sanitizeForDrawtext(input.textOverlay.priceBadgeText);
-        const escapedPrice = cleanPrice
-          .replace(/'/g, "")
-          .replace(/:/g, "\\:");
-        const priceStart = is10s ? 5 : 11;
-        const priceEnd = is10s ? 8 : 15;
+    if (is10s) {
+      // HỒI 1 (0–2.5s): HOOK - Vàng Gold nổi bật
+      const act1Raw = input.textOverlay.act1Text || input.textOverlay.hookText;
+      if (act1Raw) {
+        const cleanAct1 = sanitizeForDrawtext(act1Raw).replace(/'/g, "").replace(/:/g, "\\:");
         drawtextFilters.push(
-          `drawtext=fontfile='${fontPath}':text='${escapedPrice}':fontcolor=white:fontsize=32:box=1:boxcolor=black@0.65:boxborderw=12:x=(w-text_w)/2:y=120:enable='between(t,${priceStart},${priceEnd})':expansion=none`
+          `drawtext=fontfile='${fontPath}':text='${cleanAct1}':fontcolor=0xFFD700:fontsize=40:line_spacing=8:box=1:boxcolor=black@0.65:boxborderw=12:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,0,2.5)':expansion=none`
         );
       }
 
-      if (input.textOverlay.ctaText) {
-        const cleanCta = sanitizeForDrawtext(input.textOverlay.ctaText || "ĐẶT VÉ CHÍNH HÃNG - QUÉT MÃ VÀO CỔNG");
-        const escapedCta = cleanCta
-          .replace(/'/g, "")
-          .replace(/:/g, "\\:");
-        const ctaStart = is10s ? 8 : 15;
+      // HỒI 2 (2.5–5.0s): EXPERIENCE - Trắng thanh lịch viền mờ
+      const act2Raw = input.textOverlay.act2Text || input.textOverlay.tipText;
+      if (act2Raw) {
+        const cleanAct2 = sanitizeForDrawtext(act2Raw).replace(/'/g, "").replace(/:/g, "\\:");
         drawtextFilters.push(
-          `drawtext=fontfile='${fontPath}':text='${escapedCta}':fontcolor=0x00FFCC:fontsize=32:box=1:boxcolor=black@0.65:boxborderw=10:x=(w-text_w)/2:y=h-180:enable='gte(t,${ctaStart})':expansion=none`
+          `drawtext=fontfile='${fontPath}':text='${cleanAct2}':fontcolor=white:fontsize=38:line_spacing=8:box=1:boxcolor=black@0.65:boxborderw=12:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,2.5,5.0)':expansion=none`
         );
+      }
+
+      // HỒI 3 (5.0–7.5s): TOUR INFO - Khung xanh đậm viền vàng gold, chốt giá vé rõ ràng
+      const act3Raw = input.textOverlay.act3Text || input.textOverlay.priceBadgeText;
+      if (act3Raw) {
+        const cleanAct3 = sanitizeForDrawtext(act3Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${cleanAct3}':fontcolor=0xFFD700:fontsize=40:line_spacing=8:box=1:boxcolor=0x0B132B@0.85:boxborderw=14:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,5.0,7.5)':expansion=none`
+        );
+      }
+
+      // HỒI 4 (7.5–10.0s): CTA - Nền xanh lá đậm, chữ ngọc bích, hướng dẫn đặt vé chính hãng
+      const act4Raw = input.textOverlay.act4Text || input.textOverlay.ctaText || "ĐẶT VÉ CHÍNH HÃNG\nOFFICIAL CHECKOUT: 1900 8888";
+      if (act4Raw) {
+        const cleanAct4 = sanitizeForDrawtext(act4Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${cleanAct4}':fontcolor=0x34D399:fontsize=38:line_spacing=8:box=1:boxcolor=0x064E3B@0.85:boxborderw=14:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,7.5,10.0)':expansion=none`
+        );
+      }
+    } else {
+      // Profile dài (>12s Storytelling)
+      if (input.textOverlay.hookText) {
+        const cleanHook = sanitizeForDrawtext(input.textOverlay.hookText).replace(/'/g, "").replace(/:/g, "\\:");
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${cleanHook}':fontcolor=0xFFD700:fontsize=44:box=1:boxcolor=black@0.65:boxborderw=10:x=(w-text_w)/2:y=(h-text_h)/2-100:enable='between(t,0,3)':expansion=none`
+        );
+      }
+      if (input.textOverlay.tipText) {
+        const cleanTip = sanitizeForDrawtext(input.textOverlay.tipText).replace(/'/g, "").replace(/:/g, "\\:");
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${cleanTip}':fontcolor=0x34D399:fontsize=36:box=1:boxcolor=black@0.65:boxborderw=10:x=(w-text_w)/2:y=h-280:enable='between(t,3,7)':expansion=none`
+        );
+      }
+      if (!hasEndCard) {
+        if (input.textOverlay.priceBadgeText) {
+          const cleanPrice = sanitizeForDrawtext(input.textOverlay.priceBadgeText).replace(/'/g, "").replace(/:/g, "\\:");
+          drawtextFilters.push(
+            `drawtext=fontfile='${fontPath}':text='${cleanPrice}':fontcolor=white:fontsize=32:box=1:boxcolor=black@0.65:boxborderw=12:x=(w-text_w)/2:y=120:enable='between(t,11,15)':expansion=none`
+          );
+        }
+        if (input.textOverlay.ctaText) {
+          const cleanCta = sanitizeForDrawtext(input.textOverlay.ctaText).replace(/'/g, "").replace(/:/g, "\\:");
+          drawtextFilters.push(
+            `drawtext=fontfile='${fontPath}':text='${cleanCta}':fontcolor=0x00FFCC:fontsize=32:box=1:boxcolor=black@0.65:boxborderw=10:x=(w-text_w)/2:y=h-180:enable='gte(t,15)':expansion=none`
+          );
+        }
       }
     }
 
-    const vfFilters = drawtextFilters.length > 0
-      ? drawtextFilters.join(",")
-      : "null";
+    // Bộ lọc màu ấm (Warm Golden LUT 5600K) đồng bộ ánh sáng hoàng hôn/bình minh chuẩn Mục 0
+    const warmGoldenFilter = "eq=contrast=1.05:brightness=0.01:saturation=1.10,colorbalance=rs=0.05:gs=0.02:bs=-0.04:rm=0.05:gm=0.02:bm=-0.04";
+    const filterParts = [warmGoldenFilter, ...drawtextFilters];
+    const vfFilters = filterParts.join(",");
 
     // 4.6. Ghép visual + audio: Mặc định ưu tiên 100% âm thanh thuyết minh tiếng Việt chuẩn từ Edge-TTS
     // Chỉ dùng âm thanh gốc của Muse AI khi được chỉ định tường minh (useMuseAudio === true)

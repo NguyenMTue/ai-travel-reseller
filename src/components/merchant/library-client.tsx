@@ -96,7 +96,10 @@ function LibraryRead({
         if (!alive) return;
         if (res.success && Array.isArray(res.data) && res.data.length > 0) {
           setCampaigns(res.data);
-          setSelectedCampaignId(res.data[0].id);
+          const defaultBaNa = res.data.find((c: CampaignOption) =>
+            (c.name + " " + (c.targetLocation || "") + " " + c.productName).toLowerCase().includes("bà nà")
+          );
+          setSelectedCampaignId(defaultBaNa ? defaultBaNa.id : res.data[0].id);
         } else {
           setCampaigns([]);
         }

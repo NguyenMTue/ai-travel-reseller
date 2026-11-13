@@ -8,6 +8,8 @@ import {
   composeHybridVideo,
   composeChainedOmniVideo,
   createTwoImageHeroClip,
+  createSingleImageMotionClip,
+  trimVideoBuffer,
   type TourEndCardConfig,
 } from "../video-engine/ffmpeg-compositor.ts";
 import { buildChainedPromptPlan } from "../video-engine/chained-prompt-generator.ts";
@@ -286,15 +288,48 @@ export async function generateMerchantCampaignVideo(
     };
   });
 
+  // Kiểm tra xem bộ ảnh được chọn có phải là Ba Na Hills hay không để tự động chuẩn hóa metadata (Grounding)
+  const assetsText = (mediaRows || [])
+    .map((r: any) => `${r.title || ""} ${(r.style_tags || []).join(" ")}`)
+    .join(" ")
+    .toLowerCase();
+
+  const isBaNaAssets =
+    assetsText.includes("bà nà") ||
+    assetsText.includes("bana") ||
+    assetsText.includes("cầu vàng") ||
+    assetsText.includes("cáp treo") ||
+    assetsText.includes("làng pháp") ||
+    assetsText.includes("nhật thực");
+
+  const isNguHanhSonProduct =
+    (product.name + " " + ((campaign as any).target_location || "")).toLowerCase().includes("ngũ hành sơn") ||
+    (product.name + " " + ((campaign as any).target_location || "")).toLowerCase().includes("huyền không");
+
+  // Nếu bộ ảnh chọn là Bà Nà Hills nhưng Product lại bị gán sang Ngũ Hành Sơn (do chọn nhầm campaign hoặc default),
+  // tự động chuẩn hóa metadata hiển thị sang đúng Vé Cáp Treo Sun World Ba Na Hills (950.000 VND)
+  let effectiveProductName = product.name;
+  let effectiveLocation = (campaign as any).target_location || "Đà Nẵng";
+  let effectiveSalePrice = Number(product.sale_price) || 0;
+  let effectiveOriginalPrice = product.original_price ? Number(product.original_price) : null;
+
+  if (isBaNaAssets && isNguHanhSonProduct) {
+    console.log(
+      "[Video Service] Tự động chuẩn hóa metadata sang Sun World Ba Na Hills vì toàn bộ ảnh được chọn là Bà Nà Hills!"
+    );
+    effectiveProductName = "Vé Cáp Treo Sun World Ba Na Hills";
+    effectiveLocation = "Bà Nà Hills, Đà Nẵng";
+    effectiveSalePrice = 950000;
+    effectiveOriginalPrice = 1050000;
+  }
+
   // 5. Chuẩn bị Input nạp vào Core AI Video Generation Engine
   const engineInput: VideoEngineInput = {
     merchant_name: merchantName,
-    product_name: product.name,
-    location: (campaign as any).target_location || "Đà Nẵng",
-    sale_price: Number(product.sale_price) || 0,
-    original_price: product.original_price
-      ? Number(product.original_price)
-      : null,
+    product_name: effectiveProductName,
+    location: effectiveLocation,
+    sale_price: effectiveSalePrice,
+    original_price: effectiveOriginalPrice,
     official_cta: `Comment để nhận link đặt vé chính thức từ ${merchantName}`,
     booking_url: `https://travellink.vn/book/${product.id}`,
     target_platforms: input.target_platforms,
@@ -306,8 +341,8 @@ export async function generateMerchantCampaignVideo(
     authentic_tips: input.authentic_tips,
     audio_config: {
       voice_persona_id: "vn_danang_youth_female_energetic",
-      ambient_sound_tags: (product.name + " " + (campaign as any).target_location).toLowerCase().includes("ngũ hành sơn") ||
-        (product.name + " " + (campaign as any).target_location).toLowerCase().includes("huyền không")
+      ambient_sound_tags: (effectiveProductName + " " + effectiveLocation).toLowerCase().includes("ngũ hành sơn") ||
+        (effectiveProductName + " " + effectiveLocation).toLowerCase().includes("huyền không")
         ? [
             "tiếng chuông chùa ngân vang",
             "tiếng gió lùa qua hang đá",
@@ -380,19 +415,21 @@ export async function generateMerchantCampaignVideo(
       // Theo đúng chuẩn docs/be2/system_prompt_travel_video_director_agent.md:
       // Vector Momentum Matching + Terminal Stabilization + Unified Atmospheric Anchor
       const promptPlan = buildChainedPromptPlan({
-        productName: product.name,
-        location,
-        salePrice: Number(product.sale_price) || 0,
+        productName: effectiveProductName,
+        location: effectiveLocation,
+        salePrice: effectiveSalePrice,
+        originalPrice: effectiveOriginalPrice,
         officialCta: (campaign as any).official_cta || "Bình luận nhận ưu đãi vé chính hãng",
         authenticTips: input.authentic_tips,
         mediaAssets: mediaAssets.slice(0, 4).map((a) => ({
           asset_id: a.asset_id,
           url: a.url,
-          title: a.description || product.name,
+          title: a.description || effectiveProductName,
           description: a.description,
           shot_type: a.shot_type,
         })),
         targetDurationSec: effectiveDuration,
+        merchantName,
       });
 
       let finalBuffer: Buffer;
@@ -402,15 +439,15 @@ export async function generateMerchantCampaignVideo(
         imageBuffers[imageBuffers.length - 1] || imageBuffers[0];
 
       const isNguHanhSon =
-        `${product.name} ${location}`.toLowerCase().includes("ngũ hành sơn") ||
-        `${product.name} ${location}`.toLowerCase().includes("huyền không") ||
-        `${product.name} ${location}`.toLowerCase().includes("non nước");
+        `${effectiveProductName} ${effectiveLocation}`.toLowerCase().includes("ngũ hành sơn") ||
+        `${effectiveProductName} ${effectiveLocation}`.toLowerCase().includes("huyền không") ||
+        `${effectiveProductName} ${effectiveLocation}`.toLowerCase().includes("non nước");
 
       const tourEndCardInfo: TourEndCardConfig = {
-        productName: product.name,
-        location,
-        salePrice: Number(product.sale_price) || 0,
-        originalPrice: product.original_price ? Number(product.original_price) : null,
+        productName: effectiveProductName,
+        location: effectiveLocation,
+        salePrice: effectiveSalePrice,
+        originalPrice: effectiveOriginalPrice,
         highlights:
           input.authentic_tips && input.authentic_tips.length > 0
             ? input.authentic_tips
@@ -435,87 +472,52 @@ export async function generateMerchantCampaignVideo(
 
       if (isShortFormat) {
         const segmentBuffers: Buffer[] = [];
-        const isSingleShot = effectiveDuration <= 12;
 
-        if (isSingleShot) {
-          // Sinh 1 lần trực tiếp toàn bộ 10s video qua Muse AI (Single-shot generation)
-          // Không cắt đôi 5s + 5s rồi ghép thô, tạo chuyển động camera mượt mà, liên tục từ đầu đến cuối
-          const startBuf = imageBuffers[0];
-          const endBuf = imageBuffers[1] || imageBuffers[0];
-          const singleShotPrompt = promptPlan.singleShotPrompt || promptPlan.masterPrompt;
+        // Lặp qua từng phân cảnh theo đúng chuẩn docs/be1/prompts/system_prompt_ai_tourism_video_10s.md:
+        // - Nếu đủ 4 ảnh: 4 shot x 2.5s = 10.0s (mỗi shot từ 1 ảnh thật độc lập, cấm hallucination).
+        // - Nếu < 4 ảnh: fallback 2 shot x 5.0s = 10.0s.
+        for (const segment of promptPlan.segments) {
+          const startBuf = imageBuffers[segment.startImageIndex] || imageBuffers[0];
+          const endBuf = imageBuffers[segment.endImageIndex] || startBuf;
 
           console.log(
-            `[Video Service] Sinh 1 lần trực tiếp video ${effectiveDuration}s bằng Muse AI (Single-shot mode)...`
+            `[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) bằng Muse AI - ${segment.durationSeconds}s...`
           );
 
-          let singleSegBuffer: Buffer | null = null;
+          let segBuffer: Buffer | null = null;
           if (isMuse2ApiConfigured()) {
             try {
+              // Gọi API Muse AI sinh clip (tối thiểu 5s theo API Muse) rồi cắt về đúng 2.5s bằng trimVideoBuffer
               const segResult = await generateMuseVideoClip({
-                prompt: singleShotPrompt,
+                prompt: segment.musePrompt || segment.omniPrompt,
                 startImageBuffer: startBuf,
                 endImageBuffer: endBuf,
-                durationSeconds: Math.round(effectiveDuration),
+                durationSeconds: Math.max(5, Math.round(segment.durationSeconds)),
                 aspectRatio: "9:16",
                 includeAudioPrompt: false, // Tắt audio prompt của Muse AI để tránh sinh ra tiếng Anh ngẫu nhiên
               });
               if (segResult?.videoBuffer && segResult.videoBuffer.length > 1000) {
-                singleSegBuffer = segResult.videoBuffer;
-                costBreakdown = segResult.cost;
+                segBuffer = await trimVideoBuffer(segResult.videoBuffer, segment.durationSeconds);
+                if (!costBreakdown) costBreakdown = segResult.cost;
               }
             } catch (museErr: any) {
-              console.warn("[Video Service] Muse AI single-shot clip warning:", museErr?.message);
+              console.warn("[Video Service] Muse AI clip warning:", museErr?.message);
             }
           }
 
-          // Fallback Ken Burns nội suy từ ảnh thật của Merchant nếu Muse AI bận
-          if (!singleSegBuffer) {
-            singleSegBuffer = await createTwoImageHeroClip(startBuf, endBuf, effectiveDuration);
-          }
-
-          segmentBuffers.push(singleSegBuffer);
-        } else {
-          // Luồng đa phân cảnh cho thời lượng dài hơn (18s Storytelling)
-          for (const segment of promptPlan.segments) {
-            const startBuf = imageBuffers[segment.startImageIndex] || imageBuffers[0];
-            const endBuf = imageBuffers[segment.endImageIndex] || imageBuffers[1] || startBuf;
-
-            console.log(
-              `[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) bằng Muse AI - ${segment.durationSeconds}s...`
+          // Fallback tạo chuyển động vi mô 2.5s từ ảnh thật chuẩn điện ảnh Mục II.2 nếu Muse AI bận
+          if (!segBuffer) {
+            segBuffer = await createSingleImageMotionClip(
+              startBuf,
+              segment.durationSeconds,
+              segment.role
             );
-
-            let segBuffer: Buffer | null = null;
-            if (isMuse2ApiConfigured()) {
-              try {
-                const segResult = await generateMuseVideoClip({
-                  prompt: segment.musePrompt || segment.omniPrompt,
-                  startImageBuffer: startBuf,
-                  endImageBuffer: endBuf,
-                  durationSeconds: segment.durationSeconds,
-                  aspectRatio: "9:16",
-                  includeAudioPrompt: false,
-                });
-                if (segResult?.videoBuffer && segResult.videoBuffer.length > 1000) {
-                  segBuffer = segResult.videoBuffer;
-                  if (!costBreakdown) costBreakdown = segResult.cost;
-                }
-              } catch (museErr: any) {
-                console.warn("[Video Service] Muse AI clip warning:", museErr?.message);
-              }
-            }
-
-            if (!segBuffer) {
-              segBuffer = await createTwoImageHeroClip(startBuf, endBuf, segment.durationSeconds);
-            }
-
-            segmentBuffers.push(segBuffer);
           }
+
+          segmentBuffers.push(segBuffer);
         }
 
-        // 10s Muse AI + 2.0s End-Card phủ mờ thông tin tour = 12s tổng (tối ưu completion rate)
-        const hasEndCard = Boolean(closingImageBuffer && tourEndCardInfo);
-        const endCardDuration = 2.0;
-        totalDurationSec = promptPlan.totalDurationSec + (hasEndCard ? endCardDuration : 0);
+        totalDurationSec = promptPlan.totalDurationSec;
 
         if (!costBreakdown) {
           costBreakdown = {

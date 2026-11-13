@@ -190,10 +190,28 @@ function VideoGenerateSession({
         if (!alive) return;
         if (res.success && Array.isArray(res.data) && res.data.length > 0) {
           setCampaigns(res.data);
+          // Tự động phát hiện chiến dịch khớp với các tư liệu ảnh được chọn (Grounding Metadata)
+          const itemsToScan = selectedItems && selectedItems.length > 0 ? selectedItems : selectedItem ? [selectedItem] : [];
+          const isBaNaSelection = itemsToScan.some((item) =>
+            `${item.title || ""} ${(item.style_tags || []).join(" ")}`.toLowerCase().includes("bà nà") ||
+            `${item.title || ""} ${(item.style_tags || []).join(" ")}`.toLowerCase().includes("cầu vàng") ||
+            `${item.title || ""} ${(item.style_tags || []).join(" ")}`.toLowerCase().includes("cáp treo") ||
+            `${item.title || ""} ${(item.style_tags || []).join(" ")}`.toLowerCase().includes("làng pháp") ||
+            `${item.title || ""} ${(item.style_tags || []).join(" ")}`.toLowerCase().includes("nhật thực")
+          );
+
+          const matchedCampaign = isBaNaSelection
+            ? res.data.find((c: CampaignOption) =>
+                (c.name + " " + (c.targetLocation || "") + " " + c.productName).toLowerCase().includes("bà nà")
+              )
+            : null;
+
           const initialId =
             selectedCampaign?.id &&
             res.data.some((c: CampaignOption) => c.id === selectedCampaign.id)
               ? selectedCampaign.id
+              : matchedCampaign
+              ? matchedCampaign.id
               : res.data[0].id;
           setSelectedCampaignId(initialId);
         } else {
