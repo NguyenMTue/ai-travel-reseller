@@ -83,10 +83,30 @@ export async function GET(request: Request, context: RouteContext) {
       }
     });
 
-    // 4. HTTP 302 Redirect an toàn đến trang thanh toán chính thức của Merchant
+    // 4. HTTP 302 Redirect an toàn đến trang Storefront hoặc trang thanh toán chính thức của Merchant
     // Lưu ý: Luôn luôn chuyển hướng 302 kể cả với Bot hoặc spam để bảo đảm OpenGraph Preview trên MXH không bị lỗi
     try {
-      const redirectUrl = new URL(link.destination_url, request.url);
+      let targetDest = link.destination_url;
+
+      // Graceful Fallback: Nếu destination_url chứa mock domain checkout.sunworld.vn, tự động chuyển về Storefront chính thức
+      if (targetDest.includes("checkout.sunworld.vn")) {
+        try {
+          const parsed = new URL(targetDest);
+          const pathParts = parsed.pathname.split("/").filter(Boolean);
+          const slug = pathParts[pathParts.length - 1] || "nguhanhson-01";
+          const requestOrigin = new URL(request.url).origin;
+
+          const storefrontUrl = new URL(`/storefront/sunworld/${slug}`, requestOrigin);
+          parsed.searchParams.forEach((val, key) => {
+            storefrontUrl.searchParams.set(key, val);
+          });
+          targetDest = storefrontUrl.toString();
+        } catch {
+          // Giữ nguyên targetDest nếu lỗi parse
+        }
+      }
+
+      const redirectUrl = new URL(targetDest, request.url);
       return NextResponse.redirect(redirectUrl.toString(), 302);
     } catch {
       return NextResponse.redirect(new URL("/?error=invalid_destination_url", request.url), 302);

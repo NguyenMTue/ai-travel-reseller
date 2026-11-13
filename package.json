@@ -29,6 +29,7 @@
     "test:payout-double-spend": "node --env-file=.env.local --experimental-strip-types --test tests/payout-double-spend.test.ts",
     "test:database-webhooks": "node --env-file=.env.local --experimental-strip-types --test tests/database-webhooks.test.ts",
     "test:admin": "node --env-file=.env.local --experimental-strip-types --test tests/super-admin-back-office.test.ts",
+    "test:storefront": "node --env-file=.env.local --experimental-strip-types --test tests/storefront-subdomain-and-booking.test.ts",
     "test:final-sprint": "node --env-file=.env.local --experimental-strip-types --test tests/be1-final-sprint.test.ts tests/be2-final-sprint.test.ts",
     "benchmark:wallet": "node --env-file=.env.local scripts/benchmark-reseller-wallet.mjs",
     "verify:production": "node --env-file=.env.local scripts/verify-production-readiness.mjs"

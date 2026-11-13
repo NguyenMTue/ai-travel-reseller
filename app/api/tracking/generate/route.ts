@@ -281,9 +281,17 @@ export async function POST(request: Request) {
       });
     }
 
-    // 6. Xác định Destination URL (Bắt buộc phải có URL thanh toán/đặt chỗ chính thức hợp lệ)
-    const targetUrl = product.payment_url?.trim() || product.booking_url?.trim();
-    if (!targetUrl || (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://"))) {
+    // 6. Xác định Destination URL (Ưu tiên Official Checkout hoặc Storefront của Doanh nghiệp)
+    const baseUrl = getBaseUrl(request);
+    let targetUrl = product.payment_url?.trim() || product.booking_url?.trim();
+
+    if (!targetUrl || targetUrl.includes("checkout.sunworld.vn")) {
+      // Tự động chuyển hướng về Storefront Tour chính thức của Doanh nghiệp
+      const productSlug = product.name?.toLowerCase().includes("ngũ hành sơn")
+        ? "nguhanhson-01"
+        : (product.name ? product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") : productId);
+      targetUrl = `${baseUrl}/storefront/sunworld/${productSlug}`;
+    } else if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
       return NextResponse.json(
         { error: "Product does not have a valid official payment or booking URL configured" },
         { status: 400 },
@@ -308,7 +316,6 @@ export async function POST(request: Request) {
     }
 
     // 8. Tạo URL rút gọn chuẩn domain public
-    const baseUrl = getBaseUrl(request);
     const shortUrl = `${baseUrl}/r/${uniqueCode}`;
 
     // 9. Lưu vào bảng affiliate_links
