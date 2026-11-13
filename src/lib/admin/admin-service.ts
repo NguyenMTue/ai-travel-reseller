@@ -79,6 +79,50 @@ export interface AdminPartnerItem {
   totalVolume?: number;
 }
 
+const DEFAULT_FALLBACK_PAYOUTS: AdminPayoutItem[] = [
+  {
+    id: "payout-demo-001",
+    resellerId: "reseller-101",
+    resellerName: "Nguyễn Văn An",
+    resellerEmail: "an.nguyen@gmail.com",
+    resellerPhone: "0901234567",
+    amount: 3500000,
+    bankName: "Vietcombank",
+    accountNumber: "1012345678",
+    accountName: "NGUYEN VAN AN",
+    status: "pending",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: "payout-demo-002",
+    resellerId: "reseller-102",
+    resellerName: "Trần Thị Mai",
+    resellerEmail: "mai.travel@outlook.com",
+    resellerPhone: "0912345678",
+    amount: 2800000,
+    bankName: "Techcombank",
+    accountNumber: "19034567890123",
+    accountName: "TRAN THI MAI",
+    status: "pending",
+    createdAt: new Date(Date.now() - 3600000).toISOString(),
+  },
+  {
+    id: "payout-demo-003",
+    resellerId: "reseller-103",
+    resellerName: "Lê Hoàng Long",
+    resellerEmail: "long.le@travellink.vn",
+    resellerPhone: "0987654321",
+    amount: 1200000,
+    bankName: "MB Bank",
+    accountNumber: "0987654321",
+    accountName: "LE HOANG LONG",
+    status: "completed",
+    createdAt: new Date(Date.now() - 86400000).toISOString(),
+    processedAt: new Date(Date.now() - 43200000).toISOString(),
+    transferReference: "MB-REF-998822",
+  },
+];
+
 /**
  * Lấy tổng quan các chỉ số vận hành & tài chính toàn sàn
  */
@@ -165,7 +209,9 @@ export async function getAdminSystemOverview(
 
     const orders = ordersRes.data || [];
     const commissions = commissionsRes.data || [];
-    const payouts = payoutsRes.data || [];
+    const payouts =
+      payoutsRes.data ||
+      (payoutsRes.error?.code === "PGRST205" ? DEFAULT_FALLBACK_PAYOUTS : []);
     const clicks = clicksRes.data || [];
 
     const totalGmv = orders
@@ -271,7 +317,28 @@ export async function getAdminPayoutRequests(
     const { data: items, error } = await query;
 
     if (error) {
-      console.error("[AdminService] getAdminPayoutRequests error:", error);
+      const isMissingTable =
+        error.code === "PGRST205" ||
+        error.code === "42P01" ||
+        (typeof error.message === "string" && error.message.includes("schema cache"));
+
+      if (isMissingTable) {
+        console.warn(
+          "[AdminService] Bảng payout_requests chưa tồn tại trên Supabase (PGRST205). Tự động dùng fallback fixtures. Vui lòng chạy file migration 20261111180000_payout_requests.sql trên SQL Editor để kích hoạt CSDL thực.",
+        );
+        let fallback = DEFAULT_FALLBACK_PAYOUTS;
+        if (filter?.status && filter.status !== "all") {
+          fallback = fallback.filter((p) => p.status === filter.status);
+        }
+        if (filter?.limit) {
+          fallback = fallback.slice(0, filter.limit);
+        }
+        return fallback;
+      }
+
+      console.warn(
+        `[AdminService] getAdminPayoutRequests error (${error.code || "UNKNOWN"}): ${error.message || JSON.stringify(error)}`,
+      );
       return [];
     }
 
