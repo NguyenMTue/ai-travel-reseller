@@ -537,8 +537,8 @@ VALUES
     '11111111-1111-1111-1111-111111111111',
     '22222222-2222-2222-2222-111111111111',
     '33333333-3333-3333-3333-333333333333',
-    2300000, -- 2 vé x 1.150.000
-    172500,  -- 7.5% hoa hồng
+    2500000, -- 2 vé x 1.250.000
+    200000,  -- 200.000 VNĐ hoa hồng thực nhận
     'completed',
     'BK-BANA-20261001-01',
     now() - interval '8 days'
@@ -642,3 +642,34 @@ VALUES
     '{"order_id": "77777777-7777-7777-7777-444444444444", "value": 600000}'::jsonb
   )
 ON CONFLICT (id) DO NOTHING;
+
+
+-- ------------------------------------------------------------------------------
+-- 10. CHÈN BẢNG public.commissions (Bảng hoa hồng xác nhận cho ví Reseller)
+-- Cung cấp số dư khả dụng thực tế 200.000 VNĐ cho reseller@example.com
+-- ------------------------------------------------------------------------------
+INSERT INTO public.commissions (
+  id, order_id, reseller_id, merchant_id, campaign_id,
+  gross_amount, platform_fee, net_amount, status, created_at, updated_at
+)
+VALUES
+  (
+    '99999999-9999-9999-9999-111111111111',
+    '77777777-7777-7777-7777-111111111111',
+    '22222222-2222-2222-2222-111111111111',
+    '11111111-1111-1111-1111-111111111111',
+    '44444444-4444-4444-4444-444444444444',
+    250000,
+    50000,
+    200000,
+    'confirmed',
+    now() - interval '2 days',
+    now()
+  )
+ON CONFLICT (id) DO UPDATE SET
+  gross_amount = EXCLUDED.gross_amount,
+  platform_fee = EXCLUDED.platform_fee,
+  net_amount = EXCLUDED.net_amount,
+  status = EXCLUDED.status,
+  updated_at = EXCLUDED.updated_at;
+
