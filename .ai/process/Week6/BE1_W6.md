@@ -32,8 +32,8 @@
 |---|---|:---:|:---:|---|:---:|---|:---:|
 | **BE1-W6-01** | **Xây dựng Background Worker Tự động sinh Video Review 40–50s cho Merchant duyệt** | **P0** | `DONE` | Groq / Storage | BE1 | API non-blocking `< 500ms`, video MP4 9:16 dài 40-50s lưu bảng `contents` status `pending` | 18/11 17:00 |
 | **BE1-W6-02** | **Hoàn thiện Logic Tính toán & API Top Reseller theo Budget cho Merchant** | **P0** | `DONE` | DB Schema | BE1 | RPC/View `get_top_resellers_for_merchant`, filter theo commission budget | 19/11 12:00 |
-| **BE1-W6-03** | **Xây dựng Microservice cào chỉ số tương tác TikTok (Views, Likes, Comments)** | **P1** | `TODO` | TikTok API | BE1 | Worker phân tích link video TikTok, lưu bảng `reseller_tiktok_posts` | 20/11 12:00 |
-| **BE1-W6-04** | **Schema & Logic tích Điểm thưởng Merchant (Gamification Points) khi video viral** | **P1** | `TODO` | BE1-W6-03 | BE1 | Bảng `merchant_points`, trigger quy đổi engagement $\rightarrow$ điểm thưởng | 20/11 17:00 |
+| **BE1-W6-03** | **Xây dựng Microservice cào chỉ số tương tác TikTok (Views, Likes, Comments)** | **P1** | `DONE` | TikTok API | BE1 | Worker phân tích link video TikTok, lưu bảng `reseller_tiktok_posts` | 20/11 12:00 |
+| **BE1-W6-04** | **Schema & Logic tích Điểm thưởng Merchant (Gamification Points) khi video viral** | **P1** | `DONE` | BE1-W6-03 | BE1 | Bảng `merchant_points`, trigger quy đổi engagement $\rightarrow$ điểm thưởng | 20/11 17:00 |
 | **BE1-W6-05** | **Hỗ trợ FE Chính tích hợp API Attribution & Xác nhận Thanh toán Storefront** | **P0** | `DONE` | FE Chính | BE1 | API `/api/storefront/orders/confirm` ghi nhận đơn hàng và cộng ví Reseller mượt mà | 21/11 12:00 |
 
 ---
