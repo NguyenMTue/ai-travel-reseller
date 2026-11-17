@@ -122,3 +122,72 @@
   - API nộp link TikTok (`POST /api/reseller/tiktok-posts`) để làm form dán link.
 * **Yêu cầu hỗ trợ:**
   - Cần FE Chính hoàn thiện mockup giao diện Storefront & Modal thanh toán Mobile-First theo đúng tiến độ.
+
+---
+
+## 5. BÁO CÁO KẾT QUẢ TRIỂN KHAI, VERIFY VÀ HƯỚNG DẪN DEPLOY PRODUCTION (17/11/2026)
+
+### 5.1. Tình trạng Nhánh & Pull Requests
+Toàn bộ 5/5 tasks của BE1 Sprint 6 đã hoàn thành và được tổ chức trên 2 nhánh Git riêng biệt, kèm Pull Request chờ review (chưa merge trực tiếp):
+
+1. **Nhánh 1:** `feature/be1-w6-auto-video-pipeline-and-commission` (Commit: `d58c19c`)
+   - **Phạm vi:** `BE1-W6-01`, `BE1-W6-02`, `BE1-W6-05`.
+   - **Files cốt lõi:**
+     - [app/api/merchant/video/auto-pipeline/route.ts](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/app/api/merchant/video/auto-pipeline/route.ts)
+     - [src/lib/video-engine/auto-pipeline-worker.ts](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/src/lib/video-engine/auto-pipeline-worker.ts)
+     - [services/llm-service/content_generator.py](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/services/llm-service/content_generator.py)
+     - [supabase/migrations/20261117100000_get_top_resellers_for_merchant.sql](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/supabase/migrations/20261117100000_get_top_resellers_for_merchant.sql)
+     - [app/api/merchant/resellers/top/route.ts](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/app/api/merchant/resellers/top/route.ts)
+     - [app/api/storefront/orders/confirm/route.ts](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/app/api/storefront/orders/confirm/route.ts)
+   - **Pull Request URL:** [Compare/PR Nhánh 1](https://github.com/NguyenMTue/ai-travel-reseller/compare/dev...feature/be1-w6-auto-video-pipeline-and-commission?expand=1)
+
+2. **Nhánh 2:** `feature/be1-w6-tiktok-analytics-and-merchant-points` (Commit: `099326b`)
+   - **Phạm vi:** `BE1-W6-03`, `BE1-W6-04` kèm fix lỗi TypeScript & tối ưu Turbopack.
+   - **Files cốt lõi:**
+     - [supabase/migrations/20261117140000_tiktok_analytics_and_merchant_points.sql](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/supabase/migrations/20261117140000_tiktok_analytics_and_merchant_points.sql)
+     - [src/lib/tiktok/tiktok-service.ts](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/src/lib/tiktok/tiktok-service.ts)
+     - [app/api/reseller/tiktok-posts/route.ts](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/app/api/reseller/tiktok-posts/route.ts)
+     - [app/api/merchant/points/route.ts](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/app/api/merchant/points/route.ts)
+     - [services/llm-service/tiktok_publisher.py](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/services/llm-service/tiktok_publisher.py)
+   - **Pull Request URL:** [Compare/PR Nhánh 2](https://github.com/NguyenMTue/ai-travel-reseller/compare/dev...feature/be1-w6-tiktok-analytics-and-merchant-points?expand=1)
+
+---
+
+### 5.2. Kết quả Kiểm thử & Production Build
+- **Kiểm thử tự động:**
+  - `npm run test:be1:w6`: **10/10 PASS** (Bao gồm video worker, top reseller calculation, storefront order attribution, TikTok metrics và gamification points).
+  - `npm run test:be1:sprint`: **4/4 PASS** (Đảm bảo tính tương thích hồi quy).
+- **Kiểm tra TypeScript & Clean Production Build:**
+  - Lệnh: `npm run build` (`next build`).
+  - **Kết quả:** **Thành công 100% (Mã thoát 0)**, biên dịch toàn bộ **42/42 dynamic/static routes** chỉ trong 9.7 giây.
+  - **Các bản sửa lỗi type checking đã áp dụng:**
+    1. [app/actions/auth.ts](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/app/actions/auth.ts#L47): An toàn hóa kiểm tra `error.code` khi ép kiểu `AuthError`.
+    2. [app/api/tracking/generate/route.ts](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/app/api/tracking/generate/route.ts#L267): Sửa cơ chế bất đồng bộ gọi `.catch` trên Supabase query builder.
+    3. [src/components/merchant/video-generate-modal.tsx](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/src/components/merchant/video-generate-modal.tsx#L196): Đồng bộ `style_tags` sang `styleTags` đúng interface `LibraryItem`.
+    4. [src/lib/video-engine/ffmpeg-compositor.ts](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/src/lib/video-engine/ffmpeg-compositor.ts#L10-L16): Mở rộng interface `TextOverlayConfig` với `act1Text..act4Text` và gắn cờ `/*turbopackIgnore: true*/` tại các lệnh `spawn` để ngăn Turbopack trace toàn bộ filesystem vào serverless bundle.
+
+---
+
+### 5.3. Đánh giá Khả thi Triển khai Docker Muse2API trên Production
+- **Thực tế môi trường:**
+  - Docker container đang chạy ngầm trên máy local (`http://localhost:18610`) không thể được gọi trực tiếp từ cloud serverless (Vercel).
+- **Tính sẵn sàng của hệ thống (Zero Blocking):**
+  - **Auto Video Pipeline 40–50s (`BE1-W6-01`):** Hoàn toàn độc lập với Docker Muse2API. Pipeline này vận hành 100% trên nền tảng Cloud (Groq Cloud API, Edge-TTS, `ffmpeg-static` nhúng trong serverless runtime và Supabase Storage). Do đó, việc tự động sinh video review 46s khi tạo chiến dịch hoặc bấm sinh video hoàn toàn trơn tru trên Production.
+  - **Luồng Video Thủ công cũ (`BE1-W5`):** Trong [src/lib/merchant/video-generate-service.ts](file:///e:/Tue/MyProject/AITravelReseller/ai-travel-reseller/src/lib/merchant/video-generate-service.ts#L42-L65), hệ thống có sẵn cơ chế `isMuse2ApiConfigured()` và try/catch fallback sang `createSingleImageMotionClip` (FFmpeg Ken Burns motion). Khi không có Muse2API, hệ thống vẫn tạo clip chuyển động mượt mà từ ảnh mà không gây lỗi hoặc crash ứng dụng.
+- **Giải pháp đưa Muse2API lên Production (nếu muốn sử dụng model sinh chuyển động nặng):**
+  - Build Docker image Muse2API và deploy lên các dịch vụ container cloud riêng biệt (như Railway, Render, Fly.io, RunPod, hoặc VPS DigitalOcean/AWS).
+  - Cấu hình biến môi trường trên Vercel: `MUSE2API_BASE_URL=https://<your-remote-host>`.
+
+---
+
+### 5.4. Pre-deployment Checklist (Trước khi Ship Production)
+
+| STT | Hạng mục kiểm tra | Trạng thái | Hướng dẫn thực hiện |
+|:---:|---|:---:|---|
+| 1 | **Codebase & Tests** | **READY** | Toàn bộ 5 task BE1 đã pass 10/10 test và commit lên 2 nhánh feature. |
+| 2 | **Next.js Production Build** | **READY** | `npm run build` thành công 42/42 routes, không lỗi type checking. |
+| 3 | **Database Migrations (Supabase Cloud)** | **PENDING** | Cần copy và chạy 2 script sau trong Supabase SQL Editor:<br/>1. `supabase/migrations/20261117100000_get_top_resellers_for_merchant.sql`<br/>2. `supabase/migrations/20261117140000_tiktok_analytics_and_merchant_points.sql` |
+| 4 | **Environment Variables (Vercel)** | **PENDING** | Đảm bảo Dashboard Vercel có đủ các biến:<br/>- `NEXT_PUBLIC_SUPABASE_URL`<br/>- `NEXT_PUBLIC_SUPABASE_ANON_KEY`<br/>- `SUPABASE_SECRET_KEY`<br/>- `GROQ_API_KEY`<br/>- `NEXT_PUBLIC_APP_URL` |
+| 5 | **Review & Merge PR** | **PENDING** | Tiến hành review 2 PR vào nhánh `dev`. |
+| 6 | **Frontend Binding** | **IN_PROGRESS** | FE Phụ gắn dữ liệu từ 2 endpoint mới (`/api/merchant/resellers/top` và `/api/reseller/tiktok-posts`) vào giao diện UI. |
+

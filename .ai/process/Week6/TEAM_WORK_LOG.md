@@ -9,7 +9,7 @@
 
 | Thành viên | Vai trò | Mã Task chính | Trọng tâm tuần này | Trạng thái hiện tại |
 | :--- | :--- | :--- | :--- | :---: |
-| **Nguyễn Minh Tuệ** | PM & BE1 Lead | `PM-W6-01..03`<br/>`BE1-W6-01..05` | Background Worker sinh Video 40–50s, API Top Reseller theo Budget, điều phối Sprint | `IN_PROGRESS` |
+| **Nguyễn Minh Tuệ** | PM & BE1 Lead | `PM-W6-01..03`<br/>`BE1-W6-01..05` | Background Worker sinh Video 40–50s, API Top Reseller theo Budget, điều phối Sprint | `DONE (BE1)` / `IN_PROGRESS (PM)` |
 | **Cao Thị Thu Diệu** | FE Lead | `FE-W6-01..04` | **TRỌNG TÂM:** Redesign Header nhận diện Reseller, Tour Content Mobile, Modal VietQR 3 bước | `IN_PROGRESS` |
 | **Nguyễn Huỳnh** | BE2 (AI & RAG) | `BE2-W6-01..04` | Kịch bản Review TikTok 40–50s qua Groq, TTS Voiceover tiếng Việt, B-roll tag matcher | `IN_PROGRESS` |
 | **Thái Thanh Tú** | BE3 (Automation) | `BE3-W6-01..04` | Microservice cào số liệu video TikTok (View, Like, Comment), Schema tích điểm Merchant | `IN_PROGRESS` |
@@ -32,3 +32,16 @@
   - UI/UX Quý Bửu bắt đầu dựng wireframe Mobile-First cho trang Storefront có Referral Badge.
   - BE2 Nguyễn Huỳnh thử nghiệm cấu trúc Prompt 4 phân cảnh 40–50s trên Groq Cloud API.
   - BE3 Thái Thanh Tú thử nghiệm cào metadata từ TikTok oEmbed API.
+
+### Ngày 17/11/2026 (Thứ Ba) — Hoàn thành 5/5 Tasks BE1, Tạo PR & Verify Production Build
+* **08:30 - 12:00:**
+  - BE1 Nguyễn Minh Tuệ hoàn thành `BE1-W6-01` (Auto Video Pipeline 46s, 4 scenes TikTok review, Edge-TTS, FFmpeg audio ducking, lưu Supabase Storage & bảng `contents`).
+  - Hoàn thành `BE1-W6-02` (RPC & API Top Reseller theo Budget hoa hồng cho Merchant) và `BE1-W6-05` (Order confirmation & eTicket).
+  - Khởi tạo nhánh `feature/be1-w6-auto-video-pipeline-and-commission` và đẩy Pull Request lên origin.
+* **13:00 - 15:30:**
+  - BE1 tiếp tục hoàn thành `BE1-W6-03` (TikTok engagement metrics scraper qua oEmbed API & heuristic) và `BE1-W6-04` (Bảng `merchant_points`, stored procedure cộng điểm thưởng khi video viral).
+  - Khởi tạo nhánh `feature/be1-w6-tiktok-analytics-and-merchant-points` và đẩy Pull Request.
+  - Chạy `npm run test:be1:w6` đạt **10/10 PASS**, `npm run test:be1:sprint` đạt **4/4 PASS**.
+  - Kiểm tra Production Build (`next build`), phát hiện và xử lý triệt để 4 lỗi TypeScript, tối ưu Turbopack tracing. Build thành công 42/42 routes với mã thoát 0.
+  - Cập nhật tài liệu kỹ thuật, phân tích tính khả thi Docker Muse2API và lập Pre-deployment Checklist chi tiết trong `BE1_W6.md`.
+
