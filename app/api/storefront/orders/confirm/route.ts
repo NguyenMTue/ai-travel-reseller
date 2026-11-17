@@ -143,6 +143,14 @@ export async function POST(request: Request) {
             duplicate: true,
             orderId: bookingReference,
             resellerId: finalResellerId,
+            eTicket: {
+              ticketCode,
+              qrPayload: `TRAVEL_LINK_ETICKET:${bookingReference}:${ticketCode}:${orderAmount}`,
+              customerName,
+              customerPhone,
+              packageName,
+              orderAmount,
+            },
             commission: {
               grossAmount: grossCommission,
               platformFee,
@@ -214,6 +222,14 @@ export async function POST(request: Request) {
         dbRecorded: dbSuccess,
         orderId: bookingReference,
         resellerId: finalResellerId,
+        eTicket: {
+          ticketCode,
+          qrPayload: `TRAVEL_LINK_ETICKET:${bookingReference}:${ticketCode}:${orderAmount}`,
+          customerName,
+          customerPhone,
+          packageName,
+          orderAmount,
+        },
         commission: {
           grossAmount: grossCommission,
           platformFee,

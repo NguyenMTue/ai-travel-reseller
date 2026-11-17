@@ -209,6 +209,146 @@ Quy tắc bắt buộc (RAG Grounding):
         raise RuntimeError(f"[Groq Lỗi khác] {str(e)}") from e
 
 
+def generate_review_script_45s(tour_name: str, location: str, price: str = "Ưu đãi", highlights: str = "", target_audience: str = "Khách du lịch trẻ", api_key: str = None) -> dict:
+    """
+    [BE1-W6-01] Sinh kịch bản video review du lịch 40–50s chuẩn TikTok (cấu trúc 4 phân cảnh)
+    Scene 1 (0s–7s) - The Hook
+    Scene 2 (7s–25s) - Trải nghiệm thực tế
+    Scene 3 (25s–38s) - Chi phí & Giá vé ưu đãi (QR code vào cổng)
+    Scene 4 (38s–48s) - CTA đặt vé & nhận voucher độc quyền
+    """
+    client = get_groq_client(api_key)
+    model = get_available_groq_model(client)
+
+    prompt = f"""
+Bạn là đạo diễn kịch bản review du lịch TikTok chuyên nghiệp cho kênh TravelLink AI.
+Hãy viết kịch bản video review 40–50 giây (tổng ~100-110 từ đọc truyền cảm) cho tour sau:
+- Tên tour / Điểm đến: {tour_name}
+- Địa điểm: {location}
+- Giá vé / Gói: {price}
+- Điểm nổi bật: {highlights or 'Check-in cảnh đẹp, cáp treo, trải nghiệm ẩm thực đặc sắc'}
+- Đối tượng người xem: {target_audience}
+
+Cấu trúc kịch bản bắt buộc gồm đúng 4 Scene sau:
+1. Scene 1 (0s-7s) - The Hook: Câu mở đầu kích thích tò mò, hình ảnh ấn tượng nhất.
+2. Scene 2 (7s-25s) - Trải nghiệm thực tế: Kể 2-3 điểm nhấn không thể bỏ qua, góc chụp ảnh triệu view.
+3. Scene 3 (25s-38s) - Chi phí & Vé vào cổng: Tiết lộ giá vé ưu đãi, quét QR Code vào cổng ngay không phải xếp hàng.
+4. Scene 4 (38s-48s) - Kêu gọi hành động (CTA): Kêu gọi bấm link bio đối tác TravelLink để nhận voucher độc quyền.
+
+Yêu cầu định dạng JSON trả về:
+{{
+  "title": "Review chi tiết {tour_name}",
+  "target_duration_sec": 46,
+  "caption": "Caption ngắn TikTok kèm hashtag hấp dẫn",
+  "scenes": [
+    {{
+      "scene_number": 1,
+      "role": "HOOK",
+      "duration_seconds": 7,
+      "time_range": "00:00 - 00:07",
+      "visual_tag": "aerial_wide_scenic",
+      "b_roll_description": "Toàn cảnh góc rộng từ trên cao ấn tượng",
+      "voiceover_text": "Lời thoại mở đầu 15-18 từ...",
+      "overlay_text": "Tiêu đề chữ lớn đập vào mắt"
+    }},
+    {{
+      "scene_number": 2,
+      "role": "EXPERIENCE",
+      "duration_seconds": 18,
+      "time_range": "00:07 - 00:25",
+      "visual_tag": "human_pov_checkin",
+      "b_roll_description": "Trải nghiệm cận cảnh check-in và ẩm thực",
+      "voiceover_text": "Lời thoại trải nghiệm 40-45 từ...",
+      "overlay_text": "3 Góc Check-in Triệu View"
+    }},
+    {{
+      "scene_number": 3,
+      "role": "PRICING_AND_QR",
+      "duration_seconds": 13,
+      "time_range": "00:25 - 00:38",
+      "visual_tag": "ticket_qr_entry",
+      "b_roll_description": "Cổng vào quét mã QR nhanh gọn, bảng giá vé",
+      "voiceover_text": "Lời thoại giá vé 25-30 từ...",
+      "overlay_text": "Vé QR Vào Cổng Không Cần Xếp Hàng"
+    }},
+    {{
+      "scene_number": 4,
+      "role": "CTA",
+      "duration_seconds": 8,
+      "time_range": "00:38 - 00:46",
+      "visual_tag": "cta_voucher_bio",
+      "b_roll_description": "Màn hình hướng dẫn bấm link bio nhận mã giảm giá",
+      "voiceover_text": "Lời thoại kêu gọi 15-20 từ...",
+      "overlay_text": "Bấm Link Bio Nhận Voucher Ngay"
+    }}
+  ]
+}}
+"""
+
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "Bạn là chuyên gia biên kịch video du lịch TikTok Việt Nam. Luôn trả về đúng chuẩn JSON yêu cầu."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1200,
+            response_format={"type": "json_object"}
+        )
+        raw_content = response.choices[0].message.content
+        return json.loads(raw_content)
+    except Exception as e:
+        # Fallback an toàn nếu Groq gặp sự cố mạng
+        return {
+            "title": f"Review Chi Tiết: {tour_name}",
+            "target_duration_sec": 46,
+            "caption": f"Khám phá trọn vẹn {tour_name} tại {location}! Quét mã QR vào cổng không cần xếp hàng. #TravelLink #{location.replace(' ', '')} #DuLichVietNam",
+            "scenes": [
+                {
+                    "scene_number": 1,
+                    "role": "HOOK",
+                    "duration_seconds": 7,
+                    "time_range": "00:00 - 00:07",
+                    "visual_tag": "aerial_wide_scenic",
+                    "b_roll_description": f"Toàn cảnh {tour_name} hùng vĩ trong ánh bình minh rực rỡ.",
+                    "voiceover_text": f"Đến {location} mà chưa ghé {tour_name} thì chuyến đi của bạn chắc chắn chưa trọn vẹn đâu!",
+                    "overlay_text": f"TỔNG HỢP KINH NGHIỆM ĐI {tour_name.upper()}"
+                },
+                {
+                    "scene_number": 2,
+                    "role": "EXPERIENCE",
+                    "duration_seconds": 18,
+                    "time_range": "00:07 - 00:25",
+                    "visual_tag": "human_pov_checkin",
+                    "b_roll_description": f"Góc check-in tuyệt đẹp, trải nghiệm không gian và dịch vụ đẳng cấp.",
+                    "voiceover_text": f"Tại đây, bạn sẽ được tận hưởng không gian tuyệt mỹ, vô số góc sống ảo triệu view cùng nhiều hoạt động vui chơi giải trí hấp dẫn phù hợp cho cả gia đình và bạn bè.",
+                    "overlay_text": "GÓC CHECK-IN TRIỆU VIEW"
+                },
+                {
+                    "scene_number": 3,
+                    "role": "PRICING_AND_QR",
+                    "duration_seconds": 13,
+                    "time_range": "00:25 - 00:38",
+                    "visual_tag": "ticket_qr_entry",
+                    "b_roll_description": "Thao tác quét mã QR điện tử tại cổng vào nhanh chóng, không phải chen lấn.",
+                    "voiceover_text": f"Giá vé chỉ từ {price}, đặt online nhận ngay vé điện tử QR Code quét thẳng vào cổng không cần chờ đợi xếp hàng.",
+                    "overlay_text": "VÉ QR VÀO CỔNG TỨC THÌ"
+                },
+                {
+                    "scene_number": 4,
+                    "role": "CTA",
+                    "duration_seconds": 8,
+                    "time_range": "00:38 - 00:46",
+                    "visual_tag": "cta_voucher_bio",
+                    "b_roll_description": "Nhấp link liên kết đối tác nhận ưu đãi độc quyền.",
+                    "voiceover_text": "Nhấp ngay vào liên kết bên dưới để săn mã giảm giá độc quyền từ đối tác chính thức nhé!",
+                    "overlay_text": "ĐẶT VÉ CHÍNH HÃNG NGAY"
+                }
+            ]
+        }
+
+
 # Tương thích ngược nếu code cũ gọi tên OpenAI
 test_openai_connection = test_groq_connection
 get_openai_client = get_groq_client
