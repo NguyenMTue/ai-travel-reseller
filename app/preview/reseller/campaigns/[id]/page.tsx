@@ -12,12 +12,35 @@ export default async function ContentKitPreviewPage({ params, searchParams }: {
 }) {
   if (process.env.NODE_ENV !== "development") notFound();
   const { fixtureCampaignDetail, fixtureContentVariants, approvedFixtureVariants } = await import("@/tests/fixtures/reseller-content-kit");
+  const { campaignFixtures } = await import("@/tests/fixtures/reseller-campaigns");
+  const { parseCampaignDetail } = await import("@/src/lib/reseller/content-kit");
   const { id } = await params;
-  if (id !== fixtureCampaignDetail.id) notFound();
+  const feedMatch = campaignFixtures.find((c) => c.id === id);
+  if (!feedMatch && id !== fixtureCampaignDetail.id) notFound();
+  const baseCampaign = feedMatch
+    ? parseCampaignDetail({
+        id: feedMatch.id,
+        product_id: feedMatch.productId ?? fixtureCampaignDetail.product_id,
+        name: feedMatch.name,
+        target_location: feedMatch.location ?? "Việt Nam",
+        target_audience: "Dữ liệu kiểm thử",
+        commission_rate: feedMatch.commissionRate ?? 10,
+        start_date: null,
+        end_date: null,
+        products: feedMatch.productId
+          ? {
+              id: feedMatch.productId,
+              name: `Sản phẩm fixture ${feedMatch.name}`,
+              category: feedMatch.category ?? "Trải nghiệm",
+              description: `Mô tả kiểm thử cô lập cho ${feedMatch.name}. Không dùng như thông tin sản phẩm thật.`,
+            }
+          : null,
+      })
+    : fixtureCampaignDetail;
   const { state, tracking, poster } = await searchParams;
   const posterDetails = {
-    campaignName: poster === "long" ? "Khám phá miền Trung — hành trình trải nghiệm văn hóa, ẩm thực và thiên nhiên Việt Nam ".repeat(8) : fixtureCampaignDetail.name,
-    productName: poster === "no-image" ? null : poster === "long" ? "Tên sản phẩm kiểm thử tiếng Việt rất dài ".repeat(12) : fixtureCampaignDetail.products?.name,
+    campaignName: poster === "long" ? "Khám phá miền Trung — hành trình trải nghiệm văn hóa, ẩm thực và thiên nhiên Việt Nam ".repeat(8) : baseCampaign.name,
+    productName: poster === "no-image" ? null : poster === "long" ? "Tên sản phẩm kiểm thử tiếng Việt rất dài ".repeat(12) : baseCampaign.products?.name,
     ...(poster === "no-image" ? { illustrationUrl: null } : {}),
     // Test-only loopback image server, deliberately without CORS response headers.
     ...(poster === "cors" ? { illustrationUrl: "http://127.0.0.1:3186/coast.svg" } : {}),
@@ -30,7 +53,7 @@ export default async function ContentKitPreviewPage({ params, searchParams }: {
     ["error", "query"], ["permission-error", "permission"], ["schema-error", "schema"],
     ["network-error", "network"], ["configuration-error", "configuration"],
   ]).get(state ?? "");
-  const campaign = approved ? { ...fixtureCampaignDetail, start_date: "2026-10-14T00:15:00", end_date: "2026-10-21T23:59:00" } : fixtureCampaignDetail;
+  const campaign = approved ? { ...baseCampaign, start_date: "2026-10-14T00:15:00", end_date: "2026-10-21T23:59:00" } : baseCampaign;
   if (trackingScenario === "scope") return <ResellerShell preview><TrackingScopePreview campaign={campaign} variants={approvedFixtureVariants} /></ResellerShell>;
   return <ResellerShell preview>
     <aside className="mb-6 rounded-xl border border-border bg-secondary p-4 text-sm" aria-label="Thông tin fixture">

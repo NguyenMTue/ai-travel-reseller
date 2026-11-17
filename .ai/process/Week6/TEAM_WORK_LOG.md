@@ -11,7 +11,7 @@
 | :--- | :--- | :--- | :--- | :---: |
 | **Nguyễn Minh Tuệ** | PM & BE1 Lead | `PM-W6-01..03`<br/>`BE1-W6-01..05` | Background Worker sinh Video 40–50s, API Top Reseller theo Budget, điều phối Sprint | `IN_PROGRESS` |
 | **Cao Thị Thu Diệu** | FE Lead | `FE-W6-01..04` | **TRỌNG TÂM:** Redesign Header nhận diện Reseller, Tour Content Mobile, Modal VietQR 3 bước | `IN_PROGRESS` |
-| **Nguyễn Huỳnh** | BE2 (AI & RAG) | `BE2-W6-01..04` | Kịch bản Review TikTok 40–50s qua Groq, TTS Voiceover tiếng Việt, B-roll tag matcher | `IN_PROGRESS` |
+| **Nguyễn Huỳnh** | BE2 (AI & RAG) | `BE2-W6-01..04` | Kịch bản Review TikTok 40–50s qua Groq, TTS Voiceover tiếng Việt, B-roll tag matcher | `COMPLETED` |
 | **Thái Thanh Tú** | BE3 (Automation) | `BE3-W6-01..04` | Microservice cào số liệu video TikTok (View, Like, Comment), Schema tích điểm Merchant | `IN_PROGRESS` |
 | **Lê Mỹ Uyên** | BA Lead | `BA-W6-01..04` | Đặc tả nghiệp vụ hoa hồng Reseller, công thức tích điểm Merchant, kịch bản UAT | `IN_PROGRESS` |
 | **Nguyễn Phước Quý Bửu** | UI/UX Designer | `UIUX-W6-01..04` | Thiết kế Mobile-First trang Tour, Modal VietQR Napas247, Mockup Top Reseller | `IN_PROGRESS` |
@@ -32,3 +32,12 @@
   - UI/UX Quý Bửu bắt đầu dựng wireframe Mobile-First cho trang Storefront có Referral Badge.
   - BE2 Nguyễn Huỳnh thử nghiệm cấu trúc Prompt 4 phân cảnh 40–50s trên Groq Cloud API.
   - BE3 Thái Thanh Tú thử nghiệm cào metadata từ TikTok oEmbed API.
+
+### Ngày 17/11/2026 (Thứ Ba) — Triển khai Engine Kịch bản & Audio TTS
+* **08:30 - 12:00 (BE2 Huỳnh):**
+  - Xử lý triệt để 2 lỗi kiểm thử người dùng: Sửa route fixture `/preview/reseller/campaigns/[id]` để không 404 khi duyệt danh sách fixture; Nâng cấp grounding cho Chatbot `/api/chat` lấy thông tin chính thức trực tiếp từ cơ sở dữ liệu `products` & `campaigns` (giá, tên tour, mô tả, địa điểm) ngay cả khi bảng embeddings chưa có dữ liệu.
+* **13:30 - 17:30 (BE2 Huỳnh):**
+  - Hoàn tất `BE2-W6-01`: Engine sinh kịch bản review du lịch TikTok 40–50s (4 phân cảnh Hook, Experience, Pricing, CTA) tích hợp Groq LLM và fallback xác định.
+  - Hoàn tất `BE2-W6-02`: Module `tts_engine.py` lồng tiếng AI tiếng Việt đa engine (Edge-TTS giọng Hoài My/Nam Minh và Google TTS fallback), hỗ trợ trích xuất MP3 từng cảnh và file ghép hoàn chỉnh có đo thời lượng chính xác bằng `mutagen`.
+  - Hoàn tất `BE2-W6-03`: Module `semantic_tag_matcher.py` (Python) và `semantic-tag-matcher.ts` (TypeScript) tự động khớp B-roll video MP4 theo visualTag, role và ngữ nghĩa câu thoại.
+  - Viết bộ unit test `tests/be2-w6-tiktok-review-script.test.ts` (4/4 passed) và `services/llm-service/test_tiktok_review_script.py` (5/5 passed); toàn bộ test BE2 regression đạt 96/96 passed.

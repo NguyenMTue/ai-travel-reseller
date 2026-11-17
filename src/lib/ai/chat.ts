@@ -196,10 +196,23 @@ export async function answerProductChat({
     verified_facts: verifiedFacts.length > 0 ? verifiedFacts : undefined,
   };
 
+  const productFacts = [
+    `[Thông tin chính thức từ hệ thống về sản phẩm: ${product.name}]`,
+    `- Tên sản phẩm / tour: ${product.name}`,
+    `- Giá bán ưu đãi: ${product.sale_price.toLocaleString("vi-VN")} VNĐ`,
+    product.original_price ? `- Giá niêm yết: ${product.original_price.toLocaleString("vi-VN")} VNĐ` : "",
+    location ? `- Điểm đến / Địa điểm: ${location}` : "",
+    product.description ? `- Chi tiết & Trải nghiệm: ${product.description}` : "",
+    merchant?.name ? `- Đơn vị cung cấp: ${merchant.name}` : "",
+  ].filter(Boolean).join("\n");
+
+  const ragContext = formatRetrievedContext(chunks);
+  const combinedContext = [productFacts, ragContext].filter(Boolean).join("\n\n");
+
   const result = await generateSalesReply({
     question: message,
     history: conversationHistory,
-    context: formatRetrievedContext(chunks),
+    context: combinedContext,
     checkoutAvailable: Boolean(checkoutUrl),
     knowledgeBase: kb,
   });
