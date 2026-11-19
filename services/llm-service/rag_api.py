@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from db import get_supabase
 from rag_engine import get_rag
+from tiktok_metrics_api import router as tiktok_metrics_router
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -25,6 +26,7 @@ app = FastAPI(
     version="1.0.0",
     description="Retrieves relevant travel knowledge for the n8n content workflow.",
 )
+app.include_router(tiktok_metrics_router)
 
 
 class RagSearchRequest(BaseModel):

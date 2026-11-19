@@ -100,13 +100,13 @@ python gui.py
 ### 1. Chuẩn bị TikTok Developer
 
 1. Tạo ứng dụng tại [TikTok for Developers](https://developers.tiktok.com/).
-2. Thêm Login Kit và Content Posting API; xin scope `video.publish`.
+2. Thêm Login Kit và Content Posting API; xin các scope `video.publish` và `video.list`. TikTok phải duyệt sản phẩm/quyền tương ứng.
 3. Cấu hình một OAuth redirect URI HTTPS trong Login Kit và dùng đúng URI đó ở `TIKTOK_REDIRECT_URI` trong `.env`.
 4. Điền `TIKTOK_CLIENT_KEY`, `TIKTOK_CLIENT_SECRET`, `TIKTOK_REDIRECT_URI` vào `.env` ở thư mục gốc.
-5. Chạy `python main.py --tiktok-auth-start`, mở liên kết hiện ra, đăng nhập TikTok và cấp quyền `video.publish`.
+5. Chạy `python main.py --tiktok-auth-start`, mở liên kết hiện ra, đăng nhập TikTok và cấp quyền `video.publish` cùng `video.list`.
 6. Sau khi TikTok chuyển về callback, sao chép toàn bộ URL trên thanh địa chỉ. Chạy `python main.py --tiktok-auth-finish` rồi dán URL đó. Dự án đổi OAuth code lấy access/refresh token và tự lưu vào `.env`.
 
-Client Secret và refresh token là bí mật: giữ trong `.env`, không gửi qua chat, không commit Git. Ứng dụng tự làm mới token và ghi token mới trở lại `.env`.
+Client Secret và refresh token là bí mật: giữ trong `.env`, không gửi qua chat, không commit Git. Ứng dụng tự làm mới token và ghi token mới trở lại `.env`. Nếu đã OAuth trước đây chỉ với `video.publish`, cần cấp quyền lại để có `video.list`.
 
 TikTok giới hạn bài của ứng dụng chưa được duyệt ở chế độ riêng tư. Muốn đăng công khai, ứng dụng Content Posting API phải vượt qua quy trình audit của TikTok. TikTok cũng không chấp nhận ứng dụng chỉ dùng nội bộ để đăng lên các tài khoản do chính nhóm quản lý; hãy kiểm tra điều kiện Developer trước khi đầu tư triển khai đầy đủ.
 
@@ -138,7 +138,21 @@ python main.py --tiktok-worker
 
 Giữ cửa sổ này chạy, máy tính bật và không ở chế độ ngủ. Bộ hẹn giờ kiểm tra lịch định kỳ và thử đăng một lần mỗi ngày. Đóng cửa sổ sẽ dừng tự động đăng; để chạy liên tục khi không dùng máy cá nhân, cần chuyển worker lên máy chủ luôn hoạt động.
 
-### 5. Thông tin cấu hình TikTok
+### 5. Đồng bộ View / Like / Comment TikTok qua API chính thức
+
+Metrics worker dùng TikTok API v2 `video/query` với quyền `video.list`. API xác minh video thuộc tài khoản TikTok đã OAuth; worker **không cào HTML và không đọc video của tài khoản khác**. Research API không dùng cho sản phẩm thương mại.
+
+1. Áp dụng migration Supabase `20261119120413_tiktok_video_metrics_tracking.sql`.
+2. Thêm `TIKTOK_METRICS_API_KEY` riêng (ít nhất 32 ký tự) và `TIKTOK_METRICS_RESELLER_ID` của Reseller sở hữu tài khoản TikTok vào `.env` của service.
+3. Đăng nhập lại TikTok sau khi bật scope `video.list` nếu token hiện tại chưa có scope đó.
+4. Chạy API: `python -m uvicorn rag_api:app --host 0.0.0.0 --port 8000`.
+5. Đăng ký video bằng `POST /tiktok/metrics/posts` với header `X-API-Key` và JSON `{"reseller_id":"<UUID reseller>","content_id":"<UUID content>","video_url":"https://www.tiktok.com/@creator/video/<video-id>"}`. `content_id` có thể bỏ qua.
+6. Chạy một bản worker liên tục: `python main.py --tiktok-metrics-worker --tiktok-metrics-interval 900`.
+7. Kiểm tra kết quả qua `GET /tiktok/metrics/posts/{post_id}`. Worker lưu số mới nhất trong `tiktok_video_posts` và lịch sử thay đổi trong `tiktok_video_metric_snapshots`.
+
+Endpoint chỉ nhận URL TikTok đầy đủ dạng `/@username/video/ID`; link rút gọn cần được mở/chuyển thành URL đầy đủ trước khi gửi. Sau 5 lỗi liên tiếp bản ghi chuyển sang `needs_attention` để tránh lặp vô hạn. API và worker hiện dùng **một tài khoản TikTok được OAuth trong service**; muốn theo dõi video thuộc nhiều tài khoản Reseller thì cần mở rộng OAuth và lưu credential riêng cho từng tài khoản.
+
+### 6. Thông tin cấu hình TikTok
 
 Trong `.env`:
 
