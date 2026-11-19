@@ -30,10 +30,10 @@
 
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|:---:|:---:|---|:---:|---|:---:|
-| **BE2-W6-01** | **Xây dựng Prompt Engine sinh Kịch bản Review 40–50s chuẩn TikTok** | **P0** | `IN_PROGRESS` | Groq API | BE2 | Hàm `generate_tiktok_review_script(tour)` xuất JSON 4 phân cảnh | 18/11 12:00 |
-| **BE2-W6-02** | **Tích hợp Module Lồng tiếng AI (TTS tiếng Việt tự nhiên)** | **P0** | `TODO` | Python Edge-TTS | BE2 | Module chuyển kịch bản thành file MP3 giọng đọc truyền cảm | 19/11 12:00 |
-| **BE2-W6-03** | **Xây dựng Semantic Tag Matcher cho kho B-roll clips** | **P1** | `TODO` | RAG Engine | BE2 | Thuật toán gán và khớp tag cảnh quay theo từng câu thoại | 20/11 12:00 |
-| **BE2-W6-04** | **Phối hợp BE1 hoàn thiện luồng Render FFmpeg tự động** | **P0** | `TODO` | BE1 Pipeline | BE2 | Test ráp âm thanh TTS + B-roll ra video MP4 40–50s hoàn chỉnh | 20/11 17:00 |
+| **BE2-W6-01** | **Xây dựng Prompt Engine sinh Kịch bản Review 40–50s chuẩn TikTok** | **P0** | `DONE` | Groq API | BE2 | Hàm `generate_tiktok_review_script(tour)` xuất JSON 4 phân cảnh & adapter TS | 18/11 12:00 |
+| **BE2-W6-02** | **Tích hợp Module Lồng tiếng AI (TTS tiếng Việt tự nhiên)** | **P0** | `DONE` | Python Edge-TTS / gTTS | BE2 | Module `tts_engine.py` chuyển kịch bản thành file MP3 từng scene & full voiceover kèm đo duration mutagen | 19/11 12:00 |
+| **BE2-W6-03** | **Xây dựng Semantic Tag Matcher cho kho B-roll clips** | **P1** | `DONE` | Python & TypeScript Engine | BE2 | Thuật toán khớp tag visualTag + câu thoại + ưu tiên video MP4 | 20/11 12:00 |
+| **BE2-W6-04** | **Phối hợp BE1 hoàn thiện luồng Render FFmpeg tự động** | **P0** | `DONE` | BE1 Pipeline | BE2 | Tích hợp khớp B-roll + âm thanh TTS và test ráp dữ liệu video review 40–50s hoàn chỉnh | 20/11 17:00 |
 
 ---
 
