@@ -1,680 +1,166 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import {
-  X,
-  CheckCircle2,
-  Calendar,
-  Users,
-  CreditCard,
-  QrCode,
-  Copy,
-  Check,
-  Phone,
-  Mail,
-  User,
-  ShieldCheck,
-  Sparkles,
-  ArrowRight,
-  Download,
-} from "lucide-react";
-import type {
-  StorefrontData,
-  StorefrontPackage,
-  BookingOrderResult,
-  StorefrontCommissionInfo,
-} from "@/src/lib/storefront/types";
-import { createBookingOrder } from "@/src/lib/storefront/data";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import Image from "next/image";
+import QRCode from "qrcode";
+import { X, Copy, CheckCircle2 } from "lucide-react";
+import type { StorefrontData, StorefrontPackage, BookingRequest } from "@/src/lib/storefront/types";
+import { getStorefrontPrice, getBookingTotals } from "@/src/lib/storefront/pricing";
+import { createBookingDraft, localDate, validateBooking, type BookingDraft } from "@/src/lib/storefront/booking";
+import { unavailableCheckoutGateway, readCheckoutQuote, readPaidTicket, type CheckoutGateway, type CheckoutQuote, type IssuedTicket } from "@/src/lib/storefront/checkout";
 import { formatPrice } from "@/src/lib/storefront/format";
 
-type StorefrontCheckoutModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  data: StorefrontData;
-  initialPackage?: StorefrontPackage;
+type Props = {
+  isOpen: boolean; onClose: () => void; data: StorefrontData; initialPackage?: StorefrontPackage;
+  onPackageChange: (pkg: StorefrontPackage) => void; gateway?: CheckoutGateway;
 };
+type Prepared = { fingerprint: string; draft: BookingDraft; quote?: CheckoutQuote };
+const inputClass = "min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#204e4c]";
+const buttonClass = "min-h-12 rounded-xl px-4 py-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#204e4c] disabled:cursor-wait disabled:opacity-50";
 
-export function StorefrontCheckoutModal({
-  isOpen,
-  onClose,
-  data,
-  initialPackage,
-}: StorefrontCheckoutModalProps) {
-  const { product, merchant, tracking } = data;
-
+export function StorefrontCheckoutModal({ isOpen, onClose, data, initialPackage, onPackageChange, gateway = unavailableCheckoutGateway }: Props) {
+  const selected = initialPackage ?? data.product.packages[0];
+  const [travelDate, setTravelDate] = useState(() => localDate(new Date(Date.now() + 86400000)));
+  const [adultCount, setAdults] = useState(1), [childCount, setChildren] = useState(0);
+  const [name, setName] = useState(""), [phone, setPhone] = useState(""), [email, setEmail] = useState("");
   const [step, setStep] = useState<"form" | "payment" | "success">("form");
-
-  // Selection state
-  const [selectedPackage, setSelectedPackage] = useState<StorefrontPackage>(
-    initialPackage || product.packages[0] || {
-      id: "default",
-      name: product.name,
-      description: product.subtitle,
-      originalPrice: product.originalPrice,
-      salePrice: product.salePrice,
-      inclusions: product.highlights.slice(0, 3),
-    },
-  );
-
-  // Tomorrow as default date (YYYY-MM-DD)
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const defaultDateStr = tomorrow.toISOString().split("T")[0];
-
-  const [travelDate, setTravelDate] = useState(defaultDateStr);
-  const [adultCount, setAdultCount] = useState(1);
-  const [childCount, setChildCount] = useState(0);
-
-  // Customer contact
-  const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
-  const [note, setNote] = useState("");
-
-  const [formError, setFormError] = useState("");
-  const [orderResult, setOrderResult] = useState<BookingOrderResult | null>(null);
-  const [isConfirming, setIsConfirming] = useState(false);
-  const [confirmedCommission, setConfirmedCommission] = useState<StorefrontCommissionInfo | null>(null);
-
-  // Clipboard copy state
-  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [prepared, setPrepared] = useState<Prepared>();
+  const [ticket, setTicket] = useState<IssuedTicket>();
+  const [ticketImage, setTicketImage] = useState("");
+  const [busy, setBusy] = useState(false), [error, setError] = useState("");
+  const [message, setMessage] = useState(""), [copied, setCopied] = useState("");
+  const lock = useRef(false), controller = useRef<AbortController | null>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const errorSummary = useRef<HTMLParagraphElement>(null);
+  const price = getStorefrontPrice(data, selected);
+  const totals = getBookingTotals(price, adultCount, childCount);
+  const request: BookingRequest = { packageId: selected?.id ?? "default", packageName: selected?.name ?? data.product.name, packagePrice: price.salePrice, travelDate, adultCount, childCount, customerName: name.trim(), customerPhone: phone, customerEmail: email.trim(), refCode: data.tracking?.refCode, campaignId: data.campaign?.id, productId: data.product.id, merchantSlug: data.merchant.slug };
+  const fingerprint = JSON.stringify({ request, total: totals.totalAmount });
+  const currentStep = prepared?.fingerprint === fingerprint ? step : "form";
 
   useEffect(() => {
-    if (initialPackage) {
-      setSelectedPackage(initialPackage);
-    }
-  }, [initialPackage]);
+    if (!isOpen) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    panel.current?.querySelector<HTMLElement>("button, input")?.focus({ preventScroll: true });
+    return () => { document.body.style.overflow = overflow; if (previous?.isConnected) previous.focus({ preventScroll: true }); };
+  }, [isOpen]);
+  useEffect(() => () => controller.current?.abort(), []);
+  useEffect(() => { if (isOpen && error) errorSummary.current?.focus(); }, [isOpen, error]);
+  useEffect(() => {
+    if (!ticket) return;
+    let active = true;
+    QRCode.toDataURL(ticket.qrPayload, { width: 256, margin: 2 }).then(url => { if (active) setTicketImage(url); }).catch(() => { if (active) setError("Không tải được mã vé. Vui lòng thử mở lại vé."); });
+    return () => { active = false; };
+  }, [ticket]);
 
-  if (!isOpen) return null;
-
-  // Pricing calculations
-  const adultPrice = selectedPackage.salePrice;
-  const childPrice = Math.round(selectedPackage.salePrice * 0.75);
-  const subtotal = adultCount * adultPrice + childCount * childPrice;
-  const discountAmount = tracking?.refCode ? Math.round(subtotal * 0.05) : 0;
-  const finalTotal = Math.max(0, subtotal - discountAmount);
-
-  const handleCopy = (text: string, field: string) => {
-    navigator.clipboard?.writeText(text);
-    setCopiedField(field);
-    setTimeout(() => setCopiedField(null), 2500);
-  };
-
-  const handleSubmitBooking = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customerName.trim()) {
-      setFormError("Vui lòng nhập họ và tên của bạn");
-      return;
-    }
-    if (!customerPhone.trim() || customerPhone.trim().length < 9) {
-      setFormError("Vui lòng nhập số điện thoại hợp lệ (nhận vé qua SMS)");
-      return;
-    }
-    setFormError("");
-
-    const order = createBookingOrder({
-      packageId: selectedPackage.id,
-      packageName: selectedPackage.name,
-      packagePrice: selectedPackage.salePrice,
-      travelDate,
-      adultCount,
-      childCount,
-      customerName: customerName.trim(),
-      customerPhone: customerPhone.trim(),
-      customerEmail: customerEmail.trim() || `${customerPhone.trim()}@travel.customer`,
-      note,
-      refCode: tracking?.refCode,
-      campaignId: data.campaign?.id,
-      productId: product.id,
-      merchantSlug: merchant.slug,
-    });
-
-    setOrderResult(order);
-    setStep("payment");
-  };
-
-  const handleConfirmPaid = async () => {
-    if (!orderResult) return;
-    setIsConfirming(true);
-
+  async function run<T>(operation: (signal: AbortSignal) => Promise<T>): Promise<T> {
+    const abort = new AbortController(); controller.current = abort;
+    const timer = setTimeout(() => abort.abort(), 12000);
+    try { return await operation(abort.signal); } finally { clearTimeout(timer); }
+  }
+  async function preparePayment(e?: FormEvent) {
+    e?.preventDefault();
+    if (lock.current) return;
+    const invalid = validateBooking(request);
+    if (invalid) { setError(invalid); return; }
+    lock.current = true; setBusy(true); setError(""); setMessage("");
     try {
-      const res = await fetch("/api/storefront/orders/confirm", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId: orderResult.orderId,
-          ticketCode: orderResult.ticketCode,
-          totalAmount: orderResult.totalAmount,
-          originalTotal: orderResult.originalTotal,
-          discountAmount: orderResult.discountAmount,
-          customerName: orderResult.customerName,
-          customerPhone: orderResult.customerPhone,
-          customerEmail: orderResult.customerEmail,
-          travelDate: orderResult.travelDate,
-          packageName: orderResult.packageName,
-          adultCount: orderResult.adultCount,
-          childCount: orderResult.childCount,
-          merchantId: merchant.id,
-          merchantSlug: merchant.slug,
-          productId: product.id,
-          campaignId: data.campaign?.id,
-          refCode: tracking?.refCode,
-        }),
-      });
-
-      if (res.ok) {
-        const json = await res.json();
-        if (json.commission) {
-          setConfirmedCommission(json.commission);
-        }
-      }
-    } catch (err) {
-      console.warn("[DEMO_CHECKOUT] Proceeding with offline attribution fallback:", err);
-    } finally {
-      setIsConfirming(false);
-      setStep("success");
-    }
-  };
+      const cached = prepared?.fingerprint === fingerprint ? prepared : undefined;
+      const draft = cached?.draft ?? createBookingDraft(request, price, "REQ-" + crypto.randomUUID());
+      const next = { fingerprint, draft, quote: cached?.quote };
+      setPrepared(next); setTicket(undefined); setTicketImage(""); setStep("payment");
+      if (next.quote) return;
+      const response = await run(signal => gateway.prepare(draft, { signal, supersedesOrderId: prepared?.quote?.orderId }));
+      const quote = readCheckoutQuote(response, draft);
+      setPrepared({ ...next, quote });
+      setMessage(quote ? "Chưa có xác nhận thanh toán. Chỉ chuyển tiền theo đúng thông tin của đơn bên dưới." : "Thông tin thanh toán chưa sẵn sàng. Vui lòng chưa chuyển tiền; bạn có thể kiểm tra lại sau.");
+    } catch {
+      setError("Không tải được thông tin thanh toán. Thông tin đã nhập vẫn được giữ; vui lòng thử lại.");
+    } finally { lock.current = false; setBusy(false); }
+  }
+  async function checkPayment() {
+    if (lock.current || !prepared?.quote || currentStep === "success") return;
+    lock.current = true; setBusy(true); setError("");
+    try {
+      const response = await run(signal => gateway.check(prepared.quote!, { signal }));
+      const issued = readPaidTicket(response, prepared.quote);
+      if (issued) { setTicket(issued); setStep("success"); setMessage(""); }
+      else setMessage("Đang chờ đối tác xác nhận thanh toán. Vé chưa được phát hành; vui lòng không chuyển khoản lần nữa.");
+    } catch { setError("Không kiểm tra được thanh toán. Bạn có thể thử lại cho cùng đơn; vui lòng không chuyển tiền lần nữa."); }
+    finally { lock.current = false; setBusy(false); }
+  }
+  async function copy(value: string, label: string) {
+    try { await navigator.clipboard.writeText(value); setCopied("Đã sao chép " + label); }
+    catch { setCopied("Không sao chép được; vui lòng chọn thông tin hiển thị."); }
+  }
+  if (!isOpen) return null;
+  const quote = prepared?.quote;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 overflow-y-auto">
-      <div className="relative w-full max-w-xl bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col animate-in fade-in slide-in-from-bottom-6 duration-200">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-[#f8fafc]">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#204e4c] text-white flex items-center justify-center font-bold text-xs">
-              TL
-            </div>
-            <div>
-              <h3 className="font-bold text-slate-900 text-sm md:text-base leading-tight">
-                {step === "form" && "Đặt vé tham quan chính hãng"}
-                {step === "payment" && "Thanh toán vé qua VietQR"}
-                {step === "success" && "Đặt vé thành công • Vé điện tử QR"}
-              </h3>
-              <p className="text-[11px] text-slate-500">
-                {merchant.name} • {merchant.hotline}
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-200/70 hover:bg-slate-300 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <X className="w-4 h-4" />
-          </button>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-4"
+      onKeyDown={event => {
+        if (event.key === "Escape" && !lock.current) onClose();
+        if (event.key === "Tab") {
+          const items = Array.from(panel.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input, a[href]') ?? []);
+          const first = items[0], last = items[items.length - 1];
+          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+          else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+        }
+      }}>
+      <div ref={panel} className="flex max-h-[92dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-2xl">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+          <h2 className="text-base font-bold text-slate-900">{currentStep === "form" ? "Đặt vé tham quan chính hãng" : currentStep === "payment" ? "Thanh toán VietQR" : "Vé điện tử"}</h2>
+          <button type="button" aria-label="Đóng đặt vé" onClick={onClose} disabled={busy} className={buttonClass + " shrink-0 bg-slate-100 text-slate-700"}><X aria-hidden="true" className="size-5" /></button>
         </div>
-
-        {/* Modal Body */}
-        <div className="p-5 overflow-y-auto space-y-5">
-          {/* STEP 1: FORM */}
-          {step === "form" && (
-            <form onSubmit={handleSubmitBooking} className="space-y-4">
-              {/* Package selector */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                  1. Gói vé tham quan:
-                </label>
-                <div className="space-y-2">
-                  {product.packages.map((pkg) => (
-                    <div
-                      key={pkg.id}
-                      onClick={() => setSelectedPackage(pkg)}
-                      className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
-                        selectedPackage.id === pkg.id
-                          ? "border-[#204e4c] bg-emerald-50/30"
-                          : "border-slate-200 hover:border-slate-300 bg-white"
-                      }`}
-                    >
-                      <div>
-                        <div className="font-bold text-xs md:text-sm text-slate-900">
-                          {pkg.name}
-                        </div>
-                        <div className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">
-                          {pkg.description}
-                        </div>
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div className="font-bold text-sm text-[#bd6840]">
-                          {formatPrice(pkg.salePrice)} ₫
-                        </div>
-                        <div className="text-[10px] text-slate-400 line-through">
-                          {formatPrice(pkg.originalPrice)} ₫
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        <div className="overflow-y-auto overscroll-contain p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-5">
+          <ol aria-label="Tiến trình đặt vé" className="mb-5 flex flex-wrap gap-2 text-sm text-slate-600">
+            {[['form', 'Thông tin'], ['payment', 'VietQR'], ['success', 'E-Ticket']].map(([id, label]) => <li key={id} aria-current={currentStep === id ? "step" : undefined} className={currentStep === id ? "rounded-full bg-[#204e4c] px-3 py-2 font-semibold text-white" : "px-3 py-2"}>{label}</li>)}
+          </ol>
+          {error && <p ref={errorSummary} tabIndex={-1} role="alert" className="mb-4 rounded-xl bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}
+          {currentStep === "form" && <form onSubmit={preparePayment} noValidate className="space-y-4">
+            <fieldset disabled={busy} className="space-y-3">
+              <legend className="mb-2 font-semibold">Gói vé tham quan</legend>
+              {data.product.packages.map(pkg => <button key={pkg.id} type="button" aria-pressed={selected?.id === pkg.id} onClick={() => onPackageChange(pkg)} className={"flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border p-3 text-left text-sm " + (selected?.id === pkg.id ? "border-[#204e4c] bg-emerald-50" : "border-slate-200")}><div><span className="font-semibold">{pkg.name}</span><p className="mt-1 text-sm text-slate-600">{pkg.description}</p></div><strong className="shrink-0 text-[#bd6840]">{formatPrice(getStorefrontPrice(data, pkg).finalPrice)} ₫</strong></button>)}
+              <label className="block text-sm font-medium">Ngày tham quan<input aria-label="Ngày tham quan" type="date" required min={localDate()} value={travelDate} onChange={e => setTravelDate(e.target.value)} className={inputClass} /></label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="text-sm font-medium">Người lớn<input aria-label="Người lớn" type="number" min="1" step="1" required value={Number.isNaN(adultCount) ? "" : adultCount} onChange={e => setAdults(e.target.valueAsNumber)} className={inputClass} /></label>
+                <label className="text-sm font-medium">Trẻ em<input aria-label="Trẻ em" type="number" min="0" step="1" required value={Number.isNaN(childCount) ? "" : childCount} onChange={e => setChildren(e.target.valueAsNumber)} className={inputClass} /></label>
               </div>
-
-              {/* Date & Quantity */}
-              <div className="grid sm:grid-cols-2 gap-3 pt-1">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5 text-[#204e4c]" />
-                    <span>Ngày tham quan:</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={travelDate}
-                    min={new Date().toISOString().split("T")[0]}
-                    onChange={(e) => setTravelDate(e.target.value)}
-                    required
-                    className="w-full text-xs md:text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#204e4c]/30 focus:border-[#204e4c]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center gap-1">
-                    <Users className="w-3.5 h-3.5 text-[#204e4c]" />
-                    <span>Số lượng vé:</span>
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
-                      <span className="text-[11px] text-slate-600 font-medium">Người lớn</span>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setAdultCount(Math.max(1, adultCount - 1))}
-                          className="w-6 h-6 rounded bg-white border border-slate-300 text-xs font-bold text-slate-700 flex items-center justify-center cursor-pointer"
-                        >
-                          -
-                        </button>
-                        <span className="text-xs font-bold w-4 text-center">{adultCount}</span>
-                        <button
-                          type="button"
-                          onClick={() => setAdultCount(adultCount + 1)}
-                          className="w-6 h-6 rounded bg-white border border-slate-300 text-xs font-bold text-slate-700 flex items-center justify-center cursor-pointer"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5">
-                      <span className="text-[11px] text-slate-600 font-medium">Trẻ em (-25%)</span>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setChildCount(Math.max(0, childCount - 1))}
-                          className="w-6 h-6 rounded bg-white border border-slate-300 text-xs font-bold text-slate-700 flex items-center justify-center cursor-pointer"
-                        >
-                          -
-                        </button>
-                        <span className="text-xs font-bold w-4 text-center">{childCount}</span>
-                        <button
-                          type="button"
-                          onClick={() => setChildCount(childCount + 1)}
-                          className="w-6 h-6 rounded bg-white border border-slate-300 text-xs font-bold text-slate-700 flex items-center justify-center cursor-pointer"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Customer Contact */}
-              <div className="space-y-2.5 pt-2 border-t border-slate-100">
-                <label className="block text-xs font-bold text-slate-700">
-                  2. Thông tin liên hệ nhận vé:
-                </label>
-
-                <div>
-                  <div className="relative">
-                    <User className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Họ và tên người đặt vé *"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      required
-                      className="w-full text-xs md:text-sm pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#204e4c]/30 focus:border-[#204e4c]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid sm:grid-cols-2 gap-2.5">
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                    <input
-                      type="tel"
-                      placeholder="Số điện thoại nhận vé SMS *"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      required
-                      className="w-full text-xs md:text-sm pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#204e4c]/30 focus:border-[#204e4c]"
-                    />
-                  </div>
-
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
-                    <input
-                      type="email"
-                      placeholder="Email nhận hóa đơn (tùy chọn)"
-                      value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)}
-                      className="w-full text-xs md:text-sm pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#204e4c]/30 focus:border-[#204e4c]"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Reseller referral discount badge */}
-              {tracking?.refCode && (
-                <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-200 flex items-center justify-between text-xs text-emerald-800">
-                  <div className="flex items-center gap-1.5 font-medium">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Đã áp dụng mã ưu đãi Đối tác:</span>
-                  </div>
-                  <strong className="text-emerald-700">-5% (-{formatPrice(discountAmount)} ₫)</strong>
-                </div>
-              )}
-
-              {/* Price summary */}
-              <div className="p-3 bg-slate-50 rounded-xl space-y-1.5 text-xs text-slate-600">
-                <div className="flex justify-between">
-                  <span>Vé người lớn ({adultCount}x):</span>
-                  <span>{formatPrice(adultCount * adultPrice)} ₫</span>
-                </div>
-                {childCount > 0 && (
-                  <div className="flex justify-between">
-                    <span>Vé trẻ em ({childCount}x):</span>
-                    <span>{formatPrice(childCount * childPrice)} ₫</span>
-                  </div>
-                )}
-                {discountAmount > 0 && (
-                  <div className="flex justify-between text-emerald-700 font-medium">
-                    <span>Ưu đãi liên kết tiếp thị:</span>
-                    <span>-{formatPrice(discountAmount)} ₫</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-sm font-extrabold text-slate-900 pt-1.5 border-t border-slate-200">
-                  <span>Tổng tiền thanh toán:</span>
-                  <span className="text-[#bd6840] text-base">{formatPrice(finalTotal)} ₫</span>
-                </div>
-              </div>
-
-              {formError && (
-                <p className="text-xs text-rose-600 font-medium">{formError}</p>
-              )}
-
-              <button
-                type="submit"
-                className="w-full bg-[#204e4c] hover:bg-[#183d3b] text-white font-bold text-sm py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <span>TIẾP TỤC THANH TOÁN VIETQR</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </form>
-          )}
-
-          {/* STEP 2: VIETQR PAYMENT */}
-          {step === "payment" && orderResult && (
-            <div className="space-y-4">
-              <div className="text-center">
-                <div className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200 mb-1">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  Mã đơn hàng: {orderResult.orderId}
-                </div>
-                <h4 className="text-sm font-bold text-slate-800">
-                  Quét mã VietQR chuyển khoản (Napas247)
-                </h4>
-                <p className="text-xs text-slate-500">
-                  Mở ứng dụng ngân hàng bất kỳ để quét mã và chuyển tiền tự động
-                </p>
-              </div>
-
-              {/* VietQR Display */}
-              <div className="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                <div className="relative p-2 bg-white rounded-xl shadow-xs border border-slate-200 mb-3">
-                  <img
-                    src={orderResult.vietQrUrl}
-                    alt="Mã VietQR thanh toán"
-                    className="w-48 h-48 md:w-56 md:h-56 object-contain"
-                  />
-                </div>
-
-                <div className="w-full space-y-2 text-xs">
-                  {/* Account Name */}
-                  <div className="flex justify-between items-center p-2 rounded-lg bg-white border border-slate-200">
-                    <span className="text-slate-500">Người thụ hưởng:</span>
-                    <strong className="text-slate-800">{orderResult.bankAccountName}</strong>
-                  </div>
-
-                  {/* Bank Account */}
-                  <div className="flex justify-between items-center p-2 rounded-lg bg-white border border-slate-200">
-                    <span className="text-slate-500">Số tài khoản ({orderResult.bankName}):</span>
-                    <div className="flex items-center gap-1.5">
-                      <strong className="font-mono text-slate-800">{orderResult.bankAccount}</strong>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(orderResult.bankAccount, "stk")}
-                        className="text-[#204e4c] hover:bg-slate-100 p-1 rounded cursor-pointer"
-                        title="Sao chép số tài khoản"
-                      >
-                        {copiedField === "stk" ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Transfer Amount */}
-                  <div className="flex justify-between items-center p-2 rounded-lg bg-white border border-slate-200">
-                    <span className="text-slate-500">Số tiền chính xác:</span>
-                    <div className="flex items-center gap-1.5">
-                      <strong className="text-[#bd6840] font-bold text-sm">
-                        {formatPrice(orderResult.totalAmount)} ₫
-                      </strong>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(String(orderResult.totalAmount), "amount")}
-                        className="text-[#204e4c] hover:bg-slate-100 p-1 rounded cursor-pointer"
-                        title="Sao chép số tiền"
-                      >
-                        {copiedField === "amount" ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Memo */}
-                  <div className="flex justify-between items-center p-2 rounded-lg bg-white border border-slate-200">
-                    <span className="text-slate-500">Nội dung chuyển khoản:</span>
-                    <div className="flex items-center gap-1.5">
-                      <strong className="font-mono text-slate-800 font-bold bg-amber-50 px-1 rounded">
-                        {orderResult.transferContent}
-                      </strong>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(orderResult.transferContent, "memo")}
-                        className="text-[#204e4c] hover:bg-slate-100 p-1 rounded cursor-pointer"
-                        title="Sao chép nội dung"
-                      >
-                        {copiedField === "memo" ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setStep("form")}
-                  disabled={isConfirming}
-                  className="flex-1 py-2.5 px-3 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer disabled:opacity-50"
-                >
-                  Quay lại sửa
-                </button>
-                <button
-                  type="button"
-                  onClick={handleConfirmPaid}
-                  disabled={isConfirming}
-                  className={`flex-2 bg-[#bd6840] hover:bg-[#a55630] text-white py-2.5 px-4 rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-1.5 cursor-pointer transition-all ${
-                    isConfirming ? "opacity-80 cursor-wait" : ""
-                  }`}
-                >
-                  {isConfirming ? (
-                    <>
-                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>ĐANG XÁC NHẬN & CỘNG VÍ...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span>TÔI ĐÃ CHUYỂN KHOẢN • XUẤT VÉ</span>
-                    </>
-                  )}
-                </button>
-              </div>
+              <label className="block text-sm font-medium">Họ và tên<input aria-label="Họ và tên" autoComplete="name" required maxLength={100} value={name} onChange={e => setName(e.target.value)} className={inputClass} /></label>
+              <label className="block text-sm font-medium">Số điện thoại<input aria-label="Số điện thoại" type="tel" inputMode="tel" autoComplete="tel" required maxLength={30} value={phone} onChange={e => setPhone(e.target.value)} className={inputClass} /></label>
+              <label className="block text-sm font-medium">Email nhận vé (tùy chọn)<input aria-label="Email nhận vé" type="email" autoComplete="email" maxLength={254} value={email} onChange={e => setEmail(e.target.value)} className={inputClass} /></label>
+            </fieldset>
+            <div className="space-y-2 rounded-xl bg-slate-50 p-3 text-sm">
+              <p>Người lớn: {adultCount || 0} × {formatPrice(totals.adultPrice)} ₫</p><p>Trẻ em: {childCount || 0} × {formatPrice(totals.childPrice)} ₫</p>
+              {totals.discountAmount > 0 && <p className="text-emerald-800">Ưu đãi đối tác đã xác nhận: −{formatPrice(totals.discountAmount)} ₫</p>}
+              <div className="flex flex-wrap justify-between gap-2 border-t border-slate-200 pt-2 font-bold"><span>Tổng tiền thanh toán:</span><strong>{Number.isFinite(totals.totalAmount) ? formatPrice(totals.totalAmount) : "—"} ₫</strong></div>
+              <p className="text-xs text-slate-600">Đối tác sẽ xác nhận lại giá và thông tin chuyển khoản trước khi bạn thanh toán.</p>
             </div>
-          )}
-
-          {/* STEP 3: E-TICKET QR ISSUED */}
-          {step === "success" && orderResult && (
-            <div className="text-center space-y-4">
-              <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
-                <CheckCircle2 className="w-8 h-8" />
-              </div>
-
-              <div>
-                <h4 className="text-base md:text-lg font-bold text-slate-900">
-                  XÁC NHẬN ĐẶT VÉ THÀNH CÔNG!
-                </h4>
-                <p className="text-xs text-slate-500 mt-1">
-                  Vé điện tử chính thức đã được gửi về số điện thoại <strong>{orderResult.customerPhone}</strong>
-                </p>
-              </div>
-
-              {/* Electronic Ticket Card */}
-              <div className="p-4 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-2xl shadow-xl text-left relative overflow-hidden">
-                <div className="flex justify-between items-start pb-3 border-b border-slate-700">
-                  <div>
-                    <span className="text-[10px] uppercase tracking-wider text-amber-400 font-bold">
-                      Vé điện tử chính hãng (E-Ticket)
-                    </span>
-                    <h5 className="font-bold text-sm md:text-base text-white mt-0.5">
-                      {orderResult.packageName}
-                    </h5>
-                  </div>
-                  <div className="bg-[#bd6840] text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded">
-                    {orderResult.ticketCode}
-                  </div>
-                </div>
-
-                <div className="py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="space-y-1.5 text-xs text-slate-300">
-                    <div>
-                      <span className="text-slate-400">Khách hàng: </span>
-                      <strong className="text-white">{orderResult.customerName}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400">Ngày đi: </span>
-                      <strong className="text-white">{orderResult.travelDate}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400">Số lượng: </span>
-                      <strong className="text-white">
-                        {orderResult.adultCount} Người lớn {orderResult.childCount > 0 ? `, ${orderResult.childCount} Trẻ em` : ""}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-400">Địa điểm: </span>
-                      <strong className="text-white">{merchant.name}</strong>
-                    </div>
-                  </div>
-
-                  {/* QR Entry Code Box */}
-                  <div className="bg-white p-2.5 rounded-xl shadow-md flex flex-col items-center">
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(
-                        orderResult.qrPayload,
-                      )}`}
-                      alt="QR Code Vào Cổng"
-                      className="w-28 h-28 object-contain"
-                    />
-                    <span className="text-[9px] text-slate-600 font-mono mt-1 font-bold">
-                      QUÉT TẠI CỔNG VÀO
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-2.5 border-t border-slate-700 text-[10px] text-slate-400 flex items-center justify-between">
-                  <span>Mã đơn: {orderResult.orderId}</span>
-                  <span className="text-emerald-400 font-semibold">Đã xác thực</span>
-                </div>
-              </div>
-
-              {/* Demo Commission Notification Card */}
-              <div className="p-3.5 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 rounded-2xl border border-emerald-200 text-left space-y-2 shadow-xs">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
-                    <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>CHẾ ĐỘ TEST: ĐÃ CỘNG HOA HỒNG RESELLER</span>
-                  </div>
-                  <span className="bg-emerald-600 text-white font-mono font-bold text-xs px-2.5 py-0.5 rounded-full shadow-xs">
-                    +
-                    {formatPrice(
-                      confirmedCommission?.netAmount ||
-                        Math.round(orderResult.totalAmount * 0.12 * 0.8),
-                    )}{" "}
-                    ₫
-                  </span>
-                </div>
-
-                <div className="text-[11px] text-emerald-800 space-y-1">
-                  <p>
-                    • Đơn hàng <strong>{orderResult.orderId}</strong> đã được hệ thống ghi nhận thành công và tự động phân bổ hoa hồng (Trạng thái: <strong>Đã xác nhận / confirmed</strong>).
-                  </p>
-                  <p>
-                    • Đối tác thụ hưởng: <span className="font-mono font-bold text-emerald-900">{tracking?.refCode || "22222222-2222-2222-2222-111111111111"}</span> (Travel Vlogger Danang).
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-emerald-200/70 flex items-center justify-between">
-                  <span className="text-[11px] text-slate-500 font-medium">Kiểm tra số dư tức thì:</span>
-                  <a
-                    href="/reseller/wallet"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 hover:text-emerald-950 underline cursor-pointer"
-                  >
-                    <span>Mở Ví Reseller (/reseller/wallet)</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-
-              <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 text-left space-y-1">
-                <p className="font-bold">Hướng dẫn vào cổng:</p>
-                <p>
-                  • Vui lòng lưu ảnh mã QR trên hoặc mở tin nhắn SMS để xuất trình tại cửa kiểm soát vé tự động.
-                </p>
-                <p>
-                  • Hotline hỗ trợ trực tiếp tại quầy thông tin: <strong>{merchant.hotline}</strong>
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => window.print()}
-                  className="flex-1 py-2.5 px-3 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Lưu / In vé</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="flex-1 bg-[#204e4c] hover:bg-[#183d3b] text-white py-2.5 px-4 rounded-xl text-xs font-bold cursor-pointer"
-                >
-                  Hoàn tất
-                </button>
-              </div>
+            <button type="submit" disabled={busy} className={buttonClass + " w-full bg-[#204e4c] text-white"}>TIẾP TỤC THANH TOÁN VIETQR</button>
+          </form>}
+          {currentStep === "payment" && prepared && <section aria-label="Thông tin thanh toán" className="space-y-4">
+            <p className="break-all text-sm text-slate-600">{quote ? "Mã đơn: " + quote.orderId : "Mã yêu cầu: " + prepared.draft.requestId}</p>
+            <p className="text-lg font-bold">Số tiền: {formatPrice(prepared.draft.totalAmount)} ₫</p>
+            <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm leading-relaxed text-amber-900">{busy ? "Đang kiểm tra, vui lòng chờ…" : message || "Chưa có xác nhận thanh toán."}</p>
+            {quote && <>
+              <Image unoptimized referrerPolicy="no-referrer" src={quote.vietQrUrl} alt="Mã VietQR thanh toán" width={224} height={224} className="mx-auto rounded-xl border border-slate-200" />
+              <dl className="space-y-3 break-words text-sm"><div><dt>Ngân hàng</dt><dd className="font-semibold">{quote.bankName}</dd></div><div><dt>Người thụ hưởng</dt><dd className="font-semibold">{quote.bankAccountName}</dd></div><div><dt>Số tài khoản</dt><dd className="flex flex-wrap items-center gap-2"><strong>{quote.bankAccount}</strong><button type="button" aria-label="Sao chép số tài khoản" onClick={() => copy(quote.bankAccount, "số tài khoản")} className={buttonClass + " bg-slate-100"}><Copy className="size-4" /></button></dd></div><div><dt>Nội dung chuyển khoản</dt><dd className="flex flex-wrap items-center gap-2"><strong>{quote.transferContent}</strong><button type="button" aria-label="Sao chép nội dung chuyển khoản" onClick={() => copy(quote.transferContent, "nội dung chuyển khoản")} className={buttonClass + " bg-slate-100"}><Copy className="size-4" /></button></dd></div></dl>
+              {copied && <p role="status" className="text-sm">{copied}</p>}
+            </>}
+            <div className="flex flex-wrap gap-2">
+              <button type="button" disabled={busy} onClick={() => { setStep("form"); setError(""); }} className={buttonClass + " flex-1 border border-slate-300 text-slate-700"}>Quay lại sửa</button>
+              <button type="button" disabled={busy} onClick={quote ? checkPayment : () => preparePayment()} className={buttonClass + " flex-1 bg-[#bd6840] text-white"}>{quote ? "Tôi đã chuyển khoản — Kiểm tra" : "Thử tải lại thông tin thanh toán"}</button>
             </div>
-          )}
+          </section>}
+          {currentStep === "success" && ticket && <section aria-label="E-Ticket đã xác nhận" className="space-y-4 text-center">
+            <CheckCircle2 aria-hidden="true" className="mx-auto size-10 text-emerald-700" />
+            <h3 className="text-lg font-bold">Thanh toán đã được xác nhận</h3><p className="text-sm">Vé điện tử do đối tác cấp cho đơn <strong>{ticket.orderId}</strong></p>
+            <p className="font-mono font-bold">{ticket.code}</p>
+            {ticketImage ? <><Image unoptimized src={ticketImage} width={256} height={256} alt="Mã QR vé điện tử" className="mx-auto max-w-full" /><button type="button" onClick={() => { const link = document.createElement("a"); link.href = ticketImage; link.download = ticket.code + ".png"; link.click(); }} className={buttonClass + " inline-flex items-center bg-[#204e4c] text-white"}>Lưu mã vé</button></> : <p role="status">Đang tải mã vé…</p>}
+            <button type="button" onClick={onClose} className={buttonClass + " block w-full border border-slate-300"}>Về trang tour</button>
+          </section>}
         </div>
       </div>
     </div>

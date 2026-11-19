@@ -1,6 +1,8 @@
+import { getStorefrontPrice } from "../src/lib/storefront/pricing.ts";
+import { localDate } from "../src/lib/storefront/booking.ts";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { resolveStorefrontData, createBookingOrder } from "../src/lib/storefront/data.ts";
+import { resolveStorefrontData, createBookingDraft } from "../src/lib/storefront/data.ts";
 import { formatPrice, formatNumber } from "../src/lib/storefront/format.ts";
 
 test("SF-01: resolveStorefrontData returns rich data with merchant, product, packages and authentic tips", async () => {
@@ -26,40 +28,17 @@ test("SF-01: resolveStorefrontData returns rich data with merchant, product, pac
   assert.ok(data.product.authenticTips.length >= 2, "Must provide authentic travel tips");
   assert.ok(data.product.galleryImages.length >= 3, "Must provide 4K gallery images");
 
-  assert.ok(data.tracking, "Tracking attribution must be preserved");
-  assert.equal(data.tracking?.refCode, "22222222-2222-2222-2222-111111111111");
-  assert.equal(data.tracking?.discountPercent, 5);
+  assert.equal(data.tracking, undefined, "Offline fallback must not fabricate referral identity or voucher eligibility");
 });
 
-test("SF-02: createBookingOrder calculates correct totals, applies ref discount and generates VietQR", () => {
-  const order = createBookingOrder({
-    packageId: "pkg-nguhanhson",
-    packageName: "Tour Khám Phá Danh Thắng Ngũ Hành Sơn",
-    travelDate: "2026-11-20",
-    adultCount: 2,
-    childCount: 1,
-    customerName: "Nguyễn Văn A",
-    customerPhone: "0901234567",
-    customerEmail: "nguyenvana@example.com",
-    refCode: "22222222-2222-2222-2222-111111111111",
-  });
-
-  assert.ok(order.orderId.startsWith("TL-"), "Order ID must have TL- prefix");
-  assert.ok(order.ticketCode.startsWith("ET-"), "Ticket code must have ET- prefix");
-  assert.ok(order.totalAmount > 0, "Total amount must be positive");
-  assert.ok(order.discountAmount > 0, "Ref discount must be applied");
-  assert.equal(order.totalAmount, order.originalTotal - order.discountAmount);
-
-  assert.ok(order.vietQrUrl.includes("vietqr.io"), "Must generate valid VietQR URL");
-  assert.ok(order.vietQrUrl.includes(String(order.totalAmount)), "VietQR URL must contain exact total amount");
-  assert.ok(order.transferContent.includes(order.orderId), "Transfer content must include orderId");
-
-  // Verify QR Payload is parseable JSON for turnstile scanning
-  const qrData = JSON.parse(order.qrPayload);
-  assert.equal(qrData.orderId, order.orderId);
-  assert.equal(qrData.customerName, "Nguyễn Văn A");
-  assert.equal(qrData.adults, 2);
-  assert.equal(qrData.children, 1);
+test("SF-02: local draft uses confirmed pricing and never issues a ticket or payment QR", async () => {
+  const data = await resolveStorefrontData({ tenant: "sunworld", slug: "ba-na-hills" });
+  data.tracking = { refCode: "22222222-2222-2222-2222-111111111111", resellerName: "Fixture", discountEligible: true, discountPercent: 5 };
+  const draft = createBookingDraft({ packageId: "standard", packageName: "Bà Nà", travelDate: localDate(new Date(Date.now() + 86400000)), adultCount: 2, childCount: 1, customerName: "Khách Fixture", customerPhone: "0901234567", customerEmail: "" }, getStorefrontPrice(data), "REQ-fixture");
+  assert.equal(draft.totalAmount, 2481875);
+  assert.equal("ticketCode" in draft, false);
+  assert.equal("qrPayload" in draft, false);
+  assert.equal("vietQrUrl" in draft, false);
 });
 
 test("SF-03: Subdomain parser correctly extracts tenant slug from various host patterns", () => {
@@ -194,26 +173,11 @@ test("SF-07: Instant order confirmation & Reseller commission calculation formul
   assert.ok(json.commission.netAmount > 0);
 });
 
-test("SF-08: createBookingOrder accepts packagePrice for accurate multi-tier package pricing", () => {
-  const customOrder = createBookingOrder({
-    packageId: "pkg-luxury",
-    packageName: "Combo Cáp Treo + Buffet Quốc Tế",
-    packagePrice: 1250000,
-    travelDate: "2026-11-25",
-    adultCount: 2,
-    childCount: 1,
-    customerName: "Trần VIP",
-    customerPhone: "0912345678",
-    customerEmail: "tranvip@example.com",
-    refCode: "22222222-2222-2222-2222-111111111111",
-  });
-
-  // Adult: 1.250.000 * 2 = 2.500.000
-  // Child: 1.250.000 * 0.75 = 937.500
-  // Base total: 3.437.500
-  // Discount 5%: 171.875
-  // Final total: 3.265.625
-  assert.equal(customOrder.originalTotal, 2 * 1250000 + Math.round(1250000 * 0.75));
-  assert.equal(customOrder.discountAmount, Math.round(customOrder.originalTotal * 0.05));
-  assert.equal(customOrder.totalAmount, customOrder.originalTotal - customOrder.discountAmount);
+test("SF-08: selected package and quantities produce the same confirmed quote total", async () => {
+  const data = await resolveStorefrontData({ tenant: "sunworld", slug: "ba-na-hills" });
+  data.tracking = { refCode: "22222222-2222-2222-2222-111111111111", resellerName: "Fixture", discountEligible: true, discountPercent: 5 };
+  const draft = createBookingDraft({ packageId: "combo", packageName: "Combo", travelDate: localDate(new Date(Date.now() + 86400000)), adultCount: 2, childCount: 1, customerName: "Khách Fixture", customerPhone: "0901234567", customerEmail: "" }, getStorefrontPrice(data, data.product.packages[1]), "REQ-combo");
+  assert.equal(draft.subtotal, 3437500);
+  assert.equal(draft.discountAmount, 171875);
+  assert.equal(draft.totalAmount, 3265625);
 });

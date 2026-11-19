@@ -12,16 +12,18 @@ import {
   ArrowRight,
   Clock,
 } from "lucide-react";
+import type { StorefrontPrice } from "@/src/lib/storefront/pricing";
 import type { StorefrontData } from "@/src/lib/storefront/types";
 import { formatPrice, formatNumber } from "@/src/lib/storefront/format";
 
 type StorefrontPriceCardProps = {
   data: StorefrontData;
+  price: StorefrontPrice;
   onOpenBooking: () => void;
 };
 
-export function StorefrontPriceCard({ data, onOpenBooking }: StorefrontPriceCardProps) {
-  const { product, merchant, tracking } = data;
+export function StorefrontPriceCard({ data, price, onOpenBooking }: StorefrontPriceCardProps) {
+  const { product, merchant } = data;
 
   // Flash Sale Countdown Timer (Simulated dynamic countdown)
   const [timeLeft, setTimeLeft] = useState({ hours: 4, minutes: 28, seconds: 45 });
@@ -39,11 +41,11 @@ export function StorefrontPriceCard({ data, onOpenBooking }: StorefrontPriceCard
   }, []);
 
   const discountPercent = Math.round(
-    ((product.originalPrice - product.salePrice) / product.originalPrice) * 100,
+    ((price.originalPrice - price.finalPrice) / Math.max(1, price.originalPrice)) * 100,
   );
 
   return (
-    <div className="bg-white rounded-2xl border border-[#e2e8f0] p-5 md:p-6 shadow-sm sticky top-20 flex flex-col gap-4">
+    <aside aria-label="Giá vé đã chọn" className="bg-white rounded-2xl border border-[#e2e8f0] p-5 md:p-6 shadow-sm lg:sticky lg:top-40 flex flex-col gap-4">
       {/* Category & Location Badges */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-md">
@@ -57,16 +59,16 @@ export function StorefrontPriceCard({ data, onOpenBooking }: StorefrontPriceCard
 
       {/* Product Title */}
       <div>
-        <h1 className="text-xl md:text-2xl font-bold text-slate-900 leading-snug">
+        <h2 className="text-xl md:text-2xl font-bold text-slate-900 leading-snug">
           {product.name}
-        </h1>
+        </h2>
         <p className="text-xs md:text-sm text-slate-500 mt-1 line-clamp-2">
           {product.subtitle}
         </p>
       </div>
 
       {/* Ratings & Social Proof */}
-      <div className="flex items-center gap-3 text-xs md:text-sm pb-3 border-b border-slate-100">
+      <div className="flex flex-wrap items-center gap-3 text-sm pb-3 border-b border-slate-100">
         <div className="flex items-center gap-1 bg-amber-50 text-amber-800 font-bold px-2 py-0.5 rounded-md border border-amber-200">
           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
           <span>{product.rating}</span>
@@ -81,7 +83,7 @@ export function StorefrontPriceCard({ data, onOpenBooking }: StorefrontPriceCard
       </div>
 
       {/* Flash Sale Banner */}
-      <div className="bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-orange-500/10 border border-rose-200 rounded-xl p-3 flex items-center justify-between">
+      <div className="bg-gradient-to-r from-rose-500/10 via-amber-500/10 to-orange-500/10 border border-rose-200 rounded-xl p-3 flex flex-wrap gap-2 items-center justify-between">
         <div className="flex items-center gap-2 text-rose-700 text-xs font-bold">
           <Flame className="w-4 h-4 fill-rose-500 text-rose-500 animate-bounce" />
           <span>ƯU ĐÃI FLASH SALE</span>
@@ -102,15 +104,17 @@ export function StorefrontPriceCard({ data, onOpenBooking }: StorefrontPriceCard
         </div>
       </div>
 
+      {price.packageName && <p className="text-sm font-medium text-[#204e4c]">Gói đang chọn: {price.packageName}</p>}
+      {price.hasReferralDiscount && <p className="text-sm text-slate-600">Giá bán: {formatPrice(price.salePrice)} ₫ · Đã áp dụng ưu đãi đối tác</p>}
       {/* Price Presentation */}
       <div className="flex items-baseline justify-between pt-1">
         <div>
           <span className="text-xs text-slate-400 line-through mr-2">
-            {formatPrice(product.originalPrice)} ₫
+            {formatPrice(price.originalPrice)} ₫
           </span>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl md:text-3xl font-extrabold text-[#bd6840]">
-              {formatPrice(product.salePrice)} ₫
+            <span data-testid="price-card-amount" className="text-2xl md:text-3xl font-extrabold text-[#bd6840]">
+              {formatPrice(price.finalPrice)} ₫
             </span>
             <span className="text-xs text-slate-500">/ người</span>
           </div>
@@ -131,7 +135,7 @@ export function StorefrontPriceCard({ data, onOpenBooking }: StorefrontPriceCard
       <button
         type="button"
         onClick={onOpenBooking}
-        className="w-full bg-gradient-to-r from-[#bd6840] to-[#d97746] hover:from-[#a85934] hover:to-[#bd6840] text-white font-bold text-base py-3.5 px-6 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer"
+        className="min-h-12 w-full bg-gradient-to-r from-[#bd6840] to-[#d97746] hover:from-[#a85934] hover:to-[#bd6840] text-white font-bold text-base py-3.5 px-6 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 group cursor-pointer"
       >
         <span>ĐẶT VÉ NGAY • QUÉT MÃ VÀO CỔNG</span>
         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -156,6 +160,6 @@ export function StorefrontPriceCard({ data, onOpenBooking }: StorefrontPriceCard
           <span>Xác nhận tức thì qua SMS</span>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }

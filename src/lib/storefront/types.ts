@@ -62,6 +62,7 @@ export type StorefrontData = {
     salePrice: number;
     rating: number;
     reviewCount: number;
+    reviews?: StorefrontReview[];
     soldCount: number;
     remainingToday: number;
     highlights: string[];
@@ -91,6 +92,12 @@ export type StorefrontData = {
   tracking?: {
     refCode?: string;
     resellerName?: string;
+    /** Public profile fields supplied by a trusted server source, never URL params. */
+    resellerAvatarUrl?: string;
+    resellerVerified?: boolean;
+    resellerTip?: string;
+    /** Must be explicitly confirmed by the server before advertising a discount. */
+    discountEligible?: boolean;
     discountPercent?: number;
   };
 };
