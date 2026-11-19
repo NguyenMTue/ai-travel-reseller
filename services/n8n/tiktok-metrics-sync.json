@@ -1,0 +1,89 @@
+{
+  "name": "Sync TikTok Video Metrics & Engagement Score",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        260,
+        300
+      ],
+      "id": "d2626807-5723-4a52-849f-8eb2dd941843",
+      "name": "Run every 15 minutes"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_BACKEND_DOMAIN/tiktok/metrics/sync",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": false,
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        300
+      ],
+      "id": "378296b7-16ec-4452-b44b-0a8c6ec82fd7",
+      "name": "Sync due TikTok metrics",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notes": "Requires an n8n Header Auth credential with header X-API-Key. Response reports checked, synced, skipped, failed and the Engagement Score formula."
+    },
+    {
+      "parameters": {
+        "content": "## Scheduled TikTok metrics sync\nEvery 15 minutes, call the backend's authenticated `/tiktok/metrics/sync` endpoint. The backend fetches metrics only for videos owned by the authorized TikTok account, computes `engagement_score = ((likes + comments) / views) * 100` (0 when views is 0), and saves changed snapshots to Supabase.\n\nBefore activating: replace `YOUR_BACKEND_DOMAIN` with the HTTPS API host reachable from this n8n instance. In the HTTP Request node, create/select a **Header Auth** credential with header name `X-API-Key` and the `TIKTOK_METRICS_API_KEY` configured on the backend. Do not run the standalone Python metrics worker at the same time.",
+        "height": 300,
+        "width": 480,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        -100
+      ],
+      "id": "9748c4d0-8c85-45d0-ae1f-60b4da3b9ad6",
+      "name": "Setup instructions"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Run every 15 minutes": {
+      "main": [
+        [
+          {
+            "node": "Sync due TikTok metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "saveManualExecutions": true
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "description": "Synchronizes due TikTok video interaction metrics through the authorized backend API every 15 minutes and persists the engagement-rate score and changed snapshots in Supabase."
+}

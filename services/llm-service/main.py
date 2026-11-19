@@ -10,6 +10,7 @@ from post_publisher import publish_tour_post, get_tour_catalog
 from tiktok_scheduler import configure_daily_schedule, run_forever, VIDEO_DIR
 from tiktok_publisher import get_creator_info
 from tiktok_auth import create_authorization_url, exchange_callback_url
+from tiktok_metrics_worker import run_forever as run_tiktok_metrics_worker
 
 if sys.stdout and hasattr(sys.stdout, "reconfigure") and getattr(sys.stdout, "encoding", "").lower() != "utf-8":
     try:
@@ -85,6 +86,8 @@ def main():
     parser.add_argument("--tiktok-schedule-daily", type=str, metavar="HH:MM", help="Thiết lập giờ đăng TikTok mỗi ngày (giờ Việt Nam)")
     parser.add_argument("--tiktok-tour", type=str, help="Tên tour dùng để tạo caption mỗi ngày")
     parser.add_argument("--tiktok-worker", action="store_true", help="Chạy bộ hẹn giờ TikTok; cần để cửa sổ này hoạt động")
+    parser.add_argument("--tiktok-metrics-worker", action="store_true", help="Chạy worker đồng bộ view/like/comment TikTok qua API chính thức")
+    parser.add_argument("--tiktok-metrics-interval", type=int, default=900, help="Chu kỳ worker metrics (giây, tối thiểu 60; mặc định 900)")
     parser.add_argument("--tiktok-auth-start", action="store_true", help="Tạo liên kết đăng nhập và cấp quyền TikTok lần đầu")
     parser.add_argument("--tiktok-auth-finish", action="store_true", help="Hoàn tất OAuth bằng cách dán URL callback TikTok")
     args = parser.parse_args()
@@ -165,6 +168,10 @@ def main():
 
     if args.tiktok_worker:
         run_forever()
+        return
+
+    if args.tiktok_metrics_worker:
+        run_tiktok_metrics_worker(interval_seconds=args.tiktok_metrics_interval)
         return
 
     if args.tours:
