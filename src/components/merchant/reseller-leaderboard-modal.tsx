@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Award, X } from "lucide-react";
 import { useDialogViewport } from "@/src/components/use-dialog-viewport";
 import mobileStyles from "@/src/components/mobile-dialog.module.css";
+import { Input } from "@/src/components/ui/input";
 
 export interface ResellerLeaderboardItem {
   id: string;
@@ -44,6 +45,7 @@ export function ResellerLeaderboardModal({ isOpen, onClose, data }: ResellerLead
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [budgetFilter, setBudgetFilter] = useState<BudgetFilter>("all");
+  const [minimumRevenue, setMinimumRevenue] = useState("");
 
   useDialogViewport(dialogRef, isOpen);
 
@@ -66,8 +68,14 @@ export function ResellerLeaderboardModal({ isOpen, onClose, data }: ResellerLead
   }, [isOpen]);
 
   const filteredData = useMemo(
-    () => data.filter((item) => matchesBudget(item.expectedCommissionRate, budgetFilter)),
-    [data, budgetFilter],
+    () => {
+      const revenueFloor = minimumRevenue === "" ? 0 : Number(minimumRevenue);
+      return data.filter((item) =>
+        matchesBudget(item.expectedCommissionRate, budgetFilter) &&
+        item.attributedRevenue >= revenueFloor,
+      );
+    },
+    [data, budgetFilter, minimumRevenue],
   );
 
   return (
@@ -93,14 +101,20 @@ export function ResellerLeaderboardModal({ isOpen, onClose, data }: ResellerLead
         <p id="reseller-leaderboard-description" className="mt-2 text-sm text-muted-foreground">Theo dõi doanh số và chọn mức hoa hồng phù hợp ngân sách.</p>
       </div>
 
-      <div className="mt-5 flex flex-col gap-2 sm:max-w-xs">
-        <label htmlFor="reseller-budget-filter" className="text-sm font-medium text-foreground">Lọc theo ngân sách hoa hồng</label>
-        <select id="reseller-budget-filter" value={budgetFilter} onChange={(event) => setBudgetFilter(event.target.value as BudgetFilter)} className="min-h-11 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
-          <option value="all">Tất cả mức hoa hồng</option>
-          <option value="under-10">Dưới 10%</option>
-          <option value="10-to-15">10% – 15%</option>
-          <option value="over-15">Trên 15%</option>
-        </select>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <div className="flex flex-col gap-2">
+          <label htmlFor="reseller-budget-filter" className="text-sm font-medium text-foreground">Lọc theo % hoa hồng</label>
+          <select id="reseller-budget-filter" value={budgetFilter} onChange={(event) => setBudgetFilter(event.target.value as BudgetFilter)} className="min-h-11 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+            <option value="all">Tất cả mức hoa hồng</option>
+            <option value="under-10">Dưới 10%</option>
+            <option value="10-to-15">10% – 15%</option>
+            <option value="over-15">Trên 15%</option>
+          </select>
+        </div>
+        <div className="flex flex-col gap-2">
+          <label htmlFor="reseller-minimum-revenue" className="text-sm font-medium text-foreground">Doanh số tối thiểu (VNĐ)</label>
+          <Input id="reseller-minimum-revenue" type="number" min="0" step="1000000" inputMode="numeric" placeholder="Ví dụ: 50000000" value={minimumRevenue} onChange={(event) => setMinimumRevenue(event.target.value)} />
+        </div>
       </div>
 
       {filteredData.length ? (

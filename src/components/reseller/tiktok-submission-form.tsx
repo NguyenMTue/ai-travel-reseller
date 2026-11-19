@@ -103,8 +103,10 @@ export function TikTokSubmissionForm({ onSubmit }: TikTokSubmissionFormProps) {
         <article aria-label="Thống kê tương tác video" className="mt-5 overflow-hidden rounded-xl border border-border bg-card">
           <div className="grid gap-4 p-4 sm:grid-cols-[128px_minmax(0,1fr)] sm:items-center">
             {metrics.thumbnailUrl ? (
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={metrics.thumbnailUrl} alt="Ảnh xem trước video TikTok" width={128} height={128} className="aspect-square w-full rounded-lg object-cover" />
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={metrics.thumbnailUrl} alt="Ảnh xem trước video TikTok" width={128} height={128} className="aspect-square w-full rounded-lg object-cover" />
+              </>
             ) : (
               <div aria-label="Chưa có ảnh xem trước video" role="img" className="grid aspect-square w-full place-items-center rounded-lg bg-secondary text-muted-foreground">
                 <Sparkles size={28} aria-hidden="true" />
