@@ -9,15 +9,15 @@
 
 | Thành viên | Vai trò | Mã Task chính | Trọng tâm tuần này | Trạng thái hiện tại |
 | :--- | :--- | :--- | :--- | :---: |
-| **Nguyễn Minh Tuệ** | PM & BE1 Lead | `PM-W6-01..03`<br/>`BE1-W6-01..05` | Background Worker sinh Video 40–50s, API Top Reseller theo Budget, điều phối Sprint | `IN_PROGRESS` |
-| **Cao Thị Thu Diệu** | FE Lead | `FE-W6-01..04` | **TRỌNG TÂM:** Redesign Header nhận diện Reseller, Tour Content Mobile, Modal VietQR 3 bước | `IN_PROGRESS` |
+| **Nguyễn Minh Tuệ** | PM & BE1 Lead | `PM-W6-01..03`<br/>`BE1-W6-01..05` | Background Worker sinh Video 40–50s, API Top Reseller theo Budget, điều phối Sprint | `COMPLETED` |
+| **Cao Thị Thu Diệu** | FE Lead | `FE-W6-01..04` | **TRỌNG TÂM:** Redesign Header nhận diện Reseller, Tour Content Mobile, Modal VietQR 3 bước | `COMPLETED` |
 | **Nguyễn Huỳnh** | BE2 (AI & RAG) | `BE2-W6-01..04` | Kịch bản Review TikTok 40–50s qua Groq, TTS Voiceover tiếng Việt, B-roll tag matcher | `COMPLETED` |
-| **Thái Thanh Tú** | BE3 (Automation) | `BE3-W6-01..04` | Microservice cào số liệu video TikTok (View, Like, Comment), Schema tích điểm Merchant | `IN_PROGRESS` |
-| **Lê Mỹ Uyên** | BA Lead | `BA-W6-01..04` | Đặc tả nghiệp vụ hoa hồng Reseller, công thức tích điểm Merchant, kịch bản UAT | `IN_PROGRESS` |
-| **Nguyễn Phước Quý Bửu** | UI/UX Designer | `UIUX-W6-01..04` | Thiết kế Mobile-First trang Tour, Modal VietQR Napas247, Mockup Top Reseller | `IN_PROGRESS` |
-| **Trương Đức Huy** | QA Lead | `TEST1-W6-01..04` | Kịch bản Playwright E2E luồng mua vé qua link Reseller, kiểm thử tương thích Mobile | `IN_PROGRESS` |
-| **Trần Văn Minh** | AI Safety QA | `TEST2-W6-01..04` | Kiểm định chất lượng video 40–50s theo Rubric, bảo mật RLS & chống gian lận điểm | `TODO` |
-| **Nguyễn Anh Tuấn** | FE Junior (Tester 3) | `FE-T3-W6-01..04` | Form dán link TikTok cho Reseller, Modal Top Reseller & Widget Điểm thưởng Merchant | `IN_PROGRESS` |
+| **Thái Thanh Tú** | BE3 (Automation) | `BE3-W6-01..04` | Microservice cào số liệu video TikTok (View, Like, Comment), Schema tích điểm Merchant | `COMPLETED` |
+| **Lê Mỹ Uyên** | BA Lead | `BA-W6-01..04` | Đặc tả nghiệp vụ hoa hồng Reseller, công thức tích điểm Merchant, kịch bản UAT | `COMPLETED` |
+| **Nguyễn Phước Quý Bửu** | UI/UX Designer | `UIUX-W6-01..04` | Thiết kế Mobile-First trang Tour, Modal VietQR Napas247, Mockup Top Reseller | `COMPLETED` |
+| **Trương Đức Huy** | QA Lead | `TEST1-W6-01..04` | Kịch bản Playwright E2E luồng mua vé qua link Reseller, kiểm thử tương thích Mobile | `COMPLETED` |
+| **Trần Văn Minh** | AI Safety QA | `TEST2-W6-01..04` | Kiểm định chất lượng video 40–50s theo Rubric, bảo mật RLS & chống gian lận điểm | `COMPLETED` |
+| **Nguyễn Anh Tuấn** | FE Junior (Tester 3) | `FE-T3-W6-01..04` | Form dán link TikTok cho Reseller, Modal Top Reseller & Widget Điểm thưởng Merchant | `COMPLETED` |
 
 ---
 
@@ -41,3 +41,14 @@
   - Hoàn tất `BE2-W6-02`: Module `tts_engine.py` lồng tiếng AI tiếng Việt đa engine (Edge-TTS giọng Hoài My/Nam Minh và Google TTS fallback), hỗ trợ trích xuất MP3 từng cảnh và file ghép hoàn chỉnh có đo thời lượng chính xác bằng `mutagen`.
   - Hoàn tất `BE2-W6-03`: Module `semantic_tag_matcher.py` (Python) và `semantic-tag-matcher.ts` (TypeScript) tự động khớp B-roll video MP4 theo visualTag, role và ngữ nghĩa câu thoại.
   - Viết bộ unit test `tests/be2-w6-tiktok-review-script.test.ts` (4/4 passed) và `services/llm-service/test_tiktok_review_script.py` (5/5 passed); toàn bộ test BE2 regression đạt 96/96 passed.
+
+### Ngày 21/11/2026 (Thứ Bảy) — Tổng duyệt & Tích Hợp Toàn Bộ Sprint 6
+* **09:00 - 12:00:**
+  - Tích hợp Auto-Pipeline Video 40–50s, Top Reseller RPC, TikTok Scraper và Điểm thưởng Merchant (`BE1-W6-01..05`).
+  - Merge thành công 3 PR kiểm thử QA: `#81` (Storefront Referral Checkout), `#82` (Mobile Compatibility), `#83` (Commission Idempotency Audit).
+* **13:30 - 17:00:**
+  - Hoàn tất 3 component UI độc lập của Tester 3: `TikTokSubmissionForm` (Content Kit Reseller), `ResellerLeaderboardModal` (Top Reseller & Budget Matching), `MerchantPointsWidget` (Điểm thưởng Merchant).
+  - Hoàn tất kiểm thử an toàn URL TikTok & tính điểm Gamification (`tests/tiktok-safety-and-error-handling.test.ts` 9/9 PASS).
+  - Hoàn tất báo cáo Rubric chất lượng Video 40–50s (`docs/qa/ai-video-rubric-report-w6.md` đạt 9.74/10 điểm).
+  - Chạy toàn bộ regression test suite: 100% test cases pass, `tsc --noEmit` đạt 0 errors, toàn bộ 9/9 vai trò cán đích 100%.
+

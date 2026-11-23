@@ -213,6 +213,16 @@ export async function POST(request: Request) {
         attributed: true,
         dbRecorded: dbSuccess,
         orderId: bookingReference,
+        ticketCode,
+        eTicket: {
+          ticketCode,
+          packageName,
+          customerName,
+          customerPhone,
+          amount: orderAmount,
+          qrPayload: `TRAVEL_LINK_ETICKET:${bookingReference}:${ticketCode}:${orderAmount}`,
+          verifiedAt: new Date().toISOString(),
+        },
         resellerId: finalResellerId,
         commission: {
           grossAmount: grossCommission,

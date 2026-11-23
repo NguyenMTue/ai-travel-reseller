@@ -5,6 +5,7 @@ import { Copy, Check, LoaderCircle, Send } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { VideoPlayer } from "@/src/components/video-player";
 import { VideoPostingTipsModal } from "@/src/components/merchant/video-posting-tips-modal";
+import { TikTokSubmissionForm } from "./tiktok-submission-form";
 import { FeedNotice } from "./feed-states";
 import { personas, type Persona, type ContentVariant } from "@/src/lib/reseller/content-kit";
 import { dataFailureDescriptions, type DataFailureKind } from "@/src/lib/reseller/data-failure";
@@ -233,6 +234,7 @@ export function ContentKit({ variants, contentStatus, contentReason, campaignId,
             </Button>
             {telegramMessage && <p role={telegramState === "error" ? "alert" : "status"} className="mt-3 text-sm">{telegramMessage}</p>}
           </section>
+          <TikTokSubmissionForm campaignId={campaignId} className="mt-5" />
         </>
       )}
     </section>

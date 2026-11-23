@@ -42,9 +42,43 @@ export function CampaignList({
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [generatingVideoId, setGeneratingVideoId] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const root = preview ? "/preview/merchant" : "/merchant";
+
+  async function handleAutoGenerateVideo(c: MerchantCampaignListItem) {
+    setGeneratingVideoId(c.id);
+    setActionMessage(null);
+
+    try {
+      const res = await fetch("/api/merchant/video/auto-pipeline", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          campaignId: c.id,
+          productId: c.productId,
+          tourName: c.name,
+          location: c.targetLocation || "Miền Trung",
+          targetDurationSec: 46,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Không thể khởi động luồng tạo video.");
+      }
+
+      setActionMessage(
+        `🎬 Đã kích hoạt luồng tự động dựng Video Review 45s ngầm cho chiến dịch "${c.name}". Hệ thống tự động khớp B-roll và kịch bản 4 phân cảnh (Zero manual picking). Bạn hãy vào mục "Quản lý nội dung AI" (/merchant/contents) để duyệt video khi hoàn tất.`
+      );
+    } catch (err: any) {
+      console.error("[handleAutoGenerateVideo] Error:", err);
+      setActionMessage(`Lỗi: ${err.message || "Vui lòng thử lại sau."}`);
+    } finally {
+      setGeneratingVideoId(null);
+    }
+  }
 
   const filteredCampaigns = campaigns.filter((c) => {
     const matchesSearch =
@@ -281,27 +315,41 @@ export function CampaignList({
                       </td>
                       <td>{renderStatusBadge(c.status)}</td>
                       <td style={{ textAlign: "right" }}>
-                        <button
-                          type="button"
-                          className={`${styles.toggleBtn} ${
-                            isPaused ? styles.btnActivate : styles.btnPause
-                          } ${isLoading ? styles.btnLoading : ""}`}
-                          disabled={isLoading || c.status === "expired"}
-                          onClick={() => handleToggleStatus(c.id, c.status)}
-                          aria-label={`${isPaused ? "Kích hoạt" : "Tạm dừng"} chiến dịch ${c.name}`}
-                        >
-                          {isPaused ? (
-                            <>
-                              <PlayCircle size={15} />
-                              {isLoading ? "Đang xử lý..." : "Kích hoạt lại"}
-                            </>
-                          ) : (
-                            <>
-                              <PauseCircle size={15} />
-                              {isLoading ? "Đang xử lý..." : "Tạm dừng"}
-                            </>
-                          )}
-                        </button>
+                        <div className={styles.actionGroup}>
+                          <button
+                            type="button"
+                            className={styles.btnAutoVideo}
+                            disabled={generatingVideoId === c.id}
+                            onClick={() => handleAutoGenerateVideo(c)}
+                            title="Tự động sinh video review 40–50s ngầm mà không cần chọn từng ảnh thủ công"
+                          >
+                            <Sparkles size={14} />
+                            <span>
+                              {generatingVideoId === c.id ? "Đang gửi lệnh..." : "Tự sinh Video 45s"}
+                            </span>
+                          </button>
+                          <button
+                            type="button"
+                            className={`${styles.toggleBtn} ${
+                              isPaused ? styles.btnActivate : styles.btnPause
+                            } ${isLoading ? styles.btnLoading : ""}`}
+                            disabled={isLoading || c.status === "expired"}
+                            onClick={() => handleToggleStatus(c.id, c.status)}
+                            aria-label={`${isPaused ? "Kích hoạt" : "Tạm dừng"} chiến dịch ${c.name}`}
+                          >
+                            {isPaused ? (
+                              <>
+                                <PlayCircle size={15} />
+                                {isLoading ? "Đang xử lý..." : "Kích hoạt lại"}
+                              </>
+                            ) : (
+                              <>
+                                <PauseCircle size={15} />
+                                {isLoading ? "Đang xử lý..." : "Tạm dừng"}
+                              </>
+                            )}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

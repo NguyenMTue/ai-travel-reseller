@@ -29,8 +29,8 @@
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|:---:|:---:|---|:---:|---|:---:|
 | **PM-W6-01** | **Họp Kick-off Sprint 6 & Phổ biến Nhận xét của Mentor** | **P0** | `DONE` | Mentor Feedback | PM Tuệ | Biên bản thống nhất mục tiêu Sprint 6 & WBS phân bổ | 16/11 09:00 |
-| **PM-W6-02** | **Điều phối & Giám sát Tiến độ 2 Đường găng (FE Storefront & BE Video Pipeline)** | **P0** | `IN_PROGRESS` | Team Standup | PM Tuệ | Standup hằng ngày, tháo gỡ blocker kỹ thuật giữa FE và BE | 18/11 17:00 |
-| **PM-W6-03** | **Tổ chức Demo Nội bộ & Tổng duyệt Báo cáo Mentor** | **P0** | `TODO` | All Tasks | PM Tuệ | Buổi demo chạy luồng thực tế (Click link -> Đặt vé VietQR -> Duyệt video) | 21/11 15:00 |
+| **PM-W6-02** | **Điều phối & Giám sát Tiến độ 2 Đường găng (FE Storefront & BE Video Pipeline)** | **P0** | `DONE` | Team Standup | PM Tuệ | Standup hằng ngày, tháo gỡ blocker kỹ thuật giữa FE và BE | 18/11 17:00 |
+| **PM-W6-03** | **Tổ chức Demo Nội bộ & Tổng duyệt Báo cáo Mentor** | **P0** | `DONE` | All Tasks | PM Tuệ | Buổi demo chạy luồng thực tế (Click link -> Đặt vé VietQR -> Duyệt video) | 21/11 15:00 |
 
 ---
 

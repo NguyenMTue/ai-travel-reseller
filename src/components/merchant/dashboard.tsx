@@ -16,6 +16,7 @@ import {
   Film,
   Plus,
   Sparkles,
+  Trophy,
 } from "lucide-react";
 import { Brand } from "@/src/components/brand";
 import { Button } from "@/src/components/ui/button";
@@ -23,6 +24,8 @@ import { Input } from "@/src/components/ui/input";
 import { demoProducts, demoMetrics } from "@/src/lib/merchant-demo";
 import { logout } from "@/app/actions/auth";
 import { CampaignCreatedNotice } from "./campaign-created-notice";
+import { MerchantPointsWidget } from "./merchant-points-widget";
+import { ResellerLeaderboardModal } from "./reseller-leaderboard-modal";
 
 export interface DashboardMetricProp {
   label: string;
@@ -57,6 +60,7 @@ export function Dashboard({
   const [menu, setMenu] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [view, setView] = useState("sample");
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
 
   const effectiveProducts: DashboardProductProp[] = preview
     ? demoProducts
@@ -228,6 +232,15 @@ export function Dashboard({
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowLeaderboard(true)}
+                className="border-amber-300 bg-amber-50/60 text-amber-950 hover:bg-amber-100/80 font-medium"
+              >
+                <Trophy className="h-4 w-4 text-amber-600 mr-1.5" />
+                Top Reseller & Budget
+              </Button>
               <Button asChild>
                 <Link href={preview ? "/preview/merchant/campaigns/new" : "/merchant/campaigns/new"}>
                   Tạo chiến dịch <ArrowUpRight />
@@ -262,6 +275,7 @@ export function Dashboard({
             <>
               {tab === "overview" && (
                 <>
+                  <MerchantPointsWidget className="mb-6" />
                   <div className="metrics">
                     {effectiveMetrics.map((m, i) => (
                       <article
@@ -461,6 +475,10 @@ export function Dashboard({
           )}
         </main>
       </div>
+      <ResellerLeaderboardModal
+        isOpen={showLeaderboard}
+        onClose={() => setShowLeaderboard(false)}
+      />
     </div>
   );
 }
