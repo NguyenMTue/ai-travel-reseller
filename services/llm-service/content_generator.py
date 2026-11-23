@@ -543,3 +543,9 @@ QUY TẮC BẮT BUỘC:
         print(f"[Groq Generation Warning] Lỗi sinh kịch bản ({e}), chuyển sang fallback an toàn.")
         return generate_deterministic_tiktok_script(tour)
 
+
+def generate_review_script_45s(tour: dict, api_key: str = None, use_rag: bool = True) -> dict:
+    """Kịch bản review du lịch TikTok 40-50s cấu trúc 4 phân cảnh."""
+    return generate_tiktok_review_script(tour, api_key=api_key, use_rag=use_rag)
+
+

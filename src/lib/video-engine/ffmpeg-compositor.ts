@@ -13,6 +13,10 @@ export interface TextOverlayConfig {
   ctaText?: string;
   tipText?: string;
   destinationText?: string;
+  act1Text?: string;
+  act2Text?: string;
+  act3Text?: string;
+  act4Text?: string;
 }
 
 export interface ComposeHybridVideoInput {
@@ -61,7 +65,7 @@ export function runFFmpeg(args: string[]): Promise<void> {
   return new Promise((resolve, reject) => {
     const executable = getResolvedFFmpegPath();
 
-    const proc = spawn(executable, args, { stdio: ["ignore", "pipe", "pipe"] });
+    const proc = spawn(/*turbopackIgnore: true*/ executable, args, { stdio: ["ignore", "pipe", "pipe"] });
     let stderr = "";
 
     proc.stderr.on("data", (data) => {
@@ -507,7 +511,7 @@ export function getSystemFontPath(): string {
 export function hasAudioStream(filePath: string): Promise<boolean> {
   return new Promise((resolve) => {
     const executable = getResolvedFFmpegPath();
-    const proc = spawn(executable, ["-i", filePath, "-vn", "-c:a", "copy", "-f", "null", "-"], {
+    const proc = spawn(/*turbopackIgnore: true*/ executable, ["-i", filePath, "-vn", "-c:a", "copy", "-f", "null", "-"], {
       stdio: ["ignore", "pipe", "pipe"],
     });
     proc.on("close", (code) => {
@@ -757,7 +761,7 @@ export async function createBlurredTourInfoClip(params: {
 
     await new Promise<void>((resolve, reject) => {
       const exec = getResolvedFFmpegPath();
-      const proc = spawn(exec, ffmpegArgs, {
+      const proc = spawn(/*turbopackIgnore: true*/ exec, ffmpegArgs, {
         cwd: tempDir,
         stdio: ["ignore", "pipe", "pipe"],
       });

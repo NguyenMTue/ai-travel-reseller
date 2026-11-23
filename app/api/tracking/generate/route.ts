@@ -260,11 +260,12 @@ export async function POST(request: Request) {
 
       // Tự động đồng bộ short_url mới trong DB nếu trước đó lưu localhost/domain khác
       if (hasServiceRoleKey && existingLink.short_url !== currentShortUrl) {
-        dbClient
-          .from("affiliate_links")
-          .update({ short_url: currentShortUrl, updated_at: new Date().toISOString() })
-          .eq("id", existingLink.id)
-          .catch?.(() => {});
+        void Promise.resolve(
+          dbClient
+            .from("affiliate_links")
+            .update({ short_url: currentShortUrl, updated_at: new Date().toISOString() })
+            .eq("id", existingLink.id)
+        ).catch(() => {});
       }
 
       return NextResponse.json({

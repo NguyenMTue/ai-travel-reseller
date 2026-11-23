@@ -24,10 +24,10 @@
 
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|:---:|:---:|---|:---:|---|:---:|
-| **FE-T3-W6-01** | **Xây dựng Form Dán link TikTok & Card Thống kê Tương tác cho Reseller** | **P0** | `IN_PROGRESS` | BE3 API | Anh Tuấn | Component `tiktok-submission-form.tsx` kèm preview lượt View/Like | 18/11 17:00 |
-| **FE-T3-W6-02** | **Xây dựng Bảng Danh sách Top Reseller & Bộ lọc Budget cho Merchant** | **P1** | `TODO` | BE1 RPC | Anh Tuấn | Component `reseller-leaderboard-modal.tsx` kèm filter ngân sách | 19/11 17:00 |
-| **FE-T3-W6-03** | **Xây dựng Widget Điểm Thưởng Merchant (Gamification Points Card)** | **P1** | `TODO` | BE3 DB | Anh Tuấn | Widget hiển thị số dư điểm và nút quy đổi ưu đãi | 20/11 12:00 |
-| **FE-T3-W6-04** | **Nộp PR, Fix review comments và bàn giao cho FE Lead tích hợp** | **P0** | `TODO` | FE Lead Review | Anh Tuấn | PR được chấp thuận (Approved) và merge an toàn vào `dev` | 20/11 17:00 |
+| **FE-T3-W6-01** | **Xây dựng Form Dán link TikTok & Card Thống kê Tương tác cho Reseller** | **P0** | `DONE` | BE3 API | Anh Tuấn | Component `tiktok-submission-form.tsx` kèm preview lượt View/Like | 18/11 17:00 |
+| **FE-T3-W6-02** | **Xây dựng Bảng Danh sách Top Reseller & Bộ lọc Budget cho Merchant** | **P1** | `DONE` | BE1 RPC | Anh Tuấn | Component `reseller-leaderboard-modal.tsx` kèm filter ngân sách | 19/11 17:00 |
+| **FE-T3-W6-03** | **Xây dựng Widget Điểm Thưởng Merchant (Gamification Points Card)** | **P1** | `DONE` | BE3 DB | Anh Tuấn | Widget hiển thị số dư điểm và nút quy đổi ưu đãi | 20/11 12:00 |
+| **FE-T3-W6-04** | **Nộp PR, Fix review comments và bàn giao cho FE Lead tích hợp** | **P0** | `DONE` | FE Lead Review | Anh Tuấn | PR được chấp thuận (Approved) và merge an toàn vào `dev` | 20/11 17:00 |
 
 ---
 

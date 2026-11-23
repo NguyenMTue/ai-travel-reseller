@@ -193,11 +193,11 @@ function VideoGenerateSession({
           // Tự động phát hiện chiến dịch khớp với các tư liệu ảnh được chọn (Grounding Metadata)
           const itemsToScan = selectedItems && selectedItems.length > 0 ? selectedItems : selectedItem ? [selectedItem] : [];
           const isBaNaSelection = itemsToScan.some((item) =>
-            `${item.title || ""} ${(item.style_tags || []).join(" ")}`.toLowerCase().includes("bà nà") ||
-            `${item.title || ""} ${(item.style_tags || []).join(" ")}`.toLowerCase().includes("cầu vàng") ||
-            `${item.title || ""} ${(item.style_tags || []).join(" ")}`.toLowerCase().includes("cáp treo") ||
-            `${item.title || ""} ${(item.style_tags || []).join(" ")}`.toLowerCase().includes("làng pháp") ||
-            `${item.title || ""} ${(item.style_tags || []).join(" ")}`.toLowerCase().includes("nhật thực")
+            `${item.title || ""} ${(item.styleTags || []).join(" ")}`.toLowerCase().includes("bà nà") ||
+            `${item.title || ""} ${(item.styleTags || []).join(" ")}`.toLowerCase().includes("cầu vàng") ||
+            `${item.title || ""} ${(item.styleTags || []).join(" ")}`.toLowerCase().includes("cáp treo") ||
+            `${item.title || ""} ${(item.styleTags || []).join(" ")}`.toLowerCase().includes("làng pháp") ||
+            `${item.title || ""} ${(item.styleTags || []).join(" ")}`.toLowerCase().includes("nhật thực")
           );
 
           const matchedCampaign = isBaNaSelection
