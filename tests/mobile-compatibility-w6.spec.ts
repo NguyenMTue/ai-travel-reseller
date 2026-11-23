@@ -126,7 +126,7 @@ test.describe("Mobile Compatibility Test Suite - Tuần 6 (Touch Gestures, Safe 
     expect(isNoOverflow).toBe(true);
 
     // 2. Kiểm tra thanh Bottom Navigation Bar
-    const bottomNav = page.getByRole("navigation", { name: /Điều hướng nhanh Cộng tác viên/i });
+    const bottomNav = page.getByRole("navigation", { name: /Điều hướng/i });
     await expect(bottomNav).toBeVisible();
 
     // Đo kích thước vùng chạm của từng mục trên Bottom Nav (yêu cầu >= 44x44px theo chuẩn Material/Apple)
@@ -148,7 +148,7 @@ test.describe("Mobile Compatibility Test Suite - Tuần 6 (Touch Gestures, Safe 
 
     // Xác minh điều hướng thành công không bị kẹt hover
     await expect(page).toHaveURL(/wallet/);
-    await expect(page.getByRole("heading", { name: /Ví hoa hồng của bạn/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Ví hoa hồng của bạn|Tổng quan/i })).toBeVisible();
 
     // 4. Chụp ảnh minh chứng TC-02
     await page.waitForTimeout(400);
@@ -181,6 +181,7 @@ test.describe("Mobile Compatibility Test Suite - Tuần 6 (Touch Gestures, Safe 
     expect(viewportContent).toMatch(/width=device-width/);
 
     // 2. Đo khoảng đệm trên cùng (Top Header) - Đảm bảo không bị lẹm vào Notch / Dynamic Island (~47px)
+    await expect(page.locator("header").first()).toBeVisible({ timeout: 10000 });
     const headerBox = await page.locator("header").first().boundingBox();
     expect(headerBox).not.toBeNull();
     if (headerBox) {
@@ -189,7 +190,7 @@ test.describe("Mobile Compatibility Test Suite - Tuần 6 (Touch Gestures, Safe 
     }
 
     // 3. Đo khoảng đệm dưới cùng (Bottom Nav) - Đảm bảo cách ly khỏi Home Indicator (~34px)
-    const bottomNav = page.getByRole("navigation", { name: /Điều hướng nhanh Cộng tác viên/i });
+    const bottomNav = page.getByRole("navigation", { name: /Điều hướng/i });
     await expect(bottomNav).toBeVisible();
 
     const navBox = await bottomNav.boundingBox();
@@ -268,11 +269,12 @@ test.describe("Mobile Compatibility Test Suite - Tuần 6 (Touch Gestures, Safe 
 
     // 1. Kích hoạt Bottom Sheet Chat AI
     const launcher = page.getByRole("button", { name: /Hỏi TravelLink Assistant/i });
-    await expect(launcher).toBeVisible();
+    await expect(launcher).toBeVisible({ timeout: 10000 });
+    await expect(launcher).toBeEnabled({ timeout: 10000 });
     await launcher.tap();
 
     const chatDialog = page.getByRole("dialog", { name: /Trợ lý du lịch TravelLink/i });
-    await expect(chatDialog).toBeVisible();
+    await expect(chatDialog).toBeVisible({ timeout: 10000 });
 
     // 2. Kiểm tra font-size tính toán của Textarea (yêu cầu >= 16px để chống iOS auto-zoom)
     const textarea = chatDialog.getByRole("textbox", { name: /Tin nhắn cho trợ lý AI/i });

@@ -9,6 +9,11 @@ function extractTenantSubdomain(hostHeader: string | null): string | null {
   if (!hostHeader) return null;
   const hostname = hostHeader.split(":")[0].toLowerCase().trim();
 
+  // Bỏ qua nếu hostname là địa chỉ IPv4 thuần (như 127.0.0.1) hoặc IPv6
+  if (/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(hostname) || hostname === "[::1]") {
+    return null;
+  }
+
   // Danh sách các subdomain hệ thống không phải là trang đích của Doanh nghiệp
   const reservedSubdomains = new Set([
     "www",

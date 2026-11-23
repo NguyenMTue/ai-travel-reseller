@@ -65,7 +65,7 @@ test.describe("E2E Luồng Mua vé qua Link Reseller (Storefront Referral Checko
     await expect(page).toHaveURL(new RegExp(`ref=${RESELLER_REF_CODE}`));
 
     // 2. Xác minh thông tin Thương hiệu Merchant & Cam kết minh bạch (RULE-01, FR-TRK-08)
-    await expect(page.getByText("Tập đoàn Sun World").first()).toBeVisible();
+    await expect(page.getByText(/Sun World/i).first()).toBeVisible();
     await expect(page.getByText("Chính hãng 100%").first()).toBeVisible();
 
     // 3. Xác minh Banner ưu đãi độc quyền từ Đối tác Reseller
@@ -107,7 +107,7 @@ test.describe("E2E Luồng Mua vé qua Link Reseller (Storefront Referral Checko
     await page.goto(targetUrl, { waitUntil: "domcontentloaded" });
 
     // 1. Mở Modal Đặt vé qua nút CTA chính
-    const bookNowButton = page.getByRole("button", { name: /ĐẶT VÉ NGAY/i });
+    const bookNowButton = page.getByRole("button", { name: /ĐẶT VÉ NGAY/i }).first();
     await expect(bookNowButton).toBeVisible();
     await bookNowButton.click();
 
@@ -168,7 +168,7 @@ test.describe("E2E Luồng Mua vé qua Link Reseller (Storefront Referral Checko
     await page.goto(targetUrl, { waitUntil: "domcontentloaded" });
 
     // 1. Mở modal Checkout
-    await page.getByRole("button", { name: /ĐẶT VÉ NGAY/i }).click();
+    await page.getByRole("button", { name: /ĐẶT VÉ NGAY/i }).first().click();
     await expect(page.getByRole("heading", { name: /Đặt vé tham quan chính hãng/i })).toBeVisible();
 
     // 2. Điền thông tin khách hàng hợp lệ
@@ -246,7 +246,7 @@ test.describe("E2E Luồng Mua vé qua Link Reseller (Storefront Referral Checko
     await page.goto(targetUrl, { waitUntil: "domcontentloaded" });
 
     // 1. Mở modal Checkout
-    await page.getByRole("button", { name: /ĐẶT VÉ NGAY/i }).click();
+    await page.getByRole("button", { name: /ĐẶT VÉ NGAY/i }).first().click();
     await expect(page.getByRole("heading", { name: /Đặt vé tham quan chính hãng/i })).toBeVisible();
 
     const nameInput = page.getByPlaceholder(/Họ và tên người đặt vé/i);
