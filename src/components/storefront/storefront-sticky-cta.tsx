@@ -12,7 +12,7 @@ type StorefrontStickyCtaProps = {
 
 export function StorefrontStickyCta({ product, onOpenBooking }: StorefrontStickyCtaProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 shadow-2xl flex items-center justify-between gap-3">
+    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-2xl flex items-center justify-between gap-3">
       <div>
         <div className="text-[11px] text-slate-500 flex items-center gap-1">
           <Zap className="w-3 h-3 text-amber-500 fill-amber-500" />
