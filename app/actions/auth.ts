@@ -44,7 +44,10 @@ export async function login(formData: FormData) {
       redirect("/admin");
     }
 
-    if (error.code === "email_not_confirmed" || error.message?.includes("Email not confirmed")) {
+    if (
+      ("code" in error && error.code === "email_not_confirmed") ||
+      error.message?.includes("Email not confirmed")
+    ) {
       return {
         error:
           "Email này chưa được xác nhận trong Supabase. Vui lòng kiểm tra hộp thư email (hoặc mục Spam) để kích hoạt tài khoản.",

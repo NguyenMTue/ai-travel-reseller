@@ -36,6 +36,8 @@ export function AdminPartnersManagement({
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [confirmSuspendPartner, setConfirmSuspendPartner] = useState<AdminPartnerItem | null>(null);
+  const [suspendReason, setSuspendReason] = useState<string>("");
 
   const filteredPartners = partners.filter((p) => {
     const matchesType = typeFilter === "all" || p.type === typeFilter;
@@ -49,13 +51,12 @@ export function AdminPartnersManagement({
     return matchesType && matchesSearch;
   });
 
-  async function handleToggleStatus(
+  async function executeToggleStatus(
     partnerId: string,
     partnerType: "merchant" | "reseller",
-    currentStatus: string,
+    nextStatus: "active" | "suspended",
+    notes: string = ""
   ) {
-    const nextStatus = currentStatus === "active" ? "suspended" : "active";
-
     if (preview) {
       setPartners((prev) =>
         prev.map((p) => (p.id === partnerId ? { ...p, status: nextStatus } : p)),
@@ -69,13 +70,14 @@ export function AdminPartnersManagement({
 
     try {
       setProcessingId(partnerId);
-      const res = await fetch("/api/admin/partners", {
-        method: "PATCH",
+      const res = await fetch("/api/admin/partners/status", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          partner_id: partnerId,
-          partner_type: partnerType,
+          partnerId,
+          role: partnerType,
           status: nextStatus,
+          notes,
         }),
       });
 
@@ -93,6 +95,15 @@ export function AdminPartnersManagement({
     } finally {
       setProcessingId(null);
       setTimeout(() => setMessage(null), 4000);
+    }
+  }
+
+  function handleActionClick(item: AdminPartnerItem) {
+    if (item.status === "active") {
+      setConfirmSuspendPartner(item);
+      setSuspendReason("Tạm khóa theo yêu cầu kiểm soát gian lận hoặc vi phạm chính sách");
+    } else {
+      executeToggleStatus(item.id, item.type, "active", "Mở khóa kích hoạt lại đối tác");
     }
   }
 
@@ -252,7 +263,7 @@ export function AdminPartnersManagement({
                         size="sm"
                         variant="outline"
                         disabled={processingId === item.id}
-                        onClick={() => handleToggleStatus(item.id, item.type, item.status)}
+                        onClick={() => handleActionClick(item)}
                         className={`text-xs h-7 px-2.5 ${
                           item.status === "active"
                             ? "border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800"
@@ -277,6 +288,78 @@ export function AdminPartnersManagement({
           </table>
         </div>
       </div>
+
+      {/* Confirmation Modal for Suspending Partner */}
+      {confirmSuspendPartner && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-border p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-700 flex items-center justify-center border border-rose-200">
+                <Lock className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-foreground">Xác nhận Khóa Tạm thời Đối tác</h3>
+                <p className="text-xs text-muted-foreground">Tài khoản bị khóa sẽ không thể đăng nhập hoặc tạo link tiếp thị</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-muted/40 rounded-xl text-xs space-y-1.5 border border-border">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Tên đối tác:</span>
+                <span className="font-semibold text-foreground">{confirmSuspendPartner.name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Phân loại:</span>
+                <span className="font-semibold text-foreground">
+                  {confirmSuspendPartner.type === "merchant" ? "Doanh nghiệp (Merchant)" : "Cộng tác viên (Reseller)"}
+                </span>
+              </div>
+              {confirmSuspendPartner.email && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Email:</span>
+                  <span className="text-foreground">{confirmSuspendPartner.email}</span>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-foreground mb-1.5">
+                Lý do khóa tài khoản:
+              </label>
+              <textarea
+                value={suspendReason}
+                onChange={(e) => setSuspendReason(e.target.value)}
+                placeholder="Nhập lý do tạm đình chỉ hoạt động..."
+                rows={3}
+                className="w-full text-xs p-2.5 rounded-lg border border-border bg-background focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 text-foreground"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-border">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setConfirmSuspendPartner(null)}
+                className="text-xs"
+              >
+                Hủy bỏ
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => {
+                  const p = confirmSuspendPartner;
+                  setConfirmSuspendPartner(null);
+                  executeToggleStatus(p.id, p.type, "suspended", suspendReason);
+                }}
+                className="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold flex items-center gap-1.5"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Khóa tài khoản</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -10,7 +10,7 @@ type StorefrontStickyCtaProps = {
 
 export function StorefrontStickyCta({ price, onOpenBooking }: StorefrontStickyCtaProps) {
   return (
-    <section aria-label="Đặt vé nhanh" className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-2xl md:hidden">
+    <section aria-label="Đặt vé nhanh" className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-2xl md:hidden">
       <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs text-slate-600">{price.hasReferralDiscount ? "Giá qua đối tác" : "Giá vé / người"}</p>

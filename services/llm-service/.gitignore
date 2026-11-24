@@ -4,6 +4,8 @@ data/tiktok_daily_schedule.json
 data/tiktok_oauth_state.json
 media/tiktok/*
 !media/tiktok/README.md
+media/review_test/
+media/*.mp3
 web/.vercel/
 web/.env.local
 web/node_modules/

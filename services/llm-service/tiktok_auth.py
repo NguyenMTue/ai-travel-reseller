@@ -30,7 +30,8 @@ def create_authorization_url() -> str:
     AUTH_STATE_PATH.write_text(json.dumps({"state": state}), encoding="utf-8")
     params = {
         "client_key": config.TIKTOK_CLIENT_KEY,
-        "scope": "video.publish",
+        # video.list is needed to read engagement metrics for the connected creator's videos.
+        "scope": "video.publish,video.list",
         "response_type": "code",
         "redirect_uri": config.TIKTOK_REDIRECT_URI,
         "state": state,

@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   description:
     "Kết nối doanh nghiệp du lịch, cộng tác viên và khách hàng với sự hỗ trợ của AI.",
 };
-export const viewport: Viewport = { themeColor: "#204e4c" };
+export const viewport: Viewport = { themeColor: "#204e4c", viewportFit: "cover" };
 export default function RootLayout({
   children,
 }: {

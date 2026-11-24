@@ -42,3 +42,13 @@ test("production gateway is unavailable and never calls unsafe legacy confirm en
     assert.deepEqual(await unavailableCheckoutGateway.check(quote, { signal: new AbortController().signal }), { status: "pending" });
   } finally { globalThis.fetch = previous; }
 });
+
+// Contracts observed at dev 6b25b6c: a paid lookup without a server ticket and
+// the demo confirm eTicket are insufficient, even when their order ID matches.
+test("dev status isPaid and demo eTicket cannot bypass verified order/ticket evidence", () => {
+  const status = { success: true, orderId: quote.orderId, status: "paid", isPaid: true };
+  const confirmation = { success: true, attributed: true, dbRecorded: false, orderId: quote.orderId, ticketCode: "ET-DEMO", eTicket: { ticketCode: "ET-DEMO", amount: quote.totalAmount, qrPayload: "TRAVEL_LINK_ETICKET:" + quote.orderId + ":ET-DEMO:" + quote.totalAmount, verifiedAt: new Date().toISOString() } };
+  assert.equal(readPaidTicket(status, quote), undefined);
+  for (const dbRecorded of [false, true]) assert.equal(readPaidTicket({ ...confirmation, dbRecorded }, quote), undefined);
+  assert.equal(readPaidTicket({ ...status, eTicket: confirmation.eTicket }, quote), undefined);
+});

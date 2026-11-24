@@ -15,7 +15,7 @@ type Props = {
   onPackageChange: (pkg: StorefrontPackage) => void; gateway?: CheckoutGateway;
 };
 type Prepared = { fingerprint: string; draft: BookingDraft; quote?: CheckoutQuote };
-const inputClass = "min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#204e4c]";
+const inputClass = "min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-[16px]! text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#204e4c]";
 const buttonClass = "min-h-12 rounded-xl px-4 py-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#204e4c] disabled:cursor-wait disabled:opacity-50";
 
 export function StorefrontCheckoutModal({ isOpen, onClose, data, initialPackage, onPackageChange, gateway = unavailableCheckoutGateway }: Props) {
@@ -122,7 +122,9 @@ export function StorefrontCheckoutModal({ isOpen, onClose, data, initialPackage,
           {currentStep === "form" && <form onSubmit={preparePayment} noValidate className="space-y-4">
             <fieldset disabled={busy} className="space-y-3">
               <legend className="mb-2 font-semibold">Gói vé tham quan</legend>
+              <div role="group" aria-label="Chọn gói vé tham quan" className="space-y-3">
               {data.product.packages.map(pkg => <button key={pkg.id} type="button" aria-pressed={selected?.id === pkg.id} onClick={() => onPackageChange(pkg)} className={"flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border p-3 text-left text-sm " + (selected?.id === pkg.id ? "border-[#204e4c] bg-emerald-50" : "border-slate-200")}><div><span className="font-semibold">{pkg.name}</span><p className="mt-1 text-sm text-slate-600">{pkg.description}</p></div><strong className="shrink-0 text-[#bd6840]">{formatPrice(getStorefrontPrice(data, pkg).finalPrice)} ₫</strong></button>)}
+              </div>
               <label className="block text-sm font-medium">Ngày tham quan<input aria-label="Ngày tham quan" type="date" required min={localDate()} value={travelDate} onChange={e => setTravelDate(e.target.value)} className={inputClass} /></label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="text-sm font-medium">Người lớn<input aria-label="Người lớn" type="number" min="1" step="1" required value={Number.isNaN(adultCount) ? "" : adultCount} onChange={e => setAdults(e.target.valueAsNumber)} className={inputClass} /></label>

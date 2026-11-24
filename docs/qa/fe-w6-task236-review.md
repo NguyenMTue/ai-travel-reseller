@@ -98,3 +98,7 @@ Bằng chứng collection/SHAs/patch PR #65 lưu local tại `E:/THUCTAP/ai-trav
 ## Portable handoff note
 
 See [fe-w6-reproduce.md](./fe-w6-reproduce.md) for clean-checkout setup, exact fixture/test commands and screenshot/trace regeneration. Local test-results/build evidence is not part of the Git handoff. TASK-234 historical modal prices precede the TASK-235 correction. Payment sandbox verification remains pending BE1; TASK-236 remains waiting for Tester 3 delivery. Any E:/THUCTAP paths in this report are historical local locations, not required files for running the committed tests. The TASK-236 report includes the search metadata needed to understand its conclusion; its local raw evidence JSON is supplementary only.
+
+## Mốc tích hợp 24/11/2026
+
+Origin/dev tại 6b25b6cf15f1178c1a0e81c79b588d7a9f4903ec đã có tiktok-submission-form.tsx, merchant-points-widget.tsx và reseller-leaderboard-modal.tsx. Kết luận tìm kiếm phía trên mô tả thời điểm 19/11; không dùng để kết luận hiện tại chưa có source. Lượt xử lý merge chưa review/ nghiệm thu các component này hoặc xác nhận PR/SHA bàn giao riêng của Tuấn.

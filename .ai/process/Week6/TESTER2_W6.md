@@ -29,7 +29,7 @@
 
 | ID | Task | Priority | Status | Dependency | Owner | Deliverable | Deadline |
 |---|---|:---:|:---:|---|:---:|---|:---:|
-| **TEST2-W6-01** | **Xây dựng Bộ Rubric & Kiểm định Chất lượng Video 40–50s do AI tự sinh** | **P0** | `IN_PROGRESS` | BE1 & BE2 Video | Văn Minh | Báo cáo đánh giá 5 video mẫu (Thời lượng, Âm thanh, B-roll) $\ge 9.0/10$ | 19/11 17:00 |
-| **TEST2-W6-02** | **Kiểm thử An toàn & Khả năng Chịu lỗi của Tool cào tương tác TikTok** | **P1** | `TODO` | BE3 Worker | Văn Minh | Bộ test cases với 10 loại URL TikTok khác nhau, 0 unhandled exception | 20/11 12:00 |
-| **TEST2-W6-03** | **Kiểm định Cơ chế Tích Điểm Thưởng Gamification cho Merchant** | **P1** | `TODO` | BE3 DB | Văn Minh | Biên bản test tích điểm đúng quy chế, chống gian lận số liệu | 20/11 17:00 |
-| **TEST2-W6-04** | **Phối hợp Tester 1 chạy Regression Suite toàn hệ thống trước Demo** | **P0** | `TODO` | All Features | Văn Minh | Toàn bộ 32 routes chạy ổn định, không phát sinh lỗi bảo mật | 21/11 12:00 |
+| **TEST2-W6-01** | **Xây dựng Bộ Rubric & Kiểm định Chất lượng Video 40–50s do AI tự sinh** | **P0** | `DONE` | BE1 & BE2 Video | Văn Minh | Báo cáo đánh giá 5 video mẫu (Thời lượng, Âm thanh, B-roll) $\ge 9.0/10$ | 19/11 17:00 |
+| **TEST2-W6-02** | **Kiểm thử An toàn & Khả năng Chịu lỗi của Tool cào tương tác TikTok** | **P1** | `DONE` | BE3 Worker | Văn Minh | Bộ test cases với 10 loại URL TikTok khác nhau, 0 unhandled exception | 20/11 12:00 |
+| **TEST2-W6-03** | **Kiểm định Cơ chế Tích Điểm Thưởng Gamification cho Merchant** | **P1** | `DONE` | BE3 DB | Văn Minh | Biên bản test tích điểm đúng quy chế, chống gian lận số liệu | 20/11 17:00 |
+| **TEST2-W6-04** | **Phối hợp Tester 1 chạy Regression Suite toàn hệ thống trước Demo** | **P0** | `DONE` | All Features | Văn Minh | Toàn bộ 32 routes chạy ổn định, không phát sinh lỗi bảo mật | 21/11 12:00 |

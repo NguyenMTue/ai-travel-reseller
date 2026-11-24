@@ -95,3 +95,33 @@ Final compiler audit after fixture cleanup: TypeScript has 11 errors both at HEA
 ## Portable handoff note
 
 See [fe-w6-reproduce.md](./fe-w6-reproduce.md) for clean-checkout setup, exact fixture/test commands and screenshot/trace regeneration. Local test-results/build evidence is not part of the Git handoff. TASK-234 historical modal prices precede the TASK-235 correction. Payment sandbox verification remains pending BE1; TASK-236 remains waiting for Tester 3 delivery. Any E:/THUCTAP paths in this report are historical local locations, not required files for running the committed tests. The TASK-236 report includes the search metadata needed to understand its conclusion; its local raw evidence JSON is supplementary only.
+
+## Merge origin/dev — 2026-11-24
+
+Starting FE HEAD/remote: 156ec4fded4abf57d7eb0a79ebb2dc9d1028374a; working tree was clean. Explicit fetch updated dev to 6b25b6cf15f1178c1a0e81c79b588d7a9f4903ec. FE local/remote ahead/behind was 0/0, so no collaborator commits required synchronization. Merge base: 59d21b4507d7dd28e440591575d1cfe2c542d902. Merge was held without committing until validation finished.
+
+Two content conflicts were reviewed against index stages 1/2/3 and each branch's diff:
+
+- storefront-checkout-modal.tsx: retain shared selected-package totals, explicit discount eligibility, cached drafts, retry locks and verified-ticket guard from TASK-235. Preserve dev's keyboard intent using native Enter/Space buttons with aria-pressed inside a labelled package group. Keep mobile inputs at 16px. Extra computed-style QA found the existing unlayered global font:inherit overrode text-base on both old FE and dev; the local input class now enforces text-[16px]! without changing globals. The added regression checks keyboard selection and actual computed input size at every viewport.
+- storefront-sticky-cta.tsx: retain the shared StorefrontPrice prop, selected-package amount, 48px control, modal suppression and mobile-only layout; port dev's max(12px, safe-area) bottom padding as max(0.75rem, env(safe-area-inset-bottom)). Incoming viewportFit:cover in app/layout.tsx is retained.
+
+All other updates from dev, including BE, schema migrations, portal components and QA sources, are retained. No backend/schema changes were made as conflict resolutions. Referral resolver/card and explicit voucher eligibility were not conflicted: a valid ref alone continues to show 950,000 VND for the first Ba Na package; the explicit 5% fixture shows 902,500. Changes of package and guest counts still use one pricing source across the page, Sticky CTA and checkout.
+
+### New payment contract inspected
+
+- GET /api/storefront/orders/status now exists: returns success, orderId, status and isPaid from cache or paid/completed DB status. It returns no canonical amount/currency/transaction evidence or issued ticket.
+- POST /api/webhooks/bank/vietqr optionally checks a secret only when configured; marks the paid cache before the DB lookup, and does not reconcile received amount against order amount. Therefore the status payload alone is not verified order-and-ticket evidence for this FE flow.
+- POST /api/storefront/orders/confirm now returns eTicket, but still returns it from demo fallback (dbRecorded=false), uses the caller's booking reference/amount and is not a provider payment verifier. eTicket/verifiedAt does not make the demo paid.
+- Incoming isPaid-only polling/auto-advance was deliberately not enabled. The default FE gateway still performs no live confirm/status calls and shows waiting until BE supplies an authoritative quote plus verified payment and an issued ticket bound to the same order. Regression fixtures explicitly cover the new isPaid-only and demo-eTicket payloads and keep both pending; only the proposed fully verified ticket fixture opens E-Ticket. No real payment, webhook or DB operation was executed.
+
+### Validation and baseline comparison
+
+- Checkout/pricing/referral logic: 9/9 pass. Legacy offline storefront: 7/7 pass; SF-07 excluded because it invokes the legacy confirmation writer.
+- Browser fixture: checkout 20/20, Storefront mobile 20/20 at 320/390/768/1440px; referral 10/10 at 390/1440px. Checkout/mobile were rerun after the computed-font correction; the final checkout run also checks Enter/Space selection and >=16px input font. No missing desktop referral card reproduced. Viewed 320px footer/CTA and edited-quote screenshots.
+- Artifacts remain ignored: test-results/merge-dev-20261124-checkout-font, merge-dev-20261124-mobile-font and merge-dev-20261124-referral. Recreate with the launcher/commands in fe-w6-reproduce.md, replacing --output accordingly. Initial runs before the font correction remain under merge-dev-20261124-checkout/mobile. The supplemental computed-font smoke initially failed on inherited 14px; this led to the explicit font correction and final regression assertions.
+- TypeScript compiler comparison against exact fetched dev: 1 error in both trees, zero introduced. Existing error: app/api/admin/fraud/dismiss/route.ts, TS2339, user is absent from the allowed admin-access result. Earlier 11-error reports describe the old dev baseline, not the new one.
+- Lint of all FE-different TS/TSX/MJS files compared against dev: dev 5 errors / merged 3 errors, zero introduced; remaining three are existing no-explicit-any in data.ts. Scoped lint of conflict resolutions and checkout tests passes.
+- git diff --cached --check reports 62 whitespace issues, all identical to the incoming dev diff; zero introduced by conflict handling. No unrelated Markdown hard breaks, Python, SQL or other members' files were reformatted to hide them. git diff --cached --check origin/dev -- passes for the FE delta. No unmerged entries or conflict markers remain.
+- Incoming live QA suites storefront-referral-checkout, mobile-compatibility-w6 and commission-idempotency-audit were preserved, not run as fixture acceptance: they assume the old ref-only discount / transfer-claim workflow, can invoke the live confirmation writer and write tracked screenshot evidence. Their earlier PASS reports are not claimed as validation of this guarded FE merge. Real API/payment sandbox remains unverified.
+
+The three Tester 3 components now exist in fetched dev. TASK-236's report is a historical 19/11 discovery result; this merge does not constitute reviewing/accepting those components. No PR, approval, dev push or force-push is part of this operation.

@@ -8,8 +8,9 @@ import type { CampaignCreatePolicy } from "./campaign-policy";
 import { vietnamCampaignDates } from "./campaign-dates";
 
 export type SourceReply = { data: unknown; error: unknown; status?: number };
-export type CampaignInsert = Omit<CampaignInput, "start_date" | "end_date"> & {
+export type CampaignInsert = Omit<CampaignInput, "start_date" | "end_date" | "ai_custom_instructions"> & {
   merchant_id: string; start_date: string; end_date: string; status: string;
+  ai_custom_instructions?: string;
 };
 export interface MerchantCampaignSource {
   getUser(): Promise<SourceReply>;
@@ -110,9 +111,11 @@ export async function saveMerchantCampaign(
   if (!policy || !policy.initialStatus.trim() || policy.calendarDates !== "inclusive-local-day" || policy.timeZone !== "Asia/Ho_Chi_Minh") {
     return { status: "blocked", message: campaignContractMessage };
   }
+  const { ai_custom_instructions, ...coreData } = validated.data;
   const payload: CampaignInsert = {
-    ...validated.data, merchant_id: access.merchantId, status: policy.initialStatus,
+    ...coreData, merchant_id: access.merchantId, status: policy.initialStatus,
     ...vietnamCampaignDates(validated.data.start_date, validated.data.end_date),
+    ...(ai_custom_instructions ? { ai_custom_instructions } : {}),
   };
   try {
     // Exactly one insert. No retry/upsert or second webhook after a transport failure.

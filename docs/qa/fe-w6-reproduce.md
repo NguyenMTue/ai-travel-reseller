@@ -1,6 +1,6 @@
 # Chạy lại QA FE tuần 6 (TASK-233/234/235)
 
-Các kết quả browser đã ghi trong handoff là kiểm tra local bằng fixture, không phải thanh toán sandbox thật. API quote/status/ticket thật còn chờ BE1; TASK-236 còn chờ đúng PR/nhánh/SHA của Tester 3. Không chạy migration, seed hoặc test tạo đơn thật để tái tạo bằng chứng này.
+Các kết quả browser đã ghi trong handoff là kiểm tra local bằng fixture, không phải thanh toán sandbox thật. Dev ngày 24/11 đã có API status và các component Tester 3; vẫn chờ quote/thanh toán đối soát và vé đúng đơn để bật adapter thật. Báo cáo TASK-236 là kết quả tìm bàn giao ngày 19/11, không phải nghiệm thu các component vừa có trên dev. Không chạy migration, seed hoặc test tạo đơn thật để tái tạo bằng chứng này.
 
 ## Checkout và dependencies
 
@@ -19,7 +19,7 @@ Nếu đã có Chromium tương thích, có thể đặt `$env:PLAYWRIGHT_CHROMI
 node --experimental-strip-types --test tests/storefront-checkout.test.mjs tests/storefront-pricing.test.mjs tests/storefront-referral.test.mjs
 ```
 
-Kỳ vọng 8 test. Resolver referral có timeout 1200ms hiện hữu; một lần chạy đồng thời với browser bị thiếu identity, chạy riêng sau đó pass. Không coi retry pass là đã giải quyết tính chập chờn này.
+Kỳ vọng 9 test (gồm hồi quy hợp đồng status/eTicket từ dev ngày 24/11). Resolver referral có timeout 1200ms hiện hữu; một lần chạy đồng thời với browser bị thiếu identity, chạy riêng sau đó pass. Không coi retry pass là đã giải quyết tính chập chờn này.
 
 Offline suite cần không có Supabase credentials trong process. Trong terminal QA riêng, xóa các biến process sau (không đọc/sửa file env):
 

@@ -19,6 +19,8 @@ async function install(page: Page, modes: string[] = ["pending"], prepareError =
       const mode = modes[Math.min(checks.length - 1, modes.length - 1)];
       if (mode === "network") return route.abort("internetdisconnected");
       if (mode === "http") return route.fulfill({ status: 503, json: {} });
+      if (mode === "status-paid") return route.fulfill({ json: { success: true, orderId: quote.orderId, status: "paid", isPaid: true } });
+      if (mode === "demo-ticket") return route.fulfill({ json: { success: true, dbRecorded: false, orderId: quote.orderId, eTicket: { ticketCode: "ET-DEMO", amount: quote.totalAmount, qrPayload: "TRAVEL_LINK_ETICKET:" + quote.orderId + ":ET-DEMO:" + quote.totalAmount, verifiedAt: new Date().toISOString() } } });
       if (mode === "demo" || mode === "recorded") return route.fulfill({ json: { success: true, dbRecorded: mode === "recorded", orderId: quote.orderId, commission: { status: "confirmed" } } });
       if (mode === "paid" || mode === "wrong") return route.fulfill({ json: { status: "paid", paymentVerified: true, requestId: quote.requestId, orderId: mode === "wrong" ? "OTHER-ORDER" : quote.orderId, amount: quote.totalAmount, currency: "VND", transactionId: "TX-SERVER-FIXTURE", paidAt: new Date().toISOString(), ticket: { orderId: quote.orderId, code: "ET-SERVER-FIXTURE", qrPayload: "signed-server-fixture-payload" } } });
       return route.fulfill({ json: { status: "pending", orderId: quote.orderId } });
@@ -78,9 +80,9 @@ test("confirmed pricing, guests/package edits and back preserve data and bind QR
 });
 
 test("demo, recorded, pending and wrong-order evidence wait; only verified server ticket is shown", async ({ page }, info) => {
-  const calls = await install(page, ["demo", "recorded", "pending", "wrong", "paid"]);
+  const calls = await install(page, ["demo", "recorded", "pending", "wrong", "status-paid", "demo-ticket", "paid"]);
   await open(page); await fill(page); await next(page).click();
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 6; i++) {
     await check(page).click();
     await expect(page.getByRole("status").filter({ hasText: "Đang chờ đối tác" })).toBeVisible();
     await expect(page.getByRole("region", { name: "E-Ticket đã xác nhận" })).toHaveCount(0);
@@ -92,7 +94,7 @@ test("demo, recorded, pending and wrong-order evidence wait; only verified serve
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Lưu mã vé", exact: true }).click();
   expect((await download).suggestedFilename()).toBe("ET-SERVER-FIXTURE.png");
-  expect(calls.prepares).toHaveLength(1); expect(calls.checks).toHaveLength(5);
+  expect(calls.prepares).toHaveLength(1); expect(calls.checks).toHaveLength(7);
   expect(new Set(calls.checks.map(q => q.orderId)).size).toBe(1);
   await page.screenshot({ path: info.outputPath("server-ticket-fixture.png") });
 });
@@ -115,6 +117,12 @@ test("HTTP failure, network loss, retry and fast clicks keep request/order ident
 
 test("required validation blocks invalid contact/date/counts without preparing orders", async ({ page }) => {
   const calls = await install(page); await open(page);
+  const packages = page.getByRole("dialog").getByRole("group", { name: "Chọn gói vé tham quan" }).getByRole("button");
+  await packages.nth(1).focus(); await packages.nth(1).press("Space");
+  await expect(packages.nth(1)).toHaveAttribute("aria-pressed", "true");
+  await packages.nth(0).focus(); await packages.nth(0).press("Enter");
+  await expect(packages.nth(0)).toHaveAttribute("aria-pressed", "true");
+  expect(await page.getByRole("dialog").locator("input").evaluateAll(nodes => nodes.every(node => parseFloat(getComputedStyle(node).fontSize) >= 16))).toBe(true);
   await next(page).click(); await expect(page.getByRole("dialog").getByRole("alert")).toContainText("họ tên");
   await expect(page.getByRole("dialog").getByRole("alert")).toBeInViewport();
   await page.getByRole("textbox", { name: "Họ và tên", exact: true }).fill("Khách Fixture");

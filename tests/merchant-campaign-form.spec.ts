@@ -50,10 +50,10 @@ test.describe("Kiểm thử Form tạo Campaign của Merchant trên trang /merc
     await expect(page.getByLabel("Ngày bắt đầu", { exact: false })).toBeVisible();
     await expect(page.getByLabel("Ngày kết thúc", { exact: false })).toBeVisible();
 
-    // 5. Kiểm tra trường Ghi chú cho AI (đang disable theo tiến độ triển khai)
-    const aiNotes = page.getByRole("textbox", { name: "Ghi chú cho AI — chưa hỗ trợ" });
+    // 5. Kiểm tra trường Ghi chú cho AI (đã mở khóa cho Merchant cấu hình)
+    const aiNotes = page.locator("#ai-notes");
     await expect(aiNotes).toBeVisible();
-    await expect(aiNotes).toBeDisabled();
+    await expect(aiNotes).toBeEnabled();
 
     // 6. Kiểm tra các nút hành động
     await expect(page.getByRole("link", { name: "Quay lại Dashboard" })).toBeVisible();
