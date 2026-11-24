@@ -393,6 +393,7 @@ def generate_tiktok_review_script(tour: dict, api_key: str = None, use_rag: bool
     original_price = tour.get("original_price") or "1.250.000 VNĐ"
     highlights = tour.get("highlights") or tour.get("description") or ""
     target_audience = tour.get("target_audience") or "Khách du lịch tự túc, gia đình và bạn trẻ"
+    custom_instructions = tour.get("custom_instructions") or tour.get("ai_custom_instructions") or ""
 
     # 1. Truy xuất RAG nếu được yêu cầu
     rag_context = ""
@@ -426,6 +427,7 @@ THÔNG TIN TOUR:
 - Giá niêm yết: {original_price}
 - Điểm nhấn / Mô tả: {highlights}
 - Đối tượng người xem: {target_audience}
+{f"- Ghi chú tiếp thị từ doanh nghiệp: {custom_instructions}" if custom_instructions else ""}
 
 {f"TRI THỨC THỰC TẾ (RAG GROUNDING):{chr(10)}{rag_context}" if rag_context else ""}
 

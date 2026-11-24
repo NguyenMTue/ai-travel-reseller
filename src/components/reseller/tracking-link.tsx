@@ -154,9 +154,12 @@ function TrackingLinkDialog({ input, request = requestLiveTrackingLink, preview 
             <p className={styles.hint}>QR mã hóa đúng link phía trên. Nội dung trong Content Kit vẫn giữ nguyên; hãy kiểm tra link trước khi sử dụng.</p>
           </div>}
           {(activeTab === "all" || activeTab === "voucher") && <div className={styles.voucherPanel} role="tabpanel" aria-label="Ưu đãi trực tiếp">
-            <label htmlFor="tracking-voucher" className={styles.label}>Mã Voucher</label>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+              <label htmlFor="tracking-voucher" className={styles.label}>Mã Voucher</label>
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">Giảm 5%</span>
+            </div>
             <input ref={voucherManual} id="tracking-voucher" name="voucher_code" data-testid="unique-voucher-code" value={voucherCode} readOnly className={styles.voucherCode} />
-            <p className={styles.hint}>Chia sẻ mã này khi Livestream hoặc tư vấn Offline để khách nhập khi thanh toán.</p>
+            <p className={styles.hint}>Nhập mã <strong>{voucherCode}</strong> tại trang thanh toán để được giảm ngay 5% vé chính hãng! Chia sẻ mã này khi Livestream hoặc tư vấn Offline để khách nhập khi thanh toán.</p>
             <div className={styles.actions}>
               <Button type="button" data-testid="copy-voucher-btn" onClick={copyVoucher} disabled={voucherCopy === "pending"}>{voucherCopy === "pending" ? "Đang sao chép mã…" : "Copy Mã Voucher"}</Button>
             </div>

@@ -37,7 +37,7 @@ export async function createMerchantCampaign(input: unknown): Promise<CampaignSa
           const adminClient = createAdminClient();
           const { data: cRow } = await adminClient
             .from("campaigns")
-            .select("id, merchant_id, product_id, name, target_location, target_audience")
+            .select("id, merchant_id, product_id, name, target_location, target_audience, ai_custom_instructions")
             .eq("id", campaignId)
             .maybeSingle();
 
@@ -51,6 +51,7 @@ export async function createMerchantCampaign(input: unknown): Promise<CampaignSa
                 location: cRow.target_location || "Miền Trung",
                 targetAudience: cRow.target_audience || "Du khách trẻ",
                 targetDurationSec: 46,
+                customInstructions: cRow.ai_custom_instructions || undefined,
               },
               `auto-campaign-trigger-${Date.now()}`
             );

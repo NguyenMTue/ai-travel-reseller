@@ -103,6 +103,13 @@ export function calculateEngagementScore(
   return Number(score.toFixed(2));
 }
 
+interface CachedTikTokMetrics {
+  metrics: TikTokMetrics;
+  cachedAt: number;
+}
+const tiktokMetricsCache = new Map<string, CachedTikTokMetrics>();
+const TIKTOK_CACHE_TTL_MS = 15 * 60 * 1000; // 15 phút
+
 /**
  * Microservice cào/trích xuất chỉ số tương tác thực tế từ TikTok
  * 1. Gọi TikTok oEmbed API chính thức
@@ -112,6 +119,11 @@ export async function scrapeTikTokEngagement(
   tiktokUrl: string
 ): Promise<TikTokMetrics> {
   const cleanUrl = tiktokUrl.trim();
+  const cached = tiktokMetricsCache.get(cleanUrl);
+  if (cached && Date.now() - cached.cachedAt < TIKTOK_CACHE_TTL_MS) {
+    return cached.metrics;
+  }
+
   const videoId = extractTikTokVideoId(cleanUrl);
   const fallbackUsername = extractTikTokUsername(cleanUrl);
 
@@ -152,7 +164,7 @@ export async function scrapeTikTokEngagement(
   const shares = Math.max(8, Math.round(likes * 0.04));
   const engagementScore = calculateEngagementScore(views, likes, comments, shares);
 
-  return {
+  const metricsResult: TikTokMetrics = {
     views,
     likes,
     comments,
@@ -163,6 +175,10 @@ export async function scrapeTikTokEngagement(
     thumbnailUrl,
     videoId,
   };
+
+  tiktokMetricsCache.set(cleanUrl, { metrics: metricsResult, cachedAt: Date.now() });
+
+  return metricsResult;
 }
 
 /**

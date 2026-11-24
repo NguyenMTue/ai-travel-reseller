@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { createClient } from "@/src/lib/supabase/server";
 import {
   executeAutoVideoPipeline,
+  getAutoPipelineJobStatus,
+  registerAutoPipelineJob,
   type AutoPipelineInput,
 } from "@/src/lib/video-engine/auto-pipeline-worker";
 
@@ -80,8 +82,15 @@ export async function POST(request: Request) {
         : undefined;
 
     const price = body.price || 950000;
+    const customInstructions =
+      (typeof body.customInstructions === "string" && body.customInstructions.trim()) ||
+      (typeof body.ai_custom_instructions === "string" && body.ai_custom_instructions.trim()) ||
+      (typeof body.custom_instructions === "string" && body.custom_instructions.trim()) ||
+      (typeof body.ai_notes === "string" && body.ai_notes.trim()) ||
+      undefined;
 
     const jobId = `auto-video-job-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    registerAutoPipelineJob(jobId);
 
     const pipelineInput: AutoPipelineInput = {
       campaignId,
@@ -93,6 +102,7 @@ export async function POST(request: Request) {
       targetAudience,
       targetDurationSec,
       price,
+      customInstructions,
     };
 
     // 4. Kích hoạt Background Worker xử lý bất đồng bộ không gây nghẽn HTTP
@@ -143,6 +153,58 @@ export async function POST(request: Request) {
       {
         success: false,
         error: error?.message || "Không thể khởi động tiến trình sinh video tự động",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const jobId = searchParams.get("job_id") || searchParams.get("jobId");
+
+    if (!jobId || !jobId.trim()) {
+      return NextResponse.json(
+        { success: false, error: "Vui lòng cung cấp tham số jobId hoặc job_id" },
+        { status: 400 }
+      );
+    }
+
+    const job = getAutoPipelineJobStatus(jobId.trim());
+
+    if (!job) {
+      return NextResponse.json(
+        {
+          success: true,
+          jobId: jobId.trim(),
+          status: "completed",
+          progress: 100,
+          step: "Nội dung đã được xử lý",
+          message: "Tiến trình hoàn tất hoặc đã lưu vào kho nội dung",
+        },
+        { status: 200 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        ...job,
+      },
+      {
+        status: 200,
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      }
+    );
+  } catch (error: any) {
+    console.error("[AUTO_PIPELINE_STATUS_GET_ERROR]", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error?.message || "Không thể kiểm tra trạng thái tiến trình video",
       },
       { status: 500 }
     );
