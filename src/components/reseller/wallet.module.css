@@ -56,6 +56,17 @@
 .loading { min-height: 50vh; }
 .skeletons { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 28px; }
 .skeletons > div { height: 190px; border: 1px solid var(--border); border-radius: 16px; background: var(--muted); }
+.filterBar { display: flex; align-items: center; gap: 12px; margin: 0 0 16px 0; flex-wrap: wrap; }
+.filterLabel { font-size: 13px; font-weight: 500; color: var(--foreground); }
+.filterGroup { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.filterBtn { font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); color: var(--muted-foreground); cursor: pointer; transition: all 0.15s ease; }
+.filterBtn:hover { background: var(--secondary); color: var(--foreground); }
+.filterBtnActive { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary); font-weight: 500; }
+.paginationBar { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 20px; }
+.pageBtn { font-size: 13px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); color: var(--foreground); cursor: pointer; }
+.pageBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+.pageBtn:not(:disabled):hover { background: var(--secondary); }
+.pageIndicator { font-size: 13px; color: var(--muted-foreground); }
 @media (max-width: 900px) {
   .balances { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .earnings { grid-column: 1/-1; }

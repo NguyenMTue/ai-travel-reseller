@@ -39,6 +39,58 @@ export interface AutoPipelineInput {
   targetAudience?: string;
   targetDurationSec?: number;
   price?: string | number;
+  customInstructions?: string;
+}
+
+export interface AutoPipelineJobStatus {
+  jobId: string;
+  status: "queued" | "processing" | "completed" | "failed";
+  progress: number;
+  step: string;
+  contentId?: string;
+  videoUrl?: string;
+  durationSec?: number;
+  error?: string;
+  updatedAt: string;
+}
+
+const jobStatusRegistry = new Map<string, AutoPipelineJobStatus>();
+
+export function getAutoPipelineJobStatus(jobId: string): AutoPipelineJobStatus | null {
+  return jobStatusRegistry.get(jobId) || null;
+}
+
+export function registerAutoPipelineJob(jobId: string): void {
+  jobStatusRegistry.set(jobId, {
+    jobId,
+    status: "queued",
+    progress: 10,
+    step: "Tiếp nhận yêu cầu sinh video tự động",
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+export function updateAutoPipelineJobStatus(
+  jobId: string,
+  update: Partial<AutoPipelineJobStatus>
+): void {
+  const current = jobStatusRegistry.get(jobId);
+  if (current) {
+    jobStatusRegistry.set(jobId, {
+      ...current,
+      ...update,
+      updatedAt: new Date().toISOString(),
+    });
+  } else {
+    jobStatusRegistry.set(jobId, {
+      jobId,
+      status: update.status || "processing",
+      progress: update.progress || 50,
+      step: update.step || "Đang xử lý",
+      ...update,
+      updatedAt: new Date().toISOString(),
+    });
+  }
 }
 
 export interface AutoPipelineResult {
@@ -84,7 +136,7 @@ export async function generateAutoReviewScript(
             },
             {
               role: "user",
-              content: `Tạo kịch bản review 4 phân cảnh 40-50 giây cho tour ${tourName} tại ${location}. Điểm nổi bật: ${highlights}. Giá: ${priceDisplay}. Trả về JSON có title, caption, scenes (sceneNumber, role, durationSec, timeRange, visualTag, overlayText, voiceoverText, bRollDescription).`,
+              content: `Tạo kịch bản review 4 phân cảnh 40-50 giây cho tour ${tourName} tại ${location}. Điểm nổi bật: ${highlights}. Giá: ${priceDisplay}.${input.customInstructions ? ` Ghi chú từ doanh nghiệp: ${input.customInstructions}.` : ""} Trả về JSON có title, caption, scenes (sceneNumber, role, durationSec, timeRange, visualTag, overlayText, voiceoverText, bRollDescription).`,
             },
           ],
         }),
@@ -327,8 +379,20 @@ export async function executeAutoVideoPipeline(
   const adminClient = createAdminClient();
 
   try {
+    updateAutoPipelineJobStatus(jobId, {
+      status: "processing",
+      progress: 20,
+      step: "Đang sinh kịch bản review AI 40-50s",
+    });
+
     // 1. Sinh kịch bản review 40–50s
     const script = await generateAutoReviewScript(input);
+
+    updateAutoPipelineJobStatus(jobId, {
+      status: "processing",
+      progress: 45,
+      step: "Đang khớp kho tư liệu B-roll & Voiceover",
+    });
 
     // 2. Tự động khớp tư liệu từ DB / workspace
     const matchedAssets = await matchAssetsForAutoPipeline(
@@ -337,11 +401,23 @@ export async function executeAutoVideoPipeline(
       input.location
     );
 
+    updateAutoPipelineJobStatus(jobId, {
+      status: "processing",
+      progress: 70,
+      step: "Đang render hiệu ứng video FFmpeg (9:16 dọc 1080x1920)",
+    });
+
     // 3. Render video 40–50s (MP4 9:16 dọc 1080x1920)
     const { videoBuffer, durationSec } = await composeAutoReviewVideo(
       script,
       matchedAssets
     );
+
+    updateAutoPipelineJobStatus(jobId, {
+      status: "processing",
+      progress: 88,
+      step: "Đang tải video lên Supabase Storage bucket campaign-videos",
+    });
 
     // 4. Upload lên Supabase Storage bucket `campaign-videos`
     const timestamp = Date.now();
@@ -389,6 +465,15 @@ export async function executeAutoVideoPipeline(
       console.warn("[AUTO_PIPELINE] Contents insert warning:", contentErr.message);
     }
 
+    updateAutoPipelineJobStatus(jobId, {
+      status: "completed",
+      progress: 100,
+      step: "Hoàn tất tạo nội dung và lưu vào danh sách chờ duyệt",
+      contentId: newContent?.id,
+      videoUrl: uploadedVideoUrl,
+      durationSec,
+    });
+
     return {
       success: true,
       jobId,
@@ -399,6 +484,12 @@ export async function executeAutoVideoPipeline(
     };
   } catch (err: any) {
     console.error("[AUTO_PIPELINE_ERROR] Worker failed:", err);
+    updateAutoPipelineJobStatus(jobId, {
+      status: "failed",
+      progress: 100,
+      step: "Tiến trình gặp lỗi",
+      error: err?.message || "Lỗi tiến trình sinh video tự động",
+    });
     return {
       success: false,
       jobId,

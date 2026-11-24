@@ -160,8 +160,26 @@ export function CampaignForm({ products, canSave, submitAction, preview = false 
       </fieldset>
       <section className={styles.aiNotes} aria-labelledby="ai-notes-title">
         <h2 id="ai-notes-title">Ghi chú cho AI</h2>
-        <p id="ai-notes-help">Chưa hỗ trợ lưu ghi chú riêng cho AI. Vị trí lưu và cách sử dụng thông tin này đang chờ xác nhận.</p>
-        <textarea id="ai-notes" aria-label="Ghi chú cho AI — chưa hỗ trợ" aria-describedby="ai-notes-help" disabled rows={3} placeholder="Tính năng này chưa nhận dữ liệu." />
+        <p id="ai-notes-help">Ghi chú yêu cầu tiếp thị hoặc phong cách kịch bản cho AI (tối đa {campaignLimits.ai_custom_instructions} ký tự).</p>
+        <textarea
+          id="ai-notes"
+          name="ai_custom_instructions"
+          aria-label="Ghi chú cho AI"
+          aria-describedby="ai-notes-help"
+          rows={3}
+          maxLength={campaignLimits.ai_custom_instructions}
+          value={values.ai_custom_instructions || ""}
+          onChange={(event) => {
+            const val = event.target.value;
+            setValues(current => ({ ...current, ai_custom_instructions: val }));
+          }}
+          placeholder="Ví dụ: Nhấn mạnh buffet 100 món, khuyến khích khách đi vào buổi sáng để săn mây..."
+        />
+        {errors.ai_custom_instructions && (
+          <p id="ai_custom_instructions-error" className={styles.fieldError}>
+            {errors.ai_custom_instructions}
+          </p>
+        )}
       </section>
       <div className={styles.actions}>
         <Link href={dashboard} className={styles.returnLink}>Quay lại Dashboard</Link>

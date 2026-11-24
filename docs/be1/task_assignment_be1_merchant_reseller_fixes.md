@@ -107,15 +107,28 @@ flowchart TD
 
 ---
 
-## 3. KỊCH BẢN KIỂM THỬ XÁC MINH (VERIFICATION)
+## 3. KỊCH BẢN KIỂM THỬ XÁC MINH & KẾT QUẢ NGHIỆM THU (VERIFICATION)
+
 ```powershell
 # 1. Kiểm tra Type-check TypeScript toàn hệ thống
-npx tsc -p tsconfig.json --noEmit
+npx tsc -p tsconfig.json --noEmit --incremental false
+# Output: Exit code 0 (0 error)
 
 # 2. Chạy bộ kiểm thử tự động BE1 Tuần 6
 npm run test:be1:w6
+# Output: 10/10 tests passed (100%)
 
 # 3. Chạy kiểm thử ví hoa hồng và chống rút tiền trùng lặp
 npm run test:payout-double-spend
-npm run benchmark:wallet
+# Output: 5/5 tests passed (100%)
+
+# 4. Chạy kiểm thử Sprint tổng hợp BE1 & BE2
+npm run test:final-sprint
+# Output: 16/16 tests passed (100%)
 ```
+
+### Bảng Trạng Thái Nghiệm Thu BE1 (24/11/2026):
+- [x] **BE1-MERCH-01**: Mở khóa trường "Ghi chú cho AI" (`ai_custom_instructions`) form tạo campaign, lưu database và tích hợp prompt video generator.
+- [x] **BE1-MERCH-02**: Hàng đợi bất đồng bộ non-blocking (Next.js `after()`) và endpoint `GET /api/merchant/video/auto-pipeline?jobId=...` polling trạng thái render video chống timeout HTTP 504.
+- [x] **BE1-RESELL-01**: Hoàn thiện Tab "Mã Voucher", badge giảm giá 5%, nút 1-click copy mã voucher ký tự phục vụ bán hàng Livestream TikTok / Offline.
+- [x] **BE1-RESELL-02**: Bổ sung bộ lọc khoảng ngày (Tất cả, Hôm nay, 7 ngày, 30 ngày) và phân trang danh sách hoa hồng; thiết lập cache in-memory 15 phút cho TikTok API.

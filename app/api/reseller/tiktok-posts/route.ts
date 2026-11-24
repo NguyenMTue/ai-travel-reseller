@@ -12,6 +12,13 @@ export const runtime = "nodejs";
 const UUID_REGEX = /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
 const DEMO_RESELLER_ID = "22222222-2222-2222-2222-111111111111"; // Travel Vlogger Danang
 
+interface CachedGetResult {
+  data: any;
+  cachedAt: number;
+}
+const tiktokGetCache = new Map<string, CachedGetResult>();
+const GET_CACHE_TTL_MS = 15 * 60 * 1000; // 15 phút (BE1-RESELL-02)
+
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
@@ -105,6 +112,14 @@ export async function GET(request: Request) {
       resellerId = queryResellerId.trim();
     }
 
+    const cacheKey = `${resellerId}:${queryCampaignId || "all"}`;
+    const cached = tiktokGetCache.get(cacheKey);
+    if (cached && Date.now() - cached.cachedAt < GET_CACHE_TTL_MS) {
+      return NextResponse.json(cached.data, {
+        headers: { "X-Cache": "HIT", "Cache-Control": "private, max-age=900" },
+      });
+    }
+
     const adminClient = createAdminClient();
 
     let query = adminClient
@@ -160,7 +175,7 @@ export async function GET(request: Request) {
       0
     );
 
-    return NextResponse.json({
+    const responsePayload = {
       success: true,
       reseller_id: resellerId,
       posts,
@@ -172,6 +187,12 @@ export async function GET(request: Request) {
         total_shares: totalShares,
         total_engagement_score: Number(totalEngagement.toFixed(2)),
       },
+    };
+
+    tiktokGetCache.set(cacheKey, { data: responsePayload, cachedAt: Date.now() });
+
+    return NextResponse.json(responsePayload, {
+      headers: { "X-Cache": "MISS", "Cache-Control": "private, max-age=900" },
     });
   } catch (error: any) {
     console.error("[TIKTOK_POSTS_GET_ERROR]", error);

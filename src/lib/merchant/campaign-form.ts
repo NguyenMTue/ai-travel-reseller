@@ -2,13 +2,16 @@ import { z } from "zod";
 import { databaseUuidSchema } from "@/src/lib/reseller/database-uuid";
 
 // Defensive FE limits, not inferred database VARCHAR constraints.
-export const campaignLimits = { name: 150, target_audience: 1000, target_location: 160 } as const;
+export const campaignLimits = { name: 150, target_audience: 1000, target_location: 160, ai_custom_instructions: 500 } as const;
 export const campaignFields = ["product_id", "name", "commission_rate", "start_date", "end_date", "target_audience", "target_location"] as const;
 export type CampaignField = typeof campaignFields[number];
-export type CampaignFormValues = Record<CampaignField, string>;
-export type CampaignFieldErrors = Partial<Record<CampaignField, string>>;
+export type CampaignFormValues = Record<CampaignField, string> & {
+  ai_custom_instructions?: string;
+};
+export type CampaignFieldErrors = Partial<Record<CampaignField | "ai_custom_instructions", string>>;
 export const emptyCampaignValues: CampaignFormValues = {
   product_id: "", name: "", commission_rate: "", start_date: "", end_date: "", target_audience: "", target_location: "",
+  ai_custom_instructions: "",
 };
 
 const dateSchema = z.string().length(10).pipe(z.iso.date()).refine(value => Number(value.slice(0, 4)) >= 1);
@@ -21,6 +24,7 @@ const campaignSchema = z.object({
   end_date: dateSchema,
   target_audience: z.string().trim().min(1).max(campaignLimits.target_audience),
   target_location: z.string().trim().min(1).max(campaignLimits.target_location),
+  ai_custom_instructions: z.string().trim().max(campaignLimits.ai_custom_instructions).optional(),
 }).refine(value => value.end_date >= value.start_date, { path: ["end_date"], message: "END_BEFORE_START" });
 export type CampaignInput = z.infer<typeof campaignSchema>;
 
@@ -51,9 +55,13 @@ export function validateCampaignInput(input: unknown):
   if (parsed.success) return { success: true, data: parsed.data };
   const fieldErrors: CampaignFieldErrors = {};
   for (const issue of parsed.error.issues) {
-    const field = issue.path[0] as CampaignField;
-    if (campaignFields.includes(field)) fieldErrors[field] = issue.message === "END_BEFORE_START"
-      ? "Ngày kết thúc không được trước ngày bắt đầu." : fieldMessages[field];
+    const field = issue.path[0] as CampaignField | "ai_custom_instructions";
+    if (field === "ai_custom_instructions") {
+      fieldErrors.ai_custom_instructions = `Ghi chú cho AI không được vượt quá ${campaignLimits.ai_custom_instructions} ký tự.`;
+    } else if (campaignFields.includes(field as CampaignField)) {
+      fieldErrors[field as CampaignField] = issue.message === "END_BEFORE_START"
+        ? "Ngày kết thúc không được trước ngày bắt đầu." : fieldMessages[field as CampaignField];
+    }
   }
   return { success: false, fieldErrors, message: "Kiểm tra lại các trường được đánh dấu." };
 }

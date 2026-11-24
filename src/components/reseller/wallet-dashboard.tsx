@@ -37,8 +37,37 @@ export function WalletDashboard({
 }) {
   const [isPayoutOpen, setIsPayoutOpen] = useState(false);
   const [payouts, setPayouts] = useState<PayoutRequestItem[]>([]);
+  const [dateFilter, setDateFilter] = useState<"all" | "today" | "7d" | "30d">("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 5;
+
   const b = wallet.balances,
     m = wallet.order_metrics;
+
+  const filteredCommissions = wallet.recent_commissions.filter((item) => {
+    if (dateFilter === "all") return true;
+    const itemDate = new Date(item.created_at).getTime();
+    if (isNaN(itemDate)) return true;
+    const now = Date.now();
+    if (dateFilter === "today") {
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      return itemDate >= startOfToday.getTime();
+    }
+    if (dateFilter === "7d") {
+      return itemDate >= now - 7 * 24 * 60 * 60 * 1000;
+    }
+    if (dateFilter === "30d") {
+      return itemDate >= now - 30 * 24 * 60 * 60 * 1000;
+    }
+    return true;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filteredCommissions.length / PAGE_SIZE));
+  const paginatedCommissions = filteredCommissions.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   const loadPayouts = useCallback(async () => {
     try {
@@ -249,65 +278,116 @@ export function WalletDashboard({
             <p className="eyebrow">LỊCH SỬ HOA HỒNG</p>
             <h2 id="wallet-history-title">Những giao dịch gần đây</h2>
           </div>
-          <span>Tối đa 10 giao dịch gần nhất</span>
+          <span>{filteredCommissions.length} giao dịch được ghi nhận</span>
         </div>
         <p className={styles.historyHelp}>
-          Ngày hiển thị là ngày ghi nhận hoa hồng. Danh sách hiện chưa hỗ trợ bộ lọc hoặc phân trang.
+          Ngày hiển thị là ngày ghi nhận hoa hồng (UTC+7). Sử dụng bộ lọc và phân trang bên dưới để tra cứu chi tiết.
         </p>
-        {wallet.recent_commissions.length === 0 ? (
+
+        {/* Thanh chọn khoảng thời gian */}
+        <div className={styles.filterBar} role="group" aria-label="Bộ lọc khoảng ngày">
+          <span className={styles.filterLabel}>Khoảng ngày:</span>
+          <div className={styles.filterGroup}>
+            {[
+              { id: "all", label: "Tất cả" },
+              { id: "today", label: "Hôm nay" },
+              { id: "7d", label: "7 ngày qua" },
+              { id: "30d", label: "30 ngày qua" },
+            ].map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                className={`${styles.filterBtn} ${dateFilter === f.id ? styles.filterBtnActive : ""}`}
+                onClick={() => {
+                  setDateFilter(f.id as "all" | "today" | "7d" | "30d");
+                  setCurrentPage(1);
+                }}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {filteredCommissions.length === 0 ? (
           <div className={styles.empty}>
             <Wallet size={28} aria-hidden="true" />
-            <h3>Chưa có giao dịch hoa hồng</h3>
+            <h3>Chưa có giao dịch hoa hồng trong khoảng thời gian này</h3>
             <p>
-              Các khoản hoa hồng được ghi nhận sẽ xuất hiện tại đây. Số liệu tổng quan phía trên là kết quả do dịch vụ ví
-              trả về.
+              Các khoản hoa hồng được ghi nhận sẽ xuất hiện tại đây khi có đơn hàng thành công từ link tiếp thị của bạn.
             </p>
           </div>
         ) : (
-          <ul className={styles.transactions}>
-            {wallet.recent_commissions.map((item) => {
-              const status = walletStatus(item.status);
-              return (
-                <li key={item.id} className={styles.transaction}>
-                  <div className={styles.transactionTitle}>
-                    <h3>{item.campaign_name.trim() || "Chưa có tên chiến dịch"}</h3>
-                    <span className={styles.badge} data-tone={status.tone}>
-                      {status.label}
-                    </span>
-                  </div>
-                  <dl className={styles.transactionMeta}>
-                    <div>
-                      <dt>Mã đặt chỗ</dt>
-                      <dd>
-                        {item.booking_reference.trim() && item.booking_reference !== "N/A"
-                          ? item.booking_reference
-                          : "Chưa có mã đặt chỗ"}
-                      </dd>
+          <>
+            <ul className={styles.transactions}>
+              {paginatedCommissions.map((item) => {
+                const status = walletStatus(item.status);
+                return (
+                  <li key={item.id} className={styles.transaction}>
+                    <div className={styles.transactionTitle}>
+                      <h3>{item.campaign_name.trim() || "Chưa có tên chiến dịch"}</h3>
+                      <span className={styles.badge} data-tone={status.tone}>
+                        {status.label}
+                      </span>
                     </div>
-                    <div>
-                      <dt>Ghi nhận lúc (UTC+7)</dt>
-                      <dd>{formatWalletDate(item.created_at)}</dd>
+                    <dl className={styles.transactionMeta}>
+                      <div>
+                        <dt>Mã đặt chỗ</dt>
+                        <dd>
+                          {item.booking_reference.trim() && item.booking_reference !== "N/A"
+                            ? item.booking_reference
+                            : "Chưa có mã đặt chỗ"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Ghi nhận lúc (UTC+7)</dt>
+                        <dd>{formatWalletDate(item.created_at)}</dd>
+                      </div>
+                      <div>
+                        <dt>Giá trị đơn hàng</dt>
+                        <dd>{formatWalletMoney(item.order_amount)}</dd>
+                      </div>
+                    </dl>
+                    <div className={styles.commission}>
+                      <div>
+                        <span>Hoa hồng của bạn</span>
+                        <strong>{formatWalletMoney(item.net_amount)}</strong>
+                      </div>
+                      <p>
+                        Hoa hồng gộp: {formatWalletMoney(item.gross_amount)}
+                        <br />
+                        Phí nền tảng: {formatWalletMoney(item.platform_fee)}
+                      </p>
                     </div>
-                    <div>
-                      <dt>Giá trị đơn hàng</dt>
-                      <dd>{formatWalletMoney(item.order_amount)}</dd>
-                    </div>
-                  </dl>
-                  <div className={styles.commission}>
-                    <div>
-                      <span>Hoa hồng của bạn</span>
-                      <strong>{formatWalletMoney(item.net_amount)}</strong>
-                    </div>
-                    <p>
-                      Hoa hồng gộp: {formatWalletMoney(item.gross_amount)}
-                      <br />
-                      Phí nền tảng: {formatWalletMoney(item.platform_fee)}
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                  </li>
+                );
+              })}
+            </ul>
+
+            {totalPages > 1 && (
+              <div className={styles.paginationBar} aria-label="Phân trang giao dịch">
+                <button
+                  type="button"
+                  className={styles.pageBtn}
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                >
+                  ← Trang trước
+                </button>
+                <span className={styles.pageIndicator}>
+                  Trang <strong>{currentPage}</strong> / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  className={styles.pageBtn}
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Trang sau →
+                </button>
+              </div>
+            )}
+          </>
         )}
       </section>
 
