@@ -85,6 +85,33 @@ export function StorefrontCheckoutModal({
     }
   }, [initialPackage]);
 
+  // Auto-advance to success when VietQR webhook confirms payment
+  useEffect(() => {
+    if (step !== "payment" || !orderResult?.orderId) return;
+    let isCancelled = false;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(
+          `/api/storefront/orders/status?orderId=${encodeURIComponent(orderResult.orderId)}`
+        );
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!isCancelled && json.isPaid) {
+          clearInterval(interval);
+          setStep("success");
+        }
+      } catch {
+        // Silently ignore network poll errors in background
+      }
+    }, 2500);
+
+    return () => {
+      isCancelled = true;
+      clearInterval(interval);
+    };
+  }, [step, orderResult]);
+
   if (!isOpen) return null;
 
   // Pricing calculations
@@ -216,10 +243,19 @@ export function StorefrontCheckoutModal({
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   1. Gói vé tham quan:
                 </label>
-                <div className="space-y-2">
+                <div className="space-y-2" role="radiogroup" aria-label="Chọn gói vé tham quan">
                   {product.packages.map((pkg) => (
                     <div
                       key={pkg.id}
+                      role="radio"
+                      tabIndex={0}
+                      aria-checked={selectedPackage.id === pkg.id}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setSelectedPackage(pkg);
+                        }
+                      }}
                       onClick={() => setSelectedPackage(pkg)}
                       className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between gap-3 ${
                         selectedPackage.id === pkg.id
@@ -261,7 +297,7 @@ export function StorefrontCheckoutModal({
                     min={new Date().toISOString().split("T")[0]}
                     onChange={(e) => setTravelDate(e.target.value)}
                     required
-                    className="w-full text-xs md:text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#204e4c]/30 focus:border-[#204e4c]"
+                    className="w-full text-base md:text-sm px-3 py-2 rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#204e4c]/30 focus:border-[#204e4c]"
                   />
                 </div>
 
@@ -331,7 +367,7 @@ export function StorefrontCheckoutModal({
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                       required
-                      className="w-full text-xs md:text-sm pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#204e4c]/30 focus:border-[#204e4c]"
+                      className="w-full text-base md:text-sm pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#204e4c]/30 focus:border-[#204e4c]"
                     />
                   </div>
                 </div>
@@ -345,7 +381,7 @@ export function StorefrontCheckoutModal({
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
                       required
-                      className="w-full text-xs md:text-sm pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#204e4c]/30 focus:border-[#204e4c]"
+                      className="w-full text-base md:text-sm pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#204e4c]/30 focus:border-[#204e4c]"
                     />
                   </div>
 
@@ -356,7 +392,7 @@ export function StorefrontCheckoutModal({
                       placeholder="Email nhận hóa đơn (tùy chọn)"
                       value={customerEmail}
                       onChange={(e) => setCustomerEmail(e.target.value)}
-                      className="w-full text-xs md:text-sm pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#204e4c]/30 focus:border-[#204e4c]"
+                      className="w-full text-base md:text-sm pl-9 pr-3 py-2 rounded-lg border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-[#204e4c]/30 focus:border-[#204e4c]"
                     />
                   </div>
                 </div>

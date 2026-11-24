@@ -39,11 +39,39 @@ export function AdminFraudManagement({
   const [orders, setOrders] = useState<AdminFlaggedOrder[]>(initialFlaggedOrders);
   const [clicks] = useState<AdminBotClick[]>(initialBotClicks);
   const [unflaggedId, setUnflaggedId] = useState<string | null>(null);
+  const [selectedDismissOrder, setSelectedDismissOrder] = useState<AdminFlaggedOrder | null>(null);
+  const [dismissReason, setDismissReason] = useState<string>("Khách hàng xác thực đơn hợp lệ qua đối soát thủ công");
+  const [isSubmittingDismiss, setIsSubmittingDismiss] = useState<boolean>(false);
 
-  function handleDismissFlag(orderId: string) {
-    setOrders((prev) => prev.filter((o) => o.id !== orderId));
-    setUnflaggedId(orderId);
-    setTimeout(() => setUnflaggedId(null), 3000);
+  async function handleConfirmDismiss() {
+    if (!selectedDismissOrder) return;
+    setIsSubmittingDismiss(true);
+
+    try {
+      if (!preview) {
+        await fetch("/api/admin/fraud/dismiss", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: selectedDismissOrder.id,
+            reason: dismissReason.trim() || "Xác minh đơn hàng hợp lệ sau đối soát thủ công",
+          }),
+        });
+      }
+
+      setOrders((prev) => prev.filter((o) => o.id !== selectedDismissOrder.id));
+      setUnflaggedId(selectedDismissOrder.id);
+      setSelectedDismissOrder(null);
+      setTimeout(() => setUnflaggedId(null), 4000);
+    } catch (err) {
+      console.error("Lỗi khi gỡ cờ gian lận:", err);
+    } finally {
+      setIsSubmittingDismiss(false);
+    }
+  }
+
+  function handleDismissFlag(order: AdminFlaggedOrder) {
+    setSelectedDismissOrder(order);
   }
 
   return (
@@ -181,7 +209,7 @@ export function AdminFraudManagement({
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleDismissFlag(item.id)}
+                          onClick={() => handleDismissFlag(item)}
                           className="border-border hover:bg-muted text-xs h-7 text-foreground"
                         >
                           Gỡ cờ
@@ -251,6 +279,76 @@ export function AdminFraudManagement({
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Dismiss Flag Confirmation Modal with Audit Reason */}
+      {selectedDismissOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-border p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center border border-amber-200">
+                <ShieldAlert className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-foreground">Xác nhận Gỡ cờ Gian lận</h3>
+                <p className="text-xs text-muted-foreground">Lưu vết kiểm toán vào bảng fraud_audit_logs</p>
+              </div>
+            </div>
+
+            <div className="p-3.5 bg-muted/40 rounded-xl text-xs space-y-1.5 border border-border">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Mã đơn:</span>
+                <span className="font-mono font-bold text-amber-700">{selectedDismissOrder.bookingReference}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Khách hàng:</span>
+                <span className="font-semibold text-foreground">{selectedDismissOrder.customerName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Reseller nhận hoa hồng:</span>
+                <span className="font-semibold text-foreground">{selectedDismissOrder.resellerName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Giá trị đơn:</span>
+                <span className="font-mono font-bold text-foreground">{formatVND(selectedDismissOrder.amount)}</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-foreground mb-1.5">
+                Lý do gỡ cờ cảnh báo (bắt buộc lưu audit log):
+              </label>
+              <textarea
+                value={dismissReason}
+                onChange={(e) => setDismissReason(e.target.value)}
+                placeholder="Nhập lý do xác minh hợp lệ để giải phóng hoa hồng..."
+                rows={3}
+                className="w-full text-xs p-2.5 rounded-lg border border-border bg-background focus:outline-hidden focus:ring-2 focus:ring-primary/20 text-foreground"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-border">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isSubmittingDismiss}
+                onClick={() => setSelectedDismissOrder(null)}
+                className="text-xs"
+              >
+                Hủy bỏ
+              </Button>
+              <Button
+                size="sm"
+                disabled={isSubmittingDismiss || !dismissReason.trim()}
+                onClick={handleConfirmDismiss}
+                className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold flex items-center gap-1.5"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>{isSubmittingDismiss ? "Đang xử lý..." : "Xác nhận & Giải phóng"}</span>
+              </Button>
+            </div>
           </div>
         </div>
       )}
