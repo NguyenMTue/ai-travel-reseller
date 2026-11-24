@@ -7,7 +7,18 @@ Thư mục lưu trữ toàn bộ tài liệu kỹ thuật, hợp đồng tích h
 
 ---
 
-## 1. Nhiệm vụ Nước rút Đóng gói Dự án trong Ngày (Sprint Cuối)
+## 1. Nhiệm vụ Nâng cấp & Hoàn thiện Tuần 6 (Week 6 Tasks)
+
+1. **Bảng Phân công Nhiệm vụ Nâng cấp & Sửa lỗi Phân hệ BE2 (Khách hàng & Super Admin):**
+   - [`task_assignment_be2_customer_admin_fixes.md`](./task_assignment_be2_customer_admin_fixes.md): **(MỚI NHẤT)** Kế hoạch kỹ thuật chuyên trách xử lý các lỗi và tính năng còn thiếu cho 2 vai trò **Khách hàng** và **Super Admin**:
+     - **BE2-CUST-01:** Sửa lỗi iOS Safari Auto-Zoom (`font-size >= 16px` cho input checkout), đệm an toàn Safe Area cho Sticky CTA và WAI-ARIA chọn gói vé.
+     - **BE2-CUST-02:** Xây dựng Webhook nhận biến động số dư ngân hàng tự động (Open Banking VietQR), tự động xuất vé E-Ticket QR không cần bấm tay.
+     - **BE2-ADM-01:** Tạo bảng migration `fraud_audit_logs` và API lưu vết Admin khi thực hiện thao tác gỡ cờ gian lận (Anti-Fraud).
+     - **BE2-ADM-02:** Bổ sung các tác vụ quản trị vận hành trên Cổng Đối tác (`/admin/partners`): Khóa tạm thời (Suspend), Kích hoạt lại (Reactivate).
+
+---
+
+## 2. Nhiệm vụ Nước rút Đóng gói Dự án trong Ngày (Sprint Cuối)
 
 1. **Bảng Phân công Tác vụ Nước rút BE2 (Hoàn thành trong ngày 11/11/2026):**
    - [`final_sprint_task_assignment_be2.md`](./final_sprint_task_assignment_be2.md): **(MỚI)** Bảng đặc tả chi tiết 4 nhiệm vụ của BE2 cam kết Zero Merge Conflict với BE1:

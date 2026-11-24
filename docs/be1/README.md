@@ -6,7 +6,14 @@ Thư mục tài liệu kỹ thuật, hợp đồng bàn giao và mẫu dữ li�
 
 ## Danh mục tài liệu Tuần 6 (Week 6 - Multi-Role Final Audit & Stabilization)
 
-1. **Báo cáo Tổng hợp Kết quả Nghiệm thu Tuần 6 Toàn diện của các Role (BE1, BE2, FE, QA/Testers):**
+1. **Bảng Phân công Nhiệm vụ Nâng cấp & Sửa lỗi Phân hệ BE1 (Merchant & Reseller):**
+   - [`task_assignment_be1_merchant_reseller_fixes.md`](./task_assignment_be1_merchant_reseller_fixes.md): **(MỚI NHẤT)** Kế hoạch kỹ thuật chuyên trách xử lý các tính năng còn thiếu cho 2 vai trò **Merchant** và **Reseller**:
+     - **BE1-MERCH-01:** Mở khóa ô "Ghi chú cho AI" trong form tạo chiến dịch (bổ sung cột `ai_custom_instructions` vào CSDL).
+     - **BE1-MERCH-02:** Xây dựng hàng đợi bất đồng bộ (Queue) và polling tiến độ render video AI 40–50s, chống lỗi HTTP 504 Timeout trên Vercel.
+     - **BE1-RESELL-01:** Bổ sung Tab 3 "Mã Voucher Livestream" (`FR-ATT-01`) trên modal phân phối để Reseller bán hàng qua Livestream TikTok/Facebook.
+     - **BE1-RESELL-02:** Nâng cấp ví hoa hồng Reseller (bộ lọc khoảng ngày & phân trang giao dịch), tối ưu cache chỉ số TikTok.
+
+2. **Báo cáo Tổng hợp Kết quả Nghiệm thu Tuần 6 Toàn diện của các Role (BE1, BE2, FE, QA/Testers):**
    - [`week6-multi-role-final-report.md`](./week6-multi-role-final-report.md): **(MỚI NHẤT)** Báo cáo tổng hợp toàn diện kết quả thực hiện và kiểm toán chất lượng từ 6 vai trò:
      - **BE1:** Auto-Pipeline Video 40-50s (`BE1-W6-01`), RPC Khớp Ngân sách Reseller (`BE1-W6-02`), TikTok Scraper & Điểm tương tác (`BE1-W6-03`), Gamification Tích điểm Merchant (`BE1-W6-04`), API Đặt vé tức thì & Cấp vé điện tử QR E-Ticket (`BE1-W6-05`).
      - **BE2:** Python LLM Service, Script Review 4 phân cảnh, AI Gateway, RAG Grounding và TikTok Metric Worker.
