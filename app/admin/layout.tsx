@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { getAdminPortalAccess } from "@/src/lib/admin/admin-access";
 import { AdminAccessNotice } from "@/src/components/admin/admin-access-notice";
 import { AdminNavbar } from "@/src/components/admin/admin-navbar";
-import { cookies } from "next/headers";
-import { createClient } from "@/src/lib/supabase/server";
+import { createAdminClient } from "@/src/lib/supabase/admin";
 
 export const metadata: Metadata = {
   title: "Super Admin Back-Office | TravelLink AI",
@@ -24,8 +23,7 @@ export default async function AdminLayout({
   // Lấy số lượng yêu cầu rút tiền đang chờ xử lý để hiển thị badge trên Navbar
   let pendingPayoutsCount = 0;
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = createAdminClient();
     const { count } = await (supabase as any)
       .from("payout_requests")
       .select("id", { count: "exact", head: true })

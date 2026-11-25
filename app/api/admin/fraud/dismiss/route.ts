@@ -50,36 +50,42 @@ export async function POST(request: Request) {
     }
 
     let logId = "log-" + Date.now();
+    const devFallbackAdminId = "00000000-0000-4000-a000-000000000001";
+    const resolvedAdminId =
+      access.admin.id && access.admin.id !== devFallbackAdminId ? access.admin.id : null;
 
-    try {
-      const adminClient = createAdminClient();
+    const adminClient = createAdminClient();
 
-      // 1. Unflag order and release commission
-      await adminClient
-        .from("orders")
-        .update({ flag_self_purchase: false })
-        .eq("id", orderId);
+    // 1. Unflag order and release commission
+    const { error: updateErr } = await adminClient
+      .from("orders")
+      .update({ flag_self_purchase: false })
+      .eq("id", orderId);
 
-      // 2. Insert audit log
-      const { data: logRow, error: logErr } = await adminClient
-        .from("fraud_audit_logs")
-        .insert({
-          order_id: orderId,
-          admin_id: access.user?.id || null,
-          action: "dismiss_flag",
-          reason: reason,
-          previous_status: "flagged_self_purchase",
-        })
-        .select("id")
-        .maybeSingle();
+    if (updateErr) {
+      return NextResponse.json(
+        { success: false, error: "Không thể cập nhật trạng thái đơn hàng: " + updateErr.message },
+        { status: 500 }
+      );
+    }
 
-      if (logRow) {
-        logId = logRow.id;
-      } else if (logErr) {
-        console.warn("[ADMIN_FRAUD_DISMISS] Could not insert fraud_audit_logs row:", logErr);
-      }
-    } catch (dbErr) {
-      console.warn("[ADMIN_FRAUD_DISMISS] Database operation warning / demo fallback:", dbErr);
+    // 2. Insert audit log
+    const { data: logRow, error: logErr } = await adminClient
+      .from("fraud_audit_logs")
+      .insert({
+        order_id: orderId,
+        admin_id: resolvedAdminId,
+        action: "dismiss_flag",
+        reason: reason,
+        previous_status: "flagged_self_purchase",
+      })
+      .select("id")
+      .maybeSingle();
+
+    if (logRow) {
+      logId = logRow.id;
+    } else if (logErr) {
+      console.warn("[ADMIN_FRAUD_DISMISS] Could not insert fraud_audit_logs row:", logErr);
     }
 
     return NextResponse.json({

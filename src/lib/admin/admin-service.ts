@@ -475,9 +475,9 @@ export async function getAdminFraudActivities(client: SupabaseClient): Promise<{
         .limit(50),
       (client as any)
         .from("clicks")
-        .select("id, is_bot, bot_score, ip_address, user_agent, country, created_at")
+        .select("id, is_bot, ip_address, user_agent, clicked_at")
         .eq("is_bot", true)
-        .order("created_at", { ascending: false })
+        .order("clicked_at", { ascending: false })
         .limit(50),
     ]);
 
@@ -500,9 +500,9 @@ export async function getAdminFraudActivities(client: SupabaseClient): Promise<{
       ipAddress: c.ip_address,
       userAgent: c.user_agent,
       isBot: Boolean(c.is_bot),
-      botScore: c.bot_score != null ? Number(c.bot_score) : null,
-      country: c.country,
-      createdAt: c.created_at,
+      botScore: null,
+      country: null,
+      createdAt: c.clicked_at,
     }));
 
     return { flaggedOrders, botClicks };

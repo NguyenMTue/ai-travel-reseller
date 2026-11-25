@@ -49,7 +49,7 @@ export function AdminFraudManagement({
 
     try {
       if (!preview) {
-        await fetch("/api/admin/fraud/dismiss", {
+        const res = await fetch("/api/admin/fraud/dismiss", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -57,6 +57,10 @@ export function AdminFraudManagement({
             reason: dismissReason.trim() || "Xác minh đơn hàng hợp lệ sau đối soát thủ công",
           }),
         });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data?.success === false) {
+          throw new Error(data?.error || "Không thể gỡ cờ đơn hàng.");
+        }
       }
 
       setOrders((prev) => prev.filter((o) => o.id !== selectedDismissOrder.id));
@@ -65,6 +69,7 @@ export function AdminFraudManagement({
       setTimeout(() => setUnflaggedId(null), 4000);
     } catch (err) {
       console.error("Lỗi khi gỡ cờ gian lận:", err);
+      alert(err instanceof Error ? err.message : "Lỗi khi gỡ cờ gian lận.");
     } finally {
       setIsSubmittingDismiss(false);
     }
