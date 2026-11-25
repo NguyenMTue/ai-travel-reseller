@@ -1,41 +1,27 @@
 "use client";
 
-import React from "react";
-import { ArrowRight, Zap } from "lucide-react";
-import type { StorefrontData } from "@/src/lib/storefront/types";
+import type { StorefrontPrice } from "@/src/lib/storefront/pricing";
 import { formatPrice } from "@/src/lib/storefront/format";
 
 type StorefrontStickyCtaProps = {
-  product: StorefrontData["product"];
+  price: StorefrontPrice;
   onOpenBooking: () => void;
 };
 
-export function StorefrontStickyCta({ product, onOpenBooking }: StorefrontStickyCtaProps) {
+export function StorefrontStickyCta({ price, onOpenBooking }: StorefrontStickyCtaProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 pb-[max(12px,env(safe-area-inset-bottom))] shadow-2xl flex items-center justify-between gap-3">
-      <div>
-        <div className="text-[11px] text-slate-500 flex items-center gap-1">
-          <Zap className="w-3 h-3 text-amber-500 fill-amber-500" />
-          <span>Giá chỉ từ</span>
+    <section aria-label="Đặt vé nhanh" className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-2xl md:hidden">
+      <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs text-slate-600">{price.hasReferralDiscount ? "Giá qua đối tác" : "Giá vé / người"}</p>
+          <p className="text-xs text-slate-500 line-through">{formatPrice(price.originalPrice)} ₫</p>
+          <p data-testid="sticky-cta-amount" className="text-xl font-extrabold leading-tight text-[#bd6840]">{formatPrice(price.finalPrice)} ₫</p>
         </div>
-        <div className="flex items-baseline gap-1">
-          <span className="text-xl font-extrabold text-[#bd6840]">
-            {formatPrice(product.salePrice)} ₫
-          </span>
-          <span className="text-[10px] text-slate-400 line-through">
-            {formatPrice(product.originalPrice)} ₫
-          </span>
-        </div>
+        <button type="button" onClick={onOpenBooking}
+          className="min-h-12 shrink-0 rounded-xl bg-[#bd6840] px-4 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#a85934] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#204e4c]">
+          Đặt vé ngay
+        </button>
       </div>
-
-      <button
-        type="button"
-        onClick={onOpenBooking}
-        className="bg-gradient-to-r from-[#bd6840] to-[#d97746] text-white font-bold text-xs px-5 py-3 rounded-xl shadow-md flex items-center gap-1.5 active:scale-98 transition-transform cursor-pointer"
-      >
-        <span>ĐẶT VÉ NGAY</span>
-        <ArrowRight className="w-3.5 h-3.5" />
-      </button>
-    </div>
+    </section>
   );
 }
