@@ -110,8 +110,8 @@ function LibraryRead({
   observeInvalidation?: (invalidate: () => void) => () => void;
   merchantId?: string;
 }) {
-  // Sử dụng limit=12 (bội số của 4 cột -> 3 hàng đầy) để không bị lẻ trang khi còn chỗ trống
-  const [query, setQuery] = useState({ ...initialLibraryQuery, limit: 12 });
+  // Sử dụng limit=8 (bội số của 4 cột -> 2 hàng đầy = 8 ảnh/trang)
+  const [query, setQuery] = useState({ ...initialLibraryQuery, limit: 8 });
   const [showAllMerchantMedia, setShowAllMerchantMedia] = useState(false);
   const [draft, setDraft] = useState("");
   const [result, setResult] = useState<LibraryState>({ status: "loading" });
