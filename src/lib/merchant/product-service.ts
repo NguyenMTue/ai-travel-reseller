@@ -109,6 +109,7 @@ export async function createMerchantProduct(
     valid_from,
     valid_to,
     status,
+    authentic_tips,
   } = parsed.data;
 
   try {
@@ -126,7 +127,10 @@ export async function createMerchantProduct(
         valid_from: valid_from || null,
         valid_to: valid_to || null,
         status: status || "active",
-      })
+        ...(Array.isArray(authentic_tips) && authentic_tips.length > 0
+          ? { highlights: authentic_tips }
+          : {}),
+      } as any)
       .select()
       .single();
 
