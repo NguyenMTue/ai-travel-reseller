@@ -136,7 +136,7 @@ export async function GET(request: Request) {
     const cached = tiktokGetCache.get(cacheKey);
     if (cached && Date.now() - cached.cachedAt < GET_CACHE_TTL_MS) {
       return NextResponse.json(cached.data, {
-        headers: { "X-Cache": "HIT", "Cache-Control": "private, max-age=900" },
+        headers: { "X-Cache": "HIT", "Cache-Control": "private, no-store" },
       });
     }
 
@@ -212,7 +212,7 @@ export async function GET(request: Request) {
     tiktokGetCache.set(cacheKey, { data: responsePayload, cachedAt: Date.now() });
 
     return NextResponse.json(responsePayload, {
-      headers: { "X-Cache": "MISS", "Cache-Control": "private, max-age=900" },
+      headers: { "X-Cache": "MISS", "Cache-Control": "private, no-store" },
     });
   } catch (error: any) {
     console.error("[TIKTOK_POSTS_GET_ERROR]", error);

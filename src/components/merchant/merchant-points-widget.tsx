@@ -85,7 +85,7 @@ export function MerchantPointsWidget({
             feeDiscountPercent,
             transactions: rawHistory.map((tx: any, idx: number) => ({
               id: String(tx.id || `tx-${idx}`),
-              points: Number(tx.points ?? tx.points_delta ?? 0),
+              points: Number(tx.points ?? tx.points_delta ?? tx.earned_points ?? 0),
               type: String(tx.type || tx.action || "reward"),
               description: String(tx.description || tx.reason || "Cập nhật điểm thưởng"),
               createdAt: String(tx.createdAt || tx.created_at || tx.timestamp || new Date().toISOString()),
