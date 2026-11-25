@@ -77,16 +77,18 @@ test("BE1-W6-01: 4-Scene 40–50s Review Script Generation Logic", async () => {
     `Duration must be 40-50s, got ${script.targetDurationSec}`
   );
 
-  // 2. Must have exactly 4 scenes
-  assert.equal(script.scenes.length, 4, "Must have exactly 4 scenes");
-
-  // 3. Verify roles
-  const roles = script.scenes.map((s) => s.role);
-  assert.deepEqual(
-    roles,
-    ["HOOK", "EXPERIENCE", "PRICING_AND_QR", "CTA"],
-    "Scenes must follow Hook -> Experience -> Pricing & QR -> CTA"
+  // 2. Must have 4-9 fast-paced scenes
+  assert.ok(
+    script.scenes.length >= 4 && script.scenes.length <= 9,
+    `Must have 4-9 scenes, got ${script.scenes.length}`
   );
+
+  // 3. Verify roles progression: HOOK -> EXPERIENCE... -> PRICING_AND_QR -> CTA
+  const roles = script.scenes.map((s) => s.role);
+  assert.equal(roles[0], "HOOK", "First scene must be HOOK");
+  assert.equal(roles[roles.length - 2], "PRICING_AND_QR", "Penultimate scene must be PRICING_AND_QR");
+  assert.equal(roles[roles.length - 1], "CTA", "Last scene must be CTA");
+  assert.ok(roles.slice(1, -2).every((r) => r === "EXPERIENCE"), "Middle scenes must be EXPERIENCE");
 
   // 4. Verify scene durations sum close to target
   const sumDuration = script.scenes.reduce((acc, s) => acc + s.durationSec, 0);

@@ -326,6 +326,115 @@ function VideoGenerateSession({
     scheduleTick();
 
     try {
+      // Nếu chọn thời lượng 40–50s -> gọi luồng Auto Review Pipeline (7 cảnh + phụ đề .ass + TTS)
+      if (durationSec >= 40) {
+        const autoRes = await fetch("/api/merchant/video/auto-pipeline", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            campaignId: campaign.id,
+            productId: campaign.productId,
+            tourName: campaign.productName || campaign.name,
+            targetDurationSec: durationSec,
+            customInstructions: authenticTip.trim() || undefined,
+            mediaReferenceIds:
+              selectedItemIds && selectedItemIds.length > 0
+                ? selectedItemIds
+                : selectedItem
+                ? [selectedItem.id]
+                : [],
+          }),
+        });
+
+        const autoJson = await autoRes.json();
+        if (!autoRes.ok || !autoJson.success || !autoJson.jobId) {
+          if (renderTimerRef.current) {
+            clearTimeout(renderTimerRef.current);
+            renderTimerRef.current = null;
+          }
+          setMode("error");
+          setErrorMessage(
+            autoJson.error || "Không thể khởi tạo video 40–50s. Vui lòng kiểm tra thư viện ảnh."
+          );
+          return;
+        }
+
+        const jobId = autoJson.jobId as string;
+        const maxAttempts = 90; // tối đa ~3 phút
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
+          await new Promise((r) => setTimeout(r, 2000));
+          const pollRes = await fetch(
+            `/api/merchant/video/auto-pipeline?jobId=${encodeURIComponent(jobId)}`,
+            { credentials: "same-origin" }
+          );
+          if (!pollRes.ok) continue;
+          const pollJson = await pollRes.json();
+          const job = pollJson?.job;
+          if (!job) continue;
+
+          if (typeof job.progress === "number") {
+            setProgress(job.progress);
+          }
+
+          if (job.status === "completed") {
+            const elapsedMs = Date.now() - startTime;
+            finishRenderSuccessfully(
+              {
+                content_id: job.contentId || jobId,
+                campaign_id: campaign.id,
+                product_id: campaign.productId,
+                status: "ready",
+                video_url: job.videoUrl || "",
+                aspect_ratio: "9:16",
+                duration_sec: job.durationSec || durationSec,
+                hook: campaign.productName || campaign.name,
+                script: "Kịch bản Review 7 cảnh 40-50s (đã lưu trong Quản lý nội dung AI)",
+                caption: `Khám phá ${campaign.productName || campaign.name}`,
+                cta: "Đặt vé ngay",
+                cost_breakdown: {
+                  model_name: "FFmpeg Multi-Scene + EdgeTTS (0đ)",
+                  duration_seconds: job.durationSec || durationSec,
+                  input_tokens: 0,
+                  output_tokens: 0,
+                  cost_usd: 0,
+                  cost_vnd: 0,
+                  free_tier_components: {
+                    ffmpeg_compositor_cost: 0,
+                    edge_tts_cost: 0,
+                    total_free_savings_usd: 0,
+                  },
+                  is_live_call: false,
+                  status_note: Array.isArray(job.warnings) && job.warnings.length > 0
+                    ? job.warnings[0]
+                    : "Video Review 40–50s hoàn tất (phụ đề .ass + nền mờ + đa chuyển động).",
+                },
+              },
+              elapsedMs
+            );
+            return;
+          }
+
+          if (job.status === "failed") {
+            if (renderTimerRef.current) {
+              clearTimeout(renderTimerRef.current);
+              renderTimerRef.current = null;
+            }
+            setMode("error");
+            setErrorMessage(job.error || "Quá trình dựng video 40–50s thất bại.");
+            return;
+          }
+        }
+
+        if (renderTimerRef.current) {
+          clearTimeout(renderTimerRef.current);
+          renderTimerRef.current = null;
+        }
+        setMode("error");
+        setErrorMessage("Video đang tiếp tục dựng ngầm. Vui lòng kiểm tra tại mục Quản lý nội dung AI.");
+        return;
+      }
+
       const payload = {
         campaign_id: campaign.id,
         product_id: campaign.productId,
@@ -605,6 +714,9 @@ function VideoGenerateSession({
                     >
                       <option value={10}>10 giây (Tối ưu Video AI ngắn / TikTok / Reels)</option>
                       <option value={18}>18 giây (Chuỗi phân cảnh điện ảnh 18s)</option>
+                      <option value={40}>40 giây (Video Review TikTok 40s)</option>
+                      <option value={45}>45 giây (Video Review TikTok 40–50s chuẩn Doanh nghiệp)</option>
+                      <option value={50}>50 giây (Video Review chi tiết 50s)</option>
                     </select>
                   </div>
                 </div>

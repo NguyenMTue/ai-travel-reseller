@@ -37,20 +37,39 @@ export async function createMerchantCampaign(input: unknown): Promise<CampaignSa
           const adminClient = createAdminClient();
           const { data: cRow } = await adminClient
             .from("campaigns")
-            .select("id, merchant_id, product_id, name, target_location, target_audience, ai_custom_instructions")
+            .select(
+              "id, merchant_id, product_id, name, start_date, end_date, target_location, target_audience, ai_custom_instructions, products:product_id (name, description, highlights, original_price, sale_price)"
+            )
             .eq("id", campaignId)
             .maybeSingle();
 
           if (cRow) {
+            const prod = Array.isArray((cRow as any).products)
+              ? (cRow as any).products[0]
+              : (cRow as any).products;
+            const { data: mRow } = await adminClient
+              .from("merchants")
+              .select("phone, logo, logo_url")
+              .eq("id", cRow.merchant_id)
+              .maybeSingle();
+            const highlights =
+              Array.isArray(prod?.highlights) && prod.highlights.length > 0
+                ? prod.highlights
+                : prod?.description || undefined;
             await executeAutoVideoPipeline(
               {
                 campaignId: cRow.id,
                 merchantId: cRow.merchant_id,
                 productId: cRow.product_id,
-                tourName: cRow.name,
+                tourName: prod?.name || cRow.name,
                 location: cRow.target_location || "Miền Trung",
+                highlights,
+                price: prod?.sale_price ?? undefined,
+                originalPrice: prod?.original_price ?? null,
+                contactPhone: mRow?.phone ?? null,
+                logoUrl: mRow?.logo_url || mRow?.logo || null,
                 targetAudience: cRow.target_audience || "Du khách trẻ",
-                targetDurationSec: 46,
+                targetDurationSec: 45,
                 customInstructions: cRow.ai_custom_instructions || undefined,
               },
               `auto-campaign-trigger-${Date.now()}`
