@@ -60,7 +60,19 @@ export function ResellerLeaderboardModal({
         const data = await res.json();
 
         if (mounted && data.success && Array.isArray(data.resellers)) {
-          setResellers(data.resellers);
+          const mapped: TopReseller[] = data.resellers.map((item: any, idx: number) => ({
+            rank: typeof item.rank === "number" ? item.rank : idx + 1,
+            resellerId: String(item.resellerId || item.reseller_id || ""),
+            fullName: String(item.fullName || item.reseller_name || "Reseller"),
+            avatarUrl: item.avatarUrl || item.avatar_url,
+            totalClicks: Number(item.totalClicks ?? item.total_clicks ?? 0),
+            totalOrders: Number(item.totalOrders ?? item.total_orders ?? 0),
+            conversionRate: Number(item.conversionRate ?? item.conversion_rate ?? 0),
+            totalCommissionPaid: Number(item.totalCommissionPaid ?? item.total_commission_paid ?? 0),
+            averageCommissionRate: Number(item.averageCommissionRate ?? item.commission_rate ?? 10),
+            tier: item.tier,
+          }));
+          setResellers(mapped);
         }
       } catch (err) {
         console.error("[FETCH_TOP_RESELLERS_ERROR]", err);

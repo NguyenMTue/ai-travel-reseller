@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createClient } from "@/src/lib/supabase/server";
+import { createAdminClient } from "@/src/lib/supabase/admin";
 import { getAdminPortalAccess } from "@/src/lib/admin/admin-access";
 import {
   getAdminPartners,
@@ -30,8 +29,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = createAdminClient();
 
     const partners = await getAdminPartners(supabase);
 
@@ -78,8 +76,7 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = createAdminClient();
 
     const result = await toggleAdminPartnerStatus(
       supabase,

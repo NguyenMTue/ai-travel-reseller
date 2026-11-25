@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { createClient } from "@/src/lib/supabase/server";
+import { createAdminClient } from "@/src/lib/supabase/admin";
 import { getAdminPortalAccess } from "@/src/lib/admin/admin-access";
 import { getAdminFraudActivities } from "@/src/lib/admin/admin-service";
 import {
@@ -33,8 +32,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = createAdminClient();
 
     const fraudData = await getAdminFraudActivities(supabase);
 

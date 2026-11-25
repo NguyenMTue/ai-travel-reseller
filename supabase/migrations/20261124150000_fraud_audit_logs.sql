@@ -15,12 +15,13 @@ CREATE TABLE IF NOT EXISTS public.fraud_audit_logs (
 ALTER TABLE public.fraud_audit_logs ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Super Admin & Service Role can access fraud logs
+DROP POLICY IF EXISTS "Admin only access fraud logs" ON public.fraud_audit_logs;
 CREATE POLICY "Admin only access fraud logs" ON public.fraud_audit_logs
   FOR ALL USING (
     (auth.jwt() ->> 'role') = 'service_role' OR 
-    (auth.jwt() ->> 'email') LIKE '%@travellink.vn' OR
+    (auth.jwt() ->> 'email') LIKE '%@travellink.ai' OR
     EXISTS (
-      SELECT 1 FROM public.admins WHERE admin_id = auth.uid()
+      SELECT 1 FROM public.admins WHERE id = auth.uid()
     )
   );
 

@@ -116,19 +116,30 @@ export async function POST(request: Request) {
           .maybeSingle();
 
         if (orderRow) {
-          // Update order status to paid
-          await adminClient
-            .from("orders")
-            .update({
-              status: "paid",
-            })
-            .eq("id", orderRow.id);
+          if (orderRow.status !== "paid") {
+            // Update order status to paid
+            await adminClient
+              .from("orders")
+              .update({
+                status: "paid",
+                paid_at: new Date().toISOString(),
+              })
+              .eq("id", orderRow.id);
 
-          // If commission exists and reseller is assigned, credit wallet if not already done
-          if (orderRow.reseller_id && Number(orderRow.commission_amount) > 0) {
+            // Ensure commission becomes 'confirmed' (available in reseller wallet)
+            // rather than invalid 'available' or premature 'paid' from trigger
+            if (orderRow.reseller_id && Number(orderRow.commission_amount) > 0) {
+              await adminClient
+                .from("commissions")
+                .update({ status: "confirmed" })
+                .eq("order_id", orderRow.id)
+                .in("status", ["pending", "paid"]);
+            }
+          } else if (orderRow.reseller_id && Number(orderRow.commission_amount) > 0) {
+            // Idempotent replay: only promote still-pending commissions, never revert already paid-out ones
             await adminClient
               .from("commissions")
-              .update({ status: "available" })
+              .update({ status: "confirmed" })
               .eq("order_id", orderRow.id)
               .eq("status", "pending");
           }

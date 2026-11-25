@@ -229,7 +229,13 @@ export function ContentApprovalList({
     if (selectedPersona !== "all" && c.persona !== selectedPersona) return false;
     if (selectedStatus !== "all") {
       if (selectedStatus === "pending_approval") {
-        return c.status === "pending_approval" || c.status === "ready" || c.status === "draft";
+        return (
+          c.status === "pending_approval" ||
+          c.status === "pending" ||
+          c.status === "needs_review" ||
+          c.status === "ready" ||
+          c.status === "draft"
+        );
       }
       return c.status === selectedStatus;
     }

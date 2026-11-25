@@ -26,11 +26,16 @@ interface TikTokPostMetadata {
 interface TikTokPost {
   id: string;
   tiktokUrl: string;
+  videoId?: string;
+  authorUsername?: string;
+  title?: string;
+  thumbnailUrl?: string | null;
   viewsCount: number;
   likesCount: number;
   commentsCount: number;
   sharesCount: number;
   engagementScore: number;
+  status?: string;
   metadata?: TikTokPostMetadata;
   createdAt?: string;
 }
@@ -64,7 +69,35 @@ export function TikTokSubmissionForm({
         if (!res.ok) return;
         const data = await res.json();
         if (mounted && data.success && Array.isArray(data.posts)) {
-          setRecentPosts(data.posts.slice(0, 3));
+          const mappedPosts: TikTokPost[] = data.posts.slice(0, 3).map((raw: any) => {
+            const title = String(raw.title || raw.metadata?.title || "Video Review Du lịch");
+            const authorUsername = String(
+              raw.authorUsername || raw.author_username || raw.metadata?.authorName || "tiktok_creator"
+            );
+            const thumbnailUrl = raw.thumbnailUrl ?? raw.thumbnail_url ?? raw.metadata?.thumbnail ?? null;
+            return {
+              id: String(raw.id || ""),
+              tiktokUrl: String(raw.tiktokUrl || raw.tiktok_url || ""),
+              videoId: String(raw.videoId || raw.video_id || ""),
+              authorUsername,
+              title,
+              thumbnailUrl,
+              viewsCount: Number(raw.viewsCount ?? raw.views_count ?? 0),
+              likesCount: Number(raw.likesCount ?? raw.likes_count ?? 0),
+              commentsCount: Number(raw.commentsCount ?? raw.comments_count ?? 0),
+              sharesCount: Number(raw.sharesCount ?? raw.shares_count ?? 0),
+              engagementScore: Number(raw.engagementScore ?? raw.engagement_score ?? 0),
+              status: String(raw.status || "verified"),
+              metadata: {
+                ...(raw.metadata && typeof raw.metadata === "object" ? raw.metadata : {}),
+                title,
+                authorName: authorUsername,
+                thumbnail: thumbnailUrl || undefined,
+              },
+              createdAt: String(raw.createdAt || raw.created_at || new Date().toISOString()),
+            };
+          });
+          setRecentPosts(mappedPosts);
         }
       } catch {
         // silent fail
@@ -114,16 +147,28 @@ export function TikTokSubmissionForm({
         throw new Error(data.error || "Không thể phân tích video TikTok này.");
       }
 
+      const rawPost = data.post || {};
+      const postTitle = rawPost.title || rawPost.metadata?.title;
       const formattedPost: TikTokPost = {
-        id: data.post?.id || `tt-${Date.now()}`,
-        tiktokUrl: data.post?.tiktok_url || trimmedUrl,
-        viewsCount: data.post?.views_count || 0,
-        likesCount: data.post?.likes_count || 0,
-        commentsCount: data.post?.comments_count || 0,
-        sharesCount: data.post?.shares_count || 0,
-        engagementScore: data.post?.engagement_score || 0,
-        metadata: data.post?.metadata || {},
-        createdAt: data.post?.created_at || new Date().toISOString(),
+        id: String(rawPost.id || `tt-${Date.now()}`),
+        tiktokUrl: String(rawPost.tiktokUrl || rawPost.tiktok_url || trimmedUrl),
+        videoId: String(rawPost.videoId || rawPost.video_id || ""),
+        authorUsername: String(rawPost.authorUsername || rawPost.author_username || "tiktok_creator"),
+        title: postTitle ? String(postTitle) : undefined,
+        thumbnailUrl: rawPost.thumbnailUrl ?? rawPost.thumbnail_url ?? null,
+        viewsCount: Number(rawPost.viewsCount ?? rawPost.views_count ?? 0),
+        likesCount: Number(rawPost.likesCount ?? rawPost.likes_count ?? 0),
+        commentsCount: Number(rawPost.commentsCount ?? rawPost.comments_count ?? 0),
+        sharesCount: Number(rawPost.sharesCount ?? rawPost.shares_count ?? 0),
+        engagementScore: Number(
+          rawPost.engagementScore ?? rawPost.engagement_score ?? data.engagementScore ?? 0
+        ),
+        status: String(rawPost.status || "verified"),
+        metadata: {
+          ...(rawPost.metadata && typeof rawPost.metadata === "object" ? rawPost.metadata : {}),
+          ...(postTitle ? { title: String(postTitle) } : {}),
+        },
+        createdAt: String(rawPost.createdAt || rawPost.created_at || new Date().toISOString()),
       };
 
       setSuccessPost(formattedPost);

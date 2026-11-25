@@ -1,5 +1,4 @@
-import { cookies } from "next/headers";
-import { createClient } from "@/src/lib/supabase/server";
+import { createAdminClient } from "@/src/lib/supabase/admin";
 import { getAdminPortalAccess } from "@/src/lib/admin/admin-access";
 import { getAdminFraudActivities } from "@/src/lib/admin/admin-service";
 import { AdminFraudManagement } from "@/src/components/admin/admin-fraud-management";
@@ -14,8 +13,7 @@ export default async function AdminFraudPage() {
     return <AdminAccessNotice access={access} />;
   }
 
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const fraud = await getAdminFraudActivities(supabase);
 

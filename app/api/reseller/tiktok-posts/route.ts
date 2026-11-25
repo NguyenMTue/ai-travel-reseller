@@ -80,6 +80,13 @@ export async function POST(request: Request) {
       );
     }
 
+    // Invalidate GET cache for this reseller
+    for (const key of tiktokGetCache.keys()) {
+      if (key.startsWith(`${resellerId}:`)) {
+        tiktokGetCache.delete(key);
+      }
+    }
+
     return NextResponse.json(
       {
         success: true,
@@ -110,13 +117,26 @@ export async function GET(request: Request) {
     let resellerId = DEMO_RESELLER_ID;
     if (queryResellerId && UUID_REGEX.test(queryResellerId.trim())) {
       resellerId = queryResellerId.trim();
+    } else {
+      try {
+        const cookieStore = await cookies();
+        const supabase = createClient(cookieStore);
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user?.id) {
+          resellerId = user.id;
+        }
+      } catch {
+        // use fallback
+      }
     }
 
     const cacheKey = `${resellerId}:${queryCampaignId || "all"}`;
     const cached = tiktokGetCache.get(cacheKey);
     if (cached && Date.now() - cached.cachedAt < GET_CACHE_TTL_MS) {
       return NextResponse.json(cached.data, {
-        headers: { "X-Cache": "HIT", "Cache-Control": "private, max-age=900" },
+        headers: { "X-Cache": "HIT", "Cache-Control": "private, no-store" },
       });
     }
 
@@ -192,7 +212,7 @@ export async function GET(request: Request) {
     tiktokGetCache.set(cacheKey, { data: responsePayload, cachedAt: Date.now() });
 
     return NextResponse.json(responsePayload, {
-      headers: { "X-Cache": "MISS", "Cache-Control": "private, max-age=900" },
+      headers: { "X-Cache": "MISS", "Cache-Control": "private, no-store" },
     });
   } catch (error: any) {
     console.error("[TIKTOK_POSTS_GET_ERROR]", error);

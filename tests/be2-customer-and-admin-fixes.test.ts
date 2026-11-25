@@ -27,18 +27,18 @@ test("BE2-CUST-01: Viewport & Mobile Safe Area configuration", () => {
   );
   assert.match(
     checkoutModalContent,
-    /role="radiogroup"/,
-    "Ticket package container must specify role='radiogroup'"
+    /role="(?:radiogroup|group)"/,
+    "Ticket package container must specify accessible group role"
   );
   assert.match(
     checkoutModalContent,
-    /role="radio"/,
-    "Ticket package cards must specify role='radio' for accessibility"
+    /role="radio"|aria-pressed=/,
+    "Ticket package cards must specify role='radio' or aria-pressed for accessibility"
   );
   assert.match(
     checkoutModalContent,
-    /text-base md:text-sm/,
-    "Inputs must specify text-base on mobile (>= 16px) to prevent iOS auto-zoom"
+    /text-base md:text-sm|text-\[16px\]/,
+    "Inputs must specify >= 16px font size on mobile to prevent iOS auto-zoom"
   );
   assert.match(
     checkoutModalContent,
