@@ -1,4 +1,5 @@
 import { createAdminClient } from "../supabase/admin.ts";
+import { normalizeReferralCode } from "./referral.ts";
 import type {
   StorefrontData,
   StorefrontMerchant,
@@ -6,8 +7,6 @@ import type {
   StorefrontTip,
   StorefrontItineraryItem,
   StorefrontReview,
-  BookingRequest,
-  BookingOrderResult,
 } from "./types";
 
 const SUNWORLD_MERCHANT: StorefrontMerchant = {
@@ -334,13 +333,14 @@ export async function resolveStorefrontData({
   const cleanTenant = (tenant || "sunworld").toLowerCase().trim();
   const cleanSlug = (slug || "default").toLowerCase().trim();
 
-  const refParam = typeof searchParams.ref === "string" ? searchParams.ref : undefined;
+  const refParam = normalizeReferralCode(searchParams.ref);
   const campaignParam = typeof searchParams.campaign === "string" ? searchParams.campaign : undefined;
 
   let dbMerchant: any = null;
   let dbProduct: any = null;
   let dbCampaign: any = null;
   let dbVideoUrl: string | undefined = undefined;
+  let tracking: StorefrontData["tracking"];
 
   const abortController = new AbortController();
   const timeoutId = setTimeout(() => abortController.abort(), 1200);
@@ -420,6 +420,26 @@ export async function resolveStorefrontData({
             dbVideoUrl = videoContent.video_url;
           }
         }
+      }
+      // A UUID alone does not establish a public referral identity. Require an
+      // active affiliate link for the resolved merchant's product (and campaign).
+      if (refParam && dbMerchant && dbProduct?.merchant_id === dbMerchant.id) {
+        let linkQuery = admin.from("affiliate_links").select("id")
+          .eq("reseller_id", refParam).eq("product_id", dbProduct.id)
+          .eq("is_active", true);
+        if (dbCampaign) linkQuery = linkQuery.eq("campaign_id", dbCampaign.id);
+        const { data: link, error: linkError } = await linkQuery
+          .abortSignal(abortController.signal).limit(1).maybeSingle();
+        if (link && !linkError) {
+          const { data: reseller, error: resellerError } = await admin.from("resellers")
+            .select("name").eq("id", refParam).eq("status", "active")
+            .abortSignal(abortController.signal).maybeSingle();
+          if (!resellerError && reseller?.name?.trim()) {
+            tracking = { refCode: refParam, resellerName: reseller.name.trim() };
+          }
+        }
+        // No public avatar, verification or discount-eligibility fields exist in
+        // the current schema. Do not infer these from active status or a ref URL.
       }
     };
 
@@ -541,73 +561,8 @@ export async function resolveStorefrontData({
             : "Chiến dịch Khám Phá Sun World Ba Na Hills 2026",
           commissionRate: 15,
         },
-    tracking: refParam
-      ? {
-          refCode: refParam,
-          resellerName: "Đối tác TravelLink Verified",
-          discountPercent: 5,
-        }
-      : undefined,
+    tracking,
   };
 }
 
-export function createBookingOrder(request: BookingRequest): BookingOrderResult {
-  const adultPrice =
-    typeof request.packagePrice === "number" && request.packagePrice > 0
-      ? request.packagePrice
-      : 320000;
-  // Giá vé trẻ em được ưu đãi 75% giá vé người lớn
-  const childPrice = Math.round(adultPrice * 0.75);
-
-  const baseTotal = request.adultCount * adultPrice + request.childCount * childPrice;
-  const discountAmount = request.refCode ? Math.round(baseTotal * 0.05) : 0;
-  const finalTotal = Math.max(0, baseTotal - discountAmount);
-
-  const randSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
-  const orderId = `TL-${Date.now().toString().slice(-6)}-${randSuffix}`;
-  const ticketCode = `ET-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-
-  const bankName = "MBBank";
-  const bankAccount = "09051888999";
-  const bankAccountName = "CTY CP DU LICH SUN WORLD TRAVEL";
-  const transferContent = `DH ${orderId}`;
-
-  // VietQR Napas247 URL format
-  const vietQrUrl = `https://img.vietqr.io/image/${bankName}-${bankAccount}-compact2.png?amount=${finalTotal}&addInfo=${encodeURIComponent(
-    transferContent,
-  )}&accountName=${encodeURIComponent(bankAccountName)}`;
-
-  const qrPayload = JSON.stringify({
-    orderId,
-    ticketCode,
-    packageName: request.packageName,
-    customerName: request.customerName,
-    travelDate: request.travelDate,
-    adults: request.adultCount,
-    children: request.childCount,
-    verifiedBy: "TravelLink & Sun World Official",
-    issuedAt: new Date().toISOString(),
-  });
-
-  return {
-    orderId,
-    ticketCode,
-    qrPayload,
-    vietQrUrl,
-    totalAmount: finalTotal,
-    originalTotal: baseTotal,
-    discountAmount,
-    bankName,
-    bankAccount,
-    bankAccountName,
-    transferContent,
-    customerName: request.customerName,
-    customerPhone: request.customerPhone,
-    customerEmail: request.customerEmail,
-    travelDate: request.travelDate,
-    packageName: request.packageName,
-    adultCount: request.adultCount,
-    childCount: request.childCount,
-    createdAt: new Date().toISOString(),
-  };
-}
+export { createBookingDraft } from "./booking.ts";

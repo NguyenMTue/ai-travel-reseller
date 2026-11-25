@@ -2,7 +2,10 @@
 
 import React, { useState } from "react";
 import type { StorefrontData, StorefrontPackage } from "@/src/lib/storefront/types";
+import type { CheckoutGateway } from "@/src/lib/storefront/checkout";
+import { getStorefrontPrice } from "@/src/lib/storefront/pricing";
 import { StorefrontHeader } from "./storefront-header";
+import { StorefrontReferralCard } from "./storefront-referral-card";
 import { StorefrontGallery } from "./storefront-gallery";
 import { StorefrontPriceCard } from "./storefront-price-card";
 import { StorefrontTourContent } from "./storefront-tour-content";
@@ -13,13 +16,16 @@ import { ShieldCheck, PhoneCall, Mail, MapPin } from "lucide-react";
 
 type StorefrontViewProps = {
   data: StorefrontData;
+  checkoutGateway?: CheckoutGateway;
 };
 
-export function StorefrontView({ data }: StorefrontViewProps) {
+export function StorefrontView({ data, checkoutGateway }: StorefrontViewProps) {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<StorefrontPackage | undefined>(
     data.product.packages[0],
   );
+
+  const price = getStorefrontPrice(data, selectedPackage);
 
   const handleOpenBooking = () => {
     setIsBookingOpen(true);
@@ -31,15 +37,23 @@ export function StorefrontView({ data }: StorefrontViewProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf9f5] text-slate-800 flex flex-col font-sans pb-24 md:pb-12">
+    <div className="min-h-screen bg-[#faf9f5] text-slate-800 flex flex-col font-sans pb-[calc(8rem+env(safe-area-inset-bottom))] md:pb-12">
       {/* 1. Header Thương hiệu Doanh nghiệp */}
       <StorefrontHeader merchant={data.merchant} tracking={data.tracking} />
 
       {/* 2. Main Content Container */}
-      <main className="max-w-6xl mx-auto px-4 py-6 w-full flex-1">
+      <main id="main-content" className="max-w-6xl mx-auto px-4 py-6 w-full flex-1">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           {/* Cột trái: Media Gallery, Điểm nổi bật, Lịch trình, Mẹo du lịch, Đánh giá */}
-          <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
+          <div className="min-w-0 lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
+            <div className="flex min-w-0 flex-col gap-4">
+              <div>
+                <p className="mb-2 text-sm font-medium text-[#436560]">{data.product.location}</p>
+                <h1 className="break-words text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">{data.product.name}</h1>
+              </div>
+              <StorefrontReferralCard tracking={data.tracking} />
+            </div>
+
             <StorefrontGallery
               images={data.product.galleryImages}
               videoUrl={data.product.videoUrl}
@@ -48,11 +62,13 @@ export function StorefrontView({ data }: StorefrontViewProps) {
 
             <StorefrontTourContent
               data={data}
+              selectedPackageId={selectedPackage?.id}
+              onChoosePackage={setSelectedPackage}
               onSelectPackage={handleSelectPackage}
             />
 
             <StorefrontReviews
-              reviews={data.product.packages.length > 0 ? (data as any).product.reviews || [
+              reviews={data.product.packages.length > 0 ? data.product.reviews || [
                 {
                   id: "rev-01",
                   author: "Nguyễn Hoàng Minh",
@@ -87,6 +103,7 @@ export function StorefrontView({ data }: StorefrontViewProps) {
           <div className="lg:col-span-5 xl:col-span-4">
             <StorefrontPriceCard
               data={data}
+              price={price}
               onOpenBooking={handleOpenBooking}
             />
           </div>
@@ -146,18 +163,19 @@ export function StorefrontView({ data }: StorefrontViewProps) {
       </footer>
 
       {/* 4. Thanh CTA cố định ở đáy màn hình di động */}
-      <StorefrontStickyCta
-        product={data.product}
-        onOpenBooking={handleOpenBooking}
-      />
+      {!isBookingOpen && <StorefrontStickyCta price={price} onOpenBooking={handleOpenBooking} />}
 
       {/* 5. Live Checkout & VietQR Modal */}
+      <div className={isBookingOpen ? "fixed inset-0 z-50" : undefined} role={isBookingOpen ? "dialog" : undefined} aria-modal={isBookingOpen || undefined} aria-label={isBookingOpen ? "Đặt vé tham quan" : undefined}>
       <StorefrontCheckoutModal
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
         data={data}
         initialPackage={selectedPackage}
+        onPackageChange={setSelectedPackage}
+        gateway={checkoutGateway}
       />
+      </div>
     </div>
   );
 }

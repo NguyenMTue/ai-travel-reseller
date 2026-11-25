@@ -33,12 +33,12 @@ export function StorefrontGallery({ images, videoUrl, title }: StorefrontGallery
     <div className="bg-white rounded-2xl overflow-hidden border border-[#e2e8f0] shadow-sm">
       {/* Mode Switcher Tabs */}
       <div className="flex border-b border-[#e2e8f0] bg-[#f8fafc] px-4 py-2 justify-between items-center">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {videoUrl && (
             <button
               type="button"
               onClick={() => setActiveTab("video")}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all ${
+              className={`shrink-0 min-h-12 flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
                 activeTab === "video"
                   ? "bg-[#204e4c] text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
@@ -55,7 +55,7 @@ export function StorefrontGallery({ images, videoUrl, title }: StorefrontGallery
           <button
             type="button"
             onClick={() => setActiveTab("photos")}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition-all ${
+            className={`shrink-0 min-h-12 flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
               activeTab === "photos"
                 ? "bg-[#204e4c] text-white shadow-xs"
                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/60"
