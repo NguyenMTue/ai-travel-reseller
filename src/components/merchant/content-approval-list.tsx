@@ -34,6 +34,38 @@ export interface ContentApprovalListProps {
   preview?: boolean;
 }
 
+function formatReadableScript(raw?: string | null): string {
+  if (!raw) return "";
+  const trimmed = raw.trim();
+  if (!trimmed.startsWith("{") && !trimmed.startsWith("[")) {
+    return raw;
+  }
+  try {
+    const parsed = JSON.parse(trimmed);
+    const scenes = Array.isArray(parsed)
+      ? parsed
+      : Array.isArray(parsed?.scenes)
+      ? parsed.scenes
+      : null;
+    if (!scenes || scenes.length === 0) return raw;
+
+    return scenes
+      .map((s: any, idx: number) => {
+        const num = s.sceneNumber ?? s.scene_number ?? s.id ?? idx + 1;
+        const time = s.timeRange || s.time_range || "";
+        const role = s.role ? ` [${s.role}]` : "";
+        const voice = s.voiceoverText || s.voiceover_text || s.voice || s.narration || s.text || "";
+        const overlay = s.overlayText || s.overlay_text || s.on_screen_text || "";
+        const header = `Cảnh ${num}${time ? ` (${time})` : ""}${role}:`;
+        const parts = [header, voice ? `  Lời thoại: ${voice}` : "", overlay ? `  Chữ hiển thị: ${overlay}` : ""].filter(Boolean);
+        return parts.join("\n");
+      })
+      .join("\n\n");
+  } catch {
+    return raw;
+  }
+}
+
 export function ContentApprovalList({
   initialContents,
   initialSummary,
@@ -61,7 +93,7 @@ export function ContentApprovalList({
   function openEditModal(item: MerchantContentItem) {
     setEditingItem(item);
     setEditHook(item.hook || "");
-    setEditScript(item.script || "");
+    setEditScript(formatReadableScript(item.script));
     setEditCaption(item.caption || "");
     setEditCta(item.cta || "");
   }
@@ -488,7 +520,9 @@ export function ContentApprovalList({
                           <div className={styles.sectionTitle}>
                             <span>KỊCH BẢN LỜI THOẠI (VOICEOVER SCRIPT)</span>
                           </div>
-                          <div className={styles.textContent}>{item.script}</div>
+                          <div className={`${styles.textContent} whitespace-pre-line`}>
+                            {formatReadableScript(item.script)}
+                          </div>
                         </div>
                       )}
 

@@ -36,6 +36,52 @@ export function MerchantLibraryLive({ merchantId }: { merchantId: string }) {
   return <LibraryClient contextKey={merchantId} request={readLibrary} />;
 }
 
+const BANA_HILLS_KEYWORDS = [
+  "bà nà",
+  "ba na",
+  "cầu vàng",
+  "golden_bridge",
+  "cáp treo",
+  "cable_car",
+  "làng pháp",
+  "french_village",
+  "nhật thực",
+  "eclipse_square",
+  "four seasons",
+  "máng trượt",
+  "alpine_coaster",
+  "le jardin",
+  "sunworld_gate",
+];
+
+const NGU_HANH_SON_KEYWORDS = [
+  "ngũ hành sơn",
+  "ngu hanh son",
+  "non nước",
+  "huyền không",
+  "tam thai",
+  "linh ứng",
+  "đá mỹ nghệ",
+];
+
+function matchesCampaignMedia(item: LibraryItem, campaign: CampaignOption): boolean {
+  const cmpText = `${campaign.name} ${campaign.productName} ${campaign.targetLocation || ""}`.toLowerCase();
+  const mediaText = `${item.title} ${item.styleTags.join(" ")}`.toLowerCase();
+
+  if (cmpText.includes("ngũ hành sơn") || cmpText.includes("non nước")) {
+    return NGU_HANH_SON_KEYWORDS.some((kw) => mediaText.includes(kw));
+  }
+  if (cmpText.includes("bà nà") || cmpText.includes("ba na")) {
+    return BANA_HILLS_KEYWORDS.some((kw) => mediaText.includes(kw));
+  }
+
+  const tokens = cmpText
+    .split(/[^a-z0-9àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]+/)
+    .filter((w) => w.length >= 4 && !["chiến", "dịch", "khám", "phá", "tour", "lịch", "đà", "nẵng"].includes(w));
+  if (tokens.length === 0) return true;
+  return tokens.some((tk) => mediaText.includes(tk));
+}
+
 export function LibraryClient({
   request,
   contextKey,
@@ -64,7 +110,9 @@ function LibraryRead({
   observeInvalidation?: (invalidate: () => void) => () => void;
   merchantId?: string;
 }) {
-  const [query, setQuery] = useState(initialLibraryQuery);
+  // Sử dụng limit=8 (bội số của 4 cột -> 2 hàng đầy = 8 ảnh/trang)
+  const [query, setQuery] = useState({ ...initialLibraryQuery, limit: 8 });
+  const [showAllMerchantMedia, setShowAllMerchantMedia] = useState(false);
   const [draft, setDraft] = useState("");
   const [result, setResult] = useState<LibraryState>({ status: "loading" });
   const [attempt, setAttempt] = useState(0);
@@ -217,8 +265,17 @@ function LibraryRead({
     campaigns.find((c) => c.id === selectedCampaignId) ||
     campaigns[0] ||
     null;
+  const rawItems = result.status === "ready" ? result.data.items : [];
+  const visibleItems =
+    selectedCampaign && !showAllMerchantMedia
+      ? rawItems.filter((item) => matchesCampaignMedia(item, selectedCampaign))
+      : rawItems;
   const totalAssets =
-    result.status === "ready" ? result.data.pagination.total : 0;
+    result.status === "ready"
+      ? selectedCampaign && !showAllMerchantMedia
+        ? visibleItems.length
+        : result.data.pagination.total
+      : 0;
 
   return (
     <>
@@ -239,6 +296,8 @@ function LibraryRead({
                   setSelectedCampaignId(e.target.value);
                   setSelected(null);
                   setSelectedIds([]);
+                  setShowAllMerchantMedia(false);
+                  setQuery((q) => ({ ...q, page: 1 }));
                 }}
               >
                 {campaigns.map((c) => (
@@ -428,7 +487,7 @@ function LibraryRead({
         {result.status === "loading"
           ? "Đang tải tư liệu chiến dịch…"
           : result.status === "ready"
-          ? `${result.data.pagination.total} tư liệu · Đang chọn ${selectedIds.length} ảnh`
+          ? `${totalAssets} tư liệu phù hợp · Đang chọn ${selectedIds.length} ảnh`
           : "Chưa có kết quả tư liệu."}
       </div>
 
@@ -474,10 +533,10 @@ function LibraryRead({
 
       {result.status === "ready" && (
         <div key="private-library" ref={privateView}>
-          {result.data.items.length ? (
+          {visibleItems.length ? (
             <div className={styles.collection}>
               <Grid>
-                {result.data.items.map((item) => {
+                {visibleItems.map((item) => {
                   const selectedIndex = selectedIds.indexOf(item.id);
                   const isSelected = selectedIndex !== -1;
                   let badgeText = "";
@@ -505,6 +564,18 @@ function LibraryRead({
                 })}
               </Grid>
             </div>
+          ) : rawItems.length > 0 && selectedCampaign && !showAllMerchantMedia ? (
+            <LibraryNotice
+              title={`Chưa có tư liệu ảnh riêng cho "${selectedCampaign.name}"`}
+              description={`Doanh nghiệp đang có ${rawItems.length} ảnh mẫu thuộc điểm đến khác. Bạn có thể hiển thị toàn bộ để dùng tạm hoặc tải lên ảnh riêng cho điểm đến này.`}
+            >
+              <Button
+                variant="outline"
+                onClick={() => setShowAllMerchantMedia(true)}
+              >
+                Hiển thị toàn bộ {rawItems.length} ảnh của doanh nghiệp
+              </Button>
+            </LibraryNotice>
           ) : (
             <LibraryNotice
               title={
