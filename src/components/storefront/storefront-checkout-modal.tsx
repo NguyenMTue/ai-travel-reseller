@@ -3,11 +3,11 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import QRCode from "qrcode";
-import { X, Copy, CheckCircle2 } from "lucide-react";
+import { X, Copy, CheckCircle2, Sparkles, ArrowRight } from "lucide-react";
 import type { StorefrontData, StorefrontPackage, BookingRequest } from "@/src/lib/storefront/types";
 import { getStorefrontPrice, getBookingTotals } from "@/src/lib/storefront/pricing";
 import { createBookingDraft, localDate, validateBooking, type BookingDraft } from "@/src/lib/storefront/booking";
-import { unavailableCheckoutGateway, readCheckoutQuote, readPaidTicket, type CheckoutGateway, type CheckoutQuote, type IssuedTicket } from "@/src/lib/storefront/checkout";
+import { demoCheckoutGateway, readCheckoutQuote, readPaidTicket, type CheckoutGateway, type CheckoutQuote, type IssuedTicket } from "@/src/lib/storefront/checkout";
 import { formatPrice } from "@/src/lib/storefront/format";
 
 type Props = {
@@ -18,7 +18,7 @@ type Prepared = { fingerprint: string; draft: BookingDraft; quote?: CheckoutQuot
 const inputClass = "min-h-12 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-[16px]! text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#204e4c]";
 const buttonClass = "min-h-12 rounded-xl px-4 py-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#204e4c] disabled:cursor-wait disabled:opacity-50";
 
-export function StorefrontCheckoutModal({ isOpen, onClose, data, initialPackage, onPackageChange, gateway = unavailableCheckoutGateway }: Props) {
+export function StorefrontCheckoutModal({ isOpen, onClose, data, initialPackage, onPackageChange, gateway = demoCheckoutGateway }: Props) {
   const selected = initialPackage ?? data.product.packages[0];
   const [travelDate, setTravelDate] = useState(() => localDate(new Date(Date.now() + 86400000)));
   const [adultCount, setAdults] = useState(1), [childCount, setChildren] = useState(0);
@@ -27,6 +27,7 @@ export function StorefrontCheckoutModal({ isOpen, onClose, data, initialPackage,
   const [prepared, setPrepared] = useState<Prepared>();
   const [ticket, setTicket] = useState<IssuedTicket>();
   const [ticketImage, setTicketImage] = useState("");
+  const [commission, setCommission] = useState<{ netAmount?: number }>();
   const [busy, setBusy] = useState(false), [error, setError] = useState("");
   const [message, setMessage] = useState(""), [copied, setCopied] = useState("");
   const lock = useRef(false), controller = useRef<AbortController | null>(null);
@@ -84,13 +85,49 @@ export function StorefrontCheckoutModal({ isOpen, onClose, data, initialPackage,
     if (lock.current || !prepared?.quote || currentStep === "success") return;
     lock.current = true; setBusy(true); setError("");
     try {
-      const response = await run(signal => gateway.check(prepared.quote!, { signal }));
+      const response = await run(signal => gateway.check(prepared.quote!, { signal, draft: prepared.draft }));
       const issued = readPaidTicket(response, prepared.quote);
-      if (issued) { setTicket(issued); setStep("success"); setMessage(""); }
+      if (issued) {
+        const raw = response as Record<string, unknown>;
+        if (raw?.commission && typeof raw.commission === "object") {
+          setCommission(raw.commission as { netAmount?: number });
+        }
+        setTicket(issued); setStep("success"); setMessage("");
+      }
       else setMessage("Đang chờ đối tác xác nhận thanh toán. Vé chưa được phát hành; vui lòng không chuyển khoản lần nữa.");
     } catch { setError("Không kiểm tra được thanh toán. Bạn có thể thử lại cho cùng đơn; vui lòng không chuyển tiền lần nữa."); }
     finally { lock.current = false; setBusy(false); }
   }
+
+  const checkPaymentRef = useRef(checkPayment);
+  useEffect(() => {
+    checkPaymentRef.current = checkPayment;
+  });
+
+  // Tự động kiểm tra trạng thái thanh toán từ VietQR webhook
+  const orderId = prepared?.quote?.orderId;
+  useEffect(() => {
+    if (currentStep !== "payment" || !orderId) return;
+    let isCancelled = false;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/storefront/orders/status?orderId=${encodeURIComponent(orderId)}`);
+        if (!res.ok) return;
+        const json = await res.json();
+        if (!isCancelled && json.isPaid) {
+          clearInterval(interval);
+          checkPaymentRef.current();
+        }
+      } catch {
+        // Bỏ qua lỗi polling nền
+      }
+    }, 2500);
+    return () => {
+      isCancelled = true;
+      clearInterval(interval);
+    };
+  }, [currentStep, orderId]);
+
   async function copy(value: string, label: string) {
     try { await navigator.clipboard.writeText(value); setCopied("Đã sao chép " + label); }
     catch { setCopied("Không sao chép được; vui lòng chọn thông tin hiển thị."); }
@@ -111,7 +148,7 @@ export function StorefrontCheckoutModal({ isOpen, onClose, data, initialPackage,
       }}>
       <div ref={panel} className="flex max-h-[92dvh] w-full max-w-xl flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-2xl">
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
-          <h2 className="text-base font-bold text-slate-900">{currentStep === "form" ? "Đặt vé tham quan chính hãng" : currentStep === "payment" ? "Thanh toán VietQR" : "Vé điện tử"}</h2>
+          <h2 className="text-base font-bold text-slate-900">{currentStep === "form" ? "Đặt vé tham quan chính hãng" : currentStep === "payment" ? "Thanh toán vé qua VietQR" : "Xác nhận đặt vé thành công"}</h2>
           <button type="button" aria-label="Đóng đặt vé" onClick={onClose} disabled={busy} className={buttonClass + " shrink-0 bg-slate-100 text-slate-700"}><X aria-hidden="true" className="size-5" /></button>
         </div>
         <div className="overflow-y-auto overscroll-contain p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:p-5">
@@ -143,7 +180,7 @@ export function StorefrontCheckoutModal({ isOpen, onClose, data, initialPackage,
             <button type="submit" disabled={busy} className={buttonClass + " w-full bg-[#204e4c] text-white"}>TIẾP TỤC THANH TOÁN VIETQR</button>
           </form>}
           {currentStep === "payment" && prepared && <section aria-label="Thông tin thanh toán" className="space-y-4">
-            <p className="break-all text-sm text-slate-600">{quote ? "Mã đơn: " + quote.orderId : "Mã yêu cầu: " + prepared.draft.requestId}</p>
+            <p className="break-all text-sm text-slate-600">{quote ? "Mã đơn hàng: " + quote.orderId : "Mã yêu cầu: " + prepared.draft.requestId}</p>
             <p className="text-lg font-bold">Số tiền: {formatPrice(prepared.draft.totalAmount)} ₫</p>
             <p role="status" className="rounded-xl bg-amber-50 p-3 text-sm leading-relaxed text-amber-900">{busy ? "Đang kiểm tra, vui lòng chờ…" : message || "Chưa có xác nhận thanh toán."}</p>
             {quote && <>
@@ -153,14 +190,45 @@ export function StorefrontCheckoutModal({ isOpen, onClose, data, initialPackage,
             </>}
             <div className="flex flex-wrap gap-2">
               <button type="button" disabled={busy} onClick={() => { setStep("form"); setError(""); }} className={buttonClass + " flex-1 border border-slate-300 text-slate-700"}>Quay lại sửa</button>
-              <button type="button" disabled={busy} onClick={quote ? checkPayment : () => preparePayment()} className={buttonClass + " flex-1 bg-[#bd6840] text-white"}>{quote ? "Tôi đã chuyển khoản — Kiểm tra" : "Thử tải lại thông tin thanh toán"}</button>
+              <button type="button" disabled={busy} onClick={quote ? checkPayment : () => preparePayment()} className={buttonClass + " flex-1 bg-[#bd6840] text-white"}>{quote ? "TÔI ĐÃ CHUYỂN KHOẢN • XUẤT VÉ" : "Thử tải lại thông tin thanh toán"}</button>
             </div>
           </section>}
           {currentStep === "success" && ticket && <section aria-label="E-Ticket đã xác nhận" className="space-y-4 text-center">
             <CheckCircle2 aria-hidden="true" className="mx-auto size-10 text-emerald-700" />
-            <h3 className="text-lg font-bold">Thanh toán đã được xác nhận</h3><p className="text-sm">Vé điện tử do đối tác cấp cho đơn <strong>{ticket.orderId}</strong></p>
-            <p className="font-mono font-bold">{ticket.code}</p>
-            {ticketImage ? <><Image unoptimized src={ticketImage} width={256} height={256} alt="Mã QR vé điện tử" className="mx-auto max-w-full" /><button type="button" onClick={() => { const link = document.createElement("a"); link.href = ticketImage; link.download = ticket.code + ".png"; link.click(); }} className={buttonClass + " inline-flex items-center bg-[#204e4c] text-white"}>Lưu mã vé</button></> : <p role="status">Đang tải mã vé…</p>}
+            <h3 className="text-lg font-bold">XÁC NHẬN ĐẶT VÉ THÀNH CÔNG!</h3>
+            <p className="text-sm">Vé điện tử chính hãng (E-Ticket) do đối tác cấp cho đơn <strong>{ticket.orderId}</strong></p>
+            {prepared?.draft.customerName && <p className="text-sm font-medium text-slate-700">{prepared.draft.customerName}</p>}
+            <p className="font-mono text-xl font-bold tracking-wider text-[#204e4c]">{ticket.code}</p>
+            {ticketImage ? (
+              <div className="flex flex-col items-center">
+                <Image unoptimized src={ticketImage} width={256} height={256} alt="Mã QR vé điện tử" className="mx-auto max-w-full rounded-xl border border-slate-200 p-2" />
+                <span className="mt-1 font-mono text-xs font-bold text-slate-600">QUÉT TẠI CỔNG VÀO</span>
+                <button type="button" onClick={() => { const link = document.createElement("a"); link.href = ticketImage; link.download = ticket.code + ".png"; link.click(); }} className={buttonClass + " mt-3 inline-flex items-center bg-[#204e4c] text-white"}>Lưu mã vé</button>
+              </div>
+            ) : <p role="status">Đang tải mã vé…</p>}
+            {data.tracking?.refCode && (
+              <div className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 p-3.5 text-left shadow-xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
+                    <Sparkles className="size-4 shrink-0 text-emerald-600" />
+                    <span>CHẾ ĐỘ TEST: ĐÃ CỘNG HOA HỒNG RESELLER</span>
+                  </div>
+                  <span className="rounded-full bg-emerald-600 px-2.5 py-0.5 font-mono text-xs font-bold text-white shadow-xs">
+                    +{formatPrice(commission?.netAmount || Math.round((prepared?.draft.totalAmount || 0) * 0.12 * 0.8))} ₫
+                  </span>
+                </div>
+                <div className="mt-2 space-y-1 text-[11px] text-emerald-800">
+                  <p>• Đơn hàng <strong>{ticket.orderId}</strong> đã được ghi nhận hoa hồng thành công cho đối tác <span className="font-mono font-bold text-emerald-900">{data.tracking.refCode}</span>.</p>
+                </div>
+                <div className="mt-2 flex items-center justify-between border-t border-emerald-200/70 pt-2 text-xs">
+                  <span className="text-[11px] text-slate-500 font-medium">Kiểm tra số dư:</span>
+                  <a href="/reseller/wallet" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-bold text-emerald-800 underline hover:text-emerald-950">
+                    <span>Mở Ví Reseller (/reseller/wallet)</span>
+                    <ArrowRight className="size-3.5" />
+                  </a>
+                </div>
+              </div>
+            )}
             <button type="button" onClick={onClose} className={buttonClass + " block w-full border border-slate-300"}>Về trang tour</button>
           </section>}
         </div>

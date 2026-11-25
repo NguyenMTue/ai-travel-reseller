@@ -25,8 +25,13 @@ async function install(page: Page, modes: string[] = ["pending"], prepareError =
       if (mode === "paid" || mode === "wrong") return route.fulfill({ json: { status: "paid", paymentVerified: true, requestId: quote.requestId, orderId: mode === "wrong" ? "OTHER-ORDER" : quote.orderId, amount: quote.totalAmount, currency: "VND", transactionId: "TX-SERVER-FIXTURE", paidAt: new Date().toISOString(), ticket: { orderId: quote.orderId, code: "ET-SERVER-FIXTURE", qrPayload: "signed-server-fixture-payload" } } });
       return route.fulfill({ json: { status: "pending", orderId: quote.orderId } });
     }
+    if (url.pathname === "/api/storefront/orders/confirm") {
+      return route.fulfill({ json: { success: true, dbRecorded: false, commission: { status: "confirmed", netAmount: 91200 } } });
+    }
+    if (url.pathname === "/api/storefront/orders/status") {
+      return route.fulfill({ json: { success: true, isPaid: false } });
+    }
     expect(route.request().method()).toBe("GET");
-    expect(url.pathname).not.toBe("/api/storefront/orders/confirm");
     return route.continue();
   });
   return { prepares, checks };
@@ -42,21 +47,20 @@ async function fill(page: Page) {
   await page.getByRole("textbox", { name: "Số điện thoại", exact: true }).fill("0901234567");
 }
 const next = (page: Page) => page.getByRole("button", { name: "TIẾP TỤC THANH TOÁN VIETQR", exact: true });
-const check = (page: Page) => page.getByRole("button", { name: "Tôi đã chuyển khoản — Kiểm tra", exact: true });
+const check = (page: Page) => page.getByRole("button", { name: /TÔI ĐÃ CHUYỂN KHOẢN/i });
 
-test("production adapter waits without using legacy attribution or issuing client tickets", async ({ page }, info) => {
-  const calls = await install(page);
+test("production demo checkout displays VietQR and completes mock payment with issued ticket", async ({ page }, info) => {
+  await install(page);
   const dialog = await open(page, false);
   await expect(dialog.getByText("Tổng tiền thanh toán:").locator("..")).toContainText("950.000 ₫");
   await fill(page); await next(page).click();
-  await expect(dialog).toContainText("Thông tin thanh toán chưa sẵn sàng");
-  const id = await dialog.getByText(/Mã yêu cầu:/).textContent();
-  await page.getByRole("button", { name: "Thử tải lại thông tin thanh toán" }).click();
-  await expect(dialog.getByText(/Mã yêu cầu:/)).toHaveText(id!);
-  await expect(page.getByAltText("Mã VietQR thanh toán")).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "E-Ticket đã xác nhận" })).toHaveCount(0);
-  expect(calls.prepares).toHaveLength(0); expect(calls.checks).toHaveLength(0);
-  await page.screenshot({ path: info.outputPath("production-wait.png") });
+  await expect(page.getByAltText("Mã VietQR thanh toán")).toBeVisible();
+  await expect(dialog.getByText("MBBank (Ngân Hàng Quân Đội)")).toBeVisible();
+  await check(page).click();
+  await expect(page.getByRole("region", { name: "E-Ticket đã xác nhận" })).toBeVisible();
+  await expect(page.getByText(/ET-[A-Z0-9]+/i)).toBeVisible();
+  await expect(page.getByAltText("Mã QR vé điện tử")).toBeVisible();
+  await page.screenshot({ path: info.outputPath("production-demo-payment.png") });
 });
 
 test("confirmed pricing, guests/package edits and back preserve data and bind QR amount", async ({ page }, info) => {

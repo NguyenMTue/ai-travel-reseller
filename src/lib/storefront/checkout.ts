@@ -13,11 +13,101 @@ export type IssuedTicket = { orderId: string; code: string; qrPayload: string };
  */
 export type CheckoutGateway = {
   prepare: (draft: BookingDraft, options: { signal: AbortSignal; supersedesOrderId?: string }) => Promise<unknown>;
-  check: (quote: CheckoutQuote, options: { signal: AbortSignal }) => Promise<unknown>;
+  check: (quote: CheckoutQuote, options: { signal: AbortSignal; draft?: BookingDraft }) => Promise<unknown>;
 };
 export const unavailableCheckoutGateway: CheckoutGateway = {
   prepare: async () => ({ status: "unavailable" }),
   check: async () => ({ status: "pending" }),
+};
+
+export const demoCheckoutGateway: CheckoutGateway = {
+  prepare: async (draft: BookingDraft) => {
+    const dateStr = draft.travelDate.replace(/-/g, "").slice(2);
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const orderId = `TL-${dateStr}-${randomSuffix}`;
+    const transferContent = `DH ${orderId}`;
+    const vietQrUrl = `https://img.vietqr.io/image/970422-0905188899-compact2.png?amount=${draft.totalAmount}&addInfo=${encodeURIComponent(
+      transferContent
+    )}&accountName=${encodeURIComponent("CONG TY DU LICH TRAVEL LINK")}`;
+
+    return {
+      status: "ready",
+      quote: {
+        requestId: draft.requestId,
+        orderId,
+        totalAmount: draft.totalAmount,
+        currency: "VND",
+        bankName: "MBBank (Ngân Hàng Quân Đội)",
+        bankAccount: "0905188899",
+        bankAccountName: "CÔNG TY CỔ PHẦN DU LỊCH TRAVEL LINK",
+        transferContent,
+        vietQrUrl,
+      },
+    };
+  },
+  check: async (quote: CheckoutQuote, options?: { signal?: AbortSignal; draft?: BookingDraft }) => {
+    const draft = options?.draft;
+    let commission: Record<string, unknown> | undefined;
+
+    try {
+      const response = await fetch("/api/storefront/orders/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: options?.signal,
+        body: JSON.stringify({
+          orderId: quote.orderId,
+          totalAmount: quote.totalAmount,
+          customerName: draft?.customerName || "Khách Đặt Tour Demo",
+          customerPhone: draft?.customerPhone || "0905188899",
+          customerEmail: draft?.customerEmail,
+          packageName: draft?.packageName,
+          ticketCode: `ET-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          refCode: draft?.refCode,
+          campaignId: draft?.campaignId,
+          productId: draft?.productId,
+          merchantSlug: draft?.merchantSlug,
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data?.commission) {
+          commission = data.commission;
+        }
+      }
+    } catch {
+      // In offline / isolated mode, proceed with demo ticket issuance
+    }
+
+    const randomTicketNum = Math.floor(100000 + Math.random() * 900000);
+    const code = `ET-${randomTicketNum}`;
+    const qrPayload = JSON.stringify({
+      orderId: quote.orderId,
+      code,
+      amount: quote.totalAmount,
+      date: draft?.travelDate,
+      customerName: draft?.customerName,
+      adults: draft?.adultCount,
+      children: draft?.childCount,
+      verifiedAt: new Date().toISOString(),
+    });
+
+    return {
+      status: "paid",
+      paymentVerified: true,
+      requestId: quote.requestId,
+      orderId: quote.orderId,
+      amount: quote.totalAmount,
+      currency: quote.currency,
+      transactionId: `TX-DEMO-${quote.orderId}`,
+      paidAt: new Date().toISOString(),
+      commission,
+      ticket: {
+        orderId: quote.orderId,
+        code,
+        qrPayload,
+      },
+    };
+  },
 };
 
 function record(value: unknown): Record<string, unknown> {

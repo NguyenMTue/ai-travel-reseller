@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { getStorefrontPrice, getBookingTotals } from "../src/lib/storefront/pricing.ts";
 import { createBookingDraft, validateBooking, localDate } from "../src/lib/storefront/booking.ts";
-import { readCheckoutQuote, readPaidTicket, unavailableCheckoutGateway } from "../src/lib/storefront/checkout.ts";
+import { readCheckoutQuote, readPaidTicket, unavailableCheckoutGateway, demoCheckoutGateway } from "../src/lib/storefront/checkout.ts";
 
 const ref = "22222222-2222-2222-2222-111111111111";
 const request = { packageId: "standard", packageName: "Bà Nà", customerName: "Khách Fixture", customerPhone: "0901234567", customerEmail: "", travelDate: localDate(new Date(Date.now() + 86400000)), adultCount: 1, childCount: 0 };
@@ -51,4 +51,20 @@ test("dev status isPaid and demo eTicket cannot bypass verified order/ticket evi
   assert.equal(readPaidTicket(status, quote), undefined);
   for (const dbRecorded of [false, true]) assert.equal(readPaidTicket({ ...confirmation, dbRecorded }, quote), undefined);
   assert.equal(readPaidTicket({ ...status, eTicket: confirmation.eTicket }, quote), undefined);
+});
+
+test("demoCheckoutGateway prepares valid quote with VietQR and issues verified ticket on check", async () => {
+  const prepared = await demoCheckoutGateway.prepare(draft, { signal: new AbortController().signal });
+  const parsedQuote = readCheckoutQuote(prepared, draft);
+  assert.ok(parsedQuote, "Quote must be parseable and valid");
+  assert.equal(parsedQuote.totalAmount, draft.totalAmount);
+  assert.equal(parsedQuote.currency, "VND");
+  assert.ok(parsedQuote.vietQrUrl.includes("img.vietqr.io"));
+
+  const checked = await demoCheckoutGateway.check(parsedQuote, { signal: new AbortController().signal, draft });
+  const parsedTicket = readPaidTicket(checked, parsedQuote);
+  assert.ok(parsedTicket, "Ticket must be verified and issued");
+  assert.equal(parsedTicket.orderId, parsedQuote.orderId);
+  assert.ok(parsedTicket.code.startsWith("ET-"));
+  assert.ok(parsedTicket.qrPayload.includes(parsedQuote.orderId));
 });
