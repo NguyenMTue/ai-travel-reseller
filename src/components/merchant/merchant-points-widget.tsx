@@ -56,13 +56,40 @@ export function MerchantPointsWidget({
         if (!res.ok) throw new Error("Không thể tải điểm thưởng");
         const json = await res.json();
         if (mounted && json.success) {
+          const summary = json.summary && typeof json.summary === "object" ? json.summary : json;
+          const rawHistory = Array.isArray(json.history)
+            ? json.history
+            : Array.isArray(json.transactions)
+            ? json.transactions
+            : Array.isArray(summary.history)
+            ? summary.history
+            : [];
+          const pointsBalance = Number(
+            summary.points_balance ?? summary.pointsBalance ?? json.points_balance ?? json.pointsBalance ?? 0
+          );
+          const lifetimeEarned = Number(
+            summary.lifetime_points ?? summary.lifetimeEarned ?? json.lifetime_points ?? json.lifetimeEarned ?? pointsBalance
+          );
+          const feeDiscountPercent = Number(
+            summary.platform_fee_discount_percent ??
+              summary.feeDiscountPercent ??
+              json.platform_fee_discount_percent ??
+              json.feeDiscountPercent ??
+              0
+          );
           setData({
-            pointsBalance: json.pointsBalance ?? 150,
-            tier: json.tier ?? "silver",
-            lifetimeEarned: json.lifetimeEarned ?? 150,
-            lifetimeSpent: json.lifetimeSpent ?? 0,
-            feeDiscountPercent: json.feeDiscountPercent ?? 5,
-            transactions: json.transactions ?? [],
+            pointsBalance,
+            tier: (summary.tier ?? json.tier ?? "silver") as "silver" | "gold" | "diamond",
+            lifetimeEarned,
+            lifetimeSpent: Math.max(0, Number(summary.lifetime_spent ?? summary.lifetimeSpent ?? lifetimeEarned - pointsBalance)),
+            feeDiscountPercent,
+            transactions: rawHistory.map((tx: any, idx: number) => ({
+              id: String(tx.id || `tx-${idx}`),
+              points: Number(tx.points ?? tx.points_delta ?? 0),
+              type: String(tx.type || tx.action || "reward"),
+              description: String(tx.description || tx.reason || "Cập nhật điểm thưởng"),
+              createdAt: String(tx.createdAt || tx.created_at || tx.timestamp || new Date().toISOString()),
+            })),
           });
         }
       } catch (err) {

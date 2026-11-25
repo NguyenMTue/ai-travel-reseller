@@ -125,6 +125,82 @@ export async function POST(request: Request) {
     const rawMerchantId = body.merchantId || body.merchant_id;
     if (typeof rawMerchantId === "string" && UUID_REGEX.test(rawMerchantId.trim())) {
       merchantId = rawMerchantId.trim();
+    } else {
+      try {
+        const cookieStore = await cookies();
+        const supabase = createClient(cookieStore);
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user?.id) {
+          merchantId = user.id;
+        }
+      } catch {
+        // Fallback DEMO_MERCHANT_ID
+      }
+    }
+
+    const adminClient = createAdminClient();
+
+    if (body.action === "redeem_discount") {
+      const redeemPoints = Math.max(1, Math.floor(Number(body.points) || 50));
+      const { data: currentRow, error: readErr } = await adminClient
+        .from("merchant_points")
+        .select("*")
+        .eq("merchant_id", merchantId)
+        .maybeSingle();
+
+      if (readErr) {
+        return NextResponse.json(
+          { success: false, error: "Không thể đọc số dư điểm: " + readErr.message },
+          { status: 500 }
+        );
+      }
+
+      const currentBalance = Number(currentRow?.points_balance ?? 0);
+      if (currentBalance < redeemPoints) {
+        return NextResponse.json(
+          { success: false, error: "Số dư điểm không đủ để quy đổi." },
+          { status: 400 }
+        );
+      }
+
+      const newBalance = currentBalance - redeemPoints;
+      const prevHistory = Array.isArray(currentRow?.history) ? currentRow.history : [];
+      const nextHistory = [
+        {
+          id: "redeem-" + Date.now(),
+          points: -redeemPoints,
+          type: "redeem_discount",
+          description: `Đổi ${redeemPoints} điểm lấy ưu đãi giảm phí sàn`,
+          created_at: new Date().toISOString(),
+        },
+        ...prevHistory,
+      ].slice(0, 50);
+
+      const { error: updateErr } = await adminClient
+        .from("merchant_points")
+        .update({
+          points_balance: newBalance,
+          history: nextHistory,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("merchant_id", merchantId);
+
+      if (updateErr) {
+        return NextResponse.json(
+          { success: false, error: "Lỗi cập nhật điểm thưởng: " + updateErr.message },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        merchant_id: merchantId,
+        newBalance,
+        points_balance: newBalance,
+        message: `Đã đổi ${redeemPoints} điểm thành công.`,
+      });
     }
 
     const rawContentId = body.contentId || body.content_id;
@@ -138,8 +214,6 @@ export async function POST(request: Request) {
     const comments = Math.max(0, Number(body.comments || body.comments_count) || 0);
     const shares = Math.max(0, Number(body.shares || body.shares_count) || 0);
     const reason = body.reason || "Video tự tạo đạt mốc tương tác cao";
-
-    const adminClient = createAdminClient();
 
     // 1. Thử gọi RPC award_merchant_video_points
     try {
