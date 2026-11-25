@@ -85,6 +85,43 @@ export function StorefrontCheckoutModal({
     }
   }, [initialPackage]);
 
+  const persistConfirmedOrder = async (order: BookingOrderResult) => {
+    try {
+      const res = await fetch("/api/storefront/orders/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: order.orderId,
+          ticketCode: order.ticketCode,
+          totalAmount: order.totalAmount,
+          originalTotal: order.originalTotal,
+          discountAmount: order.discountAmount,
+          customerName: order.customerName,
+          customerPhone: order.customerPhone,
+          customerEmail: order.customerEmail,
+          travelDate: order.travelDate,
+          packageName: order.packageName,
+          adultCount: order.adultCount,
+          childCount: order.childCount,
+          merchantId: merchant.id,
+          merchantSlug: merchant.slug,
+          productId: product.id,
+          campaignId: data.campaign?.id,
+          refCode: tracking?.refCode,
+        }),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.commission) {
+          setConfirmedCommission(json.commission);
+        }
+      }
+    } catch (err) {
+      console.warn("[DEMO_CHECKOUT] Proceeding with offline attribution fallback:", err);
+    }
+  };
+
   // Auto-advance to success when VietQR webhook confirms payment
   useEffect(() => {
     if (step !== "payment" || !orderResult?.orderId) return;
@@ -99,7 +136,10 @@ export function StorefrontCheckoutModal({
         const json = await res.json();
         if (!isCancelled && json.isPaid) {
           clearInterval(interval);
-          setStep("success");
+          await persistConfirmedOrder(orderResult);
+          if (!isCancelled) {
+            setStep("success");
+          }
         }
       } catch {
         // Silently ignore network poll errors in background
@@ -165,38 +205,7 @@ export function StorefrontCheckoutModal({
     setIsConfirming(true);
 
     try {
-      const res = await fetch("/api/storefront/orders/confirm", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId: orderResult.orderId,
-          ticketCode: orderResult.ticketCode,
-          totalAmount: orderResult.totalAmount,
-          originalTotal: orderResult.originalTotal,
-          discountAmount: orderResult.discountAmount,
-          customerName: orderResult.customerName,
-          customerPhone: orderResult.customerPhone,
-          customerEmail: orderResult.customerEmail,
-          travelDate: orderResult.travelDate,
-          packageName: orderResult.packageName,
-          adultCount: orderResult.adultCount,
-          childCount: orderResult.childCount,
-          merchantId: merchant.id,
-          merchantSlug: merchant.slug,
-          productId: product.id,
-          campaignId: data.campaign?.id,
-          refCode: tracking?.refCode,
-        }),
-      });
-
-      if (res.ok) {
-        const json = await res.json();
-        if (json.commission) {
-          setConfirmedCommission(json.commission);
-        }
-      }
-    } catch (err) {
-      console.warn("[DEMO_CHECKOUT] Proceeding with offline attribution fallback:", err);
+      await persistConfirmedOrder(orderResult);
     } finally {
       setIsConfirming(false);
       setStep("success");

@@ -146,9 +146,14 @@ export async function answerProductChat({
 }: AnswerProductChatInput): Promise<ProductChatAnswer> {
   const { checkoutUrl, product, campaign, merchant } =
     await loadProductAndCheckout(attribution);
-  const chunks = await retrieveProductContext(message, {
-    productId: attribution.product_id,
-  });
+  let chunks: Awaited<ReturnType<typeof retrieveProductContext>> = [];
+  try {
+    chunks = await retrieveProductContext(message, {
+      productId: attribution.product_id,
+    });
+  } catch (err) {
+    console.warn("[AI_CHAT] RAG retrieval fallback (no embeddings):", err);
+  }
 
   // Tổng hợp domain chính thức từ checkout_url, booking_url và merchant_website
   const allowedDomains = new Set<string>();

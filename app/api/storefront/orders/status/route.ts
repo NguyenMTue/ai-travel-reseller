@@ -38,7 +38,7 @@ export async function GET(request: Request) {
         .maybeSingle();
 
       if (order) {
-        const isPaid = order.status === "paid" || order.status === "completed";
+        const isPaid = order.status === "paid" || order.status === "confirmed";
         return NextResponse.json({
           success: true,
           orderId: order.booking_reference || order.id,
