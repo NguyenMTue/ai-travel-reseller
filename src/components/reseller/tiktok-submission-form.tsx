@@ -64,7 +64,21 @@ export function TikTokSubmissionForm({
         if (!res.ok) return;
         const data = await res.json();
         if (mounted && data.success && Array.isArray(data.posts)) {
-          setRecentPosts(data.posts.slice(0, 3));
+          const mappedPosts: TikTokPost[] = data.posts.slice(0, 3).map((raw: any) => ({
+            id: String(raw.id || ""),
+            tiktokUrl: String(raw.tiktokUrl || raw.tiktok_url || ""),
+            videoId: String(raw.videoId || raw.video_id || ""),
+            authorUsername: String(raw.authorUsername || raw.author_username || "tiktok_creator"),
+            title: String(raw.title || "Video Review Du lịch"),
+            thumbnailUrl: raw.thumbnailUrl ?? raw.thumbnail_url ?? null,
+            viewsCount: Number(raw.viewsCount ?? raw.views_count ?? 0),
+            likesCount: Number(raw.likesCount ?? raw.likes_count ?? 0),
+            commentsCount: Number(raw.commentsCount ?? raw.comments_count ?? 0),
+            sharesCount: Number(raw.sharesCount ?? raw.shares_count ?? 0),
+            engagementScore: Number(raw.engagementScore ?? raw.engagement_score ?? 0),
+            status: String(raw.status || "verified"),
+          }));
+          setRecentPosts(mappedPosts);
         }
       } catch {
         // silent fail

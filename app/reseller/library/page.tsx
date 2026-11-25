@@ -51,6 +51,8 @@ export default async function ResellerLibraryPage() {
         )
       )
     `)
+    .eq("status", "approved")
+    .or(`reseller_id.is.null,reseller_id.eq.${access.resellerId}`)
     .not("video_url", "is", null)
     .order("created_at", { ascending: false });
 

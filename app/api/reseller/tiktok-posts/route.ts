@@ -80,6 +80,13 @@ export async function POST(request: Request) {
       );
     }
 
+    // Invalidate GET cache for this reseller
+    for (const key of tiktokGetCache.keys()) {
+      if (key.startsWith(`${resellerId}:`)) {
+        tiktokGetCache.delete(key);
+      }
+    }
+
     return NextResponse.json(
       {
         success: true,
@@ -110,6 +117,19 @@ export async function GET(request: Request) {
     let resellerId = DEMO_RESELLER_ID;
     if (queryResellerId && UUID_REGEX.test(queryResellerId.trim())) {
       resellerId = queryResellerId.trim();
+    } else {
+      try {
+        const cookieStore = await cookies();
+        const supabase = createClient(cookieStore);
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user?.id) {
+          resellerId = user.id;
+        }
+      } catch {
+        // use fallback
+      }
     }
 
     const cacheKey = `${resellerId}:${queryCampaignId || "all"}`;
