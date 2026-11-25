@@ -857,6 +857,15 @@ export async function executeAutoVideoPipeline(
       console.warn("[AUTO_PIPELINE] Storage upload error:", storageErr);
     }
 
+    const formattedScriptText = script.scenes
+      .map(
+        (s) =>
+          `Cảnh ${s.sceneNumber} (${s.timeRange}) [${s.role}]:\n  Lời thoại: ${s.voiceoverText}${
+            s.overlayText ? `\n  Chữ hiển thị: ${s.overlayText}` : ""
+          }`
+      )
+      .join("\n\n");
+
     const { data: newContent, error: contentErr } = await adminClient
       .from("contents")
       .insert({
@@ -864,7 +873,7 @@ export async function executeAutoVideoPipeline(
         product_id: input.productId || null,
         persona: "auto_review_v2",
         hook: script.hookText,
-        script: JSON.stringify(script),
+        script: formattedScriptText,
         caption: script.caption,
         cta: script.ctaText,
         video_url: uploadedVideoUrl,
