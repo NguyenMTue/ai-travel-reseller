@@ -538,7 +538,7 @@ function sanitizeForDrawtext(text?: string): string {
 /**
  * Tự động ngắt dòng thông minh cho tiêu đề End-Card để tránh tràn mép khung hình
  */
-function wrapText(text: string, maxCharsPerLine = 24): string {
+export function wrapText(text: string, maxCharsPerLine = 24): string {
   if (!text || text.length <= maxCharsPerLine) return text;
   const words = text.split(/\s+/);
   const lines: string[] = [];
@@ -1112,3 +1112,283 @@ export async function composeChainedOmniVideo(
 }
 
 export const composeChainedMuseVideo = composeChainedOmniVideo;
+
+// ============================================================================
+// MULTI-SCENE STATIC-IMAGE PIPELINE (40–50s TikTok 9:16, Blurred BG, xfade, ASS)
+// ============================================================================
+
+export type MotionType = "zoom_in" | "zoom_out" | "pan_left" | "pan_right" | "pan_up";
+export type CropMode = "full" | "center_zoom";
+
+const XFADE_TRANSITIONS = ["fade", "wipeleft", "wiperight", "slideleft", "slidedown"] as const;
+let cachedEncoder: { codec: "h264_nvenc" | "libx264"; preset: string } | null = null;
+
+export async function detectPreferredVideoEncoder(): Promise<{ codec: "h264_nvenc" | "libx264"; preset: string }> {
+  if (cachedEncoder) return cachedEncoder;
+  if (process.env.ENABLE_NVENC === "true") {
+    try {
+      const execPath = getResolvedFFmpegPath();
+      const hasNvenc = await new Promise<boolean>((resolve) => {
+        const proc = spawn(/*turbopackIgnore: true*/ execPath, ["-hide_banner", "-encoders"], {
+          stdio: ["ignore", "pipe", "ignore"],
+        });
+        let out = "";
+        proc.stdout.on("data", (d) => (out += d.toString()));
+        proc.on("close", () => resolve(out.includes("h264_nvenc")));
+        proc.on("error", () => resolve(false));
+      });
+      if (hasNvenc) {
+        cachedEncoder = { codec: "h264_nvenc", preset: "p4" };
+        return cachedEncoder;
+      }
+    } catch {
+      // fallback libx264
+    }
+  }
+  cachedEncoder = { codec: "libx264", preset: "veryfast" };
+  return cachedEncoder;
+}
+
+/**
+ * Tạo 1 clip chuyển động mượt từ ảnh tĩnh:
+ * - Nền mờ full-bleed 1080x1920 từ chính ảnh gốc (tránh viền đen / mất chủ thể ảnh ngang)
+ * - Phóng ảnh tiền cảnh lên ~2x (2160px) trước zoompan để triệt tiêu jitter pixel
+ * - Hỗ trợ 5 kiểu chuyển động + 2 chế độ crop (toàn cảnh / cận chi tiết)
+ */
+export async function createStaticImageSceneClip(params: {
+  imageBuffer: Buffer;
+  durationSec: number;
+  motion: MotionType;
+  cropMode: CropMode;
+  outputPath: string;
+}): Promise<void> {
+  const fps = 30;
+  const totalFrames = Math.max(30, Math.round(params.durationSec * fps));
+  const imgTempPath = `${params.outputPath}.src.jpg`;
+  await fs.writeFile(imgTempPath, params.imageBuffer);
+
+  try {
+    const encoder = await detectPreferredVideoEncoder();
+
+    // Zoompan expressions on upscaled 2160px-wide input -> output 1080x1350 (4:5 vertical-friendly foreground)
+    // or center_zoom crops closer for detail shot when reusing an image
+    let zoompanExpr = "";
+    const step = (0.16 / totalFrames).toFixed(6);
+
+    switch (params.motion) {
+      case "zoom_out":
+        zoompanExpr = `z='if(eq(on,0),1.18,max(1.18-${step}*on,1.0))':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'`;
+        break;
+      case "pan_left":
+        zoompanExpr = `z='1.14':x='max(0,(iw-iw/zoom)*(1-on/${totalFrames}))':y='ih/2-(ih/zoom/2)'`;
+        break;
+      case "pan_right":
+        zoompanExpr = `z='1.14':x='min(iw-iw/zoom,(iw-iw/zoom)*(on/${totalFrames}))':y='ih/2-(ih/zoom/2)'`;
+        break;
+      case "pan_up":
+        zoompanExpr = `z='1.14':x='iw/2-(iw/zoom/2)':y='max(0,(ih-ih/zoom)*(1-on/${totalFrames}))'`;
+        break;
+      case "zoom_in":
+      default:
+        zoompanExpr = `z='min(zoom+${step},1.18)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'`;
+        break;
+    }
+
+    const fgPreFilter =
+      params.cropMode === "center_zoom"
+        ? "crop=iw*0.72:ih*0.72:(iw-iw*0.72)/2:(ih-ih*0.72)/2,scale=2160:-2:flags=bicubic"
+        : "scale=2160:-2:flags=bicubic";
+
+    const filterComplex = [
+      `[0:v]split=2[bg_raw][fg_raw]`,
+      `[bg_raw]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,boxblur=25:5,eq=brightness=-0.14[bg]`,
+      `[fg_raw]${fgPreFilter},zoompan=${zoompanExpr}:d=${totalFrames}:s=1080x1080:fps=${fps},scale=1080:-2:flags=bicubic[fg]`,
+      `[bg][fg]overlay=(W-w)/2:(H-h)/2-60:shortest=1[vout]`,
+    ].join(";");
+
+    await runFFmpeg([
+      "-loop", "1",
+      "-i", imgTempPath,
+      "-filter_complex", filterComplex,
+      "-map", "[vout]",
+      "-t", params.durationSec.toFixed(3),
+      "-r", String(fps),
+      "-c:v", encoder.codec,
+      "-preset", encoder.preset,
+      "-pix_fmt", "yuv420p",
+      "-an",
+      "-y", params.outputPath,
+    ]);
+  } finally {
+    await fs.rm(imgTempPath, { force: true }).catch(() => {});
+  }
+}
+
+/**
+ * Ghép N cảnh ảnh tĩnh thành video 40–50s:
+ * - Mỗi cảnh i < N dài audio_i + d (d = 0.4s); cảnh N dài audio_N
+ * - Chuyển cảnh xfade ngắn (0.4s) luân phiên nhiều hiệu ứng
+ * - Nối audio tuần tự không crossfade -> tiếng & chữ .ass khớp đến giây cuối
+ * - Burn phụ đề .ass + nhạc nền BGM nhẹ + logo (nếu có)
+ */
+export async function composeMultiSceneStaticVideo(params: {
+  scenes: Array<{
+    imageBuffer: Buffer;
+    audioPath: string;
+    audioDurationSec: number;
+    motion: MotionType;
+    cropMode: CropMode;
+  }>;
+  assContent: string;
+  bgmPath?: string | null;
+  logoBuffer?: Buffer | null;
+  xfadeDurationSec?: number;
+}): Promise<{ videoBuffer: Buffer; durationSec: number }> {
+  if (params.scenes.length === 0) {
+    throw new Error("Cần ít nhất 1 phân cảnh để dựng video.");
+  }
+
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "static-multi-"));
+  const d = params.xfadeDurationSec ?? 0.4;
+  const n = params.scenes.length;
+  const totalAudioSec = params.scenes.reduce((acc, s) => acc + s.audioDurationSec, 0);
+
+  try {
+    // 1. Render từng cảnh thành clip riêng (ảnh i < N dài audio_i + d; ảnh N dài audio_N)
+    const clipPaths: string[] = [];
+    for (let i = 0; i < n; i++) {
+      const s = params.scenes[i];
+      const clipDur = i < n - 1 ? s.audioDurationSec + d : s.audioDurationSec;
+      const clipPath = path.join(tempDir, `scene_${i + 1}.mp4`);
+      await createStaticImageSceneClip({
+        imageBuffer: s.imageBuffer,
+        durationSec: clipDur,
+        motion: s.motion,
+        cropMode: s.cropMode,
+        outputPath: clipPath,
+      });
+      clipPaths.push(clipPath);
+    }
+
+    // 2. Ghép hình bằng xfade (từng cặp nếu nhiều cảnh để ổn định)
+    const mergedVideoPath = path.join(tempDir, "merged_visual.mp4");
+    const encoder = await detectPreferredVideoEncoder();
+
+    if (clipPaths.length === 1) {
+      await fs.copyFile(clipPaths[0], mergedVideoPath);
+    } else {
+      const inputs: string[] = [];
+      clipPaths.forEach((p) => inputs.push("-i", p));
+
+      const xfadeChain: string[] = [];
+      let prevLabel = "[0:v]";
+      let offsetCursor = 0;
+
+      for (let i = 1; i < n; i++) {
+        // Offset của xfade thứ i chính là tổng audio của các cảnh 0..i-1
+        offsetCursor += params.scenes[i - 1].audioDurationSec;
+        const transition = XFADE_TRANSITIONS[(i - 1) % XFADE_TRANSITIONS.length];
+        const outLabel = i === n - 1 ? "[vmerged]" : `[vx${i}]`;
+        xfadeChain.push(
+          `${prevLabel}[${i}:v]xfade=transition=${transition}:duration=${d}:offset=${offsetCursor.toFixed(3)}${outLabel}`
+        );
+        prevLabel = outLabel;
+      }
+
+      await runFFmpeg([
+        ...inputs,
+        "-filter_complex", xfadeChain.join(";"),
+        "-map", "[vmerged]",
+        "-c:v", encoder.codec,
+        "-preset", encoder.preset,
+        "-pix_fmt", "yuv420p",
+        "-an",
+        "-y", mergedVideoPath,
+      ]);
+    }
+
+    // 3. Nối toàn bộ file audio TTS bằng filter concat (giải mã PCM tránh trôi frame MP3)
+    const mergedAudioPath = path.join(tempDir, "merged_voice.wav");
+    if (params.scenes.length === 1) {
+      await runFFmpeg([
+        "-i", params.scenes[0].audioPath,
+        "-ar", "44100",
+        "-ac", "2",
+        "-y", mergedAudioPath,
+      ]);
+    } else {
+      const audioInputs: string[] = [];
+      const concatInputs: string[] = [];
+      params.scenes.forEach((s, idx) => {
+        audioInputs.push("-i", s.audioPath);
+        concatInputs.push(`[${idx}:a]aresample=44100,aformat=channel_layouts=stereo[a${idx}]`);
+      });
+      const streamLabels = params.scenes.map((_, idx) => `[a${idx}]`).join("");
+      await runFFmpeg([
+        ...audioInputs,
+        "-filter_complex",
+        `${concatInputs.join(";")};${streamLabels}concat=n=${n}:v=0:a=1[aout]`,
+        "-map", "[aout]",
+        "-y", mergedAudioPath,
+      ]);
+    }
+
+    // 4. Burn .ass subtitles + Logo (optional) + BGM ducking (optional)
+    const assPath = path.join(tempDir, "subtitles.ass");
+    await fs.writeFile(assPath, params.assContent, "utf8");
+    const escapedAssPath = assPath.replace(/\\/g, "/").replace(/:/g, "\\:");
+
+    const finalOutPath = path.join(tempDir, "final_output.mp4");
+    const finalInputs: string[] = ["-i", mergedVideoPath, "-i", mergedAudioPath];
+    const filters: string[] = [];
+    let currentVideoStream = "[0:v]";
+    let inputIdx = 2;
+
+    if (params.logoBuffer && params.logoBuffer.length > 256) {
+      const logoPath = path.join(tempDir, "logo.png");
+      await fs.writeFile(logoPath, params.logoBuffer);
+      finalInputs.push("-i", logoPath);
+      const logoIdx = inputIdx++;
+      filters.push(`[${logoIdx}:v]scale=130:-1[logo_scaled]`);
+      filters.push(`${currentVideoStream}[logo_scaled]overlay=W-w-36:64[v_logo]`);
+      currentVideoStream = "[v_logo]";
+    }
+
+    filters.push(`${currentVideoStream}ass='${escapedAssPath}'[vfinal]`);
+
+    let audioMap = "1:a";
+    if (params.bgmPath && existsSync(params.bgmPath)) {
+      finalInputs.push("-stream_loop", "-1", "-i", params.bgmPath);
+      const bgmIdx = inputIdx++;
+      const fadeStart = Math.max(1, totalAudioSec - 1.5);
+      filters.push(
+        `[${bgmIdx}:a]volume=0.14,atrim=0:${totalAudioSec.toFixed(3)},afade=t=out:st=${fadeStart.toFixed(3)}:d=1.5[bgm_ducked]`
+      );
+      filters.push(`[1:a][bgm_ducked]amix=inputs=2:duration=first:dropout_transition=2[afinal]`);
+      audioMap = "[afinal]";
+    }
+
+    await runFFmpeg([
+      ...finalInputs,
+      "-filter_complex", filters.join(";"),
+      "-map", "[vfinal]",
+      "-map", audioMap,
+      "-t", totalAudioSec.toFixed(3),
+      "-c:v", encoder.codec,
+      "-preset", encoder.preset,
+      "-c:a", "aac",
+      "-b:a", "128k",
+      "-pix_fmt", "yuv420p",
+      "-movflags", "+faststart",
+      "-y", finalOutPath,
+    ]);
+
+    const videoBuffer = await fs.readFile(finalOutPath);
+    return {
+      videoBuffer,
+      durationSec: Math.round(totalAudioSec),
+    };
+  } finally {
+    await fs.rm(tempDir, { recursive: true, force: true }).catch(() => {});
+  }
+}
