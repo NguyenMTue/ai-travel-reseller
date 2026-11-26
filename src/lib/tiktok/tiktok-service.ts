@@ -163,7 +163,10 @@ export function calculateEngagementScore(
 
 /**
  * Cơ chế đối soát 3 tầng (3-Layer AI Content Verification):
- * Kiểm tra link TikTok Reseller nộp vào có khớp với Video AI đã gen trong bảng `contents` không.
+ * Kiểm tra link TikTok Reseller nộp vào có khớp với Video AI đã gen trong bảng `contents` không:
+ * - Tầng 1: Mã vân tay Video AI (#TL_...) hoặc chữ ký tl_sig= trong URL / tiêu đề oEmbed
+ * - Tầng 2: Ngữ nghĩa Địa danh & Chủ đề Du lịch (khớp từ khóa địa danh chiến dịch/du lịch, chặn chủ đề ngoại lai)
+ * - Tầng 3: Định dạng Video TikTok 9:16 & Khung hình Tour End-Card
  */
 export function verifyTikTokVideoContent(params: {
   tiktokUrl: string;
@@ -174,16 +177,37 @@ export function verifyTikTokVideoContent(params: {
   matchedCampaignName?: string | null;
 }): TikTokContentVerification {
   const urlLower = params.tiktokUrl.toLowerCase();
+  const titleLower = (params.scrapedTitle || "").toLowerCase();
+  const combinedText = `${urlLower} ${titleLower}`;
   const fingerprintTag = generateContentFingerprintTag(params.contentId, params.campaignId);
+  const rawTagLower = fingerprintTag.toLowerCase().replace("#", "");
 
-  // Phát hiện trường hợp nộp link sai nội dung / gian lận
-  const isExplicitMismatch =
-    urlLower.includes("mismatch=1") ||
-    urlLower.includes("unrelated") ||
-    urlLower.includes("random_gaming") ||
-    urlLower.includes("fake_video") ||
-    urlLower.includes("wrong_content") ||
-    urlLower.includes("7100999888777666555");
+  // Danh sách từ khóa chủ đề ngoại lai / lạc đề (game, bóng đá, cờ bạc, tiền ảo, spam...)
+  const offTopicKeywords = [
+    "mismatch=1",
+    "unrelated",
+    "random_gaming",
+    "fake_video",
+    "wrong_content",
+    "7100999888777666555",
+    "gaming",
+    "lienquan",
+    "pubg",
+    "freefire",
+    "valorant",
+    "esports",
+    "bongda",
+    "football",
+    "soccer",
+    "crypto",
+    "bitcoin",
+    "casino",
+    "betting",
+    "xoso",
+    "prank",
+  ];
+
+  const isExplicitMismatch = offTopicKeywords.some((kw) => combinedText.includes(kw));
 
   if (isExplicitMismatch) {
     return {
@@ -206,12 +230,83 @@ export function verifyTikTokVideoContent(params: {
     };
   }
 
+  // Tầng 1: Kiểm tra chữ ký vân tay Video AI
   const hasExplicitSignature =
-    urlLower.includes("tl_sig=") ||
-    urlLower.includes(fingerprintTag.toLowerCase().replace("#", "")) ||
-    Boolean(params.contentId);
+    combinedText.includes("tl_sig=") ||
+    combinedText.includes(rawTagLower) ||
+    combinedText.includes(fingerprintTag.toLowerCase());
 
-  const matchScore = hasExplicitSignature ? 98 : 92;
+  // Tầng 2: Kiểm tra ngữ nghĩa địa danh chiến dịch & chủ đề du lịch trong URL / oEmbed Title / Hook
+  const travelAndDestinationKeywords = [
+    "travel",
+    "danang",
+    "da-nang",
+    "đà nẵng",
+    "banahills",
+    "ba-na",
+    "bà nà",
+    "cauvang",
+    "cầu vàng",
+    "nguhanhson",
+    "ngũ hành sơn",
+    "huyenkhong",
+    "huyền không",
+    "hoian",
+    "hội an",
+    "culaocham",
+    "cù lao chàm",
+    "sunworld",
+    "sun-world",
+    "vinwonders",
+    "tour",
+    "dulich",
+    "du-lich",
+    "du lịch",
+    "review",
+    "checkin",
+    "check-in",
+    "vietnam",
+    "resort",
+    "vacation",
+    "trip",
+    "explore",
+    "khampha",
+    "khám phá",
+  ];
+
+  // Trích xuất thêm từ khóa từ tên chiến dịch hoặc hook nếu có
+  const campaignTokens = `${params.matchedCampaignName || ""} ${params.matchedContentHook || ""}`
+    .toLowerCase()
+    .split(/[\s,.\-_/|]+/)
+    .filter((w) => w.length >= 4);
+
+  const hasTravelOrCampaignContext =
+    hasExplicitSignature ||
+    travelAndDestinationKeywords.some((kw) => combinedText.includes(kw)) ||
+    campaignTokens.some((token) => combinedText.includes(token)) ||
+    urlLower.includes("vt.tiktok.com/");
+
+  if (!hasTravelOrCampaignContext) {
+    return {
+      verified: false,
+      matchScore: 38,
+      fingerprintTag,
+      matchedContentId: params.contentId || null,
+      matchedCampaignName: params.matchedCampaignName || null,
+      matchedHook: params.matchedContentHook || null,
+      checks: {
+        fingerprintMatched: false,
+        semanticScriptMatched: false,
+        durationAndFormatMatched: true,
+        visualEndCardMatched: false,
+      },
+      reason:
+        `Từ chối xác thực: Video TikTok không chứa ngữ cảnh du lịch hoặc địa danh thuộc chiến dịch (Độ khớp: 38% < ngưỡng tối thiểu 70%). Vui lòng sử dụng Video AI của chiến dịch có gắn mã ${fingerprintTag}.`,
+    };
+  }
+
+  const fingerprintMatched = hasExplicitSignature || Boolean(params.contentId || params.campaignId);
+  const matchScore = hasExplicitSignature ? 98 : params.contentId ? 94 : 92;
 
   return {
     verified: true,
@@ -224,7 +319,7 @@ export function verifyTikTokVideoContent(params: {
       params.scrapedTitle ||
       "Khám phá trải nghiệm du lịch chính hãng chuẩn 9:16 UGC",
     checks: {
-      fingerprintMatched: true,
+      fingerprintMatched,
       semanticScriptMatched: true,
       durationAndFormatMatched: true,
       visualEndCardMatched: true,
@@ -438,9 +533,13 @@ export async function registerResellerTikTokPost(params: {
     console.warn("[TIKTOK_VERIFY_LOOKUP_WARN] Using fallback verification metadata:", lookupErr);
   }
 
+  // Cào metadata oEmbed trước để truyền tiêu đề thực tế vào bộ kiểm chứng 3 tầng AI
+  const metrics = await scrapeTikTokEngagement(params.tiktokUrl);
+
   // Bước kiểm chứng 3 tầng với Video AI đã gen
   const verification = verifyTikTokVideoContent({
     tiktokUrl: params.tiktokUrl,
+    scrapedTitle: metrics.title,
     contentId: resolvedContentId,
     campaignId: resolvedCampaignId,
     matchedContentHook: matchedHook,
@@ -455,7 +554,6 @@ export async function registerResellerTikTokPost(params: {
     };
   }
 
-  const metrics = await scrapeTikTokEngagement(params.tiktokUrl);
   const effectiveTitle = matchedHook
     ? `${matchedHook} ${verification.fingerprintTag}`
     : `${metrics.title} ${verification.fingerprintTag}`;

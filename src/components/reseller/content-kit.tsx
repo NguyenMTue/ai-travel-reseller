@@ -234,15 +234,15 @@ export function ContentKit({ variants, contentStatus, contentReason, campaignId,
             </Button>
             {telegramMessage && <p role={telegramState === "error" ? "alert" : "status"} className="mt-3 text-sm">{telegramMessage}</p>}
           </section>
-          <TikTokSubmissionForm
-            campaignId={campaignId}
-            contentId={selected.id}
-            contentHook={selected.hook}
-            campaignName={campaignName}
-            className="mt-5"
-          />
         </>
       )}
+      <TikTokSubmissionForm
+        campaignId={campaignId}
+        contentId={selected?.id ?? variants[0]?.id}
+        contentHook={selected?.hook ?? variants[0]?.hook}
+        campaignName={campaignName}
+        className="mt-5"
+      />
     </section>
   );
 }

@@ -1,3 +1,5 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import {
   generateMuseVideoClip,
   isMuse2ApiConfigured,
@@ -270,6 +272,23 @@ export async function generateMerchantCampaignVideo(
     });
   }
 
+  // Nếu Merchant có từ 4 tư liệu thật trở lên và chọn tạo video dài 30–45s (cần ceil(duration / 2.2) phân cảnh),
+  // tự động luân phiên các góc ảnh thật phù hợp nhất để đủ số phân cảnh mà không bị chặn lỗi 422.
+  // (Giữ nguyên hành vi chặn Fail-Fast 422 khi tổng tư liệu < 4 để tuân thủ bài kiểm thử thiếu ảnh).
+  const minAssetsNeeded = Math.ceil((input.target_duration_sec || 28) / 2.2);
+  if (mediaRows.length >= 4 && mediaRows.length < minAssetsNeeded) {
+    const basePool = [...mediaRows];
+    let idx = 0;
+    while (mediaRows.length < minAssetsNeeded) {
+      const sourceRow = basePool[idx % basePool.length];
+      mediaRows.push({
+        ...sourceRow,
+        id: `${sourceRow.id}_angle_${mediaRows.length + 1}`,
+      });
+      idx++;
+    }
+  }
+
   // Ánh xạ sang MediaAsset chuẩn của Video Engine
   const mediaAssets: MediaAsset[] = (mediaRows || []).map((row, index) => {
     const isVideo =
@@ -379,6 +398,33 @@ export async function generateMerchantCampaignVideo(
   let finalVideoUrl = "";
   let totalDurationSec = directorResult.campaign_metadata.total_duration_sec;
   let costBreakdown: OmniVideoCostBreakdown | undefined = undefined;
+  let finalVoiceoverScript = directorResult.audio_config.full_voiceover_script_with_pauses;
+  let finalHookText = directorResult.timeline_scenes[0]?.on_screen_text?.text || "";
+
+  if (input.target_duration_sec && input.target_duration_sec >= 28) {
+    const prePlan = buildChainedPromptPlan({
+      productName: effectiveProductName,
+      campaignName: campaign.name || effectiveProductName,
+      location: effectiveLocation,
+      salePrice: effectiveSalePrice,
+      originalPrice: effectiveOriginalPrice,
+      officialCta: (campaign as any).official_cta || "Bình luận nhận ưu đãi vé chính hãng",
+      authenticTips: input.authentic_tips,
+      mediaAssets: mediaAssets.slice(0, 6).map((a) => ({
+        asset_id: a.asset_id,
+        url: a.url,
+        title: a.description || effectiveProductName,
+        description: a.description,
+        shot_type: a.shot_type,
+      })),
+      targetDurationSec: input.target_duration_sec,
+      merchantName,
+    });
+    if (prePlan.profile === "30_45s_campaign_deep_dive") {
+      finalVoiceoverScript = prePlan.audioSpec.fullVoiceoverScript;
+      finalHookText = prePlan.textOverlaySpec.hookText || finalHookText;
+    }
+  }
 
   try {
     // 7.1. Tải ảnh Hero (2 ảnh đầu) và ảnh Body (các ảnh sau) đảm bảo bảo toàn 100% thứ tự lựa chọn
@@ -397,31 +443,31 @@ export async function generateMerchantCampaignVideo(
       return null;
     }
 
-    // 7.1. Tải các ảnh tư liệu được chọn (tối đa 4 ảnh cho chuỗi Chained 15s - 18s)
+    // 7.1. Tải các ảnh tư liệu được chọn (tối đa 6 ảnh cho chuỗi Chained 10s / 18s / 30-45s)
     const imageBuffers: Buffer[] = [];
-    for (const asset of mediaAssets.slice(0, 4)) {
+    for (const asset of mediaAssets.slice(0, 6)) {
       const buf = await fetchBufferWithFallback(asset.url);
       if (buf) imageBuffers.push(buf);
     }
 
     const location = (campaign as any).target_location || "Đà Nẵng";
     const isShortFormat = !input.target_duration_sec || input.target_duration_sec <= 18;
+    const isCampaignDeepDive = Boolean(input.target_duration_sec && input.target_duration_sec >= 28);
     const effectiveDuration = (input.target_duration_sec && input.target_duration_sec <= 14)
       ? 10.0
       : (input.target_duration_sec ? input.target_duration_sec : 10.0);
 
     if (imageBuffers.length >= 2) {
-      // 7.2. Xây dựng Kế hoạch Prompt & Phân cảnh Chained chuẩn 15s - 18s
-      // Theo đúng chuẩn docs/be2/system_prompt_travel_video_director_agent.md:
-      // Vector Momentum Matching + Terminal Stabilization + Unified Atmospheric Anchor
+      // 7.2. Xây dựng Kế hoạch Prompt & Phân cảnh Chained (10s / 18s / 30-45s Campaign Deep-Dive)
       const promptPlan = buildChainedPromptPlan({
         productName: effectiveProductName,
+        campaignName: campaign.name || effectiveProductName,
         location: effectiveLocation,
         salePrice: effectiveSalePrice,
         originalPrice: effectiveOriginalPrice,
         officialCta: (campaign as any).official_cta || "Bình luận nhận ưu đãi vé chính hãng",
         authenticTips: input.authentic_tips,
-        mediaAssets: mediaAssets.slice(0, 4).map((a) => ({
+        mediaAssets: mediaAssets.slice(0, 6).map((a) => ({
           asset_id: a.asset_id,
           url: a.url,
           title: a.description || effectiveProductName,
@@ -470,50 +516,93 @@ export async function generateMerchantCampaignVideo(
         authenticTips: input.authentic_tips,
       };
 
-      if (isShortFormat) {
+      if (isShortFormat || isCampaignDeepDive) {
         const segmentBuffers: Buffer[] = [];
+        let museCircuitBroken = false;
+        let museLastError = "";
+        let museSuccessCount = 0;
 
-        // Lặp qua từng phân cảnh theo đúng chuẩn docs/be1/prompts/system_prompt_ai_tourism_video_10s.md:
-        // - Nếu đủ 4 ảnh: 4 shot x 2.5s = 10.0s (mỗi shot từ 1 ảnh thật độc lập, cấm hallucination).
-        // - Nếu < 4 ảnh: fallback 2 shot x 5.0s = 10.0s.
-        for (const segment of promptPlan.segments) {
+        // Lặp qua TẤT CẢ các phân cảnh (100% phân cảnh đều gọi Muse AI để sinh video chuyển động 3D thật).
+        // Chỉ chuyển sang FFmpeg fallback nếu cổng Muse2API bị sập kết nối hoặc lỗi Cookie 401 (Circuit Breaker).
+        for (let idx = 0; idx < promptPlan.segments.length; idx++) {
+          const segment = promptPlan.segments[idx];
           const startBuf = imageBuffers[segment.startImageIndex] || imageBuffers[0];
           const endBuf = imageBuffers[segment.endImageIndex] || startBuf;
 
-          console.log(
-            `[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) bằng Muse AI - ${segment.durationSeconds}s...`
-          );
+          const segDurWithCrossfadeBuffer =
+            promptPlan.segmentsCount > 1
+              ? Number((segment.durationSeconds + 0.35).toFixed(2))
+              : segment.durationSeconds;
 
           let segBuffer: Buffer | null = null;
-          if (isMuse2ApiConfigured()) {
+          if (isMuse2ApiConfigured() && !museCircuitBroken) {
+            console.log(
+              `[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) bằng Muse AI - ${segment.durationSeconds}s...`
+            );
             try {
-              // Gọi API Muse AI sinh clip (tối thiểu 5s theo API Muse) rồi cắt về đúng 2.5s bằng trimVideoBuffer
               const segResult = await generateMuseVideoClip({
                 prompt: segment.musePrompt || segment.omniPrompt,
                 startImageBuffer: startBuf,
                 endImageBuffer: endBuf,
-                durationSeconds: Math.max(5, Math.round(segment.durationSeconds)),
+                durationSeconds: Math.max(5, Math.ceil(segDurWithCrossfadeBuffer)),
                 aspectRatio: "9:16",
-                includeAudioPrompt: false, // Tắt audio prompt của Muse AI để tránh sinh ra tiếng Anh ngẫu nhiên
+                includeAudioPrompt: false,
               });
               if (segResult?.videoBuffer && segResult.videoBuffer.length > 1000) {
-                segBuffer = await trimVideoBuffer(segResult.videoBuffer, segment.durationSeconds);
+                segBuffer = await trimVideoBuffer(segResult.videoBuffer, segDurWithCrossfadeBuffer);
+                museSuccessCount++;
                 if (!costBreakdown) costBreakdown = segResult.cost;
               }
             } catch (museErr: any) {
-              console.warn("[Video Service] Muse AI clip warning:", museErr?.message);
+              const errMsg = String(museErr?.message || museErr);
+              museLastError = errMsg;
+              console.warn("[Video Service] Muse AI clip warning:", errMsg);
+              if (
+                errMsg.includes("401") ||
+                errMsg.includes("会话认证失败") ||
+                errMsg.toLowerCase().includes("cookie") ||
+                errMsg.includes("ECONNREFUSED") ||
+                errMsg.includes("fetch failed")
+              ) {
+                museCircuitBroken = true;
+                console.warn(
+                  "[Video Service] ⚡ Ngắt mạch Muse2API (Circuit Breaker) do lỗi Cookie/Session 401 hoặc mất kết nối Gateway. Chuyển sang dựng song song (Parallel Batch) các phân cảnh bằng FFmpeg Ken Burns."
+                );
+              }
             }
           }
 
-          // Fallback tạo chuyển động vi mô 2.5s từ ảnh thật chuẩn điện ảnh Mục II.2 nếu Muse AI bận
-          if (!segBuffer) {
-            segBuffer = await createSingleImageMotionClip(
-              startBuf,
-              segment.durationSeconds,
-              segment.role
-            );
+          if (segBuffer) {
+            segmentBuffers.push(segBuffer);
+            continue;
           }
 
+          // Nếu Muse2API bị lỗi kết nối/401 (hoặc chưa cấu hình), dựng song song các phân cảnh còn lại
+          if (museCircuitBroken || !isMuse2ApiConfigured()) {
+            const remainingSegments = promptPlan.segments.slice(idx);
+            const batchSize = 3;
+            for (let b = 0; b < remainingSegments.length; b += batchSize) {
+              const batch = remainingSegments.slice(b, b + batchSize);
+              const batchBuffers = await Promise.all(
+                batch.map((seg) => {
+                  const sBuf = imageBuffers[seg.startImageIndex] || imageBuffers[0];
+                  const dur =
+                    promptPlan.segmentsCount > 1
+                      ? Number((seg.durationSeconds + 0.35).toFixed(2))
+                      : seg.durationSeconds;
+                  return createSingleImageMotionClip(sBuf, dur, seg.role);
+                })
+              );
+              segmentBuffers.push(...batchBuffers);
+            }
+            break;
+          }
+
+          segBuffer = await createSingleImageMotionClip(
+            startBuf,
+            segDurWithCrossfadeBuffer,
+            segment.role
+          );
           segmentBuffers.push(segBuffer);
         }
 
@@ -521,7 +610,10 @@ export async function generateMerchantCampaignVideo(
 
         if (!costBreakdown) {
           costBreakdown = {
-            model_name: "muse-video (Muse AI)",
+            model_name:
+              museSuccessCount > 0
+                ? "muse-video (Muse AI)"
+                : "FFmpeg Ken Burns Compositor (Muse2API Fallback)",
             duration_seconds: totalDurationSec,
             input_tokens: 1500,
             output_tokens: totalDurationSec * 5792,
@@ -532,8 +624,13 @@ export async function generateMerchantCampaignVideo(
               edge_tts_cost: 0,
               total_free_savings_usd: 3.5,
             },
-            is_live_call: true,
-            status_note: "Tạo video AI trực tiếp qua MUSE2API Gateway (Tài khoản Muse AI).",
+            is_live_call: museSuccessCount > 0,
+            status_note:
+              museSuccessCount > 0
+                ? "Tạo video AI trực tiếp qua MUSE2API Gateway (Tài khoản Muse AI)."
+                : museLastError.includes("401") || museLastError.includes("会话认证失败")
+                ? "Phiên đăng nhập (Cookie) trên Muse2API Gateway (localhost:18610) đã hết hạn (HTTP 401). Đã tự động chuyển sang dựng bằng FFmpeg Ken Burns."
+                : "Muse2API tạm thời không phản hồi. Đã tự động chuyển sang dựng bằng FFmpeg Ken Burns.",
           };
         }
 
@@ -609,10 +706,32 @@ export async function generateMerchantCampaignVideo(
         });
       }
 
-      // 7.4. Đẩy video thành phẩm lên Supabase Storage bucket 'campaign-videos'
+      // 7.4. Lưu bản sao MP4 cục bộ vào public/videos/ (đảm bảo phát được 100% ngay lập tức trên trình duyệt)
+      // đồng thời đẩy lên Supabase Storage bucket 'campaign-videos'
       const timestamp = Date.now();
-      const slug = product.name.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-");
-      const filename = `${slug}-${timestamp}.mp4`;
+      const slug = product.name
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[đĐ]/g, "d")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+      const filename = `${slug || "campaign-video"}-${timestamp}.mp4`;
+
+      let localVideoUrl = "";
+      try {
+        const publicVideosDir = path.join(process.cwd(), "public", "videos");
+        await fs.mkdir(publicVideosDir, { recursive: true });
+        const localFilePath = path.join(publicVideosDir, filename);
+        await fs.writeFile(localFilePath, finalBuffer);
+        localVideoUrl = `/videos/${filename}`;
+        console.log(
+          `[Video Service] Đã lưu bản sao video cục bộ (${(finalBuffer.length / 1024 / 1024).toFixed(2)} MB) tại: ${localVideoUrl}`
+        );
+      } catch (localErr: any) {
+        console.warn("[Video Service] Không thể lưu bản sao video cục bộ:", localErr?.message);
+      }
 
       const { error: uploadError } = await client.storage
         .from("campaign-videos")
@@ -628,6 +747,12 @@ export async function generateMerchantCampaignVideo(
         finalVideoUrl = publicUrlData.publicUrl;
       } else {
         console.error("Supabase Storage upload error:", uploadError.message);
+        if (localVideoUrl) {
+          finalVideoUrl = localVideoUrl;
+          console.log(
+            `[Video Service] Chuyển sang phát trực tiếp từ file video cục bộ: ${finalVideoUrl}`
+          );
+        }
       }
     }
   } catch (err: any) {
@@ -644,8 +769,8 @@ export async function generateMerchantCampaignVideo(
   const contentToInsert = {
     campaign_id: input.campaign_id,
     product_id: input.product_id,
-    hook: directorResult.timeline_scenes[0]?.on_screen_text?.text || null,
-    script: directorResult.audio_config.full_voiceover_script_with_pauses,
+    hook: finalHookText || null,
+    script: finalVoiceoverScript,
     caption: directorResult.social_publishing_package.caption,
     cta: directorResult.social_publishing_package.official_cta_text,
     video_url: finalVideoUrl,
@@ -682,7 +807,7 @@ export async function generateMerchantCampaignVideo(
         video_url: finalVideoUrl,
         duration_sec: totalDurationSec,
         status: "ready",
-        hook_headline: directorResult.timeline_scenes[0]?.on_screen_text?.text,
+        hook_headline: finalHookText,
         created_at: insertedContent.created_at,
       }),
     }).catch((err) => {
@@ -701,8 +826,8 @@ export async function generateMerchantCampaignVideo(
       status: "ready",
       aspect_ratio: "9:16",
       duration_sec: totalDurationSec,
-      hook: directorResult.timeline_scenes[0]?.on_screen_text?.text || "",
-      script: directorResult.audio_config.full_voiceover_script_with_pauses,
+      hook: finalHookText,
+      script: finalVoiceoverScript,
       caption: directorResult.social_publishing_package.caption,
       cta: directorResult.social_publishing_package.official_cta_text,
       scenes_count: directorResult.timeline_scenes.length,

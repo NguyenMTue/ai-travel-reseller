@@ -111,25 +111,29 @@ export async function createTwoImageHeroClip(
     const clip2 = path.join(tempDir, "clip2.mp4");
     const heroOut = path.join(tempDir, "hero_out.mp4");
 
-    // Clip 1: Butter-smooth zoom in (pre-scaled to 2160x3840 4K to eliminate micro-jitter)
+    // Clip 1: Butter-smooth zoom in (1 single input image -> zoompan outputs d frames at 1080x1920 directly)
     await runFFmpeg([
-      "-loop", "1", "-i", startPath,
-      "-vf", `scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840,zoompan=z='min(zoom+0.0012,1.25)':d=${framesPerClip}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=2160x3840:fps=${fps},scale=1080:1920:flags=bicubic`,
+      "-i", startPath,
+      "-vf", `scale=1440:2560:force_original_aspect_ratio=increase,crop=1440:2560,zoompan=z='min(zoom+0.0012,1.22)':d=${framesPerClip}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=${fps},unsharp=3:3:0.5:3:3:0.0`,
       "-t", String(half),
       "-pix_fmt", "yuv420p",
       "-c:v", "libx264",
-      "-preset", "ultrafast",
+      "-preset", "veryfast",
+      "-crf", "18",
+      "-threads", "0",
       "-y", clip1,
     ]);
 
     // Clip 2: Butter-smooth zoom out with gentle easing (no frame 0 jumping)
     await runFFmpeg([
-      "-loop", "1", "-i", endPath,
-      "-vf", `scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840,zoompan=z='if(lte(zoom,1.0),1.25,max(1.25-0.0012*on,1.0))':d=${framesPerClip}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=2160x3840:fps=${fps},scale=1080:1920:flags=bicubic`,
+      "-i", endPath,
+      "-vf", `scale=1440:2560:force_original_aspect_ratio=increase,crop=1440:2560,zoompan=z='if(lte(zoom,1.0),1.22,max(1.22-0.0012*on,1.0))':d=${framesPerClip}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=${fps},unsharp=3:3:0.5:3:3:0.0`,
       "-t", String(half),
       "-pix_fmt", "yuv420p",
       "-c:v", "libx264",
-      "-preset", "ultrafast",
+      "-preset", "veryfast",
+      "-crf", "18",
+      "-threads", "0",
       "-y", clip2,
     ]);
 
@@ -140,7 +144,8 @@ export async function createTwoImageHeroClip(
       "-filter_complex", `xfade=transition=fade:duration=1.0:offset=${xfadeOffset}`,
       "-pix_fmt", "yuv420p",
       "-c:v", "libx264",
-      "-preset", "ultrafast",
+      "-preset", "veryfast",
+      "-crf", "18",
       "-y", heroOut,
     ]);
 
@@ -167,12 +172,13 @@ export async function trimVideoBuffer(
     await runFFmpeg([
       "-i", inPath,
       "-t", String(durationSec),
-      "-vf", "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,fps=30",
+      "-vf", "tpad=stop_mode=clone:stop_duration=2.0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,unsharp=3:3:0.6:3:3:0.0,fps=30",
       "-c:v", "libx264",
-      "-preset", "ultrafast",
+      "-preset", "veryfast",
+      "-crf", "18",
       "-pix_fmt", "yuv420p",
       "-c:a", "aac",
-      "-b:a", "128k",
+      "-b:a", "192k",
       "-y", outPath,
     ]);
     return await fs.readFile(outPath);
@@ -216,13 +222,16 @@ export async function createSingleImageMotionClip(
       zoompanExpr = `zoompan=z='1.04':d=${totalFrames}:x='iw/2-(iw/zoom/2)+10*sin(on*0.05)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=${fps}`;
     }
 
+    // Không dùng -loop 1 trước zoompan vì zoompan=d=totalFrames tự sinh đủ số frame từ 1 bức ảnh tĩnh duy nhất (nhanh gấp 6 lần)
     await runFFmpeg([
-      "-loop", "1", "-i", imgPath,
-      "-vf", `scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840,${zoompanExpr},scale=1080:1920:flags=bicubic`,
+      "-i", imgPath,
+      "-vf", `scale=1440:2560:force_original_aspect_ratio=increase,crop=1440:2560,${zoompanExpr},unsharp=3:3:0.5:3:3:0.0`,
       "-t", String(durationSec),
       "-pix_fmt", "yuv420p",
       "-c:v", "libx264",
       "-preset", "ultrafast",
+      "-crf", "17",
+      "-threads", "0",
       "-y", outPath,
     ]);
 
@@ -247,13 +256,21 @@ export async function generateVoiceoverAudio(
     .replace(/[\[\]]/g, "")
     .trim();
 
-  const tts = new EdgeTTS({
-    voice,
-    lang: "vi-VN",
-    outputFormat: "audio-24khz-48kbitrate-mono-mp3",
-  });
-
-  await tts.ttsPromise(cleanText, outputPath);
+  try {
+    const ttsHigh = new EdgeTTS({
+      voice,
+      lang: "vi-VN",
+      outputFormat: "audio-48khz-192kbitrate-mono-mp3",
+    });
+    await ttsHigh.ttsPromise(cleanText, outputPath);
+  } catch {
+    const ttsFallback = new EdgeTTS({
+      voice,
+      lang: "vi-VN",
+      outputFormat: "audio-24khz-48kbitrate-mono-mp3",
+    });
+    await ttsFallback.ttsPromise(cleanText, outputPath);
+  }
 }
 
 /**
@@ -272,28 +289,29 @@ async function createKenBurnsClip(
   let vfFilter = "";
   switch (motionType) {
     case "ZOOM_OUT":
-      vfFilter = `scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840,zoompan=z='if(lte(zoom,1.0),1.25,max(1.25-0.0012*on,1.0))':d=${totalFrames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=2160x3840:fps=${fps},scale=1080:1920:flags=bicubic`;
+      vfFilter = `scale=1440:2560:force_original_aspect_ratio=increase,crop=1440:2560,zoompan=z='if(lte(zoom,1.0),1.22,max(1.22-0.0012*on,1.0))':d=${totalFrames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=${fps}`;
       break;
     case "PAN_LEFT":
-      vfFilter = `scale=2484:3840:force_original_aspect_ratio=increase,crop=2484:3840,zoompan=z=1.0:d=${totalFrames}:x='(1-on/${totalFrames})*(iw-2160)':y='ih/2-1920':s=2160x3840:fps=${fps},scale=1080:1920:flags=bicubic`;
+      vfFilter = `scale=1656:2560:force_original_aspect_ratio=increase,crop=1656:2560,zoompan=z=1.0:d=${totalFrames}:x='(1-on/${totalFrames})*(iw-1440)':y='ih/2-1280':s=1080x1920:fps=${fps}`;
       break;
     case "PAN_RIGHT":
-      vfFilter = `scale=2484:3840:force_original_aspect_ratio=increase,crop=2484:3840,zoompan=z=1.0:d=${totalFrames}:x='(on/${totalFrames})*(iw-2160)':y='ih/2-1920':s=2160x3840:fps=${fps},scale=1080:1920:flags=bicubic`;
+      vfFilter = `scale=1656:2560:force_original_aspect_ratio=increase,crop=1656:2560,zoompan=z=1.0:d=${totalFrames}:x='(on/${totalFrames})*(iw-1440)':y='ih/2-1280':s=1080x1920:fps=${fps}`;
       break;
     case "ZOOM_IN":
     default:
-      vfFilter = `scale=2160:3840:force_original_aspect_ratio=increase,crop=2160:3840,zoompan=z='min(zoom+0.0012,1.25)':d=${totalFrames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=2160x3840:fps=${fps},scale=1080:1920:flags=bicubic`;
+      vfFilter = `scale=1440:2560:force_original_aspect_ratio=increase,crop=1440:2560,zoompan=z='min(zoom+0.0012,1.22)':d=${totalFrames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=${fps}`;
       break;
   }
 
   const args = [
-    "-loop", "1",
     "-i", imagePath,
-    "-vf", vfFilter,
+    "-vf", `${vfFilter},unsharp=3:3:0.5:3:3:0.0`,
     "-t", String(durationSec),
     "-pix_fmt", "yuv420p",
     "-c:v", "libx264",
-    "-preset", "ultrafast",
+    "-preset", "veryfast",
+    "-crf", "18",
+    "-threads", "0",
     "-y", outputPath,
   ];
 
@@ -343,8 +361,8 @@ export async function composeHybridVideo(
       clipPaths.push(clipPath);
     }
 
-    // 3.4. Chuẩn bị file danh sách ghép nối (concat list)
-    // Chuẩn hóa tất cả các clip về cùng kích thước 1080x1920 và fps 30
+    // 3.4. Chuẩn bị file danh sách ghép nối và chuyển cảnh mượt (Crossfade / Xfade)
+    // Chuẩn hóa tất cả các clip về cùng kích thước tràn viền 1080x1920 (Full-bleed 9:16), làm nét nhẹ và fps 30
     const normalizedClipPaths: string[] = [];
     for (let i = 0; i < clipPaths.length; i++) {
       const normPath = path.join(tempDir, `norm_${i}.mp4`);
@@ -352,11 +370,15 @@ export async function composeHybridVideo(
         "-i",
         clipPaths[i],
         "-vf",
-        "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,fps=30",
+        "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,unsharp=3:3:0.6:3:3:0.0,fps=30",
         "-c:v",
         "libx264",
         "-preset",
-        "ultrafast",
+        "veryfast",
+        "-crf",
+        "18",
+        "-pix_fmt",
+        "yuv420p",
         "-an",
         "-y",
         normPath,
@@ -364,80 +386,63 @@ export async function composeHybridVideo(
       normalizedClipPaths.push(normPath);
     }
 
-    const concatListPath = path.join(tempDir, "concat_list.txt");
-    const concatContent = normalizedClipPaths
-      .map((p) => `file '${p.replace(/\\/g, "/")}'`)
-      .join("\n");
-    await fs.writeFile(concatListPath, concatContent);
-
     const mergedVisualPath = path.join(tempDir, "merged_visual.mp4");
-    await runFFmpeg([
-      "-f",
-      "concat",
-      "-safe",
-      "0",
-      "-i",
-      concatListPath,
-      "-c:v",
-      "libx264",
-      "-preset",
-      "ultrafast",
-      "-pix_fmt",
-      "yuv420p",
-      "-y",
-      mergedVisualPath,
-    ]);
+    await mergeClipsWithCrossfade(normalizedClipPaths, mergedVisualPath, tempDir, 0.35);
 
-    // 3.5. Áp dụng Text Overlay và chuẩn hóa thời lượng tuyệt đối
+    // 3.5. Áp dụng Text Overlay (Font đậm tiếng Việt + Đổ bóng + Fade-in mượt) và chuẩn hóa thời lượng
     const finalOutputPath = path.join(tempDir, "final_composition.mp4");
-    const fontPath = "C\\:/Windows/Fonts/arial.ttf"; // Font Arial Windows hỗ trợ Unicode tiếng Việt hoàn hảo
+    const fontPath = getSystemFontPath(true);
     const is10s = targetDuration <= 12;
 
     const drawtextFilters: string[] = [];
 
     // Hook: 0-2s (10s) hoặc 0-3s (18s+)
     if (input.textOverlay.hookText) {
-      const escapedHook = input.textOverlay.hookText
+      const escapedHook = sanitizeForDrawtext(input.textOverlay.hookText)
         .replace(/'/g, "")
         .replace(/:/g, "\\:");
       const hookEnd = is10s ? 2 : 3;
+      const alphaExpr = buildAlphaFadeExpr(0, hookEnd);
       drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedHook}':fontcolor=0xFFD700:fontsize=36:borderw=3:bordercolor=black:x=(w-text_w)/2:y=(h-text_h)/2-100:enable='between(t,0,${hookEnd})'`
+        `drawtext=fontfile='${fontPath}':text='${escapedHook}':fontcolor=0xFFD700:fontsize=38:borderw=3:bordercolor=black@0.88:shadowx=2:shadowy=2:shadowcolor=black@0.75:${alphaExpr}:x=(w-text_w)/2:y=(h-text_h)/2-100:enable='between(t,0,${hookEnd})'`
       );
     }
 
     // Mẹo du lịch / Trải nghiệm thực tế
     if (input.textOverlay.tipText) {
-      const escapedTip = input.textOverlay.tipText
+      const escapedTip = sanitizeForDrawtext(input.textOverlay.tipText)
         .replace(/'/g, "")
         .replace(/:/g, "\\:");
       const tipStart = is10s ? 2 : 3;
       const tipEnd = is10s ? 5 : 7;
+      const alphaExpr = buildAlphaFadeExpr(tipStart, tipEnd);
       drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedTip}':fontcolor=0x34C759:fontsize=26:borderw=2:bordercolor=black:x=(w-text_w)/2:y=h-240:enable='between(t,${tipStart},${tipEnd})'`
+        `drawtext=fontfile='${fontPath}':text='${escapedTip}':fontcolor=0x34C759:fontsize=28:borderw=2:bordercolor=black@0.85:shadowx=2:shadowy=2:shadowcolor=black@0.75:${alphaExpr}:x=(w-text_w)/2:y=h-240:enable='between(t,${tipStart},${tipEnd})'`
       );
     }
 
     // Badge giá vé: 5-8s (10s) hoặc 11-15s (18s+)
     if (input.textOverlay.priceBadgeText) {
-      const escapedPrice = input.textOverlay.priceBadgeText
+      const escapedPrice = sanitizeForDrawtext(input.textOverlay.priceBadgeText)
         .replace(/'/g, "")
         .replace(/:/g, "\\:");
       const priceStart = is10s ? 5 : 11;
       const priceEnd = is10s ? 8 : 15;
+      const alphaExpr = buildAlphaFadeExpr(priceStart, priceEnd);
       drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedPrice}':fontcolor=white:fontsize=28:box=1:boxcolor=black@0.6:boxborderw=10:x=(w-text_w)/2:y=120:enable='between(t,${priceStart},${priceEnd})'`
+        `drawtext=fontfile='${fontPath}':text='${escapedPrice}':fontcolor=white:fontsize=30:borderw=2:bordercolor=black@0.85:shadowx=2:shadowy=2:shadowcolor=black@0.7:box=1:boxcolor=black@0.68:boxborderw=12:${alphaExpr}:x=(w-text_w)/2:y=120:enable='between(t,${priceStart},${priceEnd})'`
       );
     }
 
     // CTA & Link đặt vé: 8-10s (10s) hoặc 15-18s (18s+)
     if (input.textOverlay.ctaText) {
-      const escapedCta = input.textOverlay.ctaText
+      const escapedCta = sanitizeForDrawtext(input.textOverlay.ctaText)
         .replace(/'/g, "")
         .replace(/:/g, "\\:");
       const ctaStart = is10s ? 8 : 15;
+      const alphaExpr = buildAlphaFadeExpr(ctaStart, targetDuration);
       drawtextFilters.push(
-        `drawtext=fontfile='${fontPath}':text='${escapedCta}':fontcolor=0x00FFCC:fontsize=26:borderw=2:bordercolor=black:x=(w-text_w)/2:y=h-180:enable='gte(t,${ctaStart})'`
+        `drawtext=fontfile='${fontPath}':text='${escapedCta}':fontcolor=0x00FFCC:fontsize=28:borderw=2:bordercolor=black@0.85:shadowx=2:shadowy=2:shadowcolor=black@0.75:${alphaExpr}:x=(w-text_w)/2:y=h-180:enable='gte(t,${ctaStart})'`
       );
     }
 
@@ -446,33 +451,62 @@ export async function composeHybridVideo(
       ...(drawtextFilters.length > 0 ? drawtextFilters : []),
     ].join(",");
 
-    // Ghép visual + voiceover audio chuẩn xác (cắt đúng targetDuration tuyệt đối)
-    await runFFmpeg([
-      "-i",
-      mergedVisualPath,
-      "-i",
-      voiceoverPath,
+    // 3.6. Đo thời lượng thoại để tự động khớp nhịp (atempo) + Hòa âm nhạc nền Ambient Travel Chord
+    const voiceDur = await getMediaDurationSec(voiceoverPath);
+    const bgmPath = path.join(tempDir, "ambient_bgm.mp4");
+    const hasBgm = await synthesizeAmbientTravelBgm(bgmPath, targetDuration);
+    const { audioFilter, outLabel } = buildVoiceAndBgmAudioFilter(
+      voiceDur,
+      targetDuration,
+      hasBgm,
+      1,
+      2
+    );
+
+    const ffmpegFinalArgs = ["-i", mergedVisualPath, "-i", voiceoverPath];
+    if (hasBgm) {
+      ffmpegFinalArgs.push("-i", bgmPath);
+    }
+    ffmpegFinalArgs.push(
       "-filter_complex",
-      `[0:v]${vfFilters}[vout];[1:a]apad=whole_dur=${targetDuration}[aout]`,
+      `[0:v]${vfFilters}[vout];${audioFilter}`,
       "-map",
       "[vout]",
       "-map",
-      "[aout]",
+      outLabel,
       "-t",
       `${targetDuration}`,
       "-c:v",
       "libx264",
       "-preset",
-      "ultrafast",
+      "veryfast",
+      "-crf",
+      "22",
+      "-maxrate",
+      "3200k",
+      "-bufsize",
+      "6400k",
+      "-profile:v",
+      "high",
+      "-level",
+      "4.2",
+      "-pix_fmt",
+      "yuv420p",
       "-c:a",
       "aac",
+      "-ar",
+      "48000",
+      "-ac",
+      "2",
       "-b:a",
-      "128k",
+      "192k",
       "-movflags",
       "+faststart",
       "-y",
-      finalOutputPath,
-    ]);
+      finalOutputPath
+    );
+
+    await runFFmpeg(ffmpegFinalArgs);
 
     const finalBuffer = await fs.readFile(finalOutputPath);
     return finalBuffer;
@@ -498,11 +532,251 @@ export interface TourEndCardConfig {
   authenticTips?: string[];
 }
 
-export function getSystemFontPath(): string {
+/**
+ * Lấy đường dẫn font hệ thống hỗ trợ tiếng Việt đầy đủ.
+ * Mặc định ưu tiên font ĐẬM hiện đại (Segoe UI Bold / Arial Bold / DejaVuSans Bold) để chữ nổi bật trên nền video 9:16.
+ */
+export function getSystemFontPath(preferBold = true): string {
   if (process.platform === "win32") {
+    if (preferBold) {
+      if (existsSync("C:/Windows/Fonts/segoeuib.ttf")) {
+        return "C\\:/Windows/Fonts/segoeuib.ttf";
+      }
+      if (existsSync("C:/Windows/Fonts/arialbd.ttf")) {
+        return "C\\:/Windows/Fonts/arialbd.ttf";
+      }
+    }
+    if (existsSync("C:/Windows/Fonts/segoeui.ttf")) {
+      return "C\\:/Windows/Fonts/segoeui.ttf";
+    }
     return "C\\:/Windows/Fonts/arial.ttf";
   }
+  if (preferBold && existsSync("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")) {
+    return "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf";
+  }
   return "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+}
+
+/**
+ * Biểu thức hiệu ứng Fade-in & Fade-out mượt mà cho phụ đề FFmpeg drawtext
+ */
+export function buildAlphaFadeExpr(startSec: number, endSec?: number, fadeDur = 0.35): string {
+  const s = Number(startSec.toFixed(2));
+  const f = Number(fadeDur.toFixed(2));
+  const sIn = Number((s + f).toFixed(2));
+  if (typeof endSec === "number" && endSec > s + f * 2) {
+    const e = Number(endSec.toFixed(2));
+    const eOut = Number((e - f).toFixed(2));
+    return `alpha='if(lt(t,${s}),0,if(lt(t,${sIn}),(t-${s})/${f},if(gt(t,${eOut}),max(0,(${e}-t)/${f}),1)))'`;
+  }
+  return `alpha='if(lt(t,${s}),0,if(lt(t,${sIn}),(t-${s})/${f},1))'`;
+}
+
+/**
+ * Đo thời lượng thực tế (giây) của một file audio hoặc video qua FFmpeg stderr
+ */
+export function getMediaDurationSec(filePath: string): Promise<number> {
+  return new Promise((resolve) => {
+    const executable = getResolvedFFmpegPath();
+    const proc = spawn(/*turbopackIgnore: true*/ executable, ["-i", filePath], {
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stderr = "";
+    proc.stderr.on("data", (d) => {
+      stderr += d.toString();
+    });
+    proc.on("close", () => {
+      const match = stderr.match(/Duration:\s*(\d{2}):(\d{2}):(\d{2}(?:\.\d+)?)/);
+      if (!match) {
+        resolve(0);
+        return;
+      }
+      const hours = Number(match[1]);
+      const minutes = Number(match[2]);
+      const seconds = Number(match[3]);
+      resolve(Number((hours * 3600 + minutes * 60 + seconds).toFixed(2)));
+    });
+    proc.on("error", () => {
+      resolve(0);
+    });
+  });
+}
+
+/**
+ * Tạo lớp Nhạc nền Ambient / Travel Chord nhẹ nhàng (hợp âm C-Major9 / Pentatonic ấm áp)
+ * Sinh đoạn 5 giây chất lượng cao rồi lặp mượt (loop) và fade-in/fade-out theo tổng thời lượng video (chỉ mất ~0.3s xử lý)
+ */
+export async function synthesizeAmbientTravelBgm(
+  outputPath: string,
+  durationSec: number
+): Promise<boolean> {
+  try {
+    const dur = Math.min(6, Math.max(3, Number(durationSec.toFixed(1))));
+    // Hợp âm Ambient Travel êm dịu (C3 + G3 + B3 + D4 + E4)
+    const aevalExpr =
+      "0.04*sin(2*PI*130.81*t)+0.035*sin(2*PI*196.00*t)+0.025*sin(2*PI*246.94*t)+0.025*sin(2*PI*293.66*t)+0.02*sin(2*PI*329.63*t)";
+    await runFFmpeg([
+      "-f",
+      "lavfi",
+      "-i",
+      `aevalsrc='${aevalExpr}':s=48000:c=stereo:d=${dur}`,
+      "-af",
+      "lowpass=f=950,afade=t=in:st=0:d=0.4",
+      "-c:a",
+      "aac",
+      "-ar",
+      "48000",
+      "-ac",
+      "2",
+      "-b:a",
+      "128k",
+      "-y",
+      outputPath,
+    ]);
+    return existsSync(outputPath);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Xây dựng filter_complex cho Audio:
+ * - Tự động tăng/giảm nhẹ tốc độ đọc (atempo) nếu lời thoại dài hơn thời lượng video để không bị cắt cụt chữ ở cuối
+ * - Trộn (amix) giọng đọc thuyết minh với nhạc nền Ambient Travel ở mức âm lượng nền tinh tế (15%) kèm fade-out cuối video
+ */
+export function buildVoiceAndBgmAudioFilter(
+  voiceDurationSec: number,
+  targetDurationSec: number,
+  hasBgm: boolean,
+  voiceInputIdx = 1,
+  bgmInputIdx = 2
+): { audioFilter: string; outLabel: string } {
+  const safeTarget = Math.max(2.0, targetDurationSec - 0.25);
+  let tempoFilter = "";
+  if (voiceDurationSec > safeTarget) {
+    // Tinh chỉnh tốc độ đọc trong ngưỡng tự nhiên (1.02x - 1.38x) để vừa khít thời lượng video
+    const rawRatio = voiceDurationSec / safeTarget;
+    const clampedRatio = Math.min(1.38, Math.max(1.01, Number(rawRatio.toFixed(3))));
+    tempoFilter = `atempo=${clampedRatio},`;
+  }
+
+  if (hasBgm) {
+    const fadeOutStart = Math.max(0.5, Number((targetDurationSec - 2.0).toFixed(1)));
+    const audioFilter = `[${voiceInputIdx}:a]${tempoFilter}volume=1.18,apad=whole_dur=${targetDurationSec}[va];[${bgmInputIdx}:a]aloop=loop=-1:size=240000,atrim=0:${targetDurationSec},afade=t=in:st=0:d=1.0,afade=t=out:st=${fadeOutStart}:d=2.0,volume=0.15[bg];[va][bg]amix=inputs=2:duration=first:dropout_transition=2:normalize=0[aout]`;
+    return { audioFilter, outLabel: "[aout]" };
+  }
+
+  const audioFilter = `[${voiceInputIdx}:a]${tempoFilter}volume=1.10,apad=whole_dur=${targetDurationSec}[aout]`;
+  return { audioFilter, outLabel: "[aout]" };
+}
+
+/**
+ * Ghép nối chuỗi clip đã chuẩn hóa bằng hiệu ứng Chuyển cảnh mượt (Cinematic Crossfade / xfade)
+ * Tự động fallback về concat demuxer an toàn nếu clip quá ngắn hoặc chỉ có 1 clip.
+ */
+export async function mergeClipsWithCrossfade(
+  normalizedClipPaths: string[],
+  outputPath: string,
+  tempDir: string,
+  transitionDurationSec = 0.35
+): Promise<void> {
+  if (normalizedClipPaths.length === 0) {
+    throw new Error("Không có clip nào để ghép nối.");
+  }
+  if (normalizedClipPaths.length === 1) {
+    await fs.copyFile(normalizedClipPaths[0], outputPath);
+    return;
+  }
+
+  // Đo thời lượng từng clip để tính offset cho xfade
+  const durations: number[] = [];
+  for (const clipPath of normalizedClipPaths) {
+    const d = await getMediaDurationSec(clipPath);
+    durations.push(d);
+  }
+
+  const canUseXfade =
+    normalizedClipPaths.length <= 10 &&
+    durations.every((d) => d >= transitionDurationSec * 2.4);
+
+  if (canUseXfade) {
+    try {
+      const args: string[] = [];
+      for (const clipPath of normalizedClipPaths) {
+        args.push("-i", clipPath);
+      }
+
+      const xfadeParts: string[] = [];
+      let accDuration = durations[0];
+      let prevLabel = "[0:v]";
+
+      for (let i = 1; i < normalizedClipPaths.length; i++) {
+        const offset = Number(Math.max(0.2, accDuration - transitionDurationSec).toFixed(2));
+        const outLabel = i === normalizedClipPaths.length - 1 ? "[vmerged]" : `[vx${i}]`;
+        const transitionType = i % 2 === 1 ? "fade" : "smoothleft";
+        xfadeParts.push(
+          `${prevLabel}[${i}:v]xfade=transition=${transitionType}:duration=${transitionDurationSec}:offset=${offset}${outLabel}`
+        );
+        accDuration = offset + durations[i];
+        prevLabel = outLabel;
+      }
+
+      args.push(
+        "-filter_complex",
+        xfadeParts.join(";"),
+        "-map",
+        "[vmerged]",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "ultrafast",
+        "-crf",
+        "17",
+        "-threads",
+        "0",
+        "-pix_fmt",
+        "yuv420p",
+        "-y",
+        outputPath
+      );
+
+      await runFFmpeg(args);
+      if (existsSync(outputPath)) {
+        return;
+      }
+    } catch (xfadeErr: any) {
+      console.warn(
+        "[FFmpeg Compositor] Crossfade fallback to concat demuxer:",
+        xfadeErr?.message
+      );
+    }
+  }
+
+  // Fallback chuẩn bằng concat demuxer chất lượng cao (-crf 18)
+  const concatListPath = path.join(tempDir, "concat_list.txt");
+  const concatContent = normalizedClipPaths
+    .map((p) => `file '${p.replace(/\\/g, "/")}'`)
+    .join("\n");
+  await fs.writeFile(concatListPath, concatContent);
+
+  await runFFmpeg([
+    "-f",
+    "concat",
+    "-safe",
+    "0",
+    "-i",
+    concatListPath,
+    "-c:v",
+    "libx264",
+    "-preset",
+    "veryfast",
+    "-crf",
+    "18",
+    "-pix_fmt",
+    "yuv420p",
+    "-y",
+    outputPath,
+  ]);
 }
 
 /**
@@ -574,6 +848,7 @@ export async function createBlurredTourInfoClip(params: {
   durationSec: number;
   info: TourEndCardConfig;
   voiceoverText?: string;
+  skipVoiceover?: boolean;
 }): Promise<Buffer> {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "tour-endcard-"));
 
@@ -665,23 +940,25 @@ export async function createBlurredTourInfoClip(params: {
       "utf8"
     );
 
-    // Sinh voiceover audio cho End-Card (hoặc fallback silence nếu lỗi)
+    // Sinh voiceover audio cho End-Card chỉ khi không có track thuyết minh tổng (tránh gọi Edge-TTS 2 lần liên tiếp gây lỗi HTTP 429)
     const cardAudioPath = path.join(tempDir, "card_audio.mp3");
     let hasVoice = false;
-    try {
-      const voiceText =
-        sanitizeForDrawtext(params.voiceoverText || params.info.ctaText) ||
-        `Vé chính hãng chỉ ${Number(params.info.salePrice).toLocaleString("vi-VN")} đồng. Quét mã vào cổng ngay hôm nay!`;
-      await generateVoiceoverAudio(voiceText, cardAudioPath);
-      hasVoice = true;
-    } catch (e: any) {
-      console.warn(
-        "[FFmpeg Compositor] Không thể tạo TTS cho End-Card, dùng silent audio:",
-        e?.message
-      );
+    if (!params.skipVoiceover) {
+      try {
+        const voiceText =
+          sanitizeForDrawtext(params.voiceoverText || params.info.ctaText) ||
+          `Vé chính hãng chỉ ${Number(params.info.salePrice).toLocaleString("vi-VN")} đồng. Quét mã vào cổng ngay hôm nay!`;
+        await generateVoiceoverAudio(voiceText, cardAudioPath);
+        hasVoice = true;
+      } catch (e: any) {
+        console.warn(
+          "[FFmpeg Compositor] Không thể tạo TTS cho End-Card, dùng silent audio:",
+          e?.message
+        );
+      }
     }
 
-    const fontPath = getSystemFontPath();
+    const fontPath = getSystemFontPath(true);
     // Giới hạn thời lượng End-Card chuẩn 2.0s để tối ưu tỷ lệ xem hết video (completion rate)
     const duration = Math.min(2.5, Math.max(2.0, Number((params.durationSec || 2.0).toFixed(1))));
     const totalFrames = Math.round(duration * 30);
@@ -694,11 +971,12 @@ export async function createBlurredTourInfoClip(params: {
     const cta2Length = rawCta2.length;
     const cta2FontSize = cta2Length > 35 ? 20 : 24;
 
+    // Đặt boxblur=18:3 TRƯỚC zoompan để chỉ làm mờ 1 ảnh tĩnh duy nhất thay vì làm mờ 60 frames (tăng tốc gấp 15 lần)
     const vf = [
       "scale=1280:2276:force_original_aspect_ratio=increase",
       "crop=1280:2276",
+      "boxblur=18:3",
       `zoompan=z='min(zoom+0.0012,1.06)':d=${totalFrames}:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=30`,
-      "boxblur=18:5",
       // 1. Khung card trung tâm với độ mờ sang trọng
       "drawbox=x=70:y=200:w=940:h=1520:color=0x0B132B@0.92:t=fill",
       "drawbox=x=70:y=200:w=940:h=1520:color=0x38BDF8@0.85:t=4",
@@ -727,12 +1005,12 @@ export async function createBlurredTourInfoClip(params: {
       `drawtext=fontfile='${fontPath}':textfile=cta2.txt:fontcolor=0xDCFCE7:fontsize=${cta2FontSize}:x=(w-text_w)/2:y=1410:expansion=none`,
     ].join(",");
 
-    const ffmpegArgs = ["-loop", "1", "-i", "card_bg.jpg"];
+    const ffmpegArgs = ["-i", "card_bg.jpg"];
 
     if (hasVoice) {
       ffmpegArgs.push("-i", "card_audio.mp3");
-    } else {
-      ffmpegArgs.push("-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo");
+    } else if (!params.skipVoiceover) {
+      ffmpegArgs.push("-f", "lavfi", "-i", "anullsrc=r=48000:cl=stereo");
     }
 
     ffmpegArgs.push(
@@ -744,20 +1022,29 @@ export async function createBlurredTourInfoClip(params: {
       "libx264",
       "-preset",
       "ultrafast",
+      "-crf",
+      "17",
+      "-threads",
+      "0",
       "-pix_fmt",
-      "yuv420p",
-      "-c:a",
-      "aac",
-      "-ar",
-      "44100",
-      "-ac",
-      "2",
-      "-b:a",
-      "128k",
-      "-shortest",
-      "-y",
-      "endcard.mp4"
+      "yuv420p"
     );
+
+    if (hasVoice || !params.skipVoiceover) {
+      ffmpegArgs.push(
+        "-c:a",
+        "aac",
+        "-ar",
+        "48000",
+        "-ac",
+        "2",
+        "-b:a",
+        "192k",
+        "-shortest"
+      );
+    }
+
+    ffmpegArgs.push("-y", "endcard.mp4");
 
     await new Promise<void>((resolve, reject) => {
       const exec = getResolvedFFmpegPath();
@@ -836,6 +1123,7 @@ export async function composeChainedOmniVideo(
           durationSec: endCardDur,
           info: input.tourEndCardInfo,
           voiceoverText: input.tourEndCardInfo.ctaText,
+          skipVoiceover: input.useMuseAudio !== true,
         });
         if (cardBuffer && cardBuffer.length > 1000) {
           clipBuffers.push(cardBuffer);
@@ -849,13 +1137,21 @@ export async function composeChainedOmniVideo(
     // Thời lượng tổng video thành phẩm: Đối với video 10s là đúng 10.0s cố định
     const finalTotalDuration = Number((targetDuration + (hasEndCard ? endCardDur : 0)).toFixed(1));
 
-    // 4.3. Chuẩn hóa tất cả các phân cảnh video về cùng 1080x1920 30fps và chuẩn âm thanh AAC
+    // 4.3. Chuẩn bị các phân cảnh video cho bước ghép nối
+    // Nếu không dùng âm thanh gốc của Muse AI (useMuseAudio !== true), các clip từ createSingleImageMotionClip / trimVideoBuffer / End-Card
+    // đã ở sẵn chuẩn 1080x1920 30fps yuv420p nên không cần encode lại lần nữa kèm anullsrc (tiết kiệm 7 lượt encode H.264).
     const normalizedClipPaths: string[] = [];
     let hasAnyNativeAudio = false;
+    const wantNativeAudio = input.useMuseAudio === true;
 
     for (let i = 0; i < clipBuffers.length; i++) {
       const rawPath = path.join(tempDir, `raw_seg_${i}.mp4`);
       await fs.writeFile(rawPath, clipBuffers[i]);
+
+      if (!wantNativeAudio) {
+        normalizedClipPaths.push(rawPath);
+        continue;
+      }
 
       const normPath = path.join(tempDir, `norm_seg_${i}.mp4`);
       const hasAudio = await hasAudioStream(rawPath);
@@ -865,19 +1161,25 @@ export async function composeChainedOmniVideo(
           "-i",
           rawPath,
           "-vf",
-          "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,fps=30",
+          "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,unsharp=3:3:0.55:3:3:0.0,fps=30",
           "-c:v",
           "libx264",
           "-preset",
-          "ultrafast",
+          "veryfast",
+          "-crf",
+          "18",
+          "-threads",
+          "0",
+          "-pix_fmt",
+          "yuv420p",
           "-c:a",
           "aac",
           "-ar",
-          "44100",
+          "48000",
           "-ac",
           "2",
           "-b:a",
-          "128k",
+          "192k",
           "-y",
           normPath,
         ]);
@@ -888,21 +1190,27 @@ export async function composeChainedOmniVideo(
           "-f",
           "lavfi",
           "-i",
-          "anullsrc=r=44100:cl=stereo",
+          "anullsrc=r=48000:cl=stereo",
           "-vf",
-          "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,fps=30",
+          "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,unsharp=3:3:0.55:3:3:0.0,fps=30",
           "-c:v",
           "libx264",
           "-preset",
-          "ultrafast",
+          "veryfast",
+          "-crf",
+          "18",
+          "-threads",
+          "0",
+          "-pix_fmt",
+          "yuv420p",
           "-c:a",
           "aac",
           "-ar",
-          "44100",
+          "48000",
           "-ac",
           "2",
           "-b:a",
-          "128k",
+          "192k",
           "-shortest",
           "-y",
           normPath,
@@ -911,43 +1219,51 @@ export async function composeChainedOmniVideo(
       normalizedClipPaths.push(normPath);
     }
 
-    // 4.4. Nối các phân cảnh
-    const concatListPath = path.join(tempDir, "concat_list.txt");
-    const concatContent = normalizedClipPaths
-      .map((p) => `file '${p.replace(/\\/g, "/")}'`)
-      .join("\n");
-    await fs.writeFile(concatListPath, concatContent);
-
+    // 4.4. Nối các phân cảnh với hiệu ứng chuyển cảnh mượt (Cinematic Crossfade 0.35s)
+    // Nếu dùng âm thanh gốc của Muse AI thì nối cả audio+video qua concat, còn mặc định dùng Crossfade mượt mà
     const mergedVisualPath = path.join(tempDir, "merged_visual.mp4");
-    await runFFmpeg([
-      "-f",
-      "concat",
-      "-safe",
-      "0",
-      "-i",
-      concatListPath,
-      "-c:v",
-      "libx264",
-      "-preset",
-      "ultrafast",
-      "-pix_fmt",
-      "yuv420p",
-      "-c:a",
-      "aac",
-      "-ar",
-      "44100",
-      "-ac",
-      "2",
-      "-b:a",
-      "128k",
-      "-y",
-      mergedVisualPath,
-    ]);
+    const useNativeAudio = hasAnyNativeAudio && input.useMuseAudio === true;
+    if (useNativeAudio) {
+      const concatListPath = path.join(tempDir, "concat_list.txt");
+      const concatContent = normalizedClipPaths
+        .map((p) => `file '${p.replace(/\\/g, "/")}'`)
+        .join("\n");
+      await fs.writeFile(concatListPath, concatContent);
 
-    // 4.5. Áp dụng Text Overlay chuẩn 4 hồi (docs/be1/prompts/system_prompt_ai_tourism_video_10s.md)
-    // Safe Zone: tâm Y = 50%, dải 42%–58%, căn giữa X, pill nền mờ tương phản cao, tối đa 2 dòng
+      await runFFmpeg([
+        "-f",
+        "concat",
+        "-safe",
+        "0",
+        "-i",
+        concatListPath,
+        "-c:v",
+        "libx264",
+        "-preset",
+        "veryfast",
+        "-crf",
+        "18",
+        "-pix_fmt",
+        "yuv420p",
+        "-c:a",
+        "aac",
+        "-ar",
+        "48000",
+        "-ac",
+        "2",
+        "-b:a",
+        "192k",
+        "-y",
+        mergedVisualPath,
+      ]);
+    } else {
+      await mergeClipsWithCrossfade(normalizedClipPaths, mergedVisualPath, tempDir, 0.35);
+    }
+
+    // 4.5. Áp dụng Text Overlay chuẩn 4 hồi với Font đậm tiếng Việt, Viền chữ, Đổ bóng & Fade-in mượt
     const finalOutputPath = path.join(tempDir, "final_composition.mp4");
-    const fontPath = getSystemFontPath();
+    const fontPath = getSystemFontPath(true);
+    const textShadowStyle = "borderw=2:bordercolor=black@0.85:shadowx=2:shadowy=2:shadowcolor=black@0.75";
 
     const drawtextFilters: string[] = [];
 
@@ -956,8 +1272,9 @@ export async function composeChainedOmniVideo(
       const act1Raw = input.textOverlay.act1Text || input.textOverlay.hookText;
       if (act1Raw) {
         const cleanAct1 = sanitizeForDrawtext(act1Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        const alpha1 = buildAlphaFadeExpr(0, 2.5, 0.25);
         drawtextFilters.push(
-          `drawtext=fontfile='${fontPath}':text='${cleanAct1}':fontcolor=0xFFD700:fontsize=40:line_spacing=8:box=1:boxcolor=black@0.65:boxborderw=12:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,0,2.5)':expansion=none`
+          `drawtext=fontfile='${fontPath}':text='${cleanAct1}':fontcolor=0xFFD700:fontsize=40:line_spacing=8:${textShadowStyle}:box=1:boxcolor=black@0.68:boxborderw=12:${alpha1}:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,0,2.5)':expansion=none`
         );
       }
 
@@ -965,8 +1282,9 @@ export async function composeChainedOmniVideo(
       const act2Raw = input.textOverlay.act2Text || input.textOverlay.tipText;
       if (act2Raw) {
         const cleanAct2 = sanitizeForDrawtext(act2Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        const alpha2 = buildAlphaFadeExpr(2.5, 5.0, 0.25);
         drawtextFilters.push(
-          `drawtext=fontfile='${fontPath}':text='${cleanAct2}':fontcolor=white:fontsize=38:line_spacing=8:box=1:boxcolor=black@0.65:boxborderw=12:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,2.5,5.0)':expansion=none`
+          `drawtext=fontfile='${fontPath}':text='${cleanAct2}':fontcolor=white:fontsize=38:line_spacing=8:${textShadowStyle}:box=1:boxcolor=black@0.68:boxborderw=12:${alpha2}:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,2.5,5.0)':expansion=none`
         );
       }
 
@@ -974,8 +1292,9 @@ export async function composeChainedOmniVideo(
       const act3Raw = input.textOverlay.act3Text || input.textOverlay.priceBadgeText;
       if (act3Raw) {
         const cleanAct3 = sanitizeForDrawtext(act3Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        const alpha3 = buildAlphaFadeExpr(5.0, 7.5, 0.25);
         drawtextFilters.push(
-          `drawtext=fontfile='${fontPath}':text='${cleanAct3}':fontcolor=0xFFD700:fontsize=40:line_spacing=8:box=1:boxcolor=0x0B132B@0.85:boxborderw=14:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,5.0,7.5)':expansion=none`
+          `drawtext=fontfile='${fontPath}':text='${cleanAct3}':fontcolor=0xFFD700:fontsize=40:line_spacing=8:${textShadowStyle}:box=1:boxcolor=0x0B132B@0.85:boxborderw=14:${alpha3}:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,5.0,7.5)':expansion=none`
         );
       }
 
@@ -983,50 +1302,93 @@ export async function composeChainedOmniVideo(
       const act4Raw = input.textOverlay.act4Text || input.textOverlay.ctaText || "ĐẶT VÉ CHÍNH HÃNG\nOFFICIAL CHECKOUT: 1900 8888";
       if (act4Raw) {
         const cleanAct4 = sanitizeForDrawtext(act4Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        const alpha4 = buildAlphaFadeExpr(7.5, 10.0, 0.25);
         drawtextFilters.push(
-          `drawtext=fontfile='${fontPath}':text='${cleanAct4}':fontcolor=0x34D399:fontsize=38:line_spacing=8:box=1:boxcolor=0x064E3B@0.85:boxborderw=14:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,7.5,10.0)':expansion=none`
+          `drawtext=fontfile='${fontPath}':text='${cleanAct4}':fontcolor=0x34D399:fontsize=38:line_spacing=8:${textShadowStyle}:box=1:boxcolor=0x064E3B@0.85:boxborderw=14:${alpha4}:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,7.5,10.0)':expansion=none`
+        );
+      }
+    } else if (targetDuration >= 25) {
+      // Profile 30–45s Campaign Deep-Dive: 4 chương thuyết phục xuyên suốt thời lượng video
+      const t1End = Number((targetDuration * 0.18).toFixed(1));
+      const t2End = Number((targetDuration * 0.54).toFixed(1));
+      const t3End = Number((targetDuration * 0.80).toFixed(1));
+      const t4End = Number(targetDuration.toFixed(1));
+
+      const act1Raw = input.textOverlay.act1Text || input.textOverlay.hookText;
+      if (act1Raw) {
+        const cleanAct1 = sanitizeForDrawtext(act1Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        const alpha1 = buildAlphaFadeExpr(0, t1End, 0.35);
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${cleanAct1}':fontcolor=0xFFD700:fontsize=38:line_spacing=10:${textShadowStyle}:box=1:boxcolor=0x0B132B@0.84:boxborderw=14:${alpha1}:x=(w-text_w)/2:y=h*0.72:enable='between(t,0,${t1End})':expansion=none`
+        );
+      }
+
+      const act2Raw = input.textOverlay.act2Text || input.textOverlay.destinationText || input.textOverlay.tipText;
+      if (act2Raw) {
+        const cleanAct2 = sanitizeForDrawtext(act2Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        const alpha2 = buildAlphaFadeExpr(t1End, t2End, 0.35);
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${cleanAct2}':fontcolor=white:fontsize=36:line_spacing=10:${textShadowStyle}:box=1:boxcolor=black@0.75:boxborderw=14:${alpha2}:x=(w-text_w)/2:y=h*0.72:enable='between(t,${t1End},${t2End})':expansion=none`
+        );
+      }
+
+      const act3Raw = input.textOverlay.act3Text || input.textOverlay.priceBadgeText;
+      if (act3Raw) {
+        const cleanAct3 = sanitizeForDrawtext(act3Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        const alpha3 = buildAlphaFadeExpr(t2End, t3End, 0.35);
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${cleanAct3}':fontcolor=0xFFD700:fontsize=38:line_spacing=10:${textShadowStyle}:box=1:boxcolor=0x0B132B@0.86:boxborderw=14:${alpha3}:x=(w-text_w)/2:y=h*0.72:enable='between(t,${t2End},${t3End})':expansion=none`
+        );
+      }
+
+      const act4Raw = input.textOverlay.act4Text || input.textOverlay.ctaText;
+      if (act4Raw) {
+        const cleanAct4 = sanitizeForDrawtext(act4Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        const alpha4 = buildAlphaFadeExpr(t3End, t4End, 0.35);
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${cleanAct4}':fontcolor=0x34D399:fontsize=38:line_spacing=10:${textShadowStyle}:box=1:boxcolor=0x064E3B@0.88:boxborderw=14:${alpha4}:x=(w-text_w)/2:y=h*0.72:enable='between(t,${t3End},${t4End})':expansion=none`
         );
       }
     } else {
-      // Profile dài (>12s Storytelling)
+      // Profile 18s Storytelling
       if (input.textOverlay.hookText) {
         const cleanHook = sanitizeForDrawtext(input.textOverlay.hookText).replace(/'/g, "").replace(/:/g, "\\:");
+        const alphaHook = buildAlphaFadeExpr(0, 3, 0.3);
         drawtextFilters.push(
-          `drawtext=fontfile='${fontPath}':text='${cleanHook}':fontcolor=0xFFD700:fontsize=44:box=1:boxcolor=black@0.65:boxborderw=10:x=(w-text_w)/2:y=(h-text_h)/2-100:enable='between(t,0,3)':expansion=none`
+          `drawtext=fontfile='${fontPath}':text='${cleanHook}':fontcolor=0xFFD700:fontsize=44:${textShadowStyle}:box=1:boxcolor=black@0.68:boxborderw=10:${alphaHook}:x=(w-text_w)/2:y=(h-text_h)/2-100:enable='between(t,0,3)':expansion=none`
         );
       }
       if (input.textOverlay.tipText) {
         const cleanTip = sanitizeForDrawtext(input.textOverlay.tipText).replace(/'/g, "").replace(/:/g, "\\:");
+        const alphaTip = buildAlphaFadeExpr(3, 7, 0.3);
         drawtextFilters.push(
-          `drawtext=fontfile='${fontPath}':text='${cleanTip}':fontcolor=0x34D399:fontsize=36:box=1:boxcolor=black@0.65:boxborderw=10:x=(w-text_w)/2:y=h-280:enable='between(t,3,7)':expansion=none`
+          `drawtext=fontfile='${fontPath}':text='${cleanTip}':fontcolor=0x34D399:fontsize=36:${textShadowStyle}:box=1:boxcolor=black@0.68:boxborderw=10:${alphaTip}:x=(w-text_w)/2:y=h-280:enable='between(t,3,7)':expansion=none`
         );
       }
       if (!hasEndCard) {
         if (input.textOverlay.priceBadgeText) {
           const cleanPrice = sanitizeForDrawtext(input.textOverlay.priceBadgeText).replace(/'/g, "").replace(/:/g, "\\:");
+          const alphaPrice = buildAlphaFadeExpr(11, 15, 0.3);
           drawtextFilters.push(
-            `drawtext=fontfile='${fontPath}':text='${cleanPrice}':fontcolor=white:fontsize=32:box=1:boxcolor=black@0.65:boxborderw=12:x=(w-text_w)/2:y=120:enable='between(t,11,15)':expansion=none`
+            `drawtext=fontfile='${fontPath}':text='${cleanPrice}':fontcolor=white:fontsize=32:${textShadowStyle}:box=1:boxcolor=black@0.68:boxborderw=12:${alphaPrice}:x=(w-text_w)/2:y=120:enable='between(t,11,15)':expansion=none`
           );
         }
         if (input.textOverlay.ctaText) {
           const cleanCta = sanitizeForDrawtext(input.textOverlay.ctaText).replace(/'/g, "").replace(/:/g, "\\:");
+          const alphaCta = buildAlphaFadeExpr(15, finalTotalDuration, 0.3);
           drawtextFilters.push(
-            `drawtext=fontfile='${fontPath}':text='${cleanCta}':fontcolor=0x00FFCC:fontsize=32:box=1:boxcolor=black@0.65:boxborderw=10:x=(w-text_w)/2:y=h-180:enable='gte(t,15)':expansion=none`
+            `drawtext=fontfile='${fontPath}':text='${cleanCta}':fontcolor=0x00FFCC:fontsize=32:${textShadowStyle}:box=1:boxcolor=black@0.68:boxborderw=10:${alphaCta}:x=(w-text_w)/2:y=h-180:enable='gte(t,15)':expansion=none`
           );
         }
       }
     }
 
-    // Bộ lọc màu ấm (Warm Golden LUT 5600K) đồng bộ ánh sáng hoàng hôn/bình minh chuẩn Mục 0
-    const warmGoldenFilter = "eq=contrast=1.05:brightness=0.01:saturation=1.10,colorbalance=rs=0.05:gs=0.02:bs=-0.04:rm=0.05:gm=0.02:bm=-0.04";
+    // Bộ lọc màu ấm (Warm Golden LUT 5600K) + tpad bù thời lượng chuyển cảnh xfade
+    const warmGoldenFilter = "tpad=stop_mode=clone:stop_duration=2.5,eq=contrast=1.05:brightness=0.01:saturation=1.10,colorbalance=rs=0.05:gs=0.02:bs=-0.04:rm=0.05:gm=0.02:bm=-0.04";
     const filterParts = [warmGoldenFilter, ...drawtextFilters];
     const vfFilters = filterParts.join(",");
 
-    // 4.6. Ghép visual + audio: Mặc định ưu tiên 100% âm thanh thuyết minh tiếng Việt chuẩn từ Edge-TTS
-    // Chỉ dùng âm thanh gốc của Muse AI khi được chỉ định tường minh (useMuseAudio === true)
-    // để tránh hiện tượng Muse AI tự chèn giọng đọc tiếng Anh ngẫu nhiên vào giữa video
-    const useNativeAudio = hasAnyNativeAudio && input.useMuseAudio === true;
-
+    // 4.6. Ghép visual + audio chất lượng cao (-crf 18, -preset fast, -profile:v high, AAC 192kbps + Ambient Travel BGM + Auto-Tempo)
     if (useNativeAudio) {
       console.log("[FFmpeg Compositor] Giữ nguyên âm thanh giọng đọc & hiệu ứng từ Muse AI...");
       await runFFmpeg([
@@ -1043,44 +1405,93 @@ export async function composeChainedOmniVideo(
         "-c:v",
         "libx264",
         "-preset",
-        "ultrafast",
+        "superfast",
+        "-crf",
+        "22",
+        "-maxrate",
+        "3200k",
+        "-bufsize",
+        "6400k",
+        "-threads",
+        "0",
+        "-profile:v",
+        "high",
+        "-level",
+        "4.2",
+        "-pix_fmt",
+        "yuv420p",
         "-c:a",
         "aac",
+        "-ar",
+        "48000",
+        "-ac",
+        "2",
         "-b:a",
-        "128k",
+        "192k",
         "-movflags",
         "+faststart",
         "-y",
         finalOutputPath,
       ]);
     } else if (hasEdgeTts) {
-      console.log("[FFmpeg Compositor] Ghép âm thanh thuyết minh từ Edge-TTS...");
-      await runFFmpeg([
-        "-i",
-        mergedVisualPath,
-        "-i",
-        voiceoverPath,
+      console.log("[FFmpeg Compositor] Hòa âm thuyết minh Edge-TTS 48kHz + Ambient Travel BGM & Auto-Tempo...");
+      const voiceDur = await getMediaDurationSec(voiceoverPath);
+      const bgmPath = path.join(tempDir, "ambient_bgm.mp4");
+      const hasBgm = await synthesizeAmbientTravelBgm(bgmPath, finalTotalDuration);
+      const { audioFilter, outLabel } = buildVoiceAndBgmAudioFilter(
+        voiceDur,
+        finalTotalDuration,
+        hasBgm,
+        1,
+        2
+      );
+
+      const finalArgs = ["-i", mergedVisualPath, "-i", voiceoverPath];
+      if (hasBgm) {
+        finalArgs.push("-i", bgmPath);
+      }
+      finalArgs.push(
         "-filter_complex",
-        `[0:v]${vfFilters}[vout];[1:a]apad=whole_dur=${finalTotalDuration}[aout]`,
+        `[0:v]${vfFilters}[vout];${audioFilter}`,
         "-map",
         "[vout]",
         "-map",
-        "[aout]",
+        outLabel,
         "-t",
         `${finalTotalDuration}`,
         "-c:v",
         "libx264",
         "-preset",
-        "ultrafast",
+        "superfast",
+        "-crf",
+        "22",
+        "-maxrate",
+        "3200k",
+        "-bufsize",
+        "6400k",
+        "-threads",
+        "0",
+        "-profile:v",
+        "high",
+        "-level",
+        "4.2",
+        "-pix_fmt",
+        "yuv420p",
         "-c:a",
         "aac",
+        "-ar",
+        "48000",
+        "-ac",
+        "2",
         "-b:a",
-        "128k",
+        "192k",
         "-movflags",
         "+faststart",
         "-y",
-        finalOutputPath,
-      ]);
+        finalOutputPath
+      );
+
+      await runFFmpeg(finalArgs);
     } else {
       await runFFmpeg([
         "-i",
@@ -1094,7 +1505,21 @@ export async function composeChainedOmniVideo(
         "-c:v",
         "libx264",
         "-preset",
-        "ultrafast",
+        "superfast",
+        "-crf",
+        "22",
+        "-maxrate",
+        "3200k",
+        "-bufsize",
+        "6400k",
+        "-threads",
+        "0",
+        "-profile:v",
+        "high",
+        "-level",
+        "4.2",
+        "-pix_fmt",
+        "yuv420p",
         "-an",
         "-movflags",
         "+faststart",

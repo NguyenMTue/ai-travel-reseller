@@ -2,6 +2,7 @@ import { after, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/src/lib/supabase/server";
 import {
+  computeOptimalCampaignDurationSec,
   executeAutoVideoPipeline,
   getAutoPipelineJobStatus,
   registerAutoPipelineJob,
@@ -69,10 +70,8 @@ export async function POST(request: Request) {
       "Gen Z & Gia đình trẻ thích du lịch check-in";
 
     const rawDuration = Number(body.targetDurationSec || body.durationSec);
-    const targetDurationSec =
-      !isNaN(rawDuration) && rawDuration >= 40 && rawDuration <= 50
-        ? rawDuration
-        : 46;
+    const isStandard40To50 = !isNaN(rawDuration) && rawDuration >= 40 && rawDuration <= 50;
+    const isCampaign30To45 = !isNaN(rawDuration) && rawDuration >= 30 && rawDuration <= 45;
 
     const productId =
       typeof body.productId === "string" && UUID_REGEX.test(body.productId.trim())
@@ -88,6 +87,21 @@ export async function POST(request: Request) {
       (typeof body.custom_instructions === "string" && body.custom_instructions.trim()) ||
       (typeof body.ai_notes === "string" && body.ai_notes.trim()) ||
       undefined;
+
+    const targetDurationSec =
+      isStandard40To50 || isCampaign30To45
+        ? rawDuration
+        : computeOptimalCampaignDurationSec({
+            campaignId,
+            merchantId,
+            productId,
+            tourName,
+            location,
+            highlights,
+            targetAudience,
+            price,
+            customInstructions,
+          });
 
     const jobId = `auto-video-job-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     registerAutoPipelineJob(jobId);

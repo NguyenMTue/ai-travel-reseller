@@ -106,7 +106,7 @@ function VideoGenerateSession({
 
   // Form parameters
   const [persona, setPersona] = useState("Local Guide");
-  const [durationSec, setDurationSec] = useState(10);
+  const [durationSec, setDurationSec] = useState(35);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [allowSpatial, setAllowSpatial] = useState(true);
   const [authenticTip, setAuthenticTip] = useState(
@@ -597,16 +597,34 @@ function VideoGenerateSession({
                   </div>
 
                   <div className={styles.field}>
-                    <label htmlFor="select-duration">Thời lượng video dự kiến</label>
+                    <label htmlFor="select-duration">Thời lượng & Chế độ Video AI</label>
                     <select
                       id="select-duration"
                       value={durationSec}
                       onChange={(e) => setDurationSec(Number(e.target.value))}
                     >
-                      <option value={10}>10 giây (Tối ưu Video AI ngắn / TikTok / Reels)</option>
-                      <option value={18}>18 giây (Chuỗi phân cảnh điện ảnh 18s)</option>
+                      <option value={30}>30 giây (Review Chiến dịch, Điểm đến & Đặc sắc - 30s)</option>
+                      <option value={35}>35 giây (Chuẩn Review Chiến dịch & Chốt Đặt vé - 35s)</option>
+                      <option value={40}>40 giây (Review Sâu Điểm Đặc sắc, Giá vé & QR - 40s)</option>
+                      <option value={45}>45 giây (Review Toàn diện Chiến dịch từ A-Z - 45s)</option>
+                      <option value={18}>18 giây (Chuỗi phân cảnh kể chuyện 18s)</option>
+                      <option value={10}>10 giây (Video AI ngắn nhịp nhanh / TikTok / Reels)</option>
                     </select>
                   </div>
+                </div>
+
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/15 p-3 text-xs text-muted-foreground space-y-1">
+                  <div className="font-semibold text-emerald-500 flex items-center justify-between">
+                    <span>🤖 Cơ chế Tự động Chọn ảnh & Sinh Video Ngầm (Auto-Pipeline):</span>
+                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] text-emerald-400">
+                      {selectedItems.length > 0
+                        ? `Đang dùng ${selectedItems.length} ảnh đã chọn`
+                        : "Tự động chọn ảnh khớp chiến dịch"}
+                    </span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    Khi bạn tạo chiến dịch mới, hệ thống đã <strong>tự động chạy ngầm chọn ảnh phù hợp và sinh video 30–45s</strong> mà không cần thao tác thủ công. Tại cửa sổ này, bạn có thể <strong>test thủ công video 30–45s (hoặc 10s/18s)</strong> với cấu trúc 4 chương thuyết phục: <em>Chiến dịch & Địa điểm ➔ Đặc sắc & Trải nghiệm ➔ Giá vé & Vé QR ➔ Kêu gọi Đặt vé</em>.
+                  </p>
                 </div>
 
                 <div className={styles.field}>
