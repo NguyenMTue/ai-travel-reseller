@@ -63,6 +63,43 @@ BEGIN
            AND c.status IN ('confirmed', 'paid')),
         0
       )::numeric AS total_commission_paid,
+      -- Thống kê tương tác TikTok (Views, Likes, Comments, Shares, Engagement Score)
+      COALESCE(
+        (SELECT SUM(tp.views_count)
+         FROM public.reseller_tiktok_posts tp
+         WHERE tp.reseller_id = r.id),
+        0
+      )::bigint AS total_views,
+      COALESCE(
+        (SELECT SUM(tp.likes_count)
+         FROM public.reseller_tiktok_posts tp
+         WHERE tp.reseller_id = r.id),
+        0
+      )::bigint AS total_likes,
+      COALESCE(
+        (SELECT SUM(tp.comments_count)
+         FROM public.reseller_tiktok_posts tp
+         WHERE tp.reseller_id = r.id),
+        0
+      )::bigint AS total_comments,
+      COALESCE(
+        (SELECT SUM(tp.shares_count)
+         FROM public.reseller_tiktok_posts tp
+         WHERE tp.reseller_id = r.id),
+        0
+      )::bigint AS total_shares,
+      COALESCE(
+        (SELECT SUM(tp.engagement_score)
+         FROM public.reseller_tiktok_posts tp
+         WHERE tp.reseller_id = r.id),
+        0
+      )::numeric AS total_engagement_score,
+      COALESCE(
+        (SELECT COUNT(tp.id)
+         FROM public.reseller_tiktok_posts tp
+         WHERE tp.reseller_id = r.id),
+        0
+      )::bigint AS verified_videos_count,
       -- Mạng xã hội & người theo dõi
       COALESCE(
         (SELECT SUM(sa.followers)
@@ -108,6 +145,12 @@ BEGIN
           'total_orders', rs.total_orders,
           'total_gmv', rs.total_gmv,
           'total_commission_paid', rs.total_commission_paid,
+          'total_views', rs.total_views,
+          'total_likes', rs.total_likes,
+          'total_comments', rs.total_comments,
+          'total_shares', rs.total_shares,
+          'total_engagement_score', rs.total_engagement_score,
+          'verified_videos_count', rs.verified_videos_count,
           'conversion_rate', CASE 
             WHEN rs.total_clicks > 0 THEN ROUND((rs.total_orders::numeric / rs.total_clicks::numeric) * 100, 2)
             ELSE 0 
@@ -115,7 +158,7 @@ BEGIN
           'total_followers', rs.total_followers,
           'social_channels', rs.social_channels
         )
-        ORDER BY rs.total_orders DESC, rs.total_gmv DESC, rs.reseller_name ASC
+        ORDER BY rs.total_orders DESC, rs.total_engagement_score DESC, rs.total_gmv DESC, rs.reseller_name ASC
       ),
       '[]'::jsonb
     )

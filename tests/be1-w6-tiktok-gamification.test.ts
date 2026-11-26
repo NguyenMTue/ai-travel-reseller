@@ -8,6 +8,9 @@ import {
   extractTikTokVideoId,
   extractTikTokUsername,
   scrapeTikTokEngagement,
+  generateContentFingerprintTag,
+  buildDemoTikTokUrl,
+  verifyTikTokVideoContent,
 } from "../src/lib/tiktok/tiktok-service.ts";
 
 console.log("===============================================================================");
@@ -140,4 +143,46 @@ test("Python LLM Service: fetch_tiktok_metrics Function", () => {
     /views\s*\*\s*0\.1\s*\+\s*likes\s*\*\s*1\.0/,
     "tiktok_publisher.py must compute engagement score formula"
   );
+});
+
+test("BE1-W6-03+: 3-Layer AI Content Verification & Dev Sandbox Demo URLs", () => {
+  const contentId = "a1b2c3d4-1111-2222-3333-444444444444";
+  const campaignId = "44444444-4444-4444-4444-444444444444";
+
+  const tag = generateContentFingerprintTag(contentId, campaignId);
+  assert.equal(tag, "#TL_A1B2C3");
+
+  const matchedDemoUrl = buildDemoTikTokUrl({
+    contentId,
+    campaignId,
+    mode: "matched",
+  });
+  assert.equal(isValidTikTokUrl(matchedDemoUrl), true, "Matched demo URL must be a valid TikTok URL");
+
+  const matchedVerification = verifyTikTokVideoContent({
+    tiktokUrl: matchedDemoUrl,
+    contentId,
+    campaignId,
+    matchedContentHook: "Khám phá Cầu Vàng Bà Nà Hills",
+  });
+  assert.equal(matchedVerification.verified, true);
+  assert.ok(matchedVerification.matchScore >= 95);
+  assert.equal(matchedVerification.checks.fingerprintMatched, true);
+  assert.equal(matchedVerification.checks.visualEndCardMatched, true);
+
+  const mismatchedDemoUrl = buildDemoTikTokUrl({
+    contentId,
+    campaignId,
+    mode: "mismatched",
+  });
+  assert.equal(isValidTikTokUrl(mismatchedDemoUrl), true);
+
+  const mismatchedVerification = verifyTikTokVideoContent({
+    tiktokUrl: mismatchedDemoUrl,
+    contentId,
+    campaignId,
+  });
+  assert.equal(mismatchedVerification.verified, false);
+  assert.ok(mismatchedVerification.matchScore < 70);
+  assert.equal(mismatchedVerification.checks.fingerprintMatched, false);
 });
