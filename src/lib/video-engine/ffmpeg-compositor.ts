@@ -172,7 +172,7 @@ export async function trimVideoBuffer(
     await runFFmpeg([
       "-i", inPath,
       "-t", String(durationSec),
-      "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,unsharp=3:3:0.6:3:3:0.0,fps=30",
+      "-vf", "tpad=stop_mode=clone:stop_duration=2.0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,unsharp=3:3:0.6:3:3:0.0,fps=30",
       "-c:v", "libx264",
       "-preset", "veryfast",
       "-crf", "18",

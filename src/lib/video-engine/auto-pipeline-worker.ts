@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { createAdminClient } from "../supabase/admin.ts";
+import { generateMuseVideoClip, isMuse2ApiConfigured } from "../ai/muse-video.ts";
 import {
   buildAlphaFadeExpr,
   buildVoiceAndBgmAudioFilter,
@@ -14,6 +15,7 @@ import {
   getSystemFontPath,
   runFFmpeg,
   synthesizeAmbientTravelBgm,
+  trimVideoBuffer,
   type TourEndCardConfig,
 } from "./ffmpeg-compositor.ts";
 
@@ -591,9 +593,11 @@ export async function composeAutoReviewVideo(
       // Bù thêm 0.35s cho mỗi phân cảnh để sau khi áp dụng hiệu ứng chuyển cảnh mượt (xfade 0.35s) tổng thời lượng vẫn chuẩn xác
       const eachDuration = Number((targetDuration / numClips + 0.35).toFixed(1));
       const segmentBuffers: Buffer[] = [];
+      let museCircuitBroken = false;
 
       for (let i = 0; i < numClips; i++) {
         const imgBuf = downloadedBuffers[i % downloadedBuffers.length];
+        const nextBuf = downloadedBuffers[(i + 1) % downloadedBuffers.length] || imgBuf;
         const role =
           i === 0
             ? "OPENING_HOOK"
@@ -604,9 +608,47 @@ export async function composeAutoReviewVideo(
           i === numClips - 1
             ? Number((targetDuration - (eachDuration - 0.35) * (numClips - 1) + 0.35).toFixed(1))
             : eachDuration;
+        const targetClipDur = Math.max(2.5, clipDur);
+        const sceneSpec = script.scenes[Math.min(script.scenes.length - 1, Math.floor((i / numClips) * script.scenes.length))];
 
-        const motionClip = await createSingleImageMotionClip(imgBuf, Math.max(2.5, clipDur), role);
-        segmentBuffers.push(motionClip);
+        let segBuf: Buffer | null = null;
+        if (isMuse2ApiConfigured() && !museCircuitBroken) {
+          try {
+            const musePrompt = `4K photorealistic 9:16 vertical travel video at ${tourInfo?.location || "Da Nang, Vietnam"} for "${
+              tourInfo?.productName || script.title
+            }". Scene ${i + 1}/${numClips} (${role}): ${
+              sceneSpec?.bRollDescription || "Cinematic aerial and POV travel movement, natural golden-hour daylight, zero distortion."
+            }`;
+            const museRes = await generateMuseVideoClip({
+              prompt: musePrompt,
+              startImageBuffer: imgBuf,
+              endImageBuffer: nextBuf,
+              durationSeconds: Math.max(5, Math.ceil(targetClipDur)),
+              aspectRatio: "9:16",
+              includeAudioPrompt: false,
+            });
+            if (museRes?.videoBuffer && museRes.videoBuffer.length > 1000) {
+              segBuf = await trimVideoBuffer(museRes.videoBuffer, targetClipDur);
+            }
+          } catch (museErr: any) {
+            const errMsg = String(museErr?.message || museErr);
+            console.warn(`[AUTO_PIPELINE] Muse AI scene ${i + 1}/${numClips} warning:`, errMsg);
+            if (
+              errMsg.includes("401") ||
+              errMsg.includes("会话认证失败") ||
+              errMsg.toLowerCase().includes("cookie") ||
+              errMsg.includes("ECONNREFUSED") ||
+              errMsg.includes("fetch failed")
+            ) {
+              museCircuitBroken = true;
+            }
+          }
+        }
+
+        if (!segBuf) {
+          segBuf = await createSingleImageMotionClip(imgBuf, targetClipDur, role);
+        }
+        segmentBuffers.push(segBuf);
       }
 
       const fullVoiceoverText = script.scenes.map((s) => s.voiceoverText).join(" ");

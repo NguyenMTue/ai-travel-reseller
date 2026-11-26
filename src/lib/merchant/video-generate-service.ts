@@ -521,17 +521,9 @@ export async function generateMerchantCampaignVideo(
         let museCircuitBroken = false;
         let museLastError = "";
         let museSuccessCount = 0;
-        // Giới hạn số phân cảnh gọi Muse AI tối đa mỗi video (mặc định 2 cảnh chủ đạo: Opening Hook & Trải nghiệm chính)
-        // để tránh phải chờ 6 tác vụ Muse tuần tự (6 x 3 phút = 18 phút) và giữ dung lượng file nhẹ dưới 20MB.
-        // Có thể tùy chỉnh qua biến môi trường MUSE2API_MAX_CLIPS_PER_VIDEO.
-        const maxMuseClips =
-          Number(process.env.MUSE2API_MAX_CLIPS_PER_VIDEO) > 0
-            ? Number(process.env.MUSE2API_MAX_CLIPS_PER_VIDEO)
-            : 2;
 
-        // Lặp qua từng phân cảnh:
-        // Nếu Muse2API trả về lỗi xác thực phiên (HTTP 401 / Cookie hết hạn) hoặc đã tạo đủ số cảnh Muse chủ đạo (maxMuseClips),
-        // dựng SONG SONG (Promise.all) toàn bộ các phân cảnh còn lại bằng FFmpeg Ken Burns để rút ngắn thời gian chờ xuống ~2-3 phút.
+        // Lặp qua TẤT CẢ các phân cảnh (100% phân cảnh đều gọi Muse AI để sinh video chuyển động 3D thật).
+        // Chỉ chuyển sang FFmpeg fallback nếu cổng Muse2API bị sập kết nối hoặc lỗi Cookie 401 (Circuit Breaker).
         for (let idx = 0; idx < promptPlan.segments.length; idx++) {
           const segment = promptPlan.segments[idx];
           const startBuf = imageBuffers[segment.startImageIndex] || imageBuffers[0];
@@ -543,7 +535,7 @@ export async function generateMerchantCampaignVideo(
               : segment.durationSeconds;
 
           let segBuffer: Buffer | null = null;
-          if (isMuse2ApiConfigured() && !museCircuitBroken && museSuccessCount < maxMuseClips) {
+          if (isMuse2ApiConfigured() && !museCircuitBroken) {
             console.log(
               `[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) bằng Muse AI - ${segment.durationSeconds}s...`
             );
@@ -582,36 +574,11 @@ export async function generateMerchantCampaignVideo(
 
           if (segBuffer) {
             segmentBuffers.push(segBuffer);
-            // Nếu đã tạo đủ số cảnh Muse chủ đạo (maxMuseClips), dựng song song toàn bộ các cảnh còn lại ngay lập tức
-            if (museSuccessCount >= maxMuseClips && idx + 1 < promptPlan.segments.length) {
-              console.log(
-                `[Video Service] ⚡ Đã hoàn tất ${museSuccessCount} phân cảnh AI chủ đạo từ Muse2API. Đang dựng song song ${
-                  promptPlan.segments.length - (idx + 1)
-                } phân cảnh bổ trợ bằng FFmpeg Ken Burns...`
-              );
-              const remainingSegments = promptPlan.segments.slice(idx + 1);
-              const batchSize = 3;
-              for (let b = 0; b < remainingSegments.length; b += batchSize) {
-                const batch = remainingSegments.slice(b, b + batchSize);
-                const batchBuffers = await Promise.all(
-                  batch.map((seg) => {
-                    const sBuf = imageBuffers[seg.startImageIndex] || imageBuffers[0];
-                    const dur =
-                      promptPlan.segmentsCount > 1
-                        ? Number((seg.durationSeconds + 0.35).toFixed(2))
-                        : seg.durationSeconds;
-                    return createSingleImageMotionClip(sBuf, dur, seg.role);
-                  })
-                );
-                segmentBuffers.push(...batchBuffers);
-              }
-              break;
-            }
             continue;
           }
 
-          // Nếu Muse2API đã bị ngắt mạch (hoặc không cấu hình), dựng song song các phân cảnh còn lại theo batch 3 clip cùng lúc
-          if (museCircuitBroken || !isMuse2ApiConfigured() || museSuccessCount >= maxMuseClips) {
+          // Nếu Muse2API bị lỗi kết nối/401 (hoặc chưa cấu hình), dựng song song các phân cảnh còn lại
+          if (museCircuitBroken || !isMuse2ApiConfigured()) {
             const remainingSegments = promptPlan.segments.slice(idx);
             const batchSize = 3;
             for (let b = 0; b < remainingSegments.length; b += batchSize) {
