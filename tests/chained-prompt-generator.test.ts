@@ -190,3 +190,37 @@ test("Chained Prompt: 3 ảnh tư liệu sinh 2 phân cảnh nối tiếp chuẩ
   assert.equal(plan.segments[1].role, "CLIMAX_PANORAMA");
   assert.ok(plan.totalDurationSec >= 15.0 && plan.totalDurationSec <= 18.0);
 });
+
+test("Chained Prompt: Profile 30-45 giây (30_45s_campaign_deep_dive) làm rõ Chiến dịch, Địa điểm, Đặc sắc, Giá vé & Chốt Đặt vé", () => {
+  const assets: ChainedAssetInput[] = [
+    { asset_id: "1", url: "https://unsplash.com/1", title: "Toàn cảnh Cầu Vàng Bà Nà Hills" },
+    { asset_id: "2", url: "https://unsplash.com/2", title: "Làng Pháp cổ kính châu Âu" },
+    { asset_id: "3", url: "https://unsplash.com/3", title: "Tuyến cáp treo lướt giữa biển mây" },
+    { asset_id: "4", url: "https://unsplash.com/4", title: "Đại tiệc Buffet Quảng trường Nhật Thực" },
+  ];
+
+  const plan = buildChainedPromptPlan({
+    productName: "Vé Cáp Treo Sun World Ba Na Hills",
+    campaignName: "Mùa Hè Săn Mây Bà Nà 2026",
+    location: "Bà Nà Hills, Đà Nẵng",
+    salePrice: 950000,
+    originalPrice: 1150000,
+    officialCta: "Đặt vé chính hãng nhận voucher ngay",
+    authenticTips: ["Đi chuyến cáp sớm trước 8h30 để săn mây vắng khách"],
+    mediaAssets: assets,
+    targetDurationSec: 36,
+  });
+
+  assert.equal(plan.profile, "30_45s_campaign_deep_dive");
+  assert.equal(plan.totalDurationSec, 36.0);
+  assert.ok(plan.segmentsCount >= 4);
+  assert.ok(plan.masterPrompt.includes("30-45s Deep-Dive Specialist"));
+  assert.ok(plan.audioSpec.fullVoiceoverScript.includes("Mùa Hè Săn Mây Bà Nà 2026"));
+  assert.ok(plan.audioSpec.fullVoiceoverScript.includes("Bà Nà Hills"));
+  assert.ok(plan.audioSpec.fullVoiceoverScript.includes("Cầu Vàng"));
+  assert.ok(plan.audioSpec.fullVoiceoverScript.includes("950.000"));
+  assert.ok(plan.textOverlaySpec.act1Text?.includes("CHIẾN DỊCH"));
+  assert.ok(plan.textOverlaySpec.act2Text?.includes("ĐẶC SẮC"));
+  assert.ok(plan.textOverlaySpec.act3Text?.includes("950.000"));
+  assert.ok(plan.textOverlaySpec.act4Text?.includes("ĐẶT VÉ"));
+});

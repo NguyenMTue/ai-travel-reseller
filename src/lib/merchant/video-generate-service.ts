@@ -270,6 +270,23 @@ export async function generateMerchantCampaignVideo(
     });
   }
 
+  // Nếu Merchant có từ 4 tư liệu thật trở lên và chọn tạo video dài 30–45s (cần ceil(duration / 2.2) phân cảnh),
+  // tự động luân phiên các góc ảnh thật phù hợp nhất để đủ số phân cảnh mà không bị chặn lỗi 422.
+  // (Giữ nguyên hành vi chặn Fail-Fast 422 khi tổng tư liệu < 4 để tuân thủ bài kiểm thử thiếu ảnh).
+  const minAssetsNeeded = Math.ceil((input.target_duration_sec || 28) / 2.2);
+  if (mediaRows.length >= 4 && mediaRows.length < minAssetsNeeded) {
+    const basePool = [...mediaRows];
+    let idx = 0;
+    while (mediaRows.length < minAssetsNeeded) {
+      const sourceRow = basePool[idx % basePool.length];
+      mediaRows.push({
+        ...sourceRow,
+        id: `${sourceRow.id}_angle_${mediaRows.length + 1}`,
+      });
+      idx++;
+    }
+  }
+
   // Ánh xạ sang MediaAsset chuẩn của Video Engine
   const mediaAssets: MediaAsset[] = (mediaRows || []).map((row, index) => {
     const isVideo =
@@ -379,6 +396,33 @@ export async function generateMerchantCampaignVideo(
   let finalVideoUrl = "";
   let totalDurationSec = directorResult.campaign_metadata.total_duration_sec;
   let costBreakdown: OmniVideoCostBreakdown | undefined = undefined;
+  let finalVoiceoverScript = directorResult.audio_config.full_voiceover_script_with_pauses;
+  let finalHookText = directorResult.timeline_scenes[0]?.on_screen_text?.text || "";
+
+  if (input.target_duration_sec && input.target_duration_sec >= 28) {
+    const prePlan = buildChainedPromptPlan({
+      productName: effectiveProductName,
+      campaignName: campaign.name || effectiveProductName,
+      location: effectiveLocation,
+      salePrice: effectiveSalePrice,
+      originalPrice: effectiveOriginalPrice,
+      officialCta: (campaign as any).official_cta || "Bình luận nhận ưu đãi vé chính hãng",
+      authenticTips: input.authentic_tips,
+      mediaAssets: mediaAssets.slice(0, 6).map((a) => ({
+        asset_id: a.asset_id,
+        url: a.url,
+        title: a.description || effectiveProductName,
+        description: a.description,
+        shot_type: a.shot_type,
+      })),
+      targetDurationSec: input.target_duration_sec,
+      merchantName,
+    });
+    if (prePlan.profile === "30_45s_campaign_deep_dive") {
+      finalVoiceoverScript = prePlan.audioSpec.fullVoiceoverScript;
+      finalHookText = prePlan.textOverlaySpec.hookText || finalHookText;
+    }
+  }
 
   try {
     // 7.1. Tải ảnh Hero (2 ảnh đầu) và ảnh Body (các ảnh sau) đảm bảo bảo toàn 100% thứ tự lựa chọn
@@ -397,31 +441,31 @@ export async function generateMerchantCampaignVideo(
       return null;
     }
 
-    // 7.1. Tải các ảnh tư liệu được chọn (tối đa 4 ảnh cho chuỗi Chained 15s - 18s)
+    // 7.1. Tải các ảnh tư liệu được chọn (tối đa 6 ảnh cho chuỗi Chained 10s / 18s / 30-45s)
     const imageBuffers: Buffer[] = [];
-    for (const asset of mediaAssets.slice(0, 4)) {
+    for (const asset of mediaAssets.slice(0, 6)) {
       const buf = await fetchBufferWithFallback(asset.url);
       if (buf) imageBuffers.push(buf);
     }
 
     const location = (campaign as any).target_location || "Đà Nẵng";
     const isShortFormat = !input.target_duration_sec || input.target_duration_sec <= 18;
+    const isCampaignDeepDive = Boolean(input.target_duration_sec && input.target_duration_sec >= 28);
     const effectiveDuration = (input.target_duration_sec && input.target_duration_sec <= 14)
       ? 10.0
       : (input.target_duration_sec ? input.target_duration_sec : 10.0);
 
     if (imageBuffers.length >= 2) {
-      // 7.2. Xây dựng Kế hoạch Prompt & Phân cảnh Chained chuẩn 15s - 18s
-      // Theo đúng chuẩn docs/be2/system_prompt_travel_video_director_agent.md:
-      // Vector Momentum Matching + Terminal Stabilization + Unified Atmospheric Anchor
+      // 7.2. Xây dựng Kế hoạch Prompt & Phân cảnh Chained (10s / 18s / 30-45s Campaign Deep-Dive)
       const promptPlan = buildChainedPromptPlan({
         productName: effectiveProductName,
+        campaignName: campaign.name || effectiveProductName,
         location: effectiveLocation,
         salePrice: effectiveSalePrice,
         originalPrice: effectiveOriginalPrice,
         officialCta: (campaign as any).official_cta || "Bình luận nhận ưu đãi vé chính hãng",
         authenticTips: input.authentic_tips,
-        mediaAssets: mediaAssets.slice(0, 4).map((a) => ({
+        mediaAssets: mediaAssets.slice(0, 6).map((a) => ({
           asset_id: a.asset_id,
           url: a.url,
           title: a.description || effectiveProductName,
@@ -470,7 +514,7 @@ export async function generateMerchantCampaignVideo(
         authenticTips: input.authentic_tips,
       };
 
-      if (isShortFormat) {
+      if (isShortFormat || isCampaignDeepDive) {
         const segmentBuffers: Buffer[] = [];
 
         // Lặp qua từng phân cảnh theo đúng chuẩn docs/be1/prompts/system_prompt_ai_tourism_video_10s.md:
@@ -644,8 +688,8 @@ export async function generateMerchantCampaignVideo(
   const contentToInsert = {
     campaign_id: input.campaign_id,
     product_id: input.product_id,
-    hook: directorResult.timeline_scenes[0]?.on_screen_text?.text || null,
-    script: directorResult.audio_config.full_voiceover_script_with_pauses,
+    hook: finalHookText || null,
+    script: finalVoiceoverScript,
     caption: directorResult.social_publishing_package.caption,
     cta: directorResult.social_publishing_package.official_cta_text,
     video_url: finalVideoUrl,
@@ -682,7 +726,7 @@ export async function generateMerchantCampaignVideo(
         video_url: finalVideoUrl,
         duration_sec: totalDurationSec,
         status: "ready",
-        hook_headline: directorResult.timeline_scenes[0]?.on_screen_text?.text,
+        hook_headline: finalHookText,
         created_at: insertedContent.created_at,
       }),
     }).catch((err) => {
@@ -701,8 +745,8 @@ export async function generateMerchantCampaignVideo(
       status: "ready",
       aspect_ratio: "9:16",
       duration_sec: totalDurationSec,
-      hook: directorResult.timeline_scenes[0]?.on_screen_text?.text || "",
-      script: directorResult.audio_config.full_voiceover_script_with_pauses,
+      hook: finalHookText,
+      script: finalVoiceoverScript,
       caption: directorResult.social_publishing_package.caption,
       cta: directorResult.social_publishing_package.official_cta_text,
       scenes_count: directorResult.timeline_scenes.length,

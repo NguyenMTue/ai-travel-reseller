@@ -247,13 +247,21 @@ export async function generateVoiceoverAudio(
     .replace(/[\[\]]/g, "")
     .trim();
 
-  const tts = new EdgeTTS({
-    voice,
-    lang: "vi-VN",
-    outputFormat: "audio-24khz-48kbitrate-mono-mp3",
-  });
-
-  await tts.ttsPromise(cleanText, outputPath);
+  try {
+    const ttsHigh = new EdgeTTS({
+      voice,
+      lang: "vi-VN",
+      outputFormat: "audio-48khz-192kbitrate-mono-mp3",
+    });
+    await ttsHigh.ttsPromise(cleanText, outputPath);
+  } catch {
+    const ttsFallback = new EdgeTTS({
+      voice,
+      lang: "vi-VN",
+      outputFormat: "audio-24khz-48kbitrate-mono-mp3",
+    });
+    await ttsFallback.ttsPromise(cleanText, outputPath);
+  }
 }
 
 /**
@@ -865,11 +873,13 @@ export async function composeChainedOmniVideo(
           "-i",
           rawPath,
           "-vf",
-          "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,fps=30",
+          "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30",
           "-c:v",
           "libx264",
           "-preset",
           "ultrafast",
+          "-crf",
+          "18",
           "-c:a",
           "aac",
           "-ar",
@@ -890,11 +900,13 @@ export async function composeChainedOmniVideo(
           "-i",
           "anullsrc=r=44100:cl=stereo",
           "-vf",
-          "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2,fps=30",
+          "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30",
           "-c:v",
           "libx264",
           "-preset",
           "ultrafast",
+          "-crf",
+          "18",
           "-c:a",
           "aac",
           "-ar",
@@ -987,8 +999,46 @@ export async function composeChainedOmniVideo(
           `drawtext=fontfile='${fontPath}':text='${cleanAct4}':fontcolor=0x34D399:fontsize=38:line_spacing=8:box=1:boxcolor=0x064E3B@0.85:boxborderw=14:x=(w-text_w)/2:y=(h-text_h)/2:enable='between(t,7.5,10.0)':expansion=none`
         );
       }
+    } else if (targetDuration >= 25) {
+      // Profile 30–45s Campaign Deep-Dive: 4 chương thuyết phục xuyên suốt thời lượng video
+      const t1End = Number((targetDuration * 0.18).toFixed(1));
+      const t2End = Number((targetDuration * 0.54).toFixed(1));
+      const t3End = Number((targetDuration * 0.80).toFixed(1));
+      const t4End = Number(targetDuration.toFixed(1));
+
+      const act1Raw = input.textOverlay.act1Text || input.textOverlay.hookText;
+      if (act1Raw) {
+        const cleanAct1 = sanitizeForDrawtext(act1Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${cleanAct1}':fontcolor=0xFFD700:fontsize=38:line_spacing=10:box=1:boxcolor=0x0B132B@0.82:boxborderw=14:x=(w-text_w)/2:y=h*0.72:enable='between(t,0,${t1End})':expansion=none`
+        );
+      }
+
+      const act2Raw = input.textOverlay.act2Text || input.textOverlay.destinationText || input.textOverlay.tipText;
+      if (act2Raw) {
+        const cleanAct2 = sanitizeForDrawtext(act2Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${cleanAct2}':fontcolor=white:fontsize=36:line_spacing=10:box=1:boxcolor=black@0.72:boxborderw=14:x=(w-text_w)/2:y=h*0.72:enable='between(t,${t1End},${t2End})':expansion=none`
+        );
+      }
+
+      const act3Raw = input.textOverlay.act3Text || input.textOverlay.priceBadgeText;
+      if (act3Raw) {
+        const cleanAct3 = sanitizeForDrawtext(act3Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${cleanAct3}':fontcolor=0xFFD700:fontsize=38:line_spacing=10:box=1:boxcolor=0x0B132B@0.85:boxborderw=14:x=(w-text_w)/2:y=h*0.72:enable='between(t,${t2End},${t3End})':expansion=none`
+        );
+      }
+
+      const act4Raw = input.textOverlay.act4Text || input.textOverlay.ctaText;
+      if (act4Raw) {
+        const cleanAct4 = sanitizeForDrawtext(act4Raw).replace(/'/g, "").replace(/:/g, "\\:");
+        drawtextFilters.push(
+          `drawtext=fontfile='${fontPath}':text='${cleanAct4}':fontcolor=0x34D399:fontsize=38:line_spacing=10:box=1:boxcolor=0x064E3B@0.88:boxborderw=14:x=(w-text_w)/2:y=h*0.72:enable='between(t,${t3End},${t4End})':expansion=none`
+        );
+      }
     } else {
-      // Profile dài (>12s Storytelling)
+      // Profile 18s Storytelling
       if (input.textOverlay.hookText) {
         const cleanHook = sanitizeForDrawtext(input.textOverlay.hookText).replace(/'/g, "").replace(/:/g, "\\:");
         drawtextFilters.push(

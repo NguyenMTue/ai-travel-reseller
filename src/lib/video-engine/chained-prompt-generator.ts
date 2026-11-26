@@ -35,13 +35,17 @@ export interface TourEndCardSpec {
 
 export interface ChainedPromptPlanInput {
   productName: string;
+  campaignName?: string;
   location: string;
   salePrice: number;
   originalPrice?: number | null;
   officialCta: string;
   authenticTips?: string[];
+  highlights?: string[];
+  customInstructions?: string;
+  targetAudience?: string;
   mediaAssets: ChainedAssetInput[];
-  targetDurationSec?: number; // 10 hoặc 18 (mặc định 10s)
+  targetDurationSec?: number; // 10, 18, hoặc 30-45s (mặc định 10s)
   merchantName?: string;
 }
 
@@ -64,7 +68,7 @@ export interface ChainedSegmentSpec {
 }
 
 export interface ChainedPromptPlanOutput {
-  profile: "10s_advertising" | "18s_storytelling";
+  profile: "10s_advertising" | "18s_storytelling" | "30_45s_campaign_deep_dive";
   totalDurationSec: number;
   segmentsCount: number;
   segments: ChainedSegmentSpec[];
@@ -87,6 +91,7 @@ export interface ChainedPromptPlanOutput {
     act2Text?: string;
     act3Text?: string;
     act4Text?: string;
+    act5Text?: string;
   };
   tourEndCardSpec?: TourEndCardSpec;
 }
@@ -720,6 +725,268 @@ export function buildChainedPromptPlan(input: ChainedPromptPlanInput): ChainedPr
         ctaText: stripEmojis(input.officialCta || "ĐẶT VÉ CHÍNH HÃNG - QUÉT MÃ VÀO CỔNG"),
       },
       tourEndCardSpec,
+    };
+  }
+
+  // ========================================================================
+  // PROFILE 30-45 GIÂY: CAMPAIGN DEEP-DIVE & HIGH-CONVERSION REVIEW
+  // Giúp người xem hiểu rõ chiến dịch, địa điểm du lịch, các điểm đặc sắc,
+  // quyền lợi gói vé ưu đãi và sẵn sàng đặt vé ngay.
+  // ========================================================================
+  if (requestedDuration >= 28) {
+    const clampedDuration = Math.min(45.0, Math.max(30.0, Number(requestedDuration.toFixed(1))));
+    const rawTip =
+      input.authenticTips && input.authenticTips[0]
+        ? input.authenticTips[0]
+        : "Đi sớm trước 8h30 sáng để tận hưởng trọn vẹn không gian vắng khách và săn mây đẹp nhất";
+    const tipCondensed = condenseTip(rawTip, 14);
+    const campaignLabel = input.campaignName || input.productName;
+    const contextText = `${input.productName} ${input.campaignName || ""} ${input.location}`.toLowerCase();
+
+    const isNguHanhSon30s =
+      contextText.includes("ngũ hành sơn") ||
+      contextText.includes("huyền không") ||
+      contextText.includes("non nước");
+    const isBaNa30s =
+      contextText.includes("bà nà") ||
+      contextText.includes("bana") ||
+      contextText.includes("cầu vàng") ||
+      contextText.includes("làng pháp");
+    const isCuLaoCham30s =
+      contextText.includes("cù lao chàm") || contextText.includes("lặn biển");
+
+    const origPriceNum =
+      input.originalPrice && input.originalPrice > input.salePrice
+        ? input.originalPrice
+        : Math.round(input.salePrice * 1.15);
+    const formattedOrigPrice = Number(origPriceNum).toLocaleString("vi-VN");
+    const discountPct = Math.max(
+      5,
+      Math.round(((origPriceNum - input.salePrice) / origPriceNum) * 100)
+    );
+
+    const negativePrompt30s =
+      "morphing, fast zoom, rapid push-in, whip pan, distorted geometry, warped perspective, blurred textures, melting buildings, human disfiguration, sliding feet, erratic camera movements, abrupt jump cuts, unnatural physics, harsh midday lighting, oversaturation, CGI plasticity, low resolution, font artifacts, gibberish watermark.";
+
+    const masterPrompt30s = [
+      `Role: AI Tourism Campaign Review & Conversion Director (30-45s Deep-Dive Specialist).`,
+      `Campaign: "${campaignLabel}" for "${input.productName}" at ${input.location}.`,
+      `Objective: Deliver a comprehensive, emotionally persuasive 9:16 travel review (${clampedDuration}s) that makes viewers clearly understand the campaign, the destination's unique landmarks, authentic on-site experiences, transparent ticket value (${formattedPrice} VND), and motivates immediate ticket booking.`,
+      `Visual Style: 4K photorealistic travel documentary, 30fps, consistent 5600K golden-hour daylight, smooth aerial drone glides and orbital arcs, zero spatial hallucination, 100% landmark fidelity.`,
+      `Narrative Structure (4 Persuasive Acts):`,
+      `Act 1 (Hook & Campaign Destination): Captivating opening vista introducing ${campaignLabel} at ${input.location}.`,
+      `Act 2 (Signature Landmarks & Highlights): Deep dive into iconic sights, architecture, natural wonders, and must-try activities.`,
+      `Act 3 (Authentic Experience, Inclusions & Price Value): Insider travel tip (${tipCondensed}), full package benefits at ${formattedPrice} VND (saving ${discountPct}% from ${formattedOrigPrice} VND) with instant QR e-ticket entry.`,
+      `Act 4 (Decisive Booking CTA): Inspiring final panorama & official checkout call-to-action.`,
+      `Negative Prompt: ${negativePrompt30s}`,
+    ].join(" ");
+
+    // Chia thành 4 hồi phân cảnh rõ ràng (hoặc tới 6 phân cảnh nếu có nhiều ảnh tư liệu)
+    const pool = assets.length > 0 ? assets : [{ asset_id: "0", url: "", title: input.location }];
+    const numSegs = Math.min(6, Math.max(4, pool.length));
+    const ratios =
+      numSegs === 4
+        ? [0.18, 0.36, 0.26, 0.20]
+        : numSegs === 5
+        ? [0.16, 0.22, 0.22, 0.22, 0.18]
+        : [0.15, 0.18, 0.18, 0.17, 0.16, 0.16];
+
+    // Xây dựng lời thoại thuyết phục chi tiết giúp người xem hiểu rõ địa điểm, đặc sắc & sẵn sàng đặt vé
+    let actVoices: string[] = [];
+    let actCaptions: string[] = [];
+
+    if (isNguHanhSon30s) {
+      actVoices = [
+        `Khám phá chiến dịch ${campaignLabel} tại danh thắng Ngũ Hành Sơn Đà Nẵng với vẻ đẹp kỳ vĩ có một không hai!`,
+        `[pause 0.2s] Điểm đặc sắc nhất chính là khoảnh khắc ánh nắng xuyên qua vòm Động Huyền Không huyền ảo, kết hợp chiêm bái Chùa Linh Ứng cổ kính và ngắm toàn cảnh biển Non Nước từ đỉnh Thủy Sơn.`,
+        `[pause 0.2s] Kinh nghiệm thực tế cho bạn: ${tipCondensed.toLowerCase()}. Gói vé ưu đãi trong chiến dịch chỉ ${formattedPrice} đồng, đã bao gồm thang máy kính khứ hồi và vé QR vào cổng tức thì không cần xếp hàng.`,
+        `[pause 0.2s] Đừng bỏ lỡ cơ hội trải nghiệm trọn vẹn hôm nay, bấm ngay vào liên kết đặt vé chính hãng để giữ chỗ và nhận ưu đãi giảm thêm 5% nhé!`,
+      ];
+      actCaptions = [
+        `CHIẾN DỊCH: ${campaignLabel.toUpperCase()}\nĐIỂM ĐẾN: NGŨ HÀNH SƠN ĐÀ NẴNG`,
+        `ĐẶC SẮC: ĐỘNG HUYỀN KHÔNG & CHÙA LINH ỨNG\nTỌA ĐỘ TÂM LINH & KIỆT TÁC ĐÁ CẨM THẠCH`,
+        `TRỌN GÓI THANG MÁY & VÉ QR: ${formattedPrice}Đ\nMẸO HAY: ${tipCondensed.toUpperCase()}`,
+        `SẴN SÀNG ĐẶT VÉ CHÍNH HÃNG NGAY\nƯU ĐÃI ĐỘC QUYỀN · VÀO CỔNG TỨC THÌ`,
+      ];
+    } else if (isBaNa30s) {
+      actVoices = [
+        `Chào mừng bạn đến với chiến dịch ${campaignLabel}, hành trình khám phá trọn vẹn đỉnh Bà Nà Hills Đà Nẵng giữa biển mây bồng bềnh!`,
+        `[pause 0.2s] Tại đây, bạn sẽ được lướt trên tuyến cáp treo đạt kỷ lục thế giới, dạo bước trên tuyệt tác Cầu Vàng nâng đỡ bởi đôi bàn tay khổng lồ và check-in quần thể kiến trúc Làng Pháp cổ kính tráng lệ.`,
+        `[pause 0.2s] Đặc biệt hơn, đừng quên thưởng thức đại tiệc buffet hơn 100 món Á Âu tại Quảng trường Nhật Thực. Lưu ý thực tế là ${tipCondensed.toLowerCase()}. Vé trọn gói ưu đãi chỉ còn ${formattedPrice} đồng, quét mã QR qua cổng tự động siêu nhanh!`,
+        `[pause 0.2s] Lịch trình đã sẵn sàng, hãy nhấp ngay vào liên kết đặt vé chính thức bên dưới để nhận voucher giảm giá độc quyền cho chuyến đi của bạn nhé!`,
+      ];
+      actCaptions = [
+        `CHIẾN DỊCH: ${campaignLabel.toUpperCase()}\nKHÁM PHÁ ĐỈNH BÀ NÀ HILLS ĐÀ NẴNG`,
+        `ĐẶC SẮC: CẦU VÀNG & LÀNG PHÁP CỔ KÍNH\nTUYẾN CÁP TREO KỶ LỤC GIỮA BIỂN MÂY`,
+        `BUFFET 100+ MÓN & VÉ QR CHỈ: ${formattedPrice}Đ\nLƯU Ý: ${tipCondensed.toUpperCase()}`,
+        `ĐẶT VÉ CHÍNH HÃNG NGAY HÔM NAY\nQUÉT MÃ VÀO CỔNG · KHÔNG XẾP HÀNG`,
+      ];
+    } else if (isCuLaoCham30s) {
+      actVoices = [
+        `Cùng khám phá chiến dịch ${campaignLabel}, hành trình vi vu đảo ngọc Cù Lao Chàm chỉ với 20 phút lướt sóng cano cao tốc!`,
+        `[pause 0.2s] Điểm đặc sắc khiến du khách mê mẩn chính là làn nước biển trong vắt nhìn thấu rạn san hô tự nhiên rực rỡ tại Bãi Chồng, kết hợp tham quan Giếng cổ Chăm Pa và thưởng thức hải sản tươi sống ngay trên bãi biển.`,
+        `[pause 0.2s] Mẹo nhỏ cho bạn: ${tipCondensed.toLowerCase()}. Trọn gói từ cano khứ hồi, dụng cụ lặn biển đến bữa trưa hải sản ưu đãi chỉ ${formattedPrice} đồng kèm vé điện tử QR xác nhận tức thì.`,
+        `[pause 0.2s] Sẵn sàng cho chuyến đi biển đảo tuyệt vời này chưa? Bấm ngay vào liên kết đặt vé chính hãng bên dưới để giữ chỗ ưu đãi ngay hôm nay!`,
+      ];
+      actCaptions = [
+        `CHIẾN DỊCH: ${campaignLabel.toUpperCase()}\nTHIÊN ĐƯỜNG BIỂN ĐẢO CÙ LAO CHÀM`,
+        `ĐẶC SẮC: CANO CAO TỐC & LẶN NGẮM SAN HÔ\nTHƯỞNG THỨC HẢI SẢN TƯƠI SỐNG BÃI CHỒNG`,
+        `TOUR TRỌN GÓI ƯU ĐÃI CHỈ: ${formattedPrice}Đ\nMẸO THỰC TẾ: ${tipCondensed.toUpperCase()}`,
+        `ĐẶT VÉ GIỮ CHỖ CHÍNH HÃNG NGAY\nNHẬN VOUCHER ƯU ĐÃI ĐỘC QUYỀN`,
+      ];
+    } else {
+      const customNote = input.customInstructions
+        ? ` Đặc biệt: ${condenseTip(input.customInstructions, 14)}.`
+        : "";
+      actVoices = [
+        `Khám phá ngay chiến dịch ${campaignLabel} tại ${input.location}, hành trình du lịch đang được săn đón nhất mùa này!`,
+        `[pause 0.2s] Đến với ${input.productName}, bạn sẽ được chiêm ngưỡng trọn vẹn cảnh quan thiên nhiên đặc sắc, những góc check-in biểu tượng triệu view cùng không gian văn hóa và ẩm thực bản địa vô cùng ấn tượng.${customNote}`,
+        `[pause 0.2s] Bí kíp dành cho bạn là ${tipCondensed.toLowerCase()}. Giá vé ưu đãi chính hãng trong chiến dịch chỉ ${formattedPrice} đồng, tiết kiệm đến ${discountPct} phần trăm, tích hợp mã QR điện tử vào cổng trực tiếp không chờ đợi.`,
+        `[pause 0.2s] Mọi trải nghiệm tuyệt vời nhất đã sẵn sàng, hãy bấm ngay vào liên kết đặt vé chính thức bên dưới để giữ chỗ và nhận ưu đãi hôm nay!`,
+      ];
+      actCaptions = [
+        `CHIẾN DỊCH: ${campaignLabel.toUpperCase()}\nĐIỂM ĐẾN NỔI BẬT: ${input.location.toUpperCase()}`,
+        `ĐẶC SẮC: ${input.productName.toUpperCase()}\nTRẢI NGHIỆM CHECK-IN & DỊCH VỤ ĐỈNH CAO`,
+        `ƯU ĐÃI CHÍNH HÃNG CHỈ: ${formattedPrice}Đ (-${discountPct}%)\nVÉ QR VÀO CỔNG · ${tipCondensed.toUpperCase()}`,
+        `SẴN SÀNG ĐẶT VÉ CHÍNH HÃNG NGAY\nOFFICIAL CHECKOUT · GIỮ CHỖ TỨC THÌ`,
+      ];
+    }
+
+    const segments30s: ChainedSegmentSpec[] = [];
+    let accTime = 0;
+
+    for (let i = 0; i < numSegs; i++) {
+      const isFirst = i === 0;
+      const isLast = i === numSegs - 1;
+      const role: ChainedSegmentRole = isFirst
+        ? "OPENING_HOOK"
+        : isLast
+        ? "CLIMAX_PANORAMA"
+        : "JOURNEY_TRAVERSE";
+
+      const startIdx = i % pool.length;
+      const endIdx = (i + 1) % pool.length;
+      const startAsset = pool[startIdx];
+      const endAsset = pool[endIdx];
+
+      const segDur = isLast
+        ? Number((clampedDuration - accTime).toFixed(1))
+        : Number((clampedDuration * ratios[i]).toFixed(1));
+      const endSec = Number((accTime + segDur).toFixed(1));
+      const timeRangeSec = `${accTime.toFixed(1)}s - ${endSec.toFixed(1)}`;
+
+      // Ánh xạ lời thoại & caption theo 4 chương nội dung
+      const actIdx = Math.min(3, Math.floor((i / numSegs) * 4));
+      const voiceSeg =
+        i === 0
+          ? actVoices[0]
+          : i === 1
+          ? actVoices[1]
+          : i === numSegs - 2
+          ? actVoices[2]
+          : i === numSegs - 1
+          ? actVoices[3]
+          : "";
+      const captionSeg = actCaptions[actIdx];
+
+      const musePrompt = buildSegmentMusePrompt({
+        role,
+        profile: "18s",
+        segmentIndex: i + 1,
+        totalSegments: numSegs,
+        startLabel: cleanAssetLabel(startAsset, `Khung cảnh ${input.location}`, {
+          productName: input.productName,
+          location: input.location,
+        }),
+        endLabel: cleanAssetLabel(endAsset, `Trải nghiệm ${input.productName}`, {
+          productName: input.productName,
+          location: input.location,
+        }),
+        location: input.location,
+        durationSeconds: segDur,
+        voiceoverSegment: voiceSeg,
+      });
+
+      segments30s.push({
+        segmentIndex: i + 1,
+        totalSegments: numSegs,
+        role,
+        startImageIndex: startIdx,
+        endImageIndex: endIdx,
+        startAsset,
+        endAsset,
+        durationSeconds: segDur,
+        timeRangeSec,
+        musePrompt,
+        omniPrompt: musePrompt,
+        voiceoverSegment: voiceSeg,
+        captionText: stripEmojis(captionSeg),
+      });
+
+      accTime = endSec;
+    }
+
+    const fullVoiceover30s = actVoices.join(" ").replace(/\s+/g, " ").trim();
+
+    const defaultHighlights30s = isNguHanhSon30s
+      ? [
+          "Vé tham quan thắng cảnh & thang máy kính khứ hồi",
+          "Chiêm bái Động Huyền Không & Chùa Linh Ứng cổ kính",
+          "Vé điện tử QR Code vào cổng ưu tiên, không chờ đợi",
+        ]
+      : isBaNa30s
+      ? [
+          "Vé cáp treo khứ hồi đạt kỷ lục thế giới & Cầu Vàng",
+          "Khám phá Làng Pháp cổ kính & Quảng trường Nhật Thực",
+          "Vé điện tử QR Code vào cổng ưu tiên, không chờ đợi",
+        ]
+      : [
+          "Vé tham quan & trải nghiệm dịch vụ trọn gói chính hãng",
+          "Khám phá trọn bộ các tọa độ check-in đặc sắc nhất",
+          "Vé điện tử QR Code vào cổng ưu tiên, không chờ đợi",
+        ];
+
+    const tourEndCardSpec30s: TourEndCardSpec = {
+      productName: input.productName,
+      location: input.location,
+      salePrice: input.salePrice,
+      originalPrice: origPriceNum,
+      highlights:
+        input.highlights && input.highlights.length > 0
+          ? input.highlights.slice(0, 3)
+          : input.authenticTips && input.authenticTips.length > 0
+          ? input.authenticTips.slice(0, 3)
+          : defaultHighlights30s,
+      ctaText: stripEmojis(input.officialCta || "ĐẶT VÉ CHÍNH HÃNG - QUÉT MÃ VÀO CỔNG"),
+      hotline: "1900 8888 (Tư vấn 24/7)",
+      merchantName: input.merchantName,
+    };
+
+    return {
+      profile: "30_45s_campaign_deep_dive",
+      totalDurationSec: clampedDuration,
+      segmentsCount: segments30s.length,
+      segments: segments30s,
+      masterPrompt: masterPrompt30s,
+      negativePrompt: negativePrompt30s,
+      lightingAnchor: "Consistent 5600K natural golden-hour daylight with warm sunrise glow",
+      audioSpec: {
+        targetDurationSec: clampedDuration,
+        voicePersonaId: "vi-VN-HoaiMyNeural",
+        fullVoiceoverScript: fullVoiceover30s,
+      },
+      textOverlaySpec: {
+        hookText: stripEmojis(actCaptions[0]),
+        destinationText: stripEmojis(actCaptions[1]),
+        tipText: stripEmojis(`Mẹo thực tế: ${tipCondensed}`),
+        priceBadgeText: stripEmojis(actCaptions[2]),
+        ctaText: stripEmojis(actCaptions[3]),
+        act1Text: stripEmojis(actCaptions[0]),
+        act2Text: stripEmojis(actCaptions[1]),
+        act3Text: stripEmojis(actCaptions[2]),
+        act4Text: stripEmojis(actCaptions[3]),
+      },
+      tourEndCardSpec: tourEndCardSpec30s,
     };
   }
 

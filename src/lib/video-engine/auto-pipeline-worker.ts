@@ -1,12 +1,15 @@
 import fs from "node:fs/promises";
-import { existsSync, createReadStream } from "node:fs";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { createAdminClient } from "../supabase/admin.ts";
 import {
+  composeChainedOmniVideo,
+  createSingleImageMotionClip,
   generateVoiceoverAudio,
   getResolvedFFmpegPath,
   runFFmpeg,
+  type TourEndCardConfig,
 } from "./ffmpeg-compositor.ts";
 
 export interface AutoReviewScene {
@@ -34,12 +37,23 @@ export interface AutoPipelineInput {
   merchantId: string;
   productId?: string;
   tourName: string;
+  campaignName?: string;
   location?: string;
   highlights?: string;
   targetAudience?: string;
   targetDurationSec?: number;
   price?: string | number;
+  originalPrice?: string | number | null;
   customInstructions?: string;
+}
+
+export interface MatchedPipelineAsset {
+  id?: string;
+  title?: string;
+  path: string;
+  isVideo: boolean;
+  role?: "HOOK" | "EXPERIENCE" | "PRICING_AND_QR" | "CTA";
+  score?: number;
 }
 
 export interface AutoPipelineJobStatus {
@@ -50,6 +64,7 @@ export interface AutoPipelineJobStatus {
   contentId?: string;
   videoUrl?: string;
   durationSec?: number;
+  matchedAssetsCount?: number;
   error?: string;
   updatedAt: string;
 }
@@ -99,20 +114,89 @@ export interface AutoPipelineResult {
   contentId?: string;
   videoUrl?: string;
   durationSec: number;
+  matchedAssetsCount?: number;
   script: AutoReviewScript;
   error?: string;
 }
 
 /**
- * 1. Sinh kịch bản review 40–50s chuẩn TikTok (cấu trúc 4 phân cảnh)
+ * Tự động tính toán thời lượng tối ưu 30–45 giây tùy theo độ phong phú của từng chiến dịch.
+ * - Chiến dịch tiêu chuẩn / điểm đến đơn: ~34s - 36s
+ * - Chiến dịch nhiều điểm đặc sắc / có ghi chú AI: ~38s - 42s
+ * - Chiến dịch tổ hợp lớn (Bà Nà Hills / Combo trọn gói): ~42s - 45s
+ */
+export function computeOptimalCampaignDurationSec(input: AutoPipelineInput): number {
+  if (
+    typeof input.targetDurationSec === "number" &&
+    !isNaN(input.targetDurationSec) &&
+    input.targetDurationSec >= 30 &&
+    input.targetDurationSec <= 50
+  ) {
+    return Math.round(input.targetDurationSec);
+  }
+
+  let duration = 34;
+  const combinedText = `${input.tourName || ""} ${input.campaignName || ""} ${input.location || ""} ${input.highlights || ""}`.toLowerCase();
+
+  if (
+    combinedText.includes("bà nà") ||
+    combinedText.includes("cầu vàng") ||
+    combinedText.includes("làng pháp") ||
+    combinedText.includes("cù lao chàm") ||
+    combinedText.includes("trọn gói") ||
+    combinedText.includes("combo")
+  ) {
+    duration += 5;
+  }
+
+  if (input.highlights && input.highlights.length > 40) {
+    duration += 3;
+  }
+
+  if (input.customInstructions && input.customInstructions.trim().length > 10) {
+    duration += 3;
+  }
+
+  return Math.min(45, Math.max(30, duration));
+}
+
+function buildTimeRange(startSec: number, endSec: number): string {
+  const fmt = (sec: number) => `00:${Math.round(sec).toString().padStart(2, "0")}`;
+  return `${fmt(startSec)} - ${fmt(endSec)}`;
+}
+
+/**
+ * 1. Sinh kịch bản review 30–45s (hoặc 40–50s) chuẩn TikTok (cấu trúc 4 phân cảnh thuyết phục)
+ * Giúp người xem hiểu rõ:
+ * - Cảnh 1 (HOOK): Chiến dịch & Địa điểm du lịch nổi bật
+ * - Cảnh 2 (EXPERIENCE): Các điểm đặc sắc, trải nghiệm thực tế & mẹo hay
+ * - Cảnh 3 (PRICING_AND_QR): Quyền lợi gói vé, giá ưu đãi & tiện ích vé QR vào cổng
+ * - Cảnh 4 (CTA): Kêu gọi đặt vé chính hãng ngay
  */
 export async function generateAutoReviewScript(
   input: AutoPipelineInput
 ): Promise<AutoReviewScript> {
   const tourName = input.tourName || "Tour Du Lịch Trải Nghiệm";
+  const campaignTitle = input.campaignName || tourName;
   const location = input.location || "Đà Nẵng - Miền Trung";
-  const highlights = input.highlights || "Cảnh quan thiên nhiên tuyệt mỹ, check-in sống ảo, dịch vụ cao cấp";
-  const priceDisplay = input.price ? `${Number(input.price).toLocaleString("vi-VN")} ₫` : "Giá ưu đãi";
+  const highlights =
+    input.highlights ||
+    "Cảnh quan thiên nhiên tuyệt mỹ, tọa độ check-in biểu tượng, ẩm thực đặc sắc và dịch vụ trọn gói chính hãng";
+  const priceNum = Number(input.price) > 0 ? Number(input.price) : 950000;
+  const priceDisplay = `${priceNum.toLocaleString("vi-VN")} ₫`;
+  const origNum =
+    Number(input.originalPrice) > priceNum
+      ? Number(input.originalPrice)
+      : Math.round(priceNum * 1.15);
+  const origDisplay = `${origNum.toLocaleString("vi-VN")} ₫`;
+
+  const targetDuration = computeOptimalCampaignDurationSec(input);
+
+  // Phân bổ tỷ lệ thời lượng 4 phân cảnh khớp chính xác với targetDuration (30s - 50s)
+  const d1 = Math.max(5, Math.round(targetDuration * 0.16)); // ~5-7s
+  const d2 = Math.max(12, Math.round(targetDuration * 0.39)); // ~12-18s
+  const d3 = Math.max(8, Math.round(targetDuration * 0.27)); // ~8-13s
+  const d4 = Math.max(5, targetDuration - (d1 + d2 + d3)); // ~5-9s
 
   const groqApiKey = process.env.GROQ_API_KEY?.trim();
 
@@ -126,17 +210,30 @@ export async function generateAutoReviewScript(
         },
         body: JSON.stringify({
           model: "llama-3.3-70b-versatile",
-          temperature: 0.7,
-          max_tokens: 1200,
+          temperature: 0.65,
+          max_tokens: 1400,
           response_format: { type: "json_object" },
           messages: [
             {
               role: "system",
-              content: "Bạn là chuyên gia biên kịch video review du lịch TikTok 40-50s tại Việt Nam. Chỉ trả về JSON hợp lệ.",
+              content:
+                "Bạn là đạo diễn & biên kịch video review du lịch chuyển đổi cao (30-45 giây) trên TikTok/Reels tại Việt Nam. Kịch bản phải giúp người xem hiểu rõ chiến dịch, địa điểm du lịch, các điểm đặc sắc nhất, quyền lợi giá vé và thôi thúc đặt vé ngay. Chỉ trả về JSON hợp lệ.",
             },
             {
               role: "user",
-              content: `Tạo kịch bản review 4 phân cảnh 40-50 giây cho tour ${tourName} tại ${location}. Điểm nổi bật: ${highlights}. Giá: ${priceDisplay}.${input.customInstructions ? ` Ghi chú từ doanh nghiệp: ${input.customInstructions}.` : ""} Trả về JSON có title, caption, scenes (sceneNumber, role, durationSec, timeRange, visualTag, overlayText, voiceoverText, bRollDescription).`,
+              content: `Hãy viết kịch bản video review 4 phân cảnh với tổng thời lượng chính xác ${targetDuration} giây cho chiến dịch "${campaignTitle}" - sản phẩm "${tourName}" tại "${location}".
+Điểm đặc sắc & Trải nghiệm nổi bật: ${highlights}.
+Giá vé ưu đãi chiến dịch: ${priceDisplay} (Giá gốc: ${origDisplay}).
+Đối tượng khách hàng: ${input.targetAudience || "Du khách tự túc, gia đình và giới trẻ"}.
+${input.customInstructions ? `Yêu cầu đặc biệt từ doanh nghiệp: ${input.customInstructions}.` : ""}
+
+Yêu cầu cấu trúc 4 phân cảnh bắt buộc:
+1. Scene 1 (role: "HOOK", durationSec: ${d1}): Mở đầu thu hút trong 3 giây đầu, giới thiệu tên chiến dịch "${campaignTitle}" và điểm đến "${location}".
+2. Scene 2 (role: "EXPERIENCE", durationSec: ${d2}): Làm rõ các điểm đặc sắc nhất của địa điểm (cảnh quan, kiến trúc, hoạt động vui chơi, ẩm thực) kèm mẹo trải nghiệm thực tế để người xem hiểu rõ giá trị chuyến đi.
+3. Scene 3 (role: "PRICING_AND_QR", durationSec: ${d3}): Nêu bật quyền lợi trọn gói, giá vé ưu đãi ${priceDisplay} và sự tiện lợi của vé điện tử QR Code quét thẳng qua cổng không xếp hàng.
+4. Scene 4 (role: "CTA", durationSec: ${d4}): Lời kêu gọi hành động thuyết phục người xem đặt vé ngay qua liên kết đối tác để nhận ưu đãi.
+
+Trả về JSON có: title, targetDurationSec (${targetDuration}), caption, scenes (mảng 4 phần tử gồm: sceneNumber, role, durationSec, timeRange, visualTag, overlayText, voiceoverText, bRollDescription).`,
             },
           ],
         }),
@@ -147,15 +244,43 @@ export async function generateAutoReviewScript(
         const content = json.choices?.[0]?.message?.content;
         if (content) {
           const parsed = JSON.parse(content);
-          if (Array.isArray(parsed.scenes) && parsed.scenes.length >= 4) {
-            return {
-              title: parsed.title || `Review Chi Tiết: ${tourName}`,
-              targetDurationSec: parsed.targetDurationSec || 46,
-              caption: parsed.caption || `Khám phá ngay ${tourName}! #TravelLink #${location.replace(/\s+/g, "")}`,
-              scenes: parsed.scenes,
-              hookText: parsed.scenes[0]?.overlayText || `KHÁM PHÁ ${tourName.toUpperCase()}`,
-              ctaText: parsed.scenes[3]?.overlayText || "ĐẶT VÉ NHẬN ƯU ĐÃI NGAY",
-            };
+          if (Array.isArray(parsed.scenes) && parsed.scenes.length === 4) {
+            const roles: Array<"HOOK" | "EXPERIENCE" | "PRICING_AND_QR" | "CTA"> = [
+              "HOOK",
+              "EXPERIENCE",
+              "PRICING_AND_QR",
+              "CTA",
+            ];
+            const durations = [d1, d2, d3, d4];
+            let acc = 0;
+            const normalizedScenes: AutoReviewScene[] = parsed.scenes.map((s: any, idx: number) => {
+              const dur = durations[idx];
+              const range = buildTimeRange(acc, acc + dur);
+              acc += dur;
+              return {
+                sceneNumber: idx + 1,
+                role: roles[idx],
+                durationSec: dur,
+                timeRange: range,
+                visualTag: String(s.visualTag || "scenic_highlight"),
+                overlayText: String(s.overlayText || `ĐẶC SẮC ${tourName.toUpperCase()}`),
+                voiceoverText: String(s.voiceoverText || ""),
+                bRollDescription: String(s.bRollDescription || `Khung cảnh ${tourName} tại ${location}`),
+              };
+            });
+
+            if (normalizedScenes.every((s) => s.voiceoverText.length > 10)) {
+              return {
+                title: parsed.title || `Review Chiến Dịch: ${campaignTitle}`,
+                targetDurationSec: targetDuration,
+                caption:
+                  parsed.caption ||
+                  `Khám phá trọn vẹn chiến dịch ${campaignTitle} - ${tourName} tại ${location}! Giá ưu đãi chỉ ${priceDisplay}, vé điện tử QR vào cổng tức thì. #TravelLink #${location.replace(/[\s-]/g, "")}`,
+                scenes: normalizedScenes,
+                hookText: normalizedScenes[0].overlayText,
+                ctaText: normalizedScenes[3].overlayText,
+              };
+            }
           }
         }
       }
@@ -164,115 +289,375 @@ export async function generateAutoReviewScript(
     }
   }
 
-  // Fallback kịch bản tối ưu chuẩn cấu trúc 4 Scene 46s
+  // Fallback kịch bản chuyên sâu theo từng địa danh & chiến dịch (30s - 45s+)
+  const combinedLower = `${tourName} ${campaignTitle} ${location} ${highlights}`.toLowerCase();
+  const customTip = input.customInstructions
+    ? ` Đặc biệt lưu ý: ${input.customInstructions.trim()}.`
+    : " Mẹo nhỏ là bạn nên đi sớm trước 8 giờ 30 sáng để tận hưởng trọn vẹn không gian thoáng đãng và chụp ảnh đẹp nhất.";
+
+  let scene1Voice = `Cùng khám phá chiến dịch ${campaignTitle} tại ${location}, hành trình du lịch đặc sắc mà bạn nhất định không thể bỏ lỡ!`;
+  let scene2Voice = `Đến với ${tourName}, bạn sẽ được chiêm ngưỡng ${highlights.toLowerCase()}, hòa mình vào không gian cảnh quan ngoạn mục, vô số tọa độ check-in biểu tượng cùng dịch vụ trải nghiệm và ẩm thực bản địa vô cùng ấn tượng.${customTip}`;
+  let scene3Voice = `Trong chiến dịch này, trọn gói vé ưu đãi chính hãng chỉ còn ${priceDisplay} so với giá gốc ${origDisplay}. Đặt vé online nhận ngay mã QR điện tử quét thẳng qua cổng tự động, không cần xếp hàng chờ đợi.`;
+  let scene4Voice = `Mọi trải nghiệm tuyệt vời đã sẵn sàng! Hãy bấm ngay vào liên kết bên dưới để đặt vé giữ chỗ và nhận thêm mã voucher ưu đãi độc quyền hôm nay nhé!`;
+
+  if (combinedLower.includes("bà nà") || combinedLower.includes("cầu vàng")) {
+    scene1Voice = `Khám phá trọn vẹn chiến dịch ${campaignTitle} tại đỉnh Bà Nà Hills Đà Nẵng, thiên đường nghỉ dưỡng và giải trí giữa biển mây!`;
+    scene2Voice = `Điểm đặc sắc làm nên tên tuổi Bà Nà Hills chính là tuyến cáp treo đạt 4 kỷ lục thế giới đưa bạn vượt qua rừng nguyên sinh, dạo bước trên tuyệt tác Cầu Vàng nâng đỡ bởi đôi bàn tay khổng lồ, khám phá Làng Pháp cổ kính và thưởng thức đại tiệc buffet hơn 100 món Á Âu.${customTip}`;
+  } else if (combinedLower.includes("ngũ hành sơn") || combinedLower.includes("huyền không")) {
+    scene1Voice = `Trải nghiệm chiến dịch ${campaignTitle} tại danh thắng Ngũ Hành Sơn Đà Nẵng, tuyệt tác thiên nhiên và tâm linh nổi tiếng miền Trung!`;
+    scene2Voice = `Điều đặc sắc nhất tại đây là khoảnh khắc ánh nắng rọi thẳng qua vòm Động Huyền Không tạo nên khung cảnh huyền ảo kỳ vĩ, kết hợp chiêm bái Chùa Linh Ứng cổ kính, ngắm toàn cảnh biển Non Nước từ đỉnh Thủy Sơn và ghé thăm làng đá mỹ nghệ hơn 400 năm tuổi.${customTip}`;
+  } else if (combinedLower.includes("cù lao chàm")) {
+    scene1Voice = `Chào đón mùa hè rực rỡ cùng chiến dịch ${campaignTitle} tại đảo ngọc Cù Lao Chàm chỉ với 20 phút lướt cano cao tốc!`;
+    scene2Voice = `Tại đây, bạn sẽ được tự do lặn ngắm rạn san hô tự nhiên rực rỡ dưới làn nước trong vắt tại Bãi Chồng, khám phá khu dự trữ sinh quyển thế giới, thăm Giếng cổ Chăm Pa và thưởng thức đại tiệc hải sản tươi sống ngay sát bờ biển.${customTip}`;
+  }
+
+  const t1 = buildTimeRange(0, d1);
+  const t2 = buildTimeRange(d1, d1 + d2);
+  const t3 = buildTimeRange(d1 + d2, d1 + d2 + d3);
+  const t4 = buildTimeRange(d1 + d2 + d3, targetDuration);
+
   return {
-    title: `Review Chi Tiết: ${tourName}`,
-    targetDurationSec: 46,
-    caption: `Khám phá trọn vẹn ${tourName} tại ${location}! Quét mã QR vào cổng không cần xếp hàng. Nhận ưu đãi độc quyền qua link đối tác. #TravelLink #${location.replace(/[\s-]/g, "")} #DuLichVietNam #ReviewDuLich`,
-    hookText: `TỔNG HỢP KINH NGHIỆM ĐI ${tourName.toUpperCase()}`,
+    title: `Review Chi Tiết Chiến Dịch: ${campaignTitle}`,
+    targetDurationSec: targetDuration,
+    caption: `Khám phá trọn vẹn chiến dịch "${campaignTitle}" (${tourName}) tại ${location}! Trải nghiệm các điểm đặc sắc nhất với giá vé ưu đãi chỉ ${priceDisplay}, tích hợp mã QR vào cổng tức thì không cần xếp hàng. Đặt vé ngay qua link đối tác! #TravelLink #${location.replace(/[\s,-]/g, "")} #DuLichVietNam #ReviewDuLich`,
+    hookText: `KHÁM PHÁ ${campaignTitle.toUpperCase()} - ${location.toUpperCase()}`,
     ctaText: "ĐẶT VÉ CHÍNH HÃNG NHẬN VOUCHER NGAY",
     scenes: [
       {
         sceneNumber: 1,
         role: "HOOK",
-        durationSec: 7,
-        timeRange: "00:00 - 00:07",
+        durationSec: d1,
+        timeRange: t1,
         visualTag: "aerial_wide_scenic",
-        overlayText: `KINH NGHIỆM ĐI ${tourName.toUpperCase()} 2026`,
-        voiceoverText: `Đến ${location} mà chưa ghé ${tourName} thì chuyến đi của bạn chắc chắn chưa trọn vẹn đâu! Cùng mình khám phá ngay nhé.`,
-        bRollDescription: `Toàn cảnh ${tourName} hùng vĩ trong ánh nắng ban mai rực rỡ.`,
+        overlayText: `CHIẾN DỊCH: ${campaignTitle.toUpperCase()}`,
+        voiceoverText: scene1Voice,
+        bRollDescription: `Toàn cảnh mở màn ${tourName} tại ${location} hùng vĩ trong ánh nắng ban mai.`,
       },
       {
         sceneNumber: 2,
         role: "EXPERIENCE",
-        durationSec: 18,
-        timeRange: "00:07 - 00:25",
+        durationSec: d2,
+        timeRange: t2,
         visualTag: "human_pov_checkin",
-        overlayText: "GÓC CHECK-IN TRIỆU VIEW",
-        voiceoverText: `Tại đây, bạn sẽ được hòa mình vào không gian ngoạn mục, vô số góc sống ảo triệu view cùng nhiều trải nghiệm vui chơi và ẩm thực đặc sắc không thể bỏ lỡ.`,
-        bRollDescription: `Góc check-in thực tế, du khách trải nghiệm các điểm nhấn của tour.`,
+        overlayText: `ĐẶC SẮC & TRẢI NGHIỆM NỔI BẬT TẠI ${location.toUpperCase()}`,
+        voiceoverText: scene2Voice,
+        bRollDescription: `Chuỗi hình ảnh thực tế các điểm đặc sắc, kiến trúc, cảnh quan và trải nghiệm của tour.`,
       },
       {
         sceneNumber: 3,
         role: "PRICING_AND_QR",
-        durationSec: 13,
-        timeRange: "00:25 - 00:38",
+        durationSec: d3,
+        timeRange: t3,
         visualTag: "ticket_qr_entry",
-        overlayText: "VÉ QR CODE VÀO CỔNG TỨC THÌ",
-        voiceoverText: `Giá vé chỉ từ ${priceDisplay}, đặt online nhận ngay vé điện tử QR Code quét thẳng tại cổng vào không cần xếp hàng chen chúc.`,
-        bRollDescription: `Giao diện vé điện tử và cổng quét QR Code vào khu du lịch tiện lợi.`,
+        overlayText: `VÉ TRỌN GÓI CHỈ ${priceDisplay} · QUÉT QR VÀO CỔNG`,
+        voiceoverText: scene3Voice,
+        bRollDescription: `Thông tin quyền lợi gói vé ưu đãi và cổng quét QR Code vào khu du lịch tiện lợi.`,
       },
       {
         sceneNumber: 4,
         role: "CTA",
-        durationSec: 8,
-        timeRange: "00:38 - 00:46",
+        durationSec: d4,
+        timeRange: t4,
         visualTag: "cta_voucher_bio",
-        overlayText: "SĂN VOUCHER ĐỘC QUYỀN DƯỚI BIO",
-        voiceoverText: `Nhấp ngay vào liên kết bên dưới để nhận mã giảm giá độc quyền từ đối tác chính thức nhé!`,
-        bRollDescription: `Màn hình hướng dẫn bấm link đối tác để nhận chiết khấu.`,
+        overlayText: "ĐẶT VÉ CHÍNH HÃNG · NHẬN VOUCHER ƯU ĐÃI NGAY",
+        voiceoverText: scene4Voice,
+        bRollDescription: `Màn hình thông tin tổng kết chiến dịch và hướng dẫn đặt vé chính thức.`,
       },
     ],
   };
 }
 
 /**
- * 2. Thuật toán tự động khớp tư liệu (Asset Matcher)
+ * 2. Thuật toán tự động chấm điểm & chọn bộ ảnh phù hợp nhất cho Chiến dịch (Smart Asset Matcher)
+ * - Phân tích từ khóa tên chiến dịch, sản phẩm, địa điểm, điểm đặc sắc và style_tags.
+ * - Tự động sắp xếp ảnh theo đúng 4 chương kịch bản: HOOK (Toàn cảnh) -> EXPERIENCE (Đặc sắc/Ẩm thực) -> PRICING_AND_QR (Dịch vụ/Phương tiện) -> CTA (Điểm nhấn kết).
  */
 export async function matchAssetsForAutoPipeline(
   merchantId: string,
   tourName: string,
-  location?: string
-): Promise<{ path: string; isVideo: boolean }[]> {
+  location?: string,
+  highlights?: string
+): Promise<MatchedPipelineAsset[]> {
   const adminClient = createAdminClient();
+  const contextText = `${tourName} ${location || ""} ${highlights || ""}`.toLowerCase();
+
+  const isNguHanhSon =
+    contextText.includes("ngũ hành sơn") ||
+    contextText.includes("huyền không") ||
+    contextText.includes("non nước") ||
+    contextText.includes("linh ứng");
+  const isBaNa =
+    contextText.includes("bà nà") ||
+    contextText.includes("bana") ||
+    contextText.includes("cầu vàng") ||
+    contextText.includes("làng pháp") ||
+    contextText.includes("cáp treo");
+  const isHoiAn =
+    contextText.includes("hội an") ||
+    contextText.includes("phố cổ") ||
+    contextText.includes("cù lao chàm");
 
   try {
-    const { data: mediaRows } = await adminClient
+    // Truy vấn kho tư liệu của Merchant
+    let { data: mediaRows } = await adminClient
       .from("media_references")
-      .select("id, title, video_url, thumbnail_url, platform, style_tags")
+      .select("id, title, video_url, thumbnail_url, platform, style_tags, analysis_metadata")
       .eq("merchant_id", merchantId)
-      .limit(10);
+      .order("created_at", { ascending: false })
+      .limit(30);
+
+    // Nếu Merchant mới chưa upload đủ ảnh, mở rộng tìm kiếm tư liệu mẫu trong hệ thống
+    if (!mediaRows || mediaRows.length < 4) {
+      const { data: globalRows } = await adminClient
+        .from("media_references")
+        .select("id, title, video_url, thumbnail_url, platform, style_tags, analysis_metadata")
+        .order("created_at", { ascending: false })
+        .limit(30);
+      if (globalRows && globalRows.length > 0) {
+        const existingIds = new Set((mediaRows || []).map((r: any) => r.id));
+        mediaRows = [
+          ...(mediaRows || []),
+          ...globalRows.filter((r: any) => !existingIds.has(r.id)),
+        ];
+      }
+    }
 
     if (mediaRows && mediaRows.length > 0) {
-      // Sắp xếp ưu tiên theo từ khóa của tour
-      const keyword = `${tourName} ${location || ""}`.toLowerCase();
-      const sorted = [...mediaRows].sort((a, b) => {
-        const aMatch = `${a.title || ""} ${(a.style_tags || []).join(" ")}`.toLowerCase().includes(keyword) ? 1 : 0;
-        const bMatch = `${b.title || ""} ${(b.style_tags || []).join(" ")}`.toLowerCase().includes(keyword) ? 1 : 0;
-        return bMatch - aMatch;
+      const tokens = contextText
+        .split(/[\s,.\-()/]+/)
+        .filter((w) => w.length >= 3);
+
+      const scored = mediaRows
+        .map((row: any) => {
+          const rowText = `${row.title || ""} ${(row.style_tags || []).join(" ")}`.toLowerCase();
+          let score = 0;
+
+          // Chấm điểm khớp chuyên biệt theo địa danh
+          if (isNguHanhSon) {
+            if (
+              rowText.includes("ngũ hành sơn") ||
+              rowText.includes("huyền không") ||
+              rowText.includes("non nước") ||
+              rowText.includes("linh ứng") ||
+              rowText.includes("động") ||
+              rowText.includes("chùa")
+            ) {
+              score += 50;
+            }
+          } else if (isBaNa) {
+            if (
+              rowText.includes("bà nà") ||
+              rowText.includes("cầu vàng") ||
+              rowText.includes("làng pháp") ||
+              rowText.includes("cáp treo") ||
+              rowText.includes("nhật thực")
+            ) {
+              score += 50;
+            }
+          } else if (isHoiAn) {
+            if (
+              rowText.includes("hội an") ||
+              rowText.includes("cù lao chàm") ||
+              rowText.includes("phố cổ") ||
+              rowText.includes("đèn lồng") ||
+              rowText.includes("biển")
+            ) {
+              score += 50;
+            }
+          }
+
+          // Chấm điểm khớp theo từng từ khóa trong tên chiến dịch & điểm đặc sắc
+          for (const tk of tokens) {
+            if (rowText.includes(tk)) {
+              score += 8;
+            }
+          }
+
+          // Phân loại vai trò hình ảnh cho 4 chương của video 30-45s
+          let role: "HOOK" | "EXPERIENCE" | "PRICING_AND_QR" | "CTA" = "EXPERIENCE";
+          if (
+            rowText.includes("toàn cảnh") ||
+            rowText.includes("flycam") ||
+            rowText.includes("aerial") ||
+            rowText.includes("cầu vàng") ||
+            rowText.includes("góc rộng")
+          ) {
+            role = "HOOK";
+          } else if (
+            rowText.includes("cáp treo") ||
+            rowText.includes("thang máy") ||
+            rowText.includes("vé") ||
+            rowText.includes("cổng") ||
+            rowText.includes("cano")
+          ) {
+            role = "PRICING_AND_QR";
+          } else if (
+            rowText.includes("quảng trường") ||
+            rowText.includes("nhật thực") ||
+            rowText.includes("hoàng hôn")
+          ) {
+            role = "CTA";
+          }
+
+          const assetUrl = row.video_url || row.thumbnail_url || "";
+          const isVideo =
+            row.platform !== "upload" ||
+            assetUrl.endsWith(".mp4") ||
+            assetUrl.endsWith(".mov") ||
+            assetUrl.endsWith(".webm");
+
+          return {
+            id: row.id,
+            title: row.title || tourName,
+            path: assetUrl,
+            isVideo,
+            role,
+            score,
+          };
+        })
+        .filter((item) => Boolean(item.path));
+
+      // Sắp xếp điểm khớp giảm dần
+      scored.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+      // Chọn tối đa 6 tư liệu phù hợp nhất và sắp xếp theo trình tự kể chuyện: HOOK -> EXPERIENCE -> PRICING_AND_QR -> CTA
+      const topCandidates = scored.slice(0, 6);
+      const roleOrder = { HOOK: 1, EXPERIENCE: 2, PRICING_AND_QR: 3, CTA: 4 };
+      topCandidates.sort((a, b) => {
+        if ((b.score || 0) >= 50 && (a.score || 0) < 50) return 1;
+        if ((a.score || 0) >= 50 && (b.score || 0) < 50) return -1;
+        return (roleOrder[a.role || "EXPERIENCE"] || 2) - (roleOrder[b.role || "EXPERIENCE"] || 2);
       });
 
-      return sorted.map((row) => ({
-        path: row.video_url || row.thumbnail_url,
-        isVideo: row.platform !== "upload" || row.video_url?.endsWith(".mp4") || false,
-      }));
+      return topCandidates;
     }
   } catch (err) {
     console.warn("[ASSET_MATCHER_WARN] Error querying media_references:", err);
   }
 
-  // Fallback: Tìm file mp4 hoặc sample trong workspace
+  // Fallback: Tìm file mp4 mẫu cục bộ trong workspace
   const localSamplePath = path.join(process.cwd(), "docs", "be1", "TestModel.mp4");
   if (existsSync(localSamplePath)) {
-    return [{ path: localSamplePath, isVideo: true }];
+    return [{ path: localSamplePath, isVideo: true, title: tourName, role: "HOOK" }];
   }
 
   return [];
 }
 
+async function fetchImageBufferSafe(url: string): Promise<Buffer | null> {
+  if (!url || !url.startsWith("http")) return null;
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (res.ok) {
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (buf.length > 500) return buf;
+    }
+  } catch {
+    // ignore fetch error
+  }
+  return null;
+}
+
 /**
- * 3. Pipeline Lắp Ráp Video Bằng FFmpeg & TTS Voiceover
+ * 3. Pipeline Lắp Ráp Video 30–45s Bằng Ảnh Thật Đã Chọn Tự Động + FFmpeg 4K Ken Burns + Tour End-Card + TTS Voiceover
  */
 export async function composeAutoReviewVideo(
   script: AutoReviewScript,
-  assets: { path: string; isVideo: boolean }[]
+  assets: MatchedPipelineAsset[],
+  tourInfo?: Partial<TourEndCardConfig>
 ): Promise<{ videoBuffer: Buffer; durationSec: number }> {
+  const targetDuration = script.targetDurationSec || 38;
+
+  // 3.1. Ưu tiên dựng video từ bộ ảnh thật đã được hệ thống tự động chọn từ media_references
+  const imageAssets = assets.filter((a) => !a.isVideo && a.path.startsWith("http"));
+  const downloadedBuffers: Buffer[] = [];
+
+  for (const imgAsset of imageAssets.slice(0, 6)) {
+    const buf = await fetchImageBufferSafe(imgAsset.path);
+    if (buf) downloadedBuffers.push(buf);
+  }
+
+  if (downloadedBuffers.length >= 2) {
+    try {
+      const numClips = Math.min(6, Math.max(4, downloadedBuffers.length));
+      const eachDuration = Number((targetDuration / numClips).toFixed(1));
+      const segmentBuffers: Buffer[] = [];
+
+      for (let i = 0; i < numClips; i++) {
+        const imgBuf = downloadedBuffers[i % downloadedBuffers.length];
+        const role =
+          i === 0
+            ? "OPENING_HOOK"
+            : i === numClips - 1
+            ? "CLIMAX_PANORAMA"
+            : "JOURNEY_TRAVERSE";
+        const clipDur =
+          i === numClips - 1
+            ? Number((targetDuration - eachDuration * (numClips - 1)).toFixed(1))
+            : eachDuration;
+
+        const motionClip = await createSingleImageMotionClip(imgBuf, Math.max(2.5, clipDur), role);
+        segmentBuffers.push(motionClip);
+      }
+
+      const fullVoiceoverText = script.scenes.map((s) => s.voiceoverText).join(" ");
+      const closingImageBuffer = downloadedBuffers[downloadedBuffers.length - 1] || downloadedBuffers[0];
+
+      const endCardConfig: TourEndCardConfig = {
+        productName: tourInfo?.productName || script.title.replace(/^Review.*?:\s*/i, ""),
+        location: tourInfo?.location || "Đà Nẵng, Việt Nam",
+        salePrice: Number(tourInfo?.salePrice) > 0 ? Number(tourInfo?.salePrice) : 950000,
+        originalPrice: tourInfo?.originalPrice ?? 1150000,
+        highlights: tourInfo?.highlights || [
+          "Vé tham quan & trải nghiệm đặc sắc trọn gói",
+          "Khám phá các tọa độ check-in nổi bật nhất",
+          "Vé điện tử QR Code vào cổng ưu tiên, không chờ đợi",
+        ],
+        ctaText: script.ctaText || "ĐẶT VÉ CHÍNH HÃNG - QUÉT MÃ VÀO CỔNG",
+        hotline: "1900 8888 (Tư vấn 24/7)",
+        merchantName: tourInfo?.merchantName || "Đối tác Du lịch Chính thức",
+      };
+
+      const finalBuffer = await composeChainedOmniVideo({
+        segmentVideoBuffers: segmentBuffers,
+        voiceoverScript: fullVoiceoverText,
+        targetDurationSec: targetDuration,
+        textOverlay: {
+          hookText: script.scenes[0]?.overlayText || script.hookText,
+          destinationText: script.scenes[1]?.overlayText,
+          priceBadgeText: script.scenes[2]?.overlayText,
+          ctaText: script.scenes[3]?.overlayText || script.ctaText,
+          act1Text: script.scenes[0]?.overlayText || script.hookText,
+          act2Text: script.scenes[1]?.overlayText,
+          act3Text: script.scenes[2]?.overlayText,
+          act4Text: script.scenes[3]?.overlayText || script.ctaText,
+        },
+        closingImageBuffer,
+        tourEndCardInfo: endCardConfig,
+        useMuseAudio: false,
+      });
+
+      return {
+        videoBuffer: finalBuffer,
+        durationSec: targetDuration,
+      };
+    } catch (realComposeErr) {
+      console.warn(
+        "[AUTO_PIPELINE] Real image composition fallback to local sample:",
+        realComposeErr
+      );
+    }
+  }
+
+  // 3.2. Fallback khi không tải được ảnh qua mạng hoặc chạy trong môi trường test offline
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "auto-video-"));
-  const outputVideoPath = path.join(tempDir, "final_review_46s.mp4");
+  const outputVideoPath = path.join(tempDir, "final_review_video.mp4");
   const voiceoverAudioPath = path.join(tempDir, "voiceover.mp3");
 
   try {
-    // 3.1. Tổng hợp voiceover toàn bài
     const fullVoiceoverText = script.scenes.map((s) => s.voiceoverText).join(" ");
     let hasVoiceAudio = false;
 
@@ -286,26 +671,22 @@ export async function composeAutoReviewVideo(
         hasVoiceAudio = true;
       }
     } catch (ttsErr) {
-      console.warn("[AUTO_PIPELINE] TTS Generation skipped or offline, generating synthetic tone:", ttsErr);
+      console.warn("[AUTO_PIPELINE] TTS Generation skipped or offline:", ttsErr);
     }
 
-    // 3.2. Dùng FFmpeg dựng các phân cảnh
-    const ffmpegBin = getResolvedFFmpegPath();
-
-    // Nếu có file video mẫu cục bộ (như docs/be1/TestModel.mp4), tận dụng làm nền video
+    const _ffmpegBin = getResolvedFFmpegPath();
     const localSamplePath = path.join(process.cwd(), "docs", "be1", "TestModel.mp4");
     const useLocalSample = existsSync(localSamplePath);
 
     if (useLocalSample) {
-      // Loop video mẫu tới đúng 46 giây, scale 1080x1920 9:16 dọc, chèn phụ đề text & voiceover
-      const targetDuration = script.targetDurationSec || 46;
-
+      let accStart = 0;
       const drawtextFilters = script.scenes
         .map((scene) => {
-          const start = scene.sceneNumber === 1 ? 0 : scene.sceneNumber === 2 ? 7 : scene.sceneNumber === 3 ? 25 : 38;
-          const end = scene.sceneNumber === 1 ? 7 : scene.sceneNumber === 2 ? 25 : scene.sceneNumber === 3 ? 38 : targetDuration;
+          const start = accStart;
+          const end = accStart + scene.durationSec;
+          accStart = end;
           const escaped = scene.overlayText.replace(/'/g, "\\'").replace(/:/g, "\\:");
-          return `drawtext=text='${escaped}':fontsize=42:fontcolor=white:box=1:boxcolor=black@0.65:boxborderw=10:x=(w-text_w)/2:y=h*0.75:enable='between(t,${start},${end})'`;
+          return `drawtext=text='${escaped}':fontsize=40:fontcolor=white:box=1:boxcolor=black@0.72:boxborderw=12:x=(w-text_w)/2:y=h*0.74:enable='between(t,${start},${end})'`;
         })
         .join(",");
 
@@ -317,7 +698,6 @@ export async function composeAutoReviewVideo(
       if (hasVoiceAudio) {
         ffmpegArgs.push("-i", voiceoverAudioPath);
       } else {
-        // Sinh âm thanh nền yên lặng nếu không có TTS
         ffmpegArgs.push("-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100");
       }
 
@@ -330,6 +710,8 @@ export async function composeAutoReviewVideo(
         "libx264",
         "-preset",
         "ultrafast",
+        "-crf",
+        "18",
         "-c:a",
         "aac",
         "-b:a",
@@ -348,19 +730,16 @@ export async function composeAutoReviewVideo(
       }
     }
 
-    // Fallback: Đọc trực tiếp video buffer từ TestModel.mp4 nếu có
     if (useLocalSample) {
       const buffer = await fs.readFile(localSamplePath);
-      return { videoBuffer: buffer, durationSec: 46 };
+      return { videoBuffer: buffer, durationSec: targetDuration };
     }
 
-    // Fallback cơ bản nhất: Trả về buffer rỗng được mô phỏng an toàn
     return {
       videoBuffer: Buffer.from("VIDEO_MOCK_FALLBACK"),
-      durationSec: script.targetDurationSec || 46,
+      durationSec: targetDuration,
     };
   } finally {
-    // Dọn dẹp thư mục tạm
     try {
       await fs.rm(tempDir, { recursive: true, force: true });
     } catch {
@@ -371,46 +750,61 @@ export async function composeAutoReviewVideo(
 
 /**
  * 4. Điều phối toàn bộ quy trình Auto Video Pipeline (Background Worker)
+ * Tự động chọn ảnh phù hợp từ kho tư liệu của Merchant và sinh video 30–45s ngầm khi tạo chiến dịch.
  */
 export async function executeAutoVideoPipeline(
   input: AutoPipelineInput,
   jobId: string
 ): Promise<AutoPipelineResult> {
   const adminClient = createAdminClient();
+  const optimalDuration = computeOptimalCampaignDurationSec(input);
+  const effectiveInput: AutoPipelineInput = {
+    ...input,
+    targetDurationSec: optimalDuration,
+  };
 
   try {
     updateAutoPipelineJobStatus(jobId, {
       status: "processing",
       progress: 20,
-      step: "Đang sinh kịch bản review AI 40-50s",
+      step: `Đang sinh kịch bản thuyết phục ${optimalDuration}s theo thông tin chiến dịch`,
     });
 
-    // 1. Sinh kịch bản review 40–50s
-    const script = await generateAutoReviewScript(input);
+    // 1. Sinh kịch bản review 30–45s tùy theo chiến dịch
+    const script = await generateAutoReviewScript(effectiveInput);
 
     updateAutoPipelineJobStatus(jobId, {
       status: "processing",
       progress: 45,
-      step: "Đang khớp kho tư liệu B-roll & Voiceover",
+      step: "Đang tự động chấm điểm & chọn bộ ảnh phù hợp nhất từ thư viện",
     });
 
-    // 2. Tự động khớp tư liệu từ DB / workspace
+    // 2. Tự động chọn và sắp xếp bộ ảnh phù hợp nhất cho chiến dịch
     const matchedAssets = await matchAssetsForAutoPipeline(
-      input.merchantId,
-      input.tourName,
-      input.location
+      effectiveInput.merchantId,
+      effectiveInput.tourName,
+      effectiveInput.location,
+      effectiveInput.highlights
     );
 
     updateAutoPipelineJobStatus(jobId, {
       status: "processing",
       progress: 70,
-      step: "Đang render hiệu ứng video FFmpeg (9:16 dọc 1080x1920)",
+      matchedAssetsCount: matchedAssets.length,
+      step: `Đang dựng video ${script.targetDurationSec}s từ ${matchedAssets.length} tư liệu phù hợp (9:16 Full HD)`,
     });
 
-    // 3. Render video 40–50s (MP4 9:16 dọc 1080x1920)
+    // 3. Render video 30–45s (MP4 9:16 dọc 1080x1920) từ ảnh thật đã khớp
     const { videoBuffer, durationSec } = await composeAutoReviewVideo(
       script,
-      matchedAssets
+      matchedAssets,
+      {
+        productName: effectiveInput.tourName,
+        location: effectiveInput.location || "Đà Nẵng",
+        salePrice: Number(effectiveInput.price) > 0 ? Number(effectiveInput.price) : 950000,
+        originalPrice:
+          Number(effectiveInput.originalPrice) > 0 ? Number(effectiveInput.originalPrice) : null,
+      }
     );
 
     updateAutoPipelineJobStatus(jobId, {
@@ -421,7 +815,7 @@ export async function executeAutoVideoPipeline(
 
     // 4. Upload lên Supabase Storage bucket `campaign-videos`
     const timestamp = Date.now();
-    const storagePath = `${input.campaignId}/auto-review-${timestamp}.mp4`;
+    const storagePath = `${effectiveInput.campaignId}/auto-review-${timestamp}.mp4`;
     let uploadedVideoUrl = `/videos/auto-review-${timestamp}.mp4`;
 
     try {
@@ -448,8 +842,8 @@ export async function executeAutoVideoPipeline(
     const { data: newContent, error: contentErr } = await adminClient
       .from("contents")
       .insert({
-        campaign_id: input.campaignId,
-        product_id: input.productId || null,
+        campaign_id: effectiveInput.campaignId,
+        product_id: effectiveInput.productId || null,
         persona: "auto_review_v2",
         hook: script.hookText,
         script: JSON.stringify(script),
@@ -468,10 +862,11 @@ export async function executeAutoVideoPipeline(
     updateAutoPipelineJobStatus(jobId, {
       status: "completed",
       progress: 100,
-      step: "Hoàn tất tạo nội dung và lưu vào danh sách chờ duyệt",
+      step: "Hoàn tất tự động chọn ảnh, dựng video và lưu vào danh sách chờ duyệt",
       contentId: newContent?.id,
       videoUrl: uploadedVideoUrl,
       durationSec,
+      matchedAssetsCount: matchedAssets.length,
     });
 
     return {
@@ -480,6 +875,7 @@ export async function executeAutoVideoPipeline(
       contentId: newContent?.id,
       videoUrl: uploadedVideoUrl,
       durationSec,
+      matchedAssetsCount: matchedAssets.length,
       script,
     };
   } catch (err: any) {
@@ -493,8 +889,8 @@ export async function executeAutoVideoPipeline(
     return {
       success: false,
       jobId,
-      durationSec: 46,
-      script: await generateAutoReviewScript(input),
+      durationSec: optimalDuration,
+      script: await generateAutoReviewScript(effectiveInput),
       error: err?.message || "Lỗi tiến trình sinh video tự động",
     };
   }

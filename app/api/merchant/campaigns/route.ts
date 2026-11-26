@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/src/lib/supabase/server";
-import { triggerCampaignContentGeneration } from "@/src/lib/automation/database-webhooks";
+import {
+  runNonBlocking,
+  triggerCampaignContentGeneration,
+} from "@/src/lib/automation/database-webhooks";
+import {
+  computeOptimalCampaignDurationSec,
+  executeAutoVideoPipeline,
+} from "@/src/lib/video-engine/auto-pipeline-worker";
 
 export const dynamic = "force-dynamic";
 
@@ -243,7 +250,7 @@ export async function POST(request: Request) {
     // Xác thực sản phẩm thuộc sở hữu của Merchant
     const { data: product, error: prodError } = await (supabase as any)
       .from("products")
-      .select("id, merchant_id, name")
+      .select("id, merchant_id, name, description, sale_price, original_price")
       .eq("id", product_id)
       .eq("merchant_id", merchantId)
       .maybeSingle();
@@ -278,13 +285,45 @@ export async function POST(request: Request) {
       );
     }
 
-    // Kích hoạt webhook n8n sinh Content Kit (Non-blocking)
+    // 1. Kích hoạt webhook n8n sinh Content Kit (Non-blocking)
     triggerCampaignContentGeneration(inserted.id, inserted);
+
+    // 2. Tự động chọn ảnh phù hợp và sinh Video Chiến dịch 30-45s chạy ngầm (Zero-friction)
+    const activeMerchantId = merchantId;
+    runNonBlocking(async () => {
+      try {
+        const baseInput = {
+          campaignId: inserted.id,
+          merchantId: activeMerchantId,
+          productId: product.id,
+          tourName: product.name || inserted.name,
+          campaignName: inserted.name,
+          location: inserted.target_location || "Đà Nẵng - Miền Trung",
+          highlights: product.description || undefined,
+          targetAudience: inserted.target_audience || "Du khách đam mê khám phá",
+          price: product.sale_price != null ? Number(product.sale_price) : 950000,
+          originalPrice: product.original_price != null ? Number(product.original_price) : null,
+          customInstructions: body.ai_custom_instructions
+            ? String(body.ai_custom_instructions).trim()
+            : undefined,
+        };
+        const optimalDurationSec = computeOptimalCampaignDurationSec(baseInput);
+        await executeAutoVideoPipeline(
+          {
+            ...baseInput,
+            targetDurationSec: optimalDurationSec,
+          },
+          `auto-api-campaign-${Date.now()}`
+        );
+      } catch (bgErr) {
+        console.warn("[AUTO_VIDEO_CAMPAIGN_POST_WARN]", bgErr);
+      }
+    });
 
     return NextResponse.json(
       {
         success: true,
-        message: "Tạo chiến dịch thành công và đã kích hoạt sinh Content Kit tự động.",
+        message: "Tạo chiến dịch thành công, đã tự động chọn ảnh và kích hoạt sinh Video AI 30-45s chạy ngầm.",
         data: inserted,
       },
       { status: 201, headers: { "Cache-Control": "private, no-store" } }
