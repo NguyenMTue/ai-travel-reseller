@@ -44,12 +44,17 @@ export async function POST(request: Request) {
         ? body.ticketCode.trim()
         : `ET-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
-    // Resolve Reseller ID: from refCode or default demo
-    let finalResellerId = DEMO_RESELLER_ID;
-    if (typeof body.refCode === "string" && UUID_REGEX.test(body.refCode.trim())) {
-      finalResellerId = body.refCode.trim();
-    } else if (typeof body.resellerId === "string" && UUID_REGEX.test(body.resellerId.trim())) {
-      finalResellerId = body.resellerId.trim();
+    // Resolve Reseller ID: only attribute when refCode or resellerId is provided
+    const rawRefCode = typeof body.refCode === "string" ? body.refCode.trim() : "";
+    const rawResellerId = typeof body.resellerId === "string" ? body.resellerId.trim() : "";
+    let finalResellerId: string | null = null;
+    if (rawRefCode && UUID_REGEX.test(rawRefCode)) {
+      finalResellerId = rawRefCode;
+    } else if (rawResellerId && UUID_REGEX.test(rawResellerId)) {
+      finalResellerId = rawResellerId;
+    } else if (rawRefCode || rawResellerId) {
+      // Non-UUID referral code (e.g. short unique_code or demo code) resolves via DB or demo reseller fallback
+      finalResellerId = DEMO_RESELLER_ID;
     }
 
     // Resolve Merchant ID
@@ -74,8 +79,9 @@ export async function POST(request: Request) {
       finalCampaignId = body.campaignId.trim();
     }
 
-    // Commission Rates: 12% default, 20% platform fee, 80% net to reseller
-    let commissionRate = 12.0;
+    // Commission Rates: 12% default, 20% platform fee, 80% net to reseller (0 if organic order without referral)
+    const hasReferralAttribution = Boolean(finalResellerId);
+    let commissionRate = hasReferralAttribution ? 12.0 : 0;
     let grossCommission = Math.round(orderAmount * (commissionRate / 100.0));
     let platformFee = Math.round(grossCommission * 0.20);
     let resellerCommission = grossCommission - platformFee;
@@ -88,6 +94,20 @@ export async function POST(request: Request) {
     try {
       const adminClient = createAdminClient();
 
+      // 0. Nếu refCode là unique_code ngắn (không phải UUID), thử tra cứu reseller_id thật từ affiliate_links
+      if (rawRefCode && !UUID_REGEX.test(rawRefCode)) {
+        const { data: linkRow } = await adminClient
+          .from("affiliate_links")
+          .select("reseller_id, campaign_id, product_id")
+          .eq("unique_code", rawRefCode)
+          .maybeSingle();
+        if (linkRow?.reseller_id) {
+          finalResellerId = linkRow.reseller_id;
+          if (!finalCampaignId && linkRow.campaign_id) finalCampaignId = linkRow.campaign_id;
+          if (linkRow.product_id) finalProductId = linkRow.product_id;
+        }
+      }
+
       // 1. Kiểm tra tồn tại của Campaign trong DB để không vi phạm khoá ngoại FK
       if (finalCampaignId) {
         const { data: campRow } = await adminClient
@@ -97,7 +117,7 @@ export async function POST(request: Request) {
           .maybeSingle();
 
         if (campRow) {
-          if (campRow.commission_rate && campRow.commission_rate > 0) {
+          if (hasReferralAttribution && campRow.commission_rate && campRow.commission_rate > 0) {
             commissionRate = Number(campRow.commission_rate);
             grossCommission = Math.round(orderAmount * (commissionRate / 100.0));
             platformFee = Math.round(grossCommission * 0.20);
@@ -181,24 +201,28 @@ export async function POST(request: Request) {
 
         if (!orderErr && newOrder?.id) {
           createdOrderId = newOrder.id;
-          // Chèn vào commissions
-          const { data: newComm } = await adminClient
-            .from("commissions")
-            .insert({
-              order_id: newOrder.id,
-              reseller_id: finalResellerId,
-              merchant_id: finalMerchantId,
-              campaign_id: finalCampaignId,
-              gross_amount: grossCommission,
-              platform_fee: platformFee,
-              net_amount: resellerCommission,
-              status: "confirmed",
-            })
-            .select("id")
-            .single();
+          if (finalResellerId && resellerCommission > 0) {
+            // Chèn vào commissions khi đơn hàng có Reseller giới thiệu
+            const { data: newComm } = await adminClient
+              .from("commissions")
+              .insert({
+                order_id: newOrder.id,
+                reseller_id: finalResellerId,
+                merchant_id: finalMerchantId,
+                campaign_id: finalCampaignId,
+                gross_amount: grossCommission,
+                platform_fee: platformFee,
+                net_amount: resellerCommission,
+                status: "confirmed",
+              })
+              .select("id")
+              .single();
 
-          if (newComm?.id) {
-            createdCommissionId = newComm.id;
+            if (newComm?.id) {
+              createdCommissionId = newComm.id;
+              dbSuccess = true;
+            }
+          } else {
             dbSuccess = true;
           }
         }
@@ -210,7 +234,7 @@ export async function POST(request: Request) {
     return Response.json(
       {
         success: true,
-        attributed: true,
+        attributed: hasReferralAttribution,
         dbRecorded: dbSuccess,
         orderId: bookingReference,
         ticketCode,
@@ -224,15 +248,19 @@ export async function POST(request: Request) {
           verifiedAt: new Date().toISOString(),
         },
         resellerId: finalResellerId,
-        commission: {
-          grossAmount: grossCommission,
-          platformFee,
-          netAmount: resellerCommission,
-          rate: commissionRate,
-          status: "confirmed",
-          resellerId: finalResellerId,
-        },
-        message: "Xác nhận thanh toán thành công. Hoa hồng đã được cộng trực tiếp vào Ví Reseller.",
+        commission: hasReferralAttribution
+          ? {
+              grossAmount: grossCommission,
+              platformFee,
+              netAmount: resellerCommission,
+              rate: commissionRate,
+              status: "confirmed",
+              resellerId: finalResellerId,
+            }
+          : null,
+        message: hasReferralAttribution
+          ? "Xác nhận thanh toán thành công. Hoa hồng đã được cộng trực tiếp vào Ví Reseller."
+          : "Xác nhận thanh toán thành công. Vé điện tử đã sẵn sàng.",
       },
       {
         status: 200,

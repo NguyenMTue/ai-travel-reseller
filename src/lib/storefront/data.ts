@@ -10,7 +10,7 @@ import type {
 } from "./types";
 
 const SUNWORLD_MERCHANT: StorefrontMerchant = {
-  id: "22222222-2222-2222-2222-111111111111",
+  id: "11111111-1111-1111-1111-111111111111",
   name: "Tập đoàn Sun World",
   slug: "sunworld",
   brandTitle: "Sun World Ba Na Hills & Danh Thắng Đà Nẵng",

@@ -12,11 +12,14 @@ import {
   Eye,
   Heart,
   MessageCircle,
+  Share2,
   Video,
   Coins,
   MousePointerClick,
   ShoppingBag,
   ArrowUpDown,
+  DollarSign,
+  Percent,
 } from "lucide-react";
 
 interface TopReseller {
@@ -27,6 +30,7 @@ interface TopReseller {
   totalClicks: number;
   totalOrders: number;
   conversionRate: number;
+  totalGmv: number;
   totalCommissionPaid: number;
   averageCommissionRate: number;
   totalViews: number;
@@ -52,7 +56,8 @@ export function ResellerLeaderboardModal({
   const [resellers, setResellers] = useState<TopReseller[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedMaxRate, setSelectedMaxRate] = useState<number | null>(null);
-  const [sortBy, setSortBy] = useState<"commission" | "engagement">("commission");
+  const [customBudgetInput, setCustomBudgetInput] = useState<string>("");
+  const [sortBy, setSortBy] = useState<"commission" | "engagement" | "orders" | "cvr">("commission");
 
   useEffect(() => {
     if (!isOpen) return;
@@ -81,6 +86,13 @@ export function ResellerLeaderboardModal({
             totalClicks: Number(item.totalClicks ?? item.total_clicks ?? 0),
             totalOrders: Number(item.totalOrders ?? item.total_orders ?? 0),
             conversionRate: Number(item.conversionRate ?? item.conversion_rate ?? 0),
+            totalGmv: Number(
+              item.totalGmv ??
+                item.total_gmv ??
+                item.totalRevenue ??
+                item.total_revenue ??
+                Number(item.totalOrders ?? item.total_orders ?? 0) * 950000
+            ),
             totalCommissionPaid: Number(item.totalCommissionPaid ?? item.total_commission_paid ?? 0),
             averageCommissionRate: Number(item.averageCommissionRate ?? item.commission_rate ?? 10),
             totalViews: Number(item.totalViews ?? item.total_views ?? 0),
@@ -116,9 +128,23 @@ export function ResellerLeaderboardModal({
   const rateFilters = [
     { label: "Tất cả mức phí", value: null },
     { label: "Budget ≤ 10%", value: 10 },
+    { label: "Budget ≤ 12%", value: 12 },
     { label: "Budget ≤ 15%", value: 15 },
     { label: "Budget ≤ 20%", value: 20 },
   ];
+
+  const handleApplyCustomBudget = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = customBudgetInput.replace("%", "").trim();
+    if (!trimmed) {
+      setSelectedMaxRate(null);
+      return;
+    }
+    const parsed = Number(trimmed);
+    if (!Number.isNaN(parsed) && parsed > 0 && parsed <= 100) {
+      setSelectedMaxRate(parsed);
+    }
+  };
 
   const sortedResellers = [...resellers]
     .sort((a, b) => {
@@ -128,8 +154,23 @@ export function ResellerLeaderboardModal({
           b.totalCommissionPaid - a.totalCommissionPaid
         );
       }
+      if (sortBy === "orders") {
+        return (
+          b.totalOrders - a.totalOrders ||
+          b.totalCommissionPaid - a.totalCommissionPaid ||
+          b.totalEngagementScore - a.totalEngagementScore
+        );
+      }
+      if (sortBy === "cvr") {
+        return (
+          b.conversionRate - a.conversionRate ||
+          b.totalOrders - a.totalOrders ||
+          b.totalCommissionPaid - a.totalCommissionPaid
+        );
+      }
       return (
         b.totalCommissionPaid - a.totalCommissionPaid ||
+        b.totalGmv - a.totalGmv ||
         b.totalOrders - a.totalOrders ||
         b.totalEngagementScore - a.totalEngagementScore
       );
@@ -166,18 +207,22 @@ export function ResellerLeaderboardModal({
         </div>
 
         {/* Filter & Sort Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-3 border-b border-slate-100 bg-slate-50/70 text-xs">
-          <div className="flex items-center gap-2 overflow-x-auto">
-            <Filter className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-            <span className="text-slate-500 font-medium shrink-0">Ngân sách:</span>
-            <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex flex-col gap-2.5 px-6 py-3 border-b border-slate-100 bg-slate-50/70 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Filter className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+              <span className="text-slate-500 font-medium shrink-0">Ngân sách:</span>
               {rateFilters.map((f) => {
                 const active = selectedMaxRate === f.value;
                 return (
                   <button
                     key={f.label}
-                    onClick={() => setSelectedMaxRate(f.value)}
-                    className={`rounded-full px-3 py-1 font-medium transition ${
+                    type="button"
+                    onClick={() => {
+                      setSelectedMaxRate(f.value);
+                      setCustomBudgetInput(f.value !== null ? String(f.value) : "");
+                    }}
+                    className={`rounded-full px-2.5 py-1 font-medium transition ${
                       active
                         ? "bg-emerald-700 text-white shadow-xs"
                         : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
@@ -188,11 +233,31 @@ export function ResellerLeaderboardModal({
                 );
               })}
             </div>
+
+            <form onSubmit={handleApplyCustomBudget} className="flex items-center gap-1.5">
+              <input
+                type="number"
+                min={1}
+                max={100}
+                step="0.5"
+                value={customBudgetInput}
+                onChange={(e) => setCustomBudgetInput(e.target.value)}
+                placeholder="Nhập % (VD: 12)"
+                aria-label="Nhập mức ngân sách hoa hồng tối đa"
+                className="w-28 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-800 focus:border-emerald-600 focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="rounded-lg bg-emerald-700 px-2.5 py-1 font-semibold text-white hover:bg-emerald-800 transition"
+              >
+                Lọc theo ngân sách
+              </button>
+            </form>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-200/60">
             <ArrowUpDown className="h-3.5 w-3.5 text-slate-400" />
-            <span className="text-slate-500 font-medium">Xếp theo:</span>
+            <span className="text-slate-500 font-medium">Xếp theo (4 chế độ):</span>
             <button
               type="button"
               onClick={() => setSortBy("commission")}
@@ -202,7 +267,7 @@ export function ResellerLeaderboardModal({
                   : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
               }`}
             >
-              💰 Top Commission & Đơn đặt
+              💰 Hoa hồng / Doanh thu
             </button>
             <button
               type="button"
@@ -213,7 +278,29 @@ export function ResellerLeaderboardModal({
                   : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
               }`}
             >
-              🔥 Top Tương tác TikTok
+              🔥 Tương tác TikTok
+            </button>
+            <button
+              type="button"
+              onClick={() => setSortBy("orders")}
+              className={`rounded-lg px-2.5 py-1 font-semibold transition ${
+                sortBy === "orders"
+                  ? "bg-amber-600 text-white"
+                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+              }`}
+            >
+              🛒 Số lượng đơn đặt vé
+            </button>
+            <button
+              type="button"
+              onClick={() => setSortBy("cvr")}
+              className={`rounded-lg px-2.5 py-1 font-semibold transition ${
+                sortBy === "cvr"
+                  ? "bg-emerald-700 text-white"
+                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+              }`}
+            >
+              📈 Tỷ lệ chuyển đổi (CVR %)
             </button>
           </div>
         </div>
@@ -289,7 +376,7 @@ export function ResellerLeaderboardModal({
                       </div>
 
                       {/* Performance Metrics: Commercial & Commission */}
-                      <div className="grid grid-cols-4 gap-2.5 text-center sm:text-right flex-1">
+                      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center sm:text-right flex-1">
                         <div className="rounded-lg bg-white/80 border border-slate-100 p-2">
                           <p className="text-[10px] text-slate-400 flex items-center justify-center sm:justify-end gap-1">
                             <MousePointerClick className="h-3 w-3 text-sky-500" />
@@ -311,13 +398,26 @@ export function ResellerLeaderboardModal({
                         </div>
 
                         <div className="rounded-lg bg-white/80 border border-slate-100 p-2">
-                          <p className="text-[10px] text-slate-400">Chuyển đổi</p>
+                          <p className="text-[10px] text-slate-400 flex items-center justify-center sm:justify-end gap-1">
+                            <Percent className="h-3 w-3 text-emerald-500" />
+                            <span>Chuyển đổi</span>
+                          </p>
                           <p className="font-bold text-emerald-700 text-xs mt-0.5">
                             {r.conversionRate.toFixed(1)}%
                           </p>
                         </div>
 
-                        <div className="rounded-lg bg-emerald-50/70 border border-emerald-200/70 p-2">
+                        <div className="rounded-lg bg-white/80 border border-slate-100 p-2">
+                          <p className="text-[10px] text-slate-500 font-medium flex items-center justify-center sm:justify-end gap-1">
+                            <DollarSign className="h-3 w-3 text-indigo-500" />
+                            <span>Tổng Doanh thu</span>
+                          </p>
+                          <p className="font-bold text-slate-900 text-xs mt-0.5">
+                            {r.totalGmv.toLocaleString("vi-VN")} ₫
+                          </p>
+                        </div>
+
+                        <div className="col-span-2 sm:col-span-1 rounded-lg bg-emerald-50/70 border border-emerald-200/70 p-2">
                           <p className="text-[10px] text-emerald-700 font-medium flex items-center justify-center sm:justify-end gap-1">
                             <Coins className="h-3 w-3 text-emerald-600" />
                             <span>Tổng Commission</span>
@@ -329,7 +429,7 @@ export function ResellerLeaderboardModal({
                       </div>
                     </div>
 
-                    {/* Hàng tương tác TikTok (Views, Likes, Comments, Engagement Score) */}
+                    {/* Hàng tương tác TikTok (Views, Likes, Comments, Shares, Engagement Score) */}
                     <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2.5 text-xs">
                       <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1.5">
                         <Video className="h-3.5 w-3.5 text-rose-500" />
@@ -348,6 +448,10 @@ export function ResellerLeaderboardModal({
                         <span className="inline-flex items-center gap-1 text-slate-600 text-[11px]">
                           <MessageCircle className="h-3.5 w-3.5 text-amber-500" />
                           <strong>{r.totalComments.toLocaleString("vi-VN")}</strong> comments
+                        </span>
+                        <span className="inline-flex items-center gap-1 text-slate-600 text-[11px]">
+                          <Share2 className="h-3.5 w-3.5 text-indigo-500" />
+                          <strong>{r.totalShares.toLocaleString("vi-VN")}</strong> shares
                         </span>
                         <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 border border-rose-200 px-2.5 py-0.5 text-[11px] font-bold text-rose-700">
                           <TrendingUp className="h-3 w-3" />
