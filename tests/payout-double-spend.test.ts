@@ -120,7 +120,7 @@ test("PAYOUT-02: Zod Schema Compliance & Reseller Wallet Integration", () => {
   assert.ok(payoutRequestItemSchema.safeParse(validPayoutItem).success);
 
   // Test payoutStatus label mapping
-  assert.equal(payoutStatus("pending").label, "Chờ đối soát");
+  assert.equal(payoutStatus("pending").label, "Chờ duyệt");
   assert.equal(payoutStatus("processing").label, "Đang chuyển khoản");
   assert.equal(payoutStatus("completed").label, "Đã chi trả");
   assert.equal(payoutStatus("rejected").label, "Bị từ chối");

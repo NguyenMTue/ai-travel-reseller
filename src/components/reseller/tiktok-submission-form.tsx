@@ -193,9 +193,6 @@ export function TikTokSubmissionForm({
             .slice(0, 3)
             .map((raw: any) => mapRawToTikTokPost(raw));
           setRecentPosts(mappedPosts);
-          if (mappedPosts.length > 0 && !successPost) {
-            setSuccessPost(mappedPosts[0]);
-          }
         }
       } catch {
         // silent fail
@@ -212,6 +209,7 @@ export function TikTokSubmissionForm({
     setError(null);
     setFailedVerification(null);
     setSimMessage(null);
+    setSuccessPost(null);
 
     const trimmedUrl = url.trim();
     if (!trimmedUrl) {
@@ -368,6 +366,8 @@ export function TikTokSubmissionForm({
             onClick={() => {
               setError(null);
               setFailedVerification(null);
+              setSimMessage(null);
+              setSuccessPost(null);
               setUrl(buildClientDemoUrl("matched", contentId, campaignId));
             }}
             className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-emerald-700 transition"
@@ -381,6 +381,8 @@ export function TikTokSubmissionForm({
             onClick={() => {
               setError(null);
               setFailedVerification(null);
+              setSimMessage(null);
+              setSuccessPost(null);
               setUrl(buildClientDemoUrl("mismatched", contentId, campaignId));
             }}
             className="inline-flex items-center gap-1.5 rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-100 transition"

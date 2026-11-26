@@ -99,7 +99,7 @@ export function walletStatus(status: string): { label: string; tone: string } {
 
 export function payoutStatus(status: string): { label: string; tone: string } {
   const labels: Record<string, { label: string; tone: string }> = {
-    pending: { label: "Chờ đối soát", tone: "pending" },
+    pending: { label: "Chờ duyệt", tone: "pending" },
     processing: { label: "Đang chuyển khoản", tone: "confirmed" },
     completed: { label: "Đã chi trả", tone: "paid" },
     rejected: { label: "Bị từ chối", tone: "cancelled" },
