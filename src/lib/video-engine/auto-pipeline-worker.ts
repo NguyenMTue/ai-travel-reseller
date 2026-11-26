@@ -4,11 +4,16 @@ import path from "node:path";
 import os from "node:os";
 import { createAdminClient } from "../supabase/admin.ts";
 import {
+  buildAlphaFadeExpr,
+  buildVoiceAndBgmAudioFilter,
   composeChainedOmniVideo,
   createSingleImageMotionClip,
   generateVoiceoverAudio,
+  getMediaDurationSec,
   getResolvedFFmpegPath,
+  getSystemFontPath,
   runFFmpeg,
+  synthesizeAmbientTravelBgm,
   type TourEndCardConfig,
 } from "./ffmpeg-compositor.ts";
 
@@ -583,7 +588,8 @@ export async function composeAutoReviewVideo(
   if (downloadedBuffers.length >= 2) {
     try {
       const numClips = Math.min(6, Math.max(4, downloadedBuffers.length));
-      const eachDuration = Number((targetDuration / numClips).toFixed(1));
+      // Bù thêm 0.35s cho mỗi phân cảnh để sau khi áp dụng hiệu ứng chuyển cảnh mượt (xfade 0.35s) tổng thời lượng vẫn chuẩn xác
+      const eachDuration = Number((targetDuration / numClips + 0.35).toFixed(1));
       const segmentBuffers: Buffer[] = [];
 
       for (let i = 0; i < numClips; i++) {
@@ -596,7 +602,7 @@ export async function composeAutoReviewVideo(
             : "JOURNEY_TRAVERSE";
         const clipDur =
           i === numClips - 1
-            ? Number((targetDuration - eachDuration * (numClips - 1)).toFixed(1))
+            ? Number((targetDuration - (eachDuration - 0.35) * (numClips - 1) + 0.35).toFixed(1))
             : eachDuration;
 
         const motionClip = await createSingleImageMotionClip(imgBuf, Math.max(2.5, clipDur), role);
@@ -679,16 +685,27 @@ export async function composeAutoReviewVideo(
     const useLocalSample = existsSync(localSamplePath);
 
     if (useLocalSample) {
+      const fontPath = getSystemFontPath(true);
+      const textShadowStyle = "borderw=2:bordercolor=black@0.85:shadowx=2:shadowy=2:shadowcolor=black@0.75";
       let accStart = 0;
       const drawtextFilters = script.scenes
         .map((scene) => {
           const start = accStart;
           const end = accStart + scene.durationSec;
           accStart = end;
-          const escaped = scene.overlayText.replace(/'/g, "\\'").replace(/:/g, "\\:");
-          return `drawtext=text='${escaped}':fontsize=40:fontcolor=white:box=1:boxcolor=black@0.72:boxborderw=12:x=(w-text_w)/2:y=h*0.74:enable='between(t,${start},${end})'`;
+          const escaped = scene.overlayText
+            .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "")
+            .replace(/'/g, "")
+            .replace(/:/g, "\\:")
+            .trim();
+          const alphaExpr = buildAlphaFadeExpr(start, end, 0.35);
+          return `drawtext=fontfile='${fontPath}':text='${escaped}':fontsize=38:fontcolor=white:${textShadowStyle}:box=1:boxcolor=0x0B132B@0.78:boxborderw=14:${alphaExpr}:x=(w-text_w)/2:y=h*0.74:enable='between(t,${start},${end})':expansion=none`;
         })
         .join(",");
+
+      const warmGoldenFilter =
+        "eq=contrast=1.05:brightness=0.01:saturation=1.10,colorbalance=rs=0.05:gs=0.02:bs=-0.04:rm=0.05:gm=0.02:bm=-0.04";
+      const vfChain = `scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,unsharp=3:3:0.55:3:3:0.0,fps=30,${warmGoldenFilter},${drawtextFilters}`;
 
       const ffmpegArgs: string[] = [
         "-stream_loop", "-1",
@@ -696,28 +713,65 @@ export async function composeAutoReviewVideo(
       ];
 
       if (hasVoiceAudio) {
+        const voiceDur = await getMediaDurationSec(voiceoverAudioPath);
+        const bgmPath = path.join(tempDir, "ambient_bgm.mp4");
+        const hasBgm = await synthesizeAmbientTravelBgm(bgmPath, targetDuration);
+        const { audioFilter, outLabel } = buildVoiceAndBgmAudioFilter(
+          voiceDur,
+          targetDuration,
+          hasBgm,
+          1,
+          2
+        );
+
         ffmpegArgs.push("-i", voiceoverAudioPath);
+        if (hasBgm) {
+          ffmpegArgs.push("-i", bgmPath);
+        }
+        ffmpegArgs.push(
+          "-filter_complex",
+          `[0:v]${vfChain}[vout];${audioFilter}`,
+          "-map",
+          "[vout]",
+          "-map",
+          outLabel
+        );
       } else {
-        ffmpegArgs.push("-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=44100");
+        ffmpegArgs.push(
+          "-f",
+          "lavfi",
+          "-i",
+          "anullsrc=channel_layout=stereo:sample_rate=48000",
+          "-vf",
+          vfChain
+        );
       }
 
       ffmpegArgs.push(
-        "-vf",
-        `scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30,${drawtextFilters}`,
         "-t",
         String(targetDuration),
         "-c:v",
         "libx264",
         "-preset",
-        "ultrafast",
+        "fast",
         "-crf",
         "18",
+        "-profile:v",
+        "high",
+        "-level",
+        "4.2",
         "-c:a",
         "aac",
+        "-ar",
+        "48000",
+        "-ac",
+        "2",
         "-b:a",
-        "128k",
+        "192k",
         "-pix_fmt",
         "yuv420p",
+        "-movflags",
+        "+faststart",
         "-y",
         outputVideoPath
       );

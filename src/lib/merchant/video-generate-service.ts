@@ -528,20 +528,26 @@ export async function generateMerchantCampaignVideo(
             `[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) bằng Muse AI - ${segment.durationSeconds}s...`
           );
 
+          // Bù thêm 0.35s cho mỗi phân cảnh khi có >= 2 cảnh để sau khi áp dụng hiệu ứng chuyển cảnh mượt (xfade 0.35s) tổng thời lượng vẫn chuẩn xác
+          const segDurWithCrossfadeBuffer =
+            promptPlan.segmentsCount > 1
+              ? Number((segment.durationSeconds + 0.35).toFixed(2))
+              : segment.durationSeconds;
+
           let segBuffer: Buffer | null = null;
           if (isMuse2ApiConfigured()) {
             try {
-              // Gọi API Muse AI sinh clip (tối thiểu 5s theo API Muse) rồi cắt về đúng 2.5s bằng trimVideoBuffer
+              // Gọi API Muse AI sinh clip (tối thiểu 5s theo API Muse) rồi cắt về đúng thời lượng bằng trimVideoBuffer
               const segResult = await generateMuseVideoClip({
                 prompt: segment.musePrompt || segment.omniPrompt,
                 startImageBuffer: startBuf,
                 endImageBuffer: endBuf,
-                durationSeconds: Math.max(5, Math.round(segment.durationSeconds)),
+                durationSeconds: Math.max(5, Math.ceil(segDurWithCrossfadeBuffer)),
                 aspectRatio: "9:16",
                 includeAudioPrompt: false, // Tắt audio prompt của Muse AI để tránh sinh ra tiếng Anh ngẫu nhiên
               });
               if (segResult?.videoBuffer && segResult.videoBuffer.length > 1000) {
-                segBuffer = await trimVideoBuffer(segResult.videoBuffer, segment.durationSeconds);
+                segBuffer = await trimVideoBuffer(segResult.videoBuffer, segDurWithCrossfadeBuffer);
                 if (!costBreakdown) costBreakdown = segResult.cost;
               }
             } catch (museErr: any) {
@@ -549,11 +555,11 @@ export async function generateMerchantCampaignVideo(
             }
           }
 
-          // Fallback tạo chuyển động vi mô 2.5s từ ảnh thật chuẩn điện ảnh Mục II.2 nếu Muse AI bận
+          // Fallback tạo chuyển động vi mô 4K Ken Burns từ ảnh thật chuẩn điện ảnh Mục II.2 nếu Muse AI bận
           if (!segBuffer) {
             segBuffer = await createSingleImageMotionClip(
               startBuf,
-              segment.durationSeconds,
+              segDurWithCrossfadeBuffer,
               segment.role
             );
           }

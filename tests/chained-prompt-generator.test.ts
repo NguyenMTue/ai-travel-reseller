@@ -224,3 +224,46 @@ test("Chained Prompt: Profile 30-45 giây (30_45s_campaign_deep_dive) làm rõ C
   assert.ok(plan.textOverlaySpec.act3Text?.includes("950.000"));
   assert.ok(plan.textOverlaySpec.act4Text?.includes("ĐẶT VÉ"));
 });
+
+test("FFmpeg Compositor Quality Upgrades: Bold Font, Alpha Fade, Auto-Tempo & BGM Mix", async () => {
+  const {
+    getSystemFontPath,
+    buildAlphaFadeExpr,
+    buildVoiceAndBgmAudioFilter,
+  } = await import("../src/lib/video-engine/ffmpeg-compositor.ts");
+
+  const boldFont = getSystemFontPath(true);
+  assert.ok(boldFont.endsWith(".ttf"), "Phải trả về đường dẫn font .ttf hợp lệ");
+
+  const fadeExpr = buildAlphaFadeExpr(2.5, 5.0, 0.35);
+  assert.ok(fadeExpr.startsWith("alpha='if(lt(t,2.5)"), "Phải sinh biểu thức alpha fade-in/out hợp lệ");
+
+  // Khi giọng đọc dài hơn thời lượng video (ví dụ 12.2s trên video 10s), tự động bật atempo
+  const spedUpAudio = buildVoiceAndBgmAudioFilter(12.2, 10.0, true, 1, 2);
+  assert.ok(spedUpAudio.audioFilter.includes("atempo="), "Phải tự động thêm atempo khi thoại dài hơn video");
+  assert.ok(spedUpAudio.audioFilter.includes("amix=inputs=2"), "Phải trộn (amix) giọng đọc và nhạc nền BGM");
+  assert.equal(spedUpAudio.outLabel, "[aout]");
+
+  // Khi giọng đọc vừa khít thời lượng video (ví dụ 8.5s trên video 10s), giữ nguyên tốc độ gốc
+  const normalAudio = buildVoiceAndBgmAudioFilter(8.5, 10.0, false, 1, 2);
+  assert.ok(!normalAudio.audioFilter.includes("atempo="), "Không cần atempo khi thoại đã ngắn hơn thời lượng video");
+
+  // Kiểm thử thực thi FFmpeg tạo nhạc nền Ambient Travel BGM và đo thời lượng thực tế
+  const os = await import("node:os");
+  const path = await import("node:path");
+  const fs = await import("node:fs/promises");
+  const { synthesizeAmbientTravelBgm, getMediaDurationSec } = await import(
+    "../src/lib/video-engine/ffmpeg-compositor.ts"
+  );
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bgm-test-"));
+  try {
+    const bgmFile = path.join(tmpDir, "bgm.mp4");
+    const ok = await synthesizeAmbientTravelBgm(bgmFile, 4.0);
+    assert.equal(ok, true, "FFmpeg phải tổng hợp thành công file nhạc nền Ambient Travel BGM");
+    const dur = await getMediaDurationSec(bgmFile);
+    assert.ok(dur >= 3.8 && dur <= 4.3, `Thời lượng BGM phải xấp xỉ 4.0s (thực tế: ${dur}s)`);
+  } finally {
+    await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
+  }
+});
