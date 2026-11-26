@@ -1,3 +1,5 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import {
   generateMuseVideoClip,
   isMuse2ApiConfigured,
@@ -519,10 +521,17 @@ export async function generateMerchantCampaignVideo(
         let museCircuitBroken = false;
         let museLastError = "";
         let museSuccessCount = 0;
+        // Giới hạn số phân cảnh gọi Muse AI tối đa mỗi video (mặc định 2 cảnh chủ đạo: Opening Hook & Trải nghiệm chính)
+        // để tránh phải chờ 6 tác vụ Muse tuần tự (6 x 3 phút = 18 phút) và giữ dung lượng file nhẹ dưới 20MB.
+        // Có thể tùy chỉnh qua biến môi trường MUSE2API_MAX_CLIPS_PER_VIDEO.
+        const maxMuseClips =
+          Number(process.env.MUSE2API_MAX_CLIPS_PER_VIDEO) > 0
+            ? Number(process.env.MUSE2API_MAX_CLIPS_PER_VIDEO)
+            : 2;
 
         // Lặp qua từng phân cảnh:
-        // Nếu Muse2API trả về lỗi xác thực phiên (HTTP 401 / Cookie hết hạn) hoặc mất kết nối ở cảnh 1,
-        // kích hoạt Circuit Breaker ngay lập tức và dựng SONG SONG (Promise.all) toàn bộ các phân cảnh còn lại bằng FFmpeg để rút ngắn thời gian chờ tối đa.
+        // Nếu Muse2API trả về lỗi xác thực phiên (HTTP 401 / Cookie hết hạn) hoặc đã tạo đủ số cảnh Muse chủ đạo (maxMuseClips),
+        // dựng SONG SONG (Promise.all) toàn bộ các phân cảnh còn lại bằng FFmpeg Ken Burns để rút ngắn thời gian chờ xuống ~2-3 phút.
         for (let idx = 0; idx < promptPlan.segments.length; idx++) {
           const segment = promptPlan.segments[idx];
           const startBuf = imageBuffers[segment.startImageIndex] || imageBuffers[0];
@@ -534,7 +543,7 @@ export async function generateMerchantCampaignVideo(
               : segment.durationSeconds;
 
           let segBuffer: Buffer | null = null;
-          if (isMuse2ApiConfigured() && !museCircuitBroken) {
+          if (isMuse2ApiConfigured() && !museCircuitBroken && museSuccessCount < maxMuseClips) {
             console.log(
               `[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) bằng Muse AI - ${segment.durationSeconds}s...`
             );
@@ -573,11 +582,36 @@ export async function generateMerchantCampaignVideo(
 
           if (segBuffer) {
             segmentBuffers.push(segBuffer);
+            // Nếu đã tạo đủ số cảnh Muse chủ đạo (maxMuseClips), dựng song song toàn bộ các cảnh còn lại ngay lập tức
+            if (museSuccessCount >= maxMuseClips && idx + 1 < promptPlan.segments.length) {
+              console.log(
+                `[Video Service] ⚡ Đã hoàn tất ${museSuccessCount} phân cảnh AI chủ đạo từ Muse2API. Đang dựng song song ${
+                  promptPlan.segments.length - (idx + 1)
+                } phân cảnh bổ trợ bằng FFmpeg Ken Burns...`
+              );
+              const remainingSegments = promptPlan.segments.slice(idx + 1);
+              const batchSize = 3;
+              for (let b = 0; b < remainingSegments.length; b += batchSize) {
+                const batch = remainingSegments.slice(b, b + batchSize);
+                const batchBuffers = await Promise.all(
+                  batch.map((seg) => {
+                    const sBuf = imageBuffers[seg.startImageIndex] || imageBuffers[0];
+                    const dur =
+                      promptPlan.segmentsCount > 1
+                        ? Number((seg.durationSeconds + 0.35).toFixed(2))
+                        : seg.durationSeconds;
+                    return createSingleImageMotionClip(sBuf, dur, seg.role);
+                  })
+                );
+                segmentBuffers.push(...batchBuffers);
+              }
+              break;
+            }
             continue;
           }
 
           // Nếu Muse2API đã bị ngắt mạch (hoặc không cấu hình), dựng song song các phân cảnh còn lại theo batch 3 clip cùng lúc
-          if (museCircuitBroken || !isMuse2ApiConfigured()) {
+          if (museCircuitBroken || !isMuse2ApiConfigured() || museSuccessCount >= maxMuseClips) {
             const remainingSegments = promptPlan.segments.slice(idx);
             const batchSize = 3;
             for (let b = 0; b < remainingSegments.length; b += batchSize) {
@@ -705,10 +739,32 @@ export async function generateMerchantCampaignVideo(
         });
       }
 
-      // 7.4. Đẩy video thành phẩm lên Supabase Storage bucket 'campaign-videos'
+      // 7.4. Lưu bản sao MP4 cục bộ vào public/videos/ (đảm bảo phát được 100% ngay lập tức trên trình duyệt)
+      // đồng thời đẩy lên Supabase Storage bucket 'campaign-videos'
       const timestamp = Date.now();
-      const slug = product.name.toLowerCase().replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-");
-      const filename = `${slug}-${timestamp}.mp4`;
+      const slug = product.name
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[đĐ]/g, "d")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+      const filename = `${slug || "campaign-video"}-${timestamp}.mp4`;
+
+      let localVideoUrl = "";
+      try {
+        const publicVideosDir = path.join(process.cwd(), "public", "videos");
+        await fs.mkdir(publicVideosDir, { recursive: true });
+        const localFilePath = path.join(publicVideosDir, filename);
+        await fs.writeFile(localFilePath, finalBuffer);
+        localVideoUrl = `/videos/${filename}`;
+        console.log(
+          `[Video Service] Đã lưu bản sao video cục bộ (${(finalBuffer.length / 1024 / 1024).toFixed(2)} MB) tại: ${localVideoUrl}`
+        );
+      } catch (localErr: any) {
+        console.warn("[Video Service] Không thể lưu bản sao video cục bộ:", localErr?.message);
+      }
 
       const { error: uploadError } = await client.storage
         .from("campaign-videos")
@@ -724,6 +780,12 @@ export async function generateMerchantCampaignVideo(
         finalVideoUrl = publicUrlData.publicUrl;
       } else {
         console.error("Supabase Storage upload error:", uploadError.message);
+        if (localVideoUrl) {
+          finalVideoUrl = localVideoUrl;
+          console.log(
+            `[Video Service] Chuyển sang phát trực tiếp từ file video cục bộ: ${finalVideoUrl}`
+          );
+        }
       }
     }
   } catch (err: any) {

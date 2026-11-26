@@ -753,9 +753,13 @@ export async function composeAutoReviewVideo(
         "-c:v",
         "libx264",
         "-preset",
-        "fast",
+        "veryfast",
         "-crf",
-        "18",
+        "22",
+        "-maxrate",
+        "3200k",
+        "-bufsize",
+        "6400k",
         "-profile:v",
         "high",
         "-level",
@@ -867,10 +871,21 @@ export async function executeAutoVideoPipeline(
       step: "Đang tải video lên Supabase Storage bucket campaign-videos",
     });
 
-    // 4. Upload lên Supabase Storage bucket `campaign-videos`
+    // 4. Lưu bản sao MP4 vào public/videos/ (đảm bảo phát được 100% trên trình duyệt) và upload lên Supabase Storage bucket `campaign-videos`
     const timestamp = Date.now();
-    const storagePath = `${effectiveInput.campaignId}/auto-review-${timestamp}.mp4`;
-    let uploadedVideoUrl = `/videos/auto-review-${timestamp}.mp4`;
+    const localFilename = `auto-review-${timestamp}.mp4`;
+    const storagePath = `${effectiveInput.campaignId}/${localFilename}`;
+    let uploadedVideoUrl = `/videos/${localFilename}`;
+
+    if (videoBuffer && videoBuffer.length > 500) {
+      try {
+        const publicVideosDir = path.join(process.cwd(), "public", "videos");
+        await fs.mkdir(publicVideosDir, { recursive: true });
+        await fs.writeFile(path.join(publicVideosDir, localFilename), videoBuffer);
+      } catch (localWriteErr) {
+        console.warn("[AUTO_PIPELINE] Could not write local video copy:", localWriteErr);
+      }
+    }
 
     try {
       const { data: uploadData, error: uploadErr } = await adminClient.storage
