@@ -516,54 +516,92 @@ export async function generateMerchantCampaignVideo(
 
       if (isShortFormat || isCampaignDeepDive) {
         const segmentBuffers: Buffer[] = [];
+        let museCircuitBroken = false;
+        let museLastError = "";
+        let museSuccessCount = 0;
 
-        // Lặp qua từng phân cảnh theo đúng chuẩn docs/be1/prompts/system_prompt_ai_tourism_video_10s.md:
-        // - Nếu đủ 4 ảnh: 4 shot x 2.5s = 10.0s (mỗi shot từ 1 ảnh thật độc lập, cấm hallucination).
-        // - Nếu < 4 ảnh: fallback 2 shot x 5.0s = 10.0s.
-        for (const segment of promptPlan.segments) {
+        // Lặp qua từng phân cảnh:
+        // Nếu Muse2API trả về lỗi xác thực phiên (HTTP 401 / Cookie hết hạn) hoặc mất kết nối ở cảnh 1,
+        // kích hoạt Circuit Breaker ngay lập tức và dựng SONG SONG (Promise.all) toàn bộ các phân cảnh còn lại bằng FFmpeg để rút ngắn thời gian chờ tối đa.
+        for (let idx = 0; idx < promptPlan.segments.length; idx++) {
+          const segment = promptPlan.segments[idx];
           const startBuf = imageBuffers[segment.startImageIndex] || imageBuffers[0];
           const endBuf = imageBuffers[segment.endImageIndex] || startBuf;
 
-          console.log(
-            `[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) bằng Muse AI - ${segment.durationSeconds}s...`
-          );
-
-          // Bù thêm 0.35s cho mỗi phân cảnh khi có >= 2 cảnh để sau khi áp dụng hiệu ứng chuyển cảnh mượt (xfade 0.35s) tổng thời lượng vẫn chuẩn xác
           const segDurWithCrossfadeBuffer =
             promptPlan.segmentsCount > 1
               ? Number((segment.durationSeconds + 0.35).toFixed(2))
               : segment.durationSeconds;
 
           let segBuffer: Buffer | null = null;
-          if (isMuse2ApiConfigured()) {
+          if (isMuse2ApiConfigured() && !museCircuitBroken) {
+            console.log(
+              `[Video Service] Đang tạo phân cảnh ${segment.segmentIndex}/${promptPlan.segmentsCount} (${segment.role}) bằng Muse AI - ${segment.durationSeconds}s...`
+            );
             try {
-              // Gọi API Muse AI sinh clip (tối thiểu 5s theo API Muse) rồi cắt về đúng thời lượng bằng trimVideoBuffer
               const segResult = await generateMuseVideoClip({
                 prompt: segment.musePrompt || segment.omniPrompt,
                 startImageBuffer: startBuf,
                 endImageBuffer: endBuf,
                 durationSeconds: Math.max(5, Math.ceil(segDurWithCrossfadeBuffer)),
                 aspectRatio: "9:16",
-                includeAudioPrompt: false, // Tắt audio prompt của Muse AI để tránh sinh ra tiếng Anh ngẫu nhiên
+                includeAudioPrompt: false,
               });
               if (segResult?.videoBuffer && segResult.videoBuffer.length > 1000) {
                 segBuffer = await trimVideoBuffer(segResult.videoBuffer, segDurWithCrossfadeBuffer);
+                museSuccessCount++;
                 if (!costBreakdown) costBreakdown = segResult.cost;
               }
             } catch (museErr: any) {
-              console.warn("[Video Service] Muse AI clip warning:", museErr?.message);
+              const errMsg = String(museErr?.message || museErr);
+              museLastError = errMsg;
+              console.warn("[Video Service] Muse AI clip warning:", errMsg);
+              if (
+                errMsg.includes("401") ||
+                errMsg.includes("会话认证失败") ||
+                errMsg.toLowerCase().includes("cookie") ||
+                errMsg.includes("ECONNREFUSED") ||
+                errMsg.includes("fetch failed")
+              ) {
+                museCircuitBroken = true;
+                console.warn(
+                  "[Video Service] ⚡ Ngắt mạch Muse2API (Circuit Breaker) do lỗi Cookie/Session 401 hoặc mất kết nối Gateway. Chuyển sang dựng song song (Parallel Batch) các phân cảnh bằng FFmpeg Ken Burns."
+                );
+              }
             }
           }
 
-          // Fallback tạo chuyển động vi mô 4K Ken Burns từ ảnh thật chuẩn điện ảnh Mục II.2 nếu Muse AI bận
-          if (!segBuffer) {
-            segBuffer = await createSingleImageMotionClip(
-              startBuf,
-              segDurWithCrossfadeBuffer,
-              segment.role
-            );
+          if (segBuffer) {
+            segmentBuffers.push(segBuffer);
+            continue;
           }
 
+          // Nếu Muse2API đã bị ngắt mạch (hoặc không cấu hình), dựng song song các phân cảnh còn lại theo batch 3 clip cùng lúc
+          if (museCircuitBroken || !isMuse2ApiConfigured()) {
+            const remainingSegments = promptPlan.segments.slice(idx);
+            const batchSize = 3;
+            for (let b = 0; b < remainingSegments.length; b += batchSize) {
+              const batch = remainingSegments.slice(b, b + batchSize);
+              const batchBuffers = await Promise.all(
+                batch.map((seg) => {
+                  const sBuf = imageBuffers[seg.startImageIndex] || imageBuffers[0];
+                  const dur =
+                    promptPlan.segmentsCount > 1
+                      ? Number((seg.durationSeconds + 0.35).toFixed(2))
+                      : seg.durationSeconds;
+                  return createSingleImageMotionClip(sBuf, dur, seg.role);
+                })
+              );
+              segmentBuffers.push(...batchBuffers);
+            }
+            break;
+          }
+
+          segBuffer = await createSingleImageMotionClip(
+            startBuf,
+            segDurWithCrossfadeBuffer,
+            segment.role
+          );
           segmentBuffers.push(segBuffer);
         }
 
@@ -571,7 +609,10 @@ export async function generateMerchantCampaignVideo(
 
         if (!costBreakdown) {
           costBreakdown = {
-            model_name: "muse-video (Muse AI)",
+            model_name:
+              museSuccessCount > 0
+                ? "muse-video (Muse AI)"
+                : "FFmpeg Ken Burns Compositor (Muse2API Fallback)",
             duration_seconds: totalDurationSec,
             input_tokens: 1500,
             output_tokens: totalDurationSec * 5792,
@@ -582,8 +623,13 @@ export async function generateMerchantCampaignVideo(
               edge_tts_cost: 0,
               total_free_savings_usd: 3.5,
             },
-            is_live_call: true,
-            status_note: "Tạo video AI trực tiếp qua MUSE2API Gateway (Tài khoản Muse AI).",
+            is_live_call: museSuccessCount > 0,
+            status_note:
+              museSuccessCount > 0
+                ? "Tạo video AI trực tiếp qua MUSE2API Gateway (Tài khoản Muse AI)."
+                : museLastError.includes("401") || museLastError.includes("会话认证失败")
+                ? "Phiên đăng nhập (Cookie) trên Muse2API Gateway (localhost:18610) đã hết hạn (HTTP 401). Đã tự động chuyển sang dựng bằng FFmpeg Ken Burns."
+                : "Muse2API tạm thời không phản hồi. Đã tự động chuyển sang dựng bằng FFmpeg Ken Burns.",
           };
         }
 
