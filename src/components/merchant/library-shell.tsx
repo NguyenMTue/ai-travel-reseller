@@ -1,26 +1,12 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, Film, ShieldCheck, Package, SlidersHorizontal, Sparkles } from "lucide-react";
-import { Brand } from "@/src/components/brand";
+import { Film } from "lucide-react";
 import styles from "./library.module.css";
 
-export function LibraryShell({children,preview=false}:{children:React.ReactNode;preview?:boolean}) {
-  const root=preview?"/preview/merchant":"/merchant";
-  return <div className={styles.shell}>
-    <header className={styles.header}><Brand /><span className={styles.workspace}><ShieldCheck size={16} aria-hidden="true" />Không gian doanh nghiệp</span></header>
-    <main id="main-content" className={styles.main}>
-      <nav aria-label="Điều hướng Merchant" className={styles.nav}>
-        <Link prefetch={false} href={root}><ArrowLeft size={16} aria-hidden="true" />Tổng quan</Link>
-        <Link prefetch={false} href={`${root}/products`}><Package size={17} aria-hidden="true" />Sản phẩm</Link>
-        <Link prefetch={false} href={`${root}/campaigns`}><SlidersHorizontal size={17} aria-hidden="true" />Chiến dịch</Link>
-        <Link prefetch={false} href={`${root}/contents`}><Sparkles size={17} aria-hidden="true" />Kiểm duyệt AI</Link>
-        <Link prefetch={false} href={`${root}/library`} aria-current="page"><Film size={17} aria-hidden="true" />Thư viện media</Link>
-        <Link prefetch={false} href={`${root}/campaigns/new`}>Tạo chiến dịch<ArrowUpRight size={15} aria-hidden="true" /></Link>
-      </nav>
-      <section className={styles.heading}><p className="eyebrow">MERCHANT · MEDIA LIBRARY</p><h1>Thư viện <em>media.</em></h1><p>Chất liệu cho câu chuyện hành trình của bạn. Khám phá video tham khảo và chọn cảm hứng cho bước tiếp theo.</p></section>
-      {children}
-    </main>
-    <footer className={styles.footer}>TravelLink AI · Những hành trình bắt đầu từ cảm hứng.</footer>
-  </div>;
+export function LibraryShell({children}:{children:React.ReactNode;preview?:boolean}) {
+  return <div className={styles.shell}><div className={styles.main}>
+    <section className={styles.heading}><p className="eyebrow">MERCHANT · MEDIA LIBRARY</p><h1>Thư viện <em>media.</em></h1><p>Chất liệu cho câu chuyện hành trình của bạn. Khám phá video tham khảo và chọn cảm hứng cho bước tiếp theo.</p></section>
+    {children}
+  </div><footer className={styles.footer}>TravelLink AI · Những hành trình bắt đầu từ cảm hứng.</footer></div>;
 }
 
 export function LibraryPending() {

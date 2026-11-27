@@ -1,28 +1,10 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import {
-  LayoutDashboard,
-  Package,
-  MessageSquare,
-  ArrowUpRight,
-  Search,
-  Compass,
-  SlidersHorizontal,
-  X,
-  LogOut,
-  Menu,
-  ShieldCheck,
-  Film,
-  Plus,
-  Sparkles,
-  Trophy,
-} from "lucide-react";
-import { Brand } from "@/src/components/brand";
+import { Package, MessageSquare, ArrowUpRight, Search, Compass, X, ShieldCheck, Plus, Trophy } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { demoProducts, demoMetrics } from "@/src/lib/merchant-demo";
-import { logout } from "@/app/actions/auth";
 import { CampaignCreatedNotice } from "./campaign-created-notice";
 import { MerchantPointsWidget } from "./merchant-points-widget";
 import { ResellerLeaderboardModal } from "./reseller-leaderboard-modal";
@@ -57,7 +39,6 @@ export function Dashboard({
   const [tab, setTab] = useState("overview");
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
-  const [menu, setMenu] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [view, setView] = useState("sample");
   const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -85,118 +66,13 @@ export function Dashboard({
         );
   const product = effectiveProducts.find((p) => p.id === selected);
   return (
-    <div className="dashboard-shell">
-      <aside className={`sidebar ${menu ? "sidebar-open" : ""}`}>
-        <div className="sidebar-brand">
-          <Brand />
-          <button
-            className="mobile-close"
-            aria-label="Đóng điều hướng"
-            onClick={() => setMenu(false)}
-          >
-            <X />
-          </button>
-        </div>
-        <div className="workspace">
-          <span className="workspace-avatar">M</span>
-          <div>
-            <strong>Không gian doanh nghiệp</strong>
-            <small>Merchant Portal</small>
-          </div>
-        </div>
-        <p className="nav-label">KHÔNG GIAN LÀM VIỆC</p>
-        <nav aria-label="Điều hướng Merchant">
-          <button
-            aria-current={tab === "overview" ? "page" : undefined}
-            onClick={() => {
-              setTab("overview");
-              setMenu(false);
-            }}
-          >
-            <LayoutDashboard size={19} />
-            Tổng quan
-          </button>
-          <button
-            aria-current={tab === "products" ? "page" : undefined}
-            onClick={() => {
-              setTab("products");
-              setMenu(false);
-            }}
-          >
-            <Package size={19} />
-            Sản phẩm<span className="nav-count">{effectiveProducts.length}</span>
-          </button>
-          <Link prefetch={false} href={preview ? "/preview/merchant/campaigns" : "/merchant/campaigns"}>
-            <SlidersHorizontal size={19} />
-            Chiến dịch
-          </Link>
-          <Link prefetch={false} href={preview ? "/preview/merchant/contents" : "/merchant/contents"}>
-            <Sparkles size={19} />
-            Kiểm duyệt AI
-          </Link>
-          <Link prefetch={false} href={preview ? "/preview/merchant/library" : "/merchant/library"}>
-            <Film size={19} />
-            Thư viện media
-          </Link>
-          <Link href="/chat">
-            <MessageSquare size={19} />
-            Trợ lý AI
-            <ArrowUpRight size={15} />
-          </Link>
-        </nav>
-        <div className="sidebar-bottom">
-          <div className="help-card">
-            <Compass />
-            <h3>
-              Mỗi kết nối,
-              <br />
-              một cơ hội mới.
-            </h3>
-            <p>Khám phá cách TravelLink đồng hành cùng bạn.</p>
-            <Link href="/#how-it-works">Tìm hiểu thêm ↗</Link>
-          </div>
-          {preview ? (
-            <Link className="sidebar-login" href="/login">
-              Đăng nhập tài khoản <ArrowUpRight size={16} />
-            </Link>
-          ) : (
-            <form
-              action={async () => {
-                await logout();
-              }}
-            >
-              <Button variant="ghost" type="submit">
-                <LogOut />
-                Đăng xuất
-              </Button>
-            </form>
-          )}
-        </div>
-      </aside>
-      <div className="dashboard-body">
-        <header className="dashboard-header">
-          <div className="flex items-center gap-3">
-            <button
-              className="mobile-menu"
-              aria-expanded={menu}
-              aria-label="Mở điều hướng"
-              onClick={() => setMenu(!menu)}
-            >
-              <Menu />
-            </button>
-            <span>
-              Không gian doanh nghiệp{" "}
-              <span className="breadcrumb">
-                / {tab === "overview" ? "Tổng quan" : "Sản phẩm"}
-              </span>
-            </span>
-          </div>
-          <Link href="/" className="profile-badge" aria-label="Về trang chủ">
-            TL
-          </Link>
-        </header>
-        <main id="main-content" className="dashboard-main">
+    <>
+        <div className="dashboard-main">
           <CampaignCreatedNotice preview={preview} />
+          <div className="flex flex-wrap gap-2 mb-5" role="group" aria-label="Nội dung Tổng quan">
+            <Button variant={tab === "overview" ? "default" : "outline"} aria-pressed={tab === "overview"} onClick={() => setTab("overview")}>Tổng quan</Button>
+            <Button variant={tab === "products" ? "default" : "outline"} aria-pressed={tab === "products"} onClick={() => setTab("products")}>Sản phẩm</Button>
+          </div>
           {preview && (
             <div className="preview-banner">
               <span>
@@ -473,12 +349,11 @@ export function Dashboard({
               </p>
             </>
           )}
-        </main>
-      </div>
+        </div>
       <ResellerLeaderboardModal
         isOpen={showLeaderboard}
         onClose={() => setShowLeaderboard(false)}
       />
-    </div>
+    </>
   );
 }

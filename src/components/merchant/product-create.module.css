@@ -56,3 +56,13 @@
 .successActions { display: flex; align-items: center; gap: 12px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
 
 .footer { border-top: 1px solid var(--border); padding: 24px; text-align: center; font-size: 13px; color: var(--muted-foreground); }
+
+/* Allow the existing form to shrink inside the shared Merchant workspace. */
+.layout { grid-template-columns: minmax(0, 1fr) 340px; }
+.formCard, .form, .field, .fieldRow { min-width: 0; }
+.input, .select, .textarea { min-width: 0; max-width: 100%; }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) { .formCard { padding: 20px; } }
+
+.actions { flex-wrap: wrap; }
+.actions > button, .actions > a { max-width: 100%; white-space: normal; height: auto; }

@@ -213,8 +213,6 @@ test("CA-05: Route files and UI components exist and are integrated", () => {
   const previewPath = resolve("app/preview/merchant/contents/page.tsx");
   const apiPath = resolve("app/api/merchant/contents/route.ts");
   const componentPath = resolve("src/components/merchant/content-approval-list.tsx");
-  const dashboardPath = resolve("src/components/merchant/dashboard.tsx");
-  const campaignListPath = resolve("src/components/merchant/campaign-list.tsx");
 
   assert.ok(existsSync(pagePath), "app/merchant/contents/page.tsx must exist");
   assert.ok(existsSync(previewPath), "app/preview/merchant/contents/page.tsx must exist");
@@ -226,18 +224,10 @@ test("CA-05: Route files and UI components exist and are integrated", () => {
   assert.match(apiContent, /export async function GET/, "route.ts must implement GET method");
   assert.match(apiContent, /export async function PATCH/, "route.ts must implement PATCH method");
 
-  // Check Navigation integration
-  const dashContent = readFileSync(dashboardPath, "utf-8");
-  assert.match(
-    dashContent,
-    /\/merchant\/contents/,
-    "dashboard.tsx must link to /merchant/contents"
-  );
-
-  const cmpListContent = readFileSync(campaignListPath, "utf-8");
-  assert.match(
-    cmpListContent,
-    /\/contents/,
-    "campaign-list.tsx must link to /contents"
-  );
+  // Navigation is now shared by the authorized layout, not copied into leaves.
+  const shell = readFileSync(resolve("src/components/merchant/merchant-shell.tsx"), "utf-8");
+  const layout = readFileSync(resolve("app/merchant/layout.tsx"), "utf-8");
+  assert.match(shell, /path: "\/contents"/, "Shared shell must expose approval navigation");
+  assert.match(shell, /href=\{root \+ path\}/, "Shared shell must render route links");
+  assert.match(layout, /<MerchantShell/, "Authorized Merchant layout must mount the common navigation");
 });

@@ -1,24 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  Check,
-  CheckCircle2,
-  Clock,
-  Copy,
-  Edit3,
-  Film,
-  Package,
-  ShieldCheck,
-  SlidersHorizontal,
-  Sparkles,
-  X,
-  XCircle,
-} from "lucide-react";
-import { Brand } from "@/src/components/brand";
+import { Check, CheckCircle2, Clock, Copy, Edit3, Film, SlidersHorizontal, Sparkles, X, XCircle } from "lucide-react";
 import {
   type MerchantContentItem,
   type MerchantContentsSummary,
@@ -88,7 +71,6 @@ export function ContentApprovalList({
   const [editCaption, setEditCaption] = useState("");
   const [editCta, setEditCta] = useState("");
 
-  const root = preview ? "/preview/merchant" : "/merchant";
 
   function openEditModal(item: MerchantContentItem) {
     setEditingItem(item);
@@ -276,42 +258,7 @@ export function ContentApprovalList({
 
   return (
     <div className={styles.shell}>
-      <header className={styles.header}>
-        <Brand />
-        <span className={styles.workspace}>
-          <ShieldCheck size={16} aria-hidden="true" />
-          Không gian doanh nghiệp
-        </span>
-      </header>
-
-      <main id="main-content" className={styles.main}>
-        <nav aria-label="Điều hướng Merchant" className={styles.nav}>
-          <Link prefetch={false} href={root}>
-            <ArrowLeft size={16} aria-hidden="true" />
-            Tổng quan
-          </Link>
-          <Link prefetch={false} href={`${root}/products`}>
-            <Package size={17} aria-hidden="true" />
-            Sản phẩm
-          </Link>
-          <Link prefetch={false} href={`${root}/campaigns`}>
-            <SlidersHorizontal size={17} aria-hidden="true" />
-            Chiến dịch
-          </Link>
-          <Link prefetch={false} href={`${root}/contents`} aria-current="page">
-            <Sparkles size={17} aria-hidden="true" />
-            Kiểm duyệt AI
-          </Link>
-          <Link prefetch={false} href={`${root}/library`}>
-            <Film size={17} aria-hidden="true" />
-            Thư viện media
-          </Link>
-          <Link prefetch={false} href={`${root}/campaigns/new`}>
-            Tạo chiến dịch
-            <ArrowUpRight size={15} aria-hidden="true" />
-          </Link>
-        </nav>
-
+      <div className={styles.main}>
         <section className={styles.heading}>
           <p className="eyebrow">AI CONTENT FACTORY · APPROVAL PORTAL</p>
           <h1>Kiểm duyệt & Phê duyệt Nội dung AI</h1>
@@ -685,7 +632,7 @@ export function ContentApprovalList({
             </div>
           </div>
         )}
-      </main>
+      </div>
 
       <footer style={{ padding: "24px", textAlign: "center", fontSize: "13px", color: "#64748b", borderTop: "1px solid #e2e8f0", background: "#ffffff" }}>
         TravelLink AI · Hệ thống Kiểm duyệt & Tiếp thị Du lịch Tự động

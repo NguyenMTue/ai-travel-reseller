@@ -3,24 +3,9 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CheckCircle2,
-  Compass,
-  FolderPlus,
-  LoaderCircle,
-  Package,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
-import { Brand } from "@/src/components/brand";
+import { ArrowLeft, ArrowRight, CheckCircle2, Compass, FolderPlus, LoaderCircle, Package, Sparkles } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
-import {
-  PRODUCT_CATEGORIES,
-  productInputSchema,
-  type ProductInput,
-} from "@/src/lib/merchant/product-schema";
+import { PRODUCT_CATEGORIES, productInputSchema } from "@/src/lib/merchant/product-schema";
 import styles from "./product-create.module.css";
 
 export function ProductCreateScreen({
@@ -96,6 +81,7 @@ export function ProductCreateScreen({
       return;
     }
 
+    if (preview) { setGlobalError("Bản xem trước không lưu sản phẩm. Vui lòng dùng tài khoản Merchant để thao tác thật."); return; }
     setIsSubmitting(true);
 
     try {
@@ -125,21 +111,7 @@ export function ProductCreateScreen({
 
   return (
     <div className={styles.shell}>
-      <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          <Brand />
-          <span className={styles.workspace}>
-            <ShieldCheck size={16} /> MERCHANT PORTAL
-          </span>
-        </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href={`${root}/products`}>
-            <ArrowLeft size={16} /> Về danh sách sản phẩm
-          </Link>
-        </Button>
-      </header>
-
-      <main className={styles.page}>
+      <div className={styles.page}>
         <Link href={`${root}/products`} className={styles.back}>
           <ArrowLeft size={16} /> Về danh sách sản phẩm
         </Link>
@@ -476,7 +448,7 @@ export function ProductCreateScreen({
             </div>
           </>
         )}
-      </main>
+      </div>
 
       <footer className={styles.footer}>
         TravelLink AI · Nền tảng phân phối du lịch B2B2C ứng dụng AI · Merchant Product Center

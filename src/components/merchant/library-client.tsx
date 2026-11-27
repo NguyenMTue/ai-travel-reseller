@@ -401,7 +401,7 @@ function LibraryRead({
             Click vào từng ảnh bên dưới để chọn thứ tự xuất hiện trong video (ảnh 1-2 làm phân cảnh Muse AI, ảnh cuối hiển thị thông tin tour).
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className={styles.libraryToolbar}>
           {result.status === "ready" && result.data.items.length > 0 && (
             <Button variant="outline" size="sm" onClick={handleSelectRecommended}>
               <Layers size={15} aria-hidden="true" />
