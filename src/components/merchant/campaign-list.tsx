@@ -2,20 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  Film,
-  FolderPlus,
-  Package,
-  PauseCircle,
-  PlayCircle,
-  Search,
-  ShieldCheck,
-  SlidersHorizontal,
-  Sparkles,
-} from "lucide-react";
-import { Brand } from "@/src/components/brand";
+import { FolderPlus, PauseCircle, PlayCircle, Search, SlidersHorizontal, Sparkles } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import styles from "./campaign-list.module.css";
 
@@ -174,47 +161,7 @@ export function CampaignList({
 
   return (
     <div className={styles.shell}>
-      <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          <Brand />
-          <span className={styles.workspace}>
-            <ShieldCheck size={16} aria-hidden="true" />
-            Không gian doanh nghiệp
-          </span>
-        </div>
-        <Link href={root} className="profile-badge" aria-label="Về tổng quan">
-          TL
-        </Link>
-      </header>
-
-      <main id="main-content" className={styles.main}>
-        <nav aria-label="Điều hướng Merchant" className={styles.nav}>
-          <Link prefetch={false} href={root}>
-            <ArrowLeft size={16} aria-hidden="true" />
-            Tổng quan
-          </Link>
-          <Link prefetch={false} href={`${root}/products`}>
-            <Package size={17} aria-hidden="true" />
-            Sản phẩm
-          </Link>
-          <Link prefetch={false} href={`${root}/campaigns`} aria-current="page">
-            <SlidersHorizontal size={17} aria-hidden="true" />
-            Chiến dịch
-          </Link>
-          <Link prefetch={false} href={`${root}/contents`}>
-            <Sparkles size={17} aria-hidden="true" />
-            Kiểm duyệt AI
-          </Link>
-          <Link prefetch={false} href={`${root}/library`}>
-            <Film size={17} aria-hidden="true" />
-            Thư viện media
-          </Link>
-          <Link prefetch={false} href={`${root}/campaigns/new`}>
-            Tạo chiến dịch
-            <ArrowUpRight size={15} aria-hidden="true" />
-          </Link>
-        </nav>
-
+      <div className={styles.main}>
         <section className={styles.heading}>
           <div>
             <p className="eyebrow">MERCHANT · CHIẾN DỊCH QUẢNG BÁ</p>
@@ -371,7 +318,7 @@ export function CampaignList({
             </div>
           )}
         </div>
-      </main>
+      </div>
 
       <footer className={styles.footer}>
         TravelLink AI · Không gian quản trị doanh nghiệp Merchant.

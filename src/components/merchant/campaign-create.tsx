@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowLeft, Compass } from "lucide-react";
-import { Brand } from "@/src/components/brand";
 import { campaignFailureMessages, type CampaignFormLoadResult, type CampaignSubmitAction } from "@/src/lib/merchant/campaign-form";
 import { CampaignForm, CampaignReloadButton } from "./campaign-form";
 import styles from "./campaign-create.module.css";
@@ -8,13 +7,12 @@ import styles from "./campaign-create.module.css";
 export function CampaignPageFrame({ children, preview = false }: { children: React.ReactNode; preview?: boolean }) {
   const dashboard = preview ? "/preview/merchant" : "/merchant";
   return <>
-    <header className={styles.header}><div className={`container ${styles.headerInner}`}><Brand /><span>MERCHANT PORTAL</span></div></header>
-    <main id="main-content" tabIndex={-1} className={`container ${styles.page}`}>
+    <div className={`container ${styles.page}`}>
       <Link href={dashboard} className={styles.back}><ArrowLeft size={16} aria-hidden="true" /> Về Dashboard</Link>
       {preview && <p className={`notice ${styles.preview}`}>BẢN XEM TRƯỚC · Dữ liệu mô phỏng, không lưu vào hệ thống thật.</p>}
       <div className={styles.heading}><p className="eyebrow">KẾT NỐI TRẢI NGHIỆM, MỞ RỘNG CƠ HỘI</p><h1>Tạo chiến dịch</h1><p>Chọn sản phẩm và chuẩn bị thông tin cho hành trình tiếp thị tiếp theo.</p></div>
       {children}
-    </main>
+    </div>
   </>;
 }
 

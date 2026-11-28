@@ -2,23 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  Compass,
-  Film,
-  FolderPlus,
-  LayoutDashboard,
-  Package,
-  PauseCircle,
-  PlayCircle,
-  Plus,
-  Search,
-  ShieldCheck,
-  SlidersHorizontal,
-  Tag,
-} from "lucide-react";
-import { Brand } from "@/src/components/brand";
+import { ArrowLeft, ArrowUpRight, Compass, FolderPlus, Package, PauseCircle, PlayCircle, Plus, Search, Tag } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import type { MerchantProductDetail } from "@/src/lib/merchant/product-service";
 import styles from "./product-list.module.css";
@@ -117,14 +101,7 @@ export function ProductList({
 
   return (
     <div className={styles.shell}>
-      <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          <Brand />
-          <span className={styles.workspace}>
-            <ShieldCheck size={16} /> MERCHANT PORTAL
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-end gap-3 px-6 pt-5">
           <Button asChild size="sm">
             <Link href={`${root}/products/new`}>
               <Plus size={16} /> Thêm sản phẩm mới
@@ -136,24 +113,9 @@ export function ProductList({
             </Link>
           </Button>
         </div>
-      </header>
 
-      <main className={styles.main}>
-        <nav className={styles.nav} aria-label="Điều hướng phân hệ">
-          <Link href={root}>
-            <LayoutDashboard size={16} /> Tổng quan
-          </Link>
-          <Link href={`${root}/products`} aria-current="page">
-            <Package size={16} /> Quản lý sản phẩm ({totalCount})
-          </Link>
-          <Link href={`${root}/campaigns`}>
-            <SlidersHorizontal size={16} /> Chiến dịch
-          </Link>
-          <Link href={`${root}/library`}>
-            <Film size={16} /> Thư viện media
-          </Link>
-        </nav>
 
+      <div className={styles.main}>
         <div className={styles.heading}>
           <div>
             <p className="eyebrow">DANH MỤC TRẢI NGHIỆM DU LỊCH</p>
@@ -396,7 +358,7 @@ export function ProductList({
             </table>
           </div>
         )}
-      </main>
+      </div>
 
       <footer className={styles.footer}>
         TravelLink AI · Nền tảng phân phối du lịch B2B2C ứng dụng AI · Merchant Product Center

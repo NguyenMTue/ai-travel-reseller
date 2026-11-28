@@ -60,3 +60,6 @@
 .fixture{margin:20px 0;padding:14px 18px;background:var(--secondary);border:1px dashed var(--primary);border-radius:10px;font-size:12px}
 .fixture summary{min-height:44px;cursor:pointer;font-weight:600}.fixture section{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:12px}.fixture section p{width:100%}.fixture select,.fixture button{min-height:44px;border:1px solid var(--border);border-radius:7px;padding:8px;background:var(--white)}
 @media(max-width:600px){.workspace{display:none}.header{min-height:76px}.heading{padding:28px 0}.nav{gap:0}.nav a{padding:8px;font-size:11px}.filters{padding:16px}.filters label{width:100%}.filters select{width:100%}.pagination{gap:10px}}
+
+.libraryToolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:100%;min-width:0}
+.libraryToolbar button{max-width:100%;white-space:normal;height:auto;padding-block:10px}

@@ -274,11 +274,11 @@ test("MP-05: Product management files and routes exist and are properly linked",
   );
 
   // Kiểm tra navigation trong campaign-list.tsx có liên kết đến /products
-  const campaignListContent = readFileSync(resolve("src/components/merchant/campaign-list.tsx"), "utf-8");
+  const campaignListContent = readFileSync(resolve("src/components/merchant/merchant-shell.tsx"), "utf-8");
   assert.match(
     campaignListContent,
     /products/,
-    "Campaign list must contain link to products"
+    "Shared Merchant shell must contain link to products"
   );
 
   // Kiểm tra campaign-form.tsx có liên kết tạo sản phẩm khi chưa có sản phẩm

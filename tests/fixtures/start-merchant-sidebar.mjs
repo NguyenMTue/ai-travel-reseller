@@ -1,0 +1,12 @@
+import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
+for (const file of ['.env','.env.local','.env.development','.env.development.local']) if(existsSync(file)) throw new Error('Use a checkout without runtime env files for fixture QA');
+const env={...process.env,NEXT_TELEMETRY_DISABLED:'1'};
+for(const key of Object.keys(env)) if(/SUPABASE|POSTHOG|TELEGRAM|GEMINI|GROQ|AI_STUDIO|MUSE2API/.test(key)) delete env[key];
+env.NEXT_PUBLIC_SUPABASE_URL='http://127.0.0.1:3116';
+env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY='sb_publishable_merchant_sidebar_fixture';
+const auth=spawn(process.execPath,['tests/fixtures/portal-auth-server.mjs'],{env,stdio:'inherit'});
+const next=spawn(process.execPath,['node_modules/next/dist/bin/next','dev','--hostname','127.0.0.1','--port','3226'],{env,stdio:'inherit'});
+console.log('Merchant sidebar QA: http://127.0.0.1:3226 — synthetic merchant@fixture.invalid / fixture-only; all DB writes forbidden by local fixture');
+auth.on('exit',code=>{if(code) {next.kill();process.exitCode=code;}});
+next.on('exit',code=>{auth.kill();process.exitCode=code||0;});
