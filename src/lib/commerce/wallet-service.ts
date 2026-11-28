@@ -169,11 +169,7 @@ export async function fetchResellerPayoutHistory(
     if (error) {
       // Khi bảng payout_requests chưa được deploy qua migration lên Supabase (PGRST205 / 42P01),
       // trả về mảng rỗng một cách an toàn để không làm gãy giao diện Ví hoa hồng của Reseller.
-      if (
-        error.code === "PGRST205" ||
-        error.code === "42P01" ||
-        (typeof error.message === "string" && error.message.includes("payout_requests"))
-      ) {
+      if (error.code === "PGRST205" || error.code === "42P01") {
         console.warn("[WALLET_SERVICE] Bảng payout_requests chưa tồn tại trong schema cache Supabase. Trả về mảng rỗng an toàn.");
         return { success: true, data: [] };
       }

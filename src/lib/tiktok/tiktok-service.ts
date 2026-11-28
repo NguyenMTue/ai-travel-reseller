@@ -809,47 +809,80 @@ export async function simulateTikTokPostActivity(params: {
     }
 
     // 2. Tạo đơn hàng thật & ghi sổ hoa hồng (80% net cho Reseller)
+    // Ưu tiên gọi RPC SECURITY DEFINER `process_order_attribution` để không bị RLS chặn khi chạy với publishable/anon key
     if (ordDelta > 0) {
       for (let i = 0; i < ordDelta; i++) {
         const bookingRef = `TT-${Date.now().toString().slice(-6)}-${i + 1}`;
-        const { data: insertedOrder } = await adminClient
-          .from("orders")
-          .insert({
-            merchant_id: merchantId,
-            product_id: productId,
-            campaign_id: resolvedCampaignId,
-            reseller_id: params.resellerId,
-            amount: orderUnitAmount,
-            commission_rate: commissionRate,
-            gross_commission: grossPerOrder,
-            platform_fee: feePerOrder,
-            reseller_commission: netPerOrder,
-            commission_amount: netPerOrder,
-            booking_reference: bookingRef,
-            customer_name: "Khách Đặt Vé Từ Video TikTok",
-            customer_phone: "0905678910",
-            currency: "VND",
-            status: "confirmed",
-            flag_self_purchase: false,
-            paid_at: new Date().toISOString(),
-            notes: `TikTok Video Conversion Attribution (${params.postId})`,
-          })
-          .select("id")
-          .single();
+        let orderRecorded = false;
+        let recordedNet = netPerOrder;
 
-        if (insertedOrder?.id) {
-          await adminClient.from("commissions").insert({
-            order_id: insertedOrder.id,
-            reseller_id: params.resellerId,
-            merchant_id: merchantId,
-            campaign_id: resolvedCampaignId,
-            gross_amount: grossPerOrder,
-            platform_fee: feePerOrder,
-            net_amount: netPerOrder,
-            status: "confirmed",
-          });
+        const { data: rpcData, error: rpcError } = await adminClient.rpc(
+          "process_order_attribution",
+          {
+            p_booking_reference: bookingRef,
+            p_order_amount: orderUnitAmount,
+            p_merchant_id: merchantId,
+            p_product_id: productId,
+            p_reseller_id: params.resellerId,
+            p_campaign_id: resolvedCampaignId,
+            p_customer_name: "Khách Đặt Vé Từ Video TikTok",
+            p_customer_phone: "0905678910",
+            p_status: "confirmed",
+            p_notes: `TikTok Video Conversion Attribution (${params.postId})`,
+          }
+        );
+
+        if (!rpcError && rpcData?.success) {
+          orderRecorded = true;
+          if (Number(rpcData.reseller_commission) > 0) {
+            recordedNet = Number(rpcData.reseller_commission);
+          }
+        } else {
+          const { data: insertedOrder, error: orderErr } = await adminClient
+            .from("orders")
+            .insert({
+              merchant_id: merchantId,
+              product_id: productId,
+              campaign_id: resolvedCampaignId,
+              reseller_id: params.resellerId,
+              amount: orderUnitAmount,
+              commission_rate: commissionRate,
+              gross_commission: grossPerOrder,
+              platform_fee: feePerOrder,
+              reseller_commission: netPerOrder,
+              commission_amount: netPerOrder,
+              booking_reference: bookingRef,
+              customer_name: "Khách Đặt Vé Từ Video TikTok",
+              customer_phone: "0905678910",
+              currency: "VND",
+              status: "confirmed",
+              flag_self_purchase: false,
+              paid_at: new Date().toISOString(),
+              notes: `TikTok Video Conversion Attribution (${params.postId})`,
+            })
+            .select("id")
+            .single();
+
+          if (!orderErr && insertedOrder?.id) {
+            const { error: commErr } = await adminClient.from("commissions").insert({
+              order_id: insertedOrder.id,
+              reseller_id: params.resellerId,
+              merchant_id: merchantId,
+              campaign_id: resolvedCampaignId,
+              gross_amount: grossPerOrder,
+              platform_fee: feePerOrder,
+              net_amount: netPerOrder,
+              status: "confirmed",
+            });
+            if (!commErr) {
+              orderRecorded = true;
+            }
+          }
         }
-        addedCommission += netPerOrder;
+
+        if (orderRecorded) {
+          addedCommission += recordedNet;
+        }
       }
     } else {
       addedCommission = 0;
